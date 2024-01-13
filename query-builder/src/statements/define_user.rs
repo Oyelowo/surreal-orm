@@ -12,8 +12,31 @@ use crate::{
     types::Idiomx,
 };
 
-use super::define_login::Password;
+pub struct Password(pub(crate) String);
 
+impl Password {
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+}
+
+impl From<String> for Password {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&str> for Password {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+
+impl Display for Password {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 /// Define a new database user.
 /// Requirements
 /// You must be authenticated with a user that has enough permissions. Only the OWNER built-in role grants permissions to create users.
@@ -36,7 +59,7 @@ use super::define_login::Password;
 /// let statement = define_user("username")
 ///     .on_namespace()
 ///     .password("123456")
-///     .role(Role::Viewer);
+///     .role(UserRole::Viewer);
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
@@ -44,9 +67,13 @@ pub fn define_user(name: impl Into<Idiomx>) -> DefineUserStatement {
     DefineUserStatement::new(name)
 }
 
+/// User Role
 pub enum UserRole {
+    /// Owner
     Owner,
+    /// Editor
     Editor,
+    /// Viewer
     Viewer,
 }
 

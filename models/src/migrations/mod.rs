@@ -13,8 +13,8 @@ use surreal_orm::{
     arr, cond, create_table_resources,
     functions::crypto,
     statements::{
-        define_analyzer, define_event, define_index, define_login, define_param, define_scope,
-        define_token, select, AnalyzerFilter, SnowballLanguage, Tokenizer,
+        define_analyzer, define_event, define_index, define_param, define_scope, define_token,
+        define_user, select, AnalyzerFilter, SnowballLanguage, Tokenizer, UserRole,
     },
     *,
 };
@@ -84,7 +84,7 @@ impl DbResources for Resources {
                 .signup(
                     UserCredentials {
                         email: "oyelowo.oss@gmail.com".into(),
-                        password_hash: "****".into(),
+                        password_hash: "1234".into(),
                         ..Default::default()
                     }
                     .create(),
@@ -120,14 +120,19 @@ impl DbResources for Resources {
     }
 
     fn users(&self) -> Vec<Raw> {
-        // define_login("")
-        let statement = define_login("username").on_database().password("oyelowo");
+        let user1 = define_user("oyelowo")
+            .on_database()
+            .password("banff")
+            .role(UserRole::Owner)
+            .to_raw();
 
-        let statement = define_login("username")
+        let user2 = define_user("oyedayo")
             .on_namespace()
-            .passhash("reiiereroyedayo");
+            .password("reiiereroyedayo")
+            .role(UserRole::Editor)
+            .to_raw();
 
-        vec![]
+        vec![user1, user2]
     }
 }
 
