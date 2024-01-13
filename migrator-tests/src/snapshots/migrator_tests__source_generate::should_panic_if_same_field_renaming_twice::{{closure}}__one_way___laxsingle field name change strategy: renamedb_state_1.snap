@@ -6,22 +6,53 @@ DbMigrationSchemaState {
     resources: DbInfo {
         analyzers: Analyzers(
             Info(
-                {},
+                {
+                    "ascii": DefineStatementRaw(
+                        "DEFINE ANALYZER ascii TOKENIZERS CLASS FILTERS LOWERCASE,ASCII,EDGENGRAM(2,15),SNOWBALL(ENGLISH)",
+                    ),
+                },
             ),
         ),
         functions: Functions(
             Info(
-                {},
+                {
+                    "get_animal_by_id": DefineStatementRaw(
+                        "DEFINE FUNCTION fn::get_animal_by_id($id: int) { RETURN $id; } PERMISSIONS FULL",
+                    ),
+                    "get_animal_by_id2": DefineStatementRaw(
+                        "DEFINE FUNCTION fn::get_animal_by_id2($id: int) { RETURN $id; } PERMISSIONS FULL",
+                    ),
+                },
             ),
         ),
         params: Params(
             Info(
-                {},
+                {
+                    "__some_test_param1": DefineStatementRaw(
+                        "DEFINE PARAM $__some_test_param1 VALUE NONE PERMISSIONS FULL",
+                    ),
+                    "__some_test_param2": DefineStatementRaw(
+                        "DEFINE PARAM $__some_test_param2 VALUE NONE PERMISSIONS FULL",
+                    ),
+                    "__some_test_param3": DefineStatementRaw(
+                        "DEFINE PARAM $__some_test_param3 VALUE NONE PERMISSIONS FULL",
+                    ),
+                },
             ),
         ),
         scopes: Scopes(
             Info(
-                {},
+                {
+                    "regional": DefineStatementRaw(
+                        "DEFINE SCOPE regional",
+                    ),
+                    "scope1": DefineStatementRaw(
+                        "DEFINE SCOPE scope1 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:2rk0dv7esj2wk6n60nhm, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)))",
+                    ),
+                    "scope2": DefineStatementRaw(
+                        "DEFINE SCOPE scope2 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:zc080yi08nobd9pdi2jc, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)))",
+                    ),
+                },
             ),
         ),
         tables: Tables(
@@ -56,12 +87,20 @@ DbMigrationSchemaState {
         ),
         tokens: Tokens(
             Info(
-                {},
+                {
+                    "token2": DefineStatementRaw(
+                        "DEFINE TOKEN token2 ON DATABASE TYPE EDDSA VALUE 'abrakradabra'",
+                    ),
+                },
             ),
         ),
         users: Users(
             Info(
-                {},
+                {
+                    "oyelowo": DefineStatementRaw(
+                        "DEFINE USER oyelowo ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$Ryr01cH8Ln6oFM8GywflgA$YEAMUsPPqDtFTOvOnnzr6MpRwolUz5LRBiXdsJQWc1U' ROLES OWNER",
+                    ),
+                },
             ),
         ),
     },
@@ -74,7 +113,7 @@ DbMigrationSchemaState {
                 "surql",
             ),
             checksum_up: Checksum(
-                "0581c30713a306fba4e65cf40c06c81bed66786cf2b2aef60e4fc144495ff657",
+                "b7f21696a7c701dc64c1e7ee4af0d9e6571e2f0d8b6af29d1b6a7f82e441eec3",
             ),
             checksum_down: None,
         },
