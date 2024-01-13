@@ -4,11 +4,11 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use std::fmt::{self, Display};
+use std::fmt::{self};
 
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    Binding,
+    Param,
 };
 
 /// Creates a REMOVE PARAM statement builder.
@@ -19,13 +19,12 @@ use crate::{
 /// use surreal_orm::{*, statements::remove_param};
 /// remove_param("website_name");
 /// ```
-pub fn remove_param(name: impl Display) -> RemoveParamStatement {
-    let name: String = name.to_string();
-    let name = Binding::new(name).as_raw();
+pub fn remove_param(name: impl Into<Param>) -> RemoveParamStatement {
+    let name: Param = name.into();
 
     RemoveParamStatement {
-        name: name.get_param_dollarised(),
-        bindings: vec![name],
+        name: name.to_string(),
+        bindings: vec![],
         errors: vec![],
     }
 }

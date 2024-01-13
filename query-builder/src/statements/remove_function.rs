@@ -53,7 +53,10 @@ impl Parametric for RemoveFunctionStatement {
 
 impl Buildable for RemoveFunctionStatement {
     fn build(&self) -> String {
-        format!("REMOVE FUNCTION {};", self.name)
+        format!(
+            "REMOVE FUNCTION fn::{};",
+            self.name.trim_start_matches("fn::")
+        )
     }
 }
 
