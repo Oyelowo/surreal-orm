@@ -164,7 +164,6 @@ impl MigratorDatabase {
             tokens,
             users,
         ];
-        dbg!(&resources);
 
         let mut up_queries = vec![];
         let mut down_queries = vec![];
