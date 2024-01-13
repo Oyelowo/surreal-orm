@@ -83,9 +83,9 @@ impl DbResources for Resources {
                 .session(std::time::Duration::from_secs(60 * 60 * 24 * 30))
                 .signup(
                     UserCredentials {
+                        id: UserCredentials::create_id("oyelowo".into()),
                         email: "oyelowo.oss@gmail.com".into(),
                         password_hash: "1234".into(),
-                        ..Default::default()
                     }
                     .create(),
                 )
@@ -239,11 +239,11 @@ pub mod invalid_cases {
     }
 }
 
-#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "user_credentials", schemafull)]
 pub struct UserCredentials {
-    pub id: SurrealSimpleId<Self>,
+    pub id: SurrealId<Self, String>,
     pub email: String,
     pub password_hash: String,
 }
