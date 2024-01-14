@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use migrator_tests::{current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{current_function, AssertionArg, TestConfig};
 use surreal_orm::migrator::{FastForwardDelta, Mode};
 use tempfile::tempdir;
 use test_case::test_case;
@@ -18,7 +18,7 @@ use test_case::test_case;
 async fn test_can_prune_only_unapplied_migrations(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
     conf.assert_with_db_instance(AssertionArg {
@@ -51,7 +51,7 @@ async fn test_can_prune_only_unapplied_migrations(mode: Mode, reversible: bool) 
 async fn test_can_prune_some_unapplied_and_some_applied_migrations(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations_arbitrary(89, reversible.into())
         .await;
     conf.assert_with_db_instance(AssertionArg {

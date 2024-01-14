@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use migrator_tests::{current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{current_function, AssertionArg, TestConfig};
 use surreal_models::migrations::{
     invalid_cases, Animal, AnimalV2, Planet, PlanetV2, Resources, ResourcesV2,
 };
@@ -24,7 +24,7 @@ use test_case::test_case;
 async fn test_cannot_generate_without_db_run_without_init(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.run_gen(
         Generate::builder()
@@ -58,7 +58,7 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode) {
 async fn test_cannot_generate_with_db_run_without_init(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.run_gen(
         Generate::builder()
@@ -97,7 +97,7 @@ async fn test_successfully_handles_renaming(
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     #[derive(Debug, Clone)]
     pub struct ResourcesV1;
     impl DbResources for ResourcesV1 {
@@ -358,7 +358,7 @@ async fn test_successfully_handles_renaming(
 async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)
@@ -520,7 +520,7 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
 async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)
@@ -575,7 +575,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)
@@ -625,7 +625,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
 async fn test_multiple_generation(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
     assert!(migration_dir.exists());
@@ -657,7 +657,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     };
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)
@@ -755,7 +755,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
 async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)
@@ -827,7 +827,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)
@@ -868,7 +868,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
 async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)
@@ -912,7 +912,7 @@ async fn test_should_panic_if_renaming_from_non_existing_field_in_migration_dire
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.run_init(
         Init::builder()
             .reversible(reversible)

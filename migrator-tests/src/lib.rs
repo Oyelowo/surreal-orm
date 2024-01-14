@@ -71,7 +71,7 @@ impl From<&str> for SnapShot {
 }
 
 #[derive(Clone, TypedBuilder)]
-pub struct TestConfigNew {
+pub struct TestConfig {
     pub migrator: Migrator,
 
     #[builder(default)]
@@ -152,7 +152,7 @@ impl DbMigrationSchemaState {
     }
 }
 
-impl TestConfigNew {
+impl TestConfig {
     pub async fn new(
         mode: Mode,
         migration_dir: &Path,
