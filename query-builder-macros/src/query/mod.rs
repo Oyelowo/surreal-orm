@@ -192,9 +192,9 @@ fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Resul
         }
     }
 
-    let mut placeholders = query.match_indices('$').peekable();
+    let placeholders = query.match_indices('$').peekable();
 
-    while let Some((start, _)) = placeholders.next() {
+    for (start, _) in placeholders {
         let end = query[start + 1..]
             .find(|c: char| !c.is_alphanumeric() && c != '_')
             .map_or(query.len(), |i| start + i + 1);

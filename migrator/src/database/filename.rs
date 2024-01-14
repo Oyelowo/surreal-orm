@@ -472,7 +472,7 @@ impl MigrationFilename {
         Ok(timestamp)
     }
 
-    pub fn fullpath(&self, migration_dir: &PathBuf) -> PathBuf {
+    pub fn fullpath(&self, migration_dir: &Path) -> PathBuf {
         let file_name = self.to_string();
         migration_dir.join(file_name)
     }

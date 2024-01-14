@@ -149,7 +149,7 @@ impl MigratorDatabase {
         let tokens = init.new_tokens().queries()?.intersperse_new_lines();
         let users = init.new_users().queries()?.intersperse_new_lines();
         let migration_reset =
-            Self::get_migration_reset_queries(&file_manager)?.intersperse_new_lines();
+            Self::get_migration_reset_queries(file_manager)?.intersperse_new_lines();
 
         let resources = vec![
             migration_reset,
