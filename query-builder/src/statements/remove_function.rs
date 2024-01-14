@@ -14,13 +14,6 @@ use crate::{
 
 pub struct FunctionName(String);
 
-impl FunctionName {
-    #[allow(dead_code)]
-    fn new(name: impl Display) -> Self {
-        Self(name.to_string())
-    }
-}
-
 impl From<&str> for FunctionName {
     fn from(name: &str) -> Self {
         Self(name.to_string())

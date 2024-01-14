@@ -165,7 +165,6 @@ impl MigratorDatabase {
         let mut up_queries = vec![];
         let mut down_queries = vec![];
         for resource in resources {
-            // let resource = resource?;
             let up_is_empty = resource.up_is_empty();
             let down_is_empty = resource.down_is_empty();
 
