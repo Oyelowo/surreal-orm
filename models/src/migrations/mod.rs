@@ -83,7 +83,7 @@ impl DbResources for Resources {
                 .session(std::time::Duration::from_secs(60 * 60 * 24 * 30))
                 .signup(
                     UserCredentials {
-                        id: UserCredentials::create_id("oyelowo".into()),
+                        id: UserCredentials::create_id("oyelowo".to_string()),
                         email: "oyelowo.oss@gmail.com".into(),
                         password_hash: "1234".into(),
                     }
@@ -122,13 +122,13 @@ impl DbResources for Resources {
     fn users(&self) -> Vec<Raw> {
         let user1 = define_user("oyelowo")
             .on_database()
-            .password("banff")
+            .passhash("$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8")
             .role(UserRole::Owner)
             .to_raw();
 
         let user2 = define_user("oyedayo")
             .on_namespace()
-            .password("reiiereroyedayo")
+            .passhash("$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8")
             .role(UserRole::Editor)
             .to_raw();
 

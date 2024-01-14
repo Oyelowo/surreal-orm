@@ -54,12 +54,12 @@ impl Display for Password {
 /// use surreal_orm::{*, CrudType::*, statements::{define_user}};
 /// let username = User::new("username");
 ///
-/// let statement = define_user(username).on_root().password("123456").role(Role::Owner);
-///
 /// let statement = define_user("username")
-///     .on_namespace()
-///     .password("123456")
+///     .on_database()
+///     .passhash("$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8")
 ///     .role(UserRole::Viewer);
+///
+/// let statement = define_user(username).on_root().password("123456").role(Role::Owner);
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
@@ -105,11 +105,37 @@ impl Display for UserType {
     }
 }
 
+pub struct Passhash(String);
+
+impl From<String> for Passhash {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&str> for Passhash {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+
+impl Display for Passhash {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+// Define the types for the possible login credentials
+pub enum UserCredential {
+    Password(Password),
+    Passhash(Passhash),
+}
+
 /// Define a new database user.
 pub struct DefineUserStatement {
     name: String,
     user_type: Option<UserType>,
-    password: Option<Password>,
+    credential: Option<UserCredential>,
     role: Option<UserRole>,
     bindings: BindingsList,
 }
@@ -121,7 +147,7 @@ impl DefineUserStatement {
         Self {
             name: binding.get_param_dollarised(),
             user_type: None,
-            password: None,
+            credential: None,
             role: None,
             bindings: vec![binding],
         }
@@ -151,7 +177,17 @@ impl DefineUserStatement {
         let binding = Binding::new(password.into_inner()).with_description("user password");
         let password_param = binding.get_param_dollarised();
         self.bindings.push(binding);
-        self.password = Some(password_param.into());
+        self.credential = Some(UserCredential::Password(password_param.into()));
+        self
+    }
+
+    /// Set the passhash credential
+    pub fn passhash(mut self, passhash: impl Into<Passhash>) -> Self {
+        let passhash: Passhash = passhash.into();
+        let binding = Binding::new(passhash.0.clone());
+        let passhash_param = binding.get_param_dollarised();
+        self.bindings.push(binding);
+        self.credential = Some(UserCredential::Passhash(passhash_param.into()));
         self
     }
 
@@ -169,9 +205,17 @@ impl Buildable for DefineUserStatement {
         if let Some(user_type) = &self.user_type {
             query.push_str(&format!(" ON {user_type}"));
         }
-        if let Some(password) = &self.password {
-            query.push_str(&format!(" PASSWORD {password}"));
-        }
+
+        if let Some(credential) = &self.credential {
+            match credential {
+                UserCredential::Password(password) => {
+                    query.push_str(&format!(" PASSWORD {password}"));
+                }
+                UserCredential::Passhash(hash) => {
+                    query.push_str(&format!(" PASSHASH {hash}"));
+                }
+            };
+        };
         if let Some(role) = &self.role {
             query.push_str(&format!(" ROLES {role}"));
         }
@@ -201,6 +245,27 @@ mod tests {
     use crate::{ToRaw, User};
 
     use super::*;
+
+    #[test]
+    fn test_define_user_statement_with_passhash_and_role() {
+        let username = User::new("username");
+        let user_with_passhash_and_role = define_user(username)
+            .on_database()
+            .passhash("$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8")
+            .role(UserRole::Owner);
+
+        assert_eq!(
+            user_with_passhash_and_role.fine_tune_params(),
+            "DEFINE USER $_param_00000001 ON DATABASE PASSHASH $_param_00000002 ROLES OWNER;"
+        );
+
+        assert_eq!(
+            user_with_passhash_and_role.to_raw().build(),
+            "DEFINE USER username ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8' ROLES OWNER;"
+        );
+
+        assert_eq!(user_with_passhash_and_role.get_bindings().len(), 2);
+    }
 
     #[test]
     fn test_define_user_statement_with_password_and_role() {

@@ -186,11 +186,6 @@ impl MigratorDatabase {
                 down_queries.push(QueryType::NewLine);
             }
         }
-        // dbg!(&up_queries);
-        // dbg!(&down_queries);
-        // let up_queries = intersperse_with(up_queries, vec![QueryType::NewLine, QueryType::NewLine])
-        //     .collect::<Vec<_>>();
-        // let down_queries = intersperse(down_queries, QueryType::NewLine).collect::<Vec<_>>();
 
         let up_queries_str = up_queries
             .iter()
@@ -208,14 +203,15 @@ impl MigratorDatabase {
             .trim()
             .to_string();
 
+        let query_str = format!("{up_queries_str}{down_queries_str}");
+
         let migration_file = MigrationFile::new(
             &migration_basename,
             &file_manager.migration_flag_checked()?,
-            &up_queries_str.clone().into(),
-            &down_queries_str.clone().into(),
+            &up_queries_str.into(),
+            &down_queries_str.into(),
         )?;
 
-        let query_str = format!("{up_queries_str}{down_queries_str}");
         if query_str.trim().is_empty() {
             match prompter.prompt_empty_migrations_trigger() {
                 Ok(true) => {
