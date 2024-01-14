@@ -55,22 +55,11 @@ pub struct Queries {
     pub(crate) down: Vec<QueryType>,
 }
 
-pub struct QueriesLength(usize, usize);
-impl QueriesLength {
-    pub(crate) fn has_changed(&self, latter_state: &mut Queries) -> bool {
-        self.0 != latter_state.up.len() || self.1 != latter_state.down.len()
-    }
-}
-
 impl Queries {
     pub(crate) fn intersperse_new_lines(self) -> Self {
         let up = intersperse(self.up, QueryType::NewLine).collect();
         let down = intersperse(self.down, QueryType::NewLine).collect();
         Queries { up, down }
-    }
-
-    pub(crate) fn len(&self) -> QueriesLength {
-        QueriesLength(self.up.len(), self.down.len())
     }
 
     pub(crate) fn up_is_empty(&self) -> bool {

@@ -22,7 +22,7 @@ use crate::{
     types::{DurationLike, Scope},
 };
 
-use super::{subquery, Subquery};
+use super::Subquery;
 
 /// Define a new scope.
 /// Setting scope access allows SurrealDB to operate as a web database.

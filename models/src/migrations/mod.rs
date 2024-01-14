@@ -28,6 +28,12 @@ pub struct Resources;
 define_function!(get_animal_by_id(id: int){ return id;} );
 define_function!(get_animal_by_id2(id: int){ return id;} );
 
+#[allow(dead_code)]
+fn test_funcs() {
+    get_animal_by_id!(1);
+    get_animal_by_id2!(1);
+}
+
 create_param_name_fn!(__some_test_param1);
 create_param_name_fn!(__some_test_param2);
 create_param_name_fn!(__some_test_param3);
