@@ -219,13 +219,17 @@ impl MigrationConfig {
 #[derive(Debug, Clone)]
 pub struct FileManagerUni(MigrationConfig);
 
+impl std::ops::Deref for FileManagerUni {
+    type Target = MigrationConfig;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl FileManagerUni {
     pub(crate) fn new(file_manager: MigrationConfig) -> Self {
         Self(file_manager)
-    }
-
-    pub(crate) fn into_inner(&self) -> MigrationConfig {
-        self.0.clone()
     }
 
     pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileOneWay>> {
@@ -239,11 +243,9 @@ impl FileManagerUni {
         codebase_resources: impl DbResources,
         prompter: impl Prompter,
     ) -> MigrationResult<()> {
-        let file_manager = self.into_inner();
-
         MigratorDatabase::generate_migrations(
             migration_basename,
-            &file_manager,
+            self,
             codebase_resources,
             prompter,
         )
@@ -299,13 +301,17 @@ impl FileManagerUni {
 #[derive(Debug, Clone)]
 pub struct FileManagerBi(MigrationConfig);
 
+impl std::ops::Deref for FileManagerBi {
+    type Target = MigrationConfig;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl FileManagerBi {
     pub(crate) fn new(file_manager: MigrationConfig) -> Self {
         Self(file_manager)
-    }
-
-    pub(crate) fn into_inner(&self) -> MigrationConfig {
-        self.0.clone()
     }
 
     /// Get all migrations
@@ -365,8 +371,7 @@ impl FileManagerBi {
         db: Surreal<Any>,
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
-        MigrationRunner::rollback_migrations(db.clone(), &self.into_inner(), rollback_options)
-            .await?;
+        MigrationRunner::rollback_migrations(db.clone(), self, rollback_options).await?;
 
         Ok(())
     }
