@@ -1,6 +1,12 @@
 use crate::{Field, Model, Raw, Table};
 
-///
+/// Provides the ability to gather all the resources
+/// of a table in a single place. Fields definitions,
+/// and table definitions are using automatically
+/// generated methods from the `Model` trait.
+/// Events and indexes definitions are manually
+/// implemented using the statements or query macro
+/// provided by the crate.
 pub trait TableResources
 where
     Self: Model,
