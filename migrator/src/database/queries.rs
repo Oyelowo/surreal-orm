@@ -175,7 +175,7 @@ impl From<String> for RemoveStatementRaw {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Eq, PartialEq)]
 pub struct DefineStatementRaw(String);
 
 impl From<DefineStatementRaw> for Raw {

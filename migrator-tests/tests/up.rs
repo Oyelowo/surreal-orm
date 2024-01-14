@@ -5,8 +5,11 @@
  * Licensed under the MIT license
  */
 use migrator_tests::{current_function, AssertionArg, TestConfig};
+use pretty_assertions::assert_eq;
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{FastForwardDelta, Init, MigrationFilename, MockPrompter, Mode};
+use surreal_orm::migrator::{
+    FastForwardDelta, Informational, Init, MigrationFilename, MockPrompter, Mode,
+};
 use tempfile::tempdir;
 use test_case::test_case;
 
@@ -66,14 +69,110 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
-        expected_mig_files_count: 1,
-        expected_db_mig_meta_count: 1,
-        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
-        expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
-    })
-    .await;
+    let db_state = conf
+        .assert_with_db_instance(AssertionArg {
+            expected_mig_files_count: 1,
+            expected_db_mig_meta_count: 1,
+            expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+            expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
+            code_origin_line: std::line!(),
+        })
+        .await;
+
+    // Assert that the db state is as expected
+    // These are already checked in the snapshots wihin
+    // the above function, but we do some explicit checks here
+    // as check-and-balance against the snapshots
+    // to force devs/maintainers to be more intentional
+    let analyzers = db_state.resources.analyzers();
+    assert_eq!(analyzers.get_names(), vec!["ascii"]);
+    assert_eq!(
+        analyzers
+            .get_all_definitions()
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<String>>(),
+        vec!["DEFINE ANALYZER ascii TOKENIZERS CLASS FILTERS LOWERCASE,ASCII,EDGENGRAM(2,15),SNOWBALL(ENGLISH);"]
+    );
+
+    let tables = db_state.resources.tables();
+    assert_eq!(
+        tables.get_names(),
+        vec![
+            "animal",
+            "animal_snake_case",
+            "crop",
+            "eats",
+            "eats_snake_case",
+            "migration",
+            "planet",
+            "student"
+        ]
+    );
+    assert_eq!(
+        tables.get_definition("animal").unwrap().to_string(),
+        "DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;"
+    );
+    assert_eq!(
+        tables
+            .get_definition("animal_snake_case")
+            .unwrap()
+            .to_string(),
+        "DEFINE TABLE animal_snake_case SCHEMAFULL PERMISSIONS NONE;"
+    );
+    assert_eq!(
+        tables.get_definition("crop").unwrap().to_string(),
+        "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;"
+    );
+    assert_eq!(
+        tables.get_definition("eats").unwrap().to_string(),
+        "DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;"
+    );
+    assert_eq!(
+        tables
+            .get_definition("eats_snake_case")
+            .unwrap()
+            .to_string(),
+        "DEFINE TABLE eats_snake_case SCHEMAFULL PERMISSIONS NONE;"
+    );
+    assert_eq!(
+        tables.get_definition("migration").unwrap().to_string(),
+        "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;"
+    );
+    assert_eq!(
+        tables.get_definition("planet").unwrap().to_string(),
+        "DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;"
+    );
+    assert_eq!(
+        tables.get_definition("student").unwrap().to_string(),
+        "DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;"
+    );
+
+    let params = db_state.resources.params();
+    assert_eq!(
+        params.get_names(),
+        vec![
+            "__some_test_param1",
+            "__some_test_param2",
+            "__some_test_param3"
+        ]
+    );
+
+    let functions = db_state.resources.functions();
+    assert_eq!(
+        functions.get_names(),
+        vec!["get_animal_by_id", "get_animal_by_id2"]
+    );
+
+    let scopes = db_state.resources.scopes();
+    // 'regional' is created by define token
+    assert_eq!(scopes.get_names(), vec!["regional", "scope1", "scope2"]);
+
+    let tokens = db_state.resources.tokens();
+    assert_eq!(tokens.get_names(), vec!["token2"]);
+
+    let users = db_state.resources.users();
+    assert_eq!(users.get_names(), vec!["oyelowo"]);
 
     conf.run_up(&FastForwardDelta::default()).await;
     conf.assert_with_db_instance(AssertionArg {

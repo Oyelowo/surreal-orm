@@ -109,17 +109,17 @@ impl Display for CurrentFunctionName {
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct StreamLinedMigration {
-    basename: Basename,
-    extension: Extension,
-    checksum_up: Checksum,
-    checksum_down: Option<Checksum>,
+    pub basename: Basename,
+    pub extension: Extension,
+    pub checksum_up: Checksum,
+    pub checksum_down: Option<Checksum>,
 }
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct DbMigrationSchemaState {
-    resources: DbInfo,
-    migration_meta: Vec<StreamLinedMigration>,
+    pub resources: DbInfo,
+    pub migration_meta: Vec<StreamLinedMigration>,
 }
 
 impl DbMigrationSchemaState {
