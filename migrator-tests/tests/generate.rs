@@ -45,10 +45,6 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode) {
     .await;
 
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
-    assert!(
-        false,
-        "Should panic because we havent yet initialized migration. So, we should't get here."
-    );
 }
 
 #[test_case(Mode::Strict; "Strict")]

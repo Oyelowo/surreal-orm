@@ -122,7 +122,7 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
         let left_defs = self.get_left();
         let right_defs = self.get_right();
 
-        let old_field_def = left_defs.get_definition(&old_name).ok_or_else(|| {
+        let old_field_def = left_defs.get_definition(old_name).ok_or_else(|| {
             MigrationError::InvalidOldFieldName {
                 new_name: old_name.to_owned(),
                 table: table.to_owned(),
@@ -131,7 +131,7 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
             }
         })?;
 
-        let new_field_def = right_defs.get_definition(&new_name).ok_or_else(|| {
+        let new_field_def = right_defs.get_definition(new_name).ok_or_else(|| {
             MigrationError::FieldNameDoesNotExist {
                 field_expected: new_name.to_owned(),
                 table: table.to_owned(),

@@ -30,7 +30,7 @@ fn test_embedded() {
 
     assert_eq!(
         migs[0].name().basename(),
-        "create_new_stuff".to_string().try_into().unwrap()
+        "create_new_stuff".to_string().into()
     );
     insta::assert_display_snapshot!(migs[0].content());
     assert_eq!(

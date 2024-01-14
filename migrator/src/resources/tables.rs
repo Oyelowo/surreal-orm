@@ -132,8 +132,8 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
             |mut acc, (i, q)| {
                 let is_last = i == last_table_index;
                 let queries = &q.intersperse_new_lines();
-                acc.extend_up(&queries);
-                acc.extend_down(&queries);
+                acc.extend_up(queries);
+                acc.extend_down(queries);
                 if !is_last {
                     acc.add_new_line();
                     acc.add_new_line();
