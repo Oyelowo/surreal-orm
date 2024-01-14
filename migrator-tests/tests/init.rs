@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use migrator_tests::{current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{current_function, AssertionArg, TestConfig};
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{FastForwardDelta, Init, MockPrompter, Mode};
 use tempfile::tempdir;
@@ -18,7 +18,7 @@ use test_case::test_case;
 async fn test_init_without_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.run_init(
         Init::builder()
@@ -58,7 +58,7 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
 async fn test_init_with_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.run_init(
         Init::builder()
@@ -103,7 +103,7 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
 async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.run_init(
         Init::builder()
@@ -149,7 +149,7 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
 async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.run_init(
         Init::builder()

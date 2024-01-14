@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use migrator_tests::{current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{current_function, AssertionArg, TestConfig};
 use surreal_orm::migrator::{FastForwardDelta, MigrationFilename, Mode, RollbackStrategyStruct};
 use tempfile::tempdir;
 use test_case::test_case;
@@ -15,7 +15,7 @@ use test_case::test_case;
 async fn test_rollback_previous(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(true).await;
 
     // First apply all generated migrations to the current db instance
@@ -253,7 +253,7 @@ async fn test_rollback_previous(mode: Mode) {
 async fn test_rollback_number_delta(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(true).await;
 
     // First apply all generated migrations to the current db instance
@@ -408,7 +408,7 @@ async fn test_rollback_number_delta(mode: Mode) {
 async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(true).await;
 
     // First apply all generated migrations to the current db instance
@@ -574,7 +574,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
 async fn cannot_rollback_twice_to_same_cursor_cos_it_does_not_exist_the_second_time(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     let reversible = true;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
@@ -603,7 +603,7 @@ async fn cannot_rollback_twice_to_same_cursor_cos_it_does_not_exist_the_second_t
 async fn rollingback_to_nonexisting_filecursor_panics(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(true).await;
 
     // First apply all generated migrations to the current db instance

@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use migrator_tests::{current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{current_function, AssertionArg, TestConfig};
 use surreal_models::migrations::{Resources, ResourcesV3};
 use surreal_orm::migrator::{
     FastForwardDelta, Init, Migration, MigrationFilename, MockPrompter, Mode, Reset,
@@ -21,7 +21,7 @@ use test_case::test_case;
 async fn test_can_reset_before_init(reversible: bool, mode: Mode, run: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     assert!(!migration_dir.exists());
 
     conf.assert_with_db_instance(AssertionArg {
@@ -76,7 +76,7 @@ async fn test_can_reset_before_init(reversible: bool, mode: Mode, run: bool) {
 async fn test_can_reset_after_init_run(reversible: bool, mode: Mode, run: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
     assert!(!migration_dir.exists());
     conf.assert_migration_queries_snapshot();
     conf.assert_with_db_instance(AssertionArg {
@@ -160,7 +160,7 @@ async fn test_can_reset_after_init_run(reversible: bool, mode: Mode, run: bool) 
 async fn test_reset_after_multiple_unapplied_migrations(reversible: bool, mode: Mode, run: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
@@ -224,7 +224,7 @@ async fn test_reset_after_multiple_unapplied_migrations(reversible: bool, mode: 
 async fn test_reset_after_multiple_applied_migrations(reversible: bool, mode: Mode, run: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
@@ -291,7 +291,7 @@ async fn test_reset_after_multiple_applied_migrations(reversible: bool, mode: Mo
 async fn test_reset_after_multiple_pending_migrations(reversible: bool, mode: Mode, run: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    let mut conf = TestConfig::new(mode, migration_dir, current_function!()).await;
 
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
