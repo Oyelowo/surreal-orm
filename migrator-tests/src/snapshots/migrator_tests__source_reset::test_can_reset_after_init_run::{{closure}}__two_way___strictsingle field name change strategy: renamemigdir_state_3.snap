@@ -1,0 +1,36 @@
+---
+source: migrator-tests/src/lib.rs
+expression: migration_queries_snaps
+---
+header: Basename - migration_reset. Extension - up.surql
+ Migration Query: 
+-- Resetting migrations metadata table at initialization
+DELETE migration;
+-- Resetting migrations metadata table at initialization ending
+
+
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
+
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+
+DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
+DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
+DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
+
+header: Basename - migration_reset. Extension - down.surql
+ Migration Query: 
+REMOVE TABLE crop;
+
+REMOVE TABLE migration;
+
+REMOVE TABLE student;

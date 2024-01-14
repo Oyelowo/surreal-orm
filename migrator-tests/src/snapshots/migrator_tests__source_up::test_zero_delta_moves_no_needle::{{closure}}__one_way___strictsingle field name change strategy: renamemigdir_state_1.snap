@@ -1,0 +1,271 @@
+---
+source: migrator-tests/src/lib.rs
+expression: migration_queries_snaps
+---
+header: Basename - migration_1_init. Extension - surql
+ Migration Query: 
+-- Resetting migrations metadata table at initialization
+DELETE migration;
+-- Resetting migrations metadata table at initialization ending
+
+
+DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
+DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
+DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
+DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
+DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+
+DEFINE TABLE animal_snake_case SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal_snake_case TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD created_at ON animal_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal_snake_case TYPE record<animal_snake_case> PERMISSIONS FULL;
+DEFINE FIELD species ON animal_snake_case TYPE string PERMISSIONS FULL;
+DEFINE FIELD updated_at ON animal_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal_snake_case TYPE int PERMISSIONS FULL;
+
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
+
+DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON eats TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;
+DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;
+
+DEFINE TABLE eats_snake_case SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD created_at ON eats_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON eats_snake_case TYPE record<eats_snake_case> PERMISSIONS FULL;
+DEFINE FIELD in ON eats_snake_case TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD out ON eats_snake_case TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD place ON eats_snake_case TYPE string PERMISSIONS FULL;
+
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
+
+DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
+DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
+DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
+
+
+DEFINE ANALYZER ascii TOKENIZERS CLASS FILTERS LOWERCASE,ASCII,EDGENGRAM(2,15),SNOWBALL(ENGLISH);
+
+
+DEFINE PARAM $__some_test_param1 VALUE NONE PERMISSIONS FULL;
+DEFINE PARAM $__some_test_param2 VALUE NONE PERMISSIONS FULL;
+DEFINE PARAM $__some_test_param3 VALUE NONE PERMISSIONS FULL;
+
+
+DEFINE FUNCTION fn::get_animal_by_id($id: int) { RETURN $id; } PERMISSIONS FULL;
+DEFINE FUNCTION fn::get_animal_by_id2($id: int) { RETURN $id; } PERMISSIONS FULL;
+
+
+DEFINE SCOPE regional;
+DEFINE SCOPE scope1 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:oyelowo, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)));
+DEFINE SCOPE scope2 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:oyelowo, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)));
+
+
+DEFINE TOKEN token2 ON DATABASE TYPE EDDSA VALUE 'abrakradabra';
+
+
+DEFINE USER oyelowo ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8' ROLES OWNER;
+
+header: Basename - migration_2_gen_after_init. Extension - surql
+ Migration Query: 
+Empty migration
+
+header: Basename - migration_3_gen_after_init. Extension - surql
+ Migration Query: 
+Empty migration
+
+header: Basename - migration_4_gen_after_init. Extension - surql
+ Migration Query: 
+-- Rename field attributes to characteristics
+DEFINE FIELD characteristics ON animal TYPE array<string> PERMISSIONS FULL;
+UPDATE animal SET characteristics = attributes;
+REMOVE FIELD attributes ON TABLE animal;
+-- Rename field ending
+REMOVE FIELD createdAt ON TABLE animal;
+REMOVE FIELD updatedAt ON TABLE animal;
+DEFINE INDEX species_speed_idx ON animal FIELDS velocity, characteristics UNIQUE;
+DEFINE EVENT event1 ON animal WHEN species = 'Homo Habillis' AND velocity > 545 THEN (SELECT * FROM crop);
+REMOVE EVENT event2 ON TABLE animal;
+
+REMOVE TABLE animal_snake_case;
+
+
+
+DEFINE FIELD location ON eats TYPE string PERMISSIONS FULL;
+REMOVE FIELD place ON TABLE eats;
+DEFINE FIELD updatedAt ON eats TYPE datetime PERMISSIONS FULL;
+
+REMOVE TABLE eats_snake_case;
+
+
+
+DEFINE TABLE new_stuff SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON new_stuff TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON new_stuff TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON new_stuff TYPE record<new_stuff> PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON new_stuff TYPE datetime PERMISSIONS FULL;
+
+-- Rename field firstName to newName
+DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;
+UPDATE planet SET newName = firstName;
+REMOVE FIELD firstName ON TABLE planet;
+-- Rename field ending
+
+REMOVE TABLE student;
+
+
+REMOVE ANALYZER ascii;
+
+
+REMOVE PARAM $__some_test_param1;
+REMOVE PARAM $__some_test_param2;
+REMOVE PARAM $__some_test_param3;
+
+
+REMOVE FUNCTION fn::get_animal_by_id;
+REMOVE FUNCTION fn::get_animal_by_id2;
+
+
+REMOVE SCOPE regional;
+REMOVE SCOPE scope1;
+REMOVE SCOPE scope2;
+
+
+REMOVE TOKEN token2 ON DATABASE;
+
+
+REMOVE USER oyelowo ON DATABASE;
+
+header: Basename - migration_5_gen_after_init. Extension - surql
+ Migration Query: 
+REMOVE TABLE animal;
+
+
+
+REMOVE TABLE eats;
+
+
+
+REMOVE TABLE new_stuff;
+
+REMOVE TABLE planet;
+
+DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
+DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
+DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
+
+header: Basename - migration_6_gen_after_init. Extension - surql
+ Migration Query: 
+Empty migration
+
+header: Basename - migration_7_gen_after_init. Extension - surql
+ Migration Query: 
+REMOVE TABLE crop;
+
+header: Basename - migration_8_gen_after_init. Extension - surql
+ Migration Query: 
+REMOVE TABLE student;
+
+header: Basename - migration_9_gen_after_init. Extension - surql
+ Migration Query: 
+DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
+DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
+DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
+DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
+DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
+
+DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON eats TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;
+DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;
+
+
+
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
+
+header: Basename - migration_10_gen_after_init. Extension - surql
+ Migration Query: 
+REMOVE TABLE animal;
+
+REMOVE TABLE crop;
+
+REMOVE TABLE eats;
+
+
+
+REMOVE TABLE planet;
+
+header: Basename - migration_11_gen_after_init. Extension - surql
+ Migration Query: 
+Empty migration
+
+header: Basename - migration_12_gen_after_init. Extension - surql
+ Migration Query: 
+DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
+DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
+DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
+DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
+DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
+
+
+
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;

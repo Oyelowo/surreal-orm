@@ -16,7 +16,6 @@ use surreal_orm::{Node, Object, SurrealId, SurrealSimpleId};
 pub struct Weapon {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    // pub strength: u64,
     #[surreal_orm(type_ = "float")]
     pub strength: Strength,
     pub created: DateTime<Utc>,

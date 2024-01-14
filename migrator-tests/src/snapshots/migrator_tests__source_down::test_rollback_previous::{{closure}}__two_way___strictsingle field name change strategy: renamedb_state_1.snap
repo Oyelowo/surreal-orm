@@ -194,7 +194,7 @@ DbMigrationSchemaState {
             ),
             checksum_down: Some(
                 Checksum(
-                    "601bfd8eb72f29232009ad39251fa35f4a476c92588fc3896305a272efd88c55",
+                    "b32d97ef0c72b2ed8167f41fe0049b26c83f9b3fd63db462d9f7851d2e2f6b82",
                 ),
             ),
         },
@@ -206,11 +206,11 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "2d48c38ba6a60496a9d75b897ef4fa0bb1978198945b29bda4340ba5b2769d6c",
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             ),
             checksum_down: Some(
                 Checksum(
-                    "b2618fca368a7cd0909d5cd941d16ab67fca2c20c0c2e89779c83bb1f05694fe",
+                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                 ),
             ),
         },
@@ -222,11 +222,11 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "b2618fca368a7cd0909d5cd941d16ab67fca2c20c0c2e89779c83bb1f05694fe",
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             ),
             checksum_down: Some(
                 Checksum(
-                    "a1dbf3c7cb0c3c26c5980aceb2ab3ba51d5f29f33811fe67331adfb9bfd1aed3",
+                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                 ),
             ),
         },
@@ -238,7 +238,7 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "4c39def9da41b3b8fba52542ecd208415bf065f448e692f6fbe3017a734fe979",
+                "6afbec180b04c58fb85b85c513214b2f9a5d2dd4fbd30ae89fc98fafe93db26b",
             ),
             checksum_down: Some(
                 Checksum(
