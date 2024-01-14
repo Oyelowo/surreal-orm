@@ -17,7 +17,6 @@ pub(crate) mod define_event;
 pub(crate) mod define_field;
 pub(crate) mod define_function;
 pub(crate) mod define_index;
-pub(crate) mod define_login;
 pub(crate) mod define_model;
 pub(crate) mod define_namespace;
 pub(crate) mod define_param;
@@ -73,9 +72,7 @@ pub use define_event::{define_event, DefineEventStatement};
 pub use define_field::{define_field, DefineFieldStatement};
 pub use define_function::{define_function, DefineFunctionStatement, FunctionArgument};
 pub use define_index::{define_index, search_analyzer, DefineIndexStatement, Scoring};
-// pub use define_login::{define_login, DefineLoginStatement};
 pub use define_model::{define_model, DefineModelStatement, ModelName, ModelVersion};
-
 pub use define_namespace::{define_namespace, DefineNamespaceStatement};
 pub use define_param::{define_param, DefineParamStatement};
 pub use define_scope::{define_scope, DefineScopeStatement};

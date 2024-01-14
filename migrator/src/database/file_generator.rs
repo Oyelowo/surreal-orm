@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-use itertools::{intersperse, intersperse_with};
 use std::{collections::BTreeMap, ops::Deref};
 
 use surreal_query_builder::{statements::info_for, *};
@@ -15,8 +14,6 @@ use surrealdb::{
 };
 
 use crate::*;
-
-use super::file_manager;
 
 // For the migration directory
 #[derive(Debug, Clone)]
