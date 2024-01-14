@@ -98,7 +98,7 @@ DbMigrationSchemaState {
             Info(
                 {
                     "oyelowo": DefineStatementRaw(
-                        "DEFINE USER oyelowo ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$G7hYOaMnF409Ovkhk58ayA$0pVWVkKZXHv5FhkSjHsA4YWwbEMInx6BVPTKu+/WTsw' ROLES OWNER",
+                        "DEFINE USER oyelowo ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8' ROLES OWNER",
                     ),
                 },
             ),
@@ -113,7 +113,7 @@ DbMigrationSchemaState {
                 "surql",
             ),
             checksum_up: Checksum(
-                "e932d40bb34fdd49ca6dda8f2f5847bd73a7f5f9b4e85bfbbbeb6af6ac3003d5",
+                "adceda8f9eaccd54bcb515250c8a9e2deee25a0c24228433e739fd3f72dfaab4",
             ),
             checksum_down: None,
         },

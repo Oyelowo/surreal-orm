@@ -1,0 +1,71 @@
+---
+source: migrator-tests/src/lib.rs
+expression: db_miration_schema_state
+---
+DbMigrationSchemaState {
+    resources: DbInfo {
+        analyzers: Analyzers(
+            Info(
+                {},
+            ),
+        ),
+        functions: Functions(
+            Info(
+                {},
+            ),
+        ),
+        params: Params(
+            Info(
+                {},
+            ),
+        ),
+        scopes: Scopes(
+            Info(
+                {},
+            ),
+        ),
+        tables: Tables(
+            Info(
+                {
+                    "crop": DefineStatementRaw(
+                        "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "migration": DefineStatementRaw(
+                        "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "student": DefineStatementRaw(
+                        "DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                },
+            ),
+        ),
+        tokens: Tokens(
+            Info(
+                {},
+            ),
+        ),
+        users: Users(
+            Info(
+                {},
+            ),
+        ),
+    },
+    migration_meta: [
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_reset",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "7224b625b942e14b7d2794c68dab90d966f1303b65a8f57a06072d284b9abf97",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "36f90802b64bec33edab1e73d5df0d919bc18051557eb3e332df0da0ae7e9bf9",
+                ),
+            ),
+        },
+    ],
+}
