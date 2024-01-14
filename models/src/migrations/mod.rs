@@ -202,7 +202,7 @@ impl DbResources for ResourcesV10 {
 pub mod invalid_cases {
     use super::*;
 
-    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default, TableResources)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(
         table_name = "user_renaming_from_currently_used_field_name_disallowed",
@@ -254,7 +254,7 @@ pub struct UserCredentials {
     pub password_hash: String,
 }
 
-#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "new_stuff", schemafull)]
 pub struct NewStuff {
