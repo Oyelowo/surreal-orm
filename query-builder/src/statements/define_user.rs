@@ -51,15 +51,15 @@ impl Display for Password {
 ///
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, CrudType::*, statements::{define_user}};
-/// let username = User::new("username");
+/// use surreal_orm::{*, CrudType::*, statements::{define_user, UserRole}};
 ///
 /// let statement = define_user("username")
 ///     .on_database()
 ///     .passhash("$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8")
 ///     .role(UserRole::Viewer);
 ///
-/// let statement = define_user(username).on_root().password("123456").role(Role::Owner);
+/// let username = User::new("username");
+/// let statement = define_user(username).on_root().password("123456").role(UserRole::Owner);
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
