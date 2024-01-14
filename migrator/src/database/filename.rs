@@ -31,11 +31,19 @@ pub struct MigrationNameBasicInfo {
     basename: Basename,
 }
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone)]
 pub enum MigrationFilename {
     Up(MigrationNameBasicInfo),
     Down(MigrationNameBasicInfo),
     Unidirectional(MigrationNameBasicInfo),
+}
+
+impl std::hash::Hash for MigrationFilename {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.timestamp().to_string().hash(state);
+        self.basename().to_string().hash(state);
+        self.extension().to_string().hash(state);
+    }
 }
 
 #[derive(Debug, Clone)]
