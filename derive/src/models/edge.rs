@@ -227,7 +227,7 @@ impl ToTokens for EdgeToken {
                 }
 
                 #[allow(non_snake_case)]
-                impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause   {
+                impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause {
                     type Id = #table_id_type;
                     type NonNullUpdater = #non_null_updater_struct_name;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;
@@ -439,10 +439,7 @@ impl ToTokens for EdgeToken {
 }
 
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    // Construct a representation of Rust code as a syntax tree
-    // that we can manipulate
     let input = parse_macro_input!(input);
-    // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
     let output = match EdgeToken::from_derive_input(&input) {
         Ok(out) => out,
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),

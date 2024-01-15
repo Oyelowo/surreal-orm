@@ -359,59 +359,59 @@ impl ToTokens for NodeToken {
                     }
                 }
 
-                impl #impl_generics #crate_name::Aliasable for #struct_name_ident #ty_generics #where_clause {}
+                impl #crate_name::Aliasable for #struct_name_ident {}
 
-                impl #impl_generics From<#struct_name_ident> for #crate_name::ValueLike {
+                impl From<#struct_name_ident> for #crate_name::ValueLike {
                     fn from(node: #struct_name_ident) -> Self {
                        Self::new(node)
                     }
                 }
 
-                impl #crate_name::Parametric for #struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #impl_generics #crate_name::Buildable for #struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Buildable for #struct_name_ident {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #impl_generics #crate_name::Erroneous for #struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Erroneous for #struct_name_ident {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl #impl_generics ::std::fmt::Display for #struct_name_ident #ty_generics #where_clause {
+                impl ::std::fmt::Display for #struct_name_ident {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
 
-                impl #crate_name::Aliasable for &#struct_name_ident #ty_generics #where_clause {}
+                impl #crate_name::Aliasable for &#struct_name_ident {}
 
-                impl #impl_generics #crate_name::Parametric for &#struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Parametric for &#struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #impl_generics #crate_name::Buildable for &#struct_name_ident {
+                impl #crate_name::Buildable for &#struct_name_ident {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #impl_generics #crate_name::Erroneous for &#struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Erroneous for &#struct_name_ident {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl #impl_generics #struct_name_ident #ty_generics #where_clause {
+                impl #struct_name_ident {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
@@ -485,10 +485,7 @@ impl ToTokens for NodeToken {
 }
 
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    // Construct a representation of Rust code as a syntax tree
-    // that we can manipulate
     let input = parse_macro_input!(input);
-    // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
     let output = match NodeToken::from_derive_input(&input) {
         Ok(out) => out,
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),
