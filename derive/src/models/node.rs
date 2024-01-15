@@ -40,6 +40,7 @@ impl ToTokens for NodeToken {
         let TableDeriveAttributes {
             ident: struct_name_ident,
             data,
+            generics,
             rename_all,
             table_name,
             relax_table_name,
@@ -54,6 +55,7 @@ impl ToTokens for NodeToken {
         );
         let table_name_str =
             errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
+        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -170,7 +172,7 @@ impl ToTokens for NodeToken {
             use #crate_name::{ToRaw as _};
             use #crate_name::Aliasable as _;
 
-            impl #crate_name::SchemaGetter for #struct_name_ident {
+            impl #impl_generics #crate_name::SchemaGetter for #struct_name_ident #ty_generics #where_clause {
                 type Schema = #module_name_rexported::Schema;
 
                 fn schema() -> #module_name_rexported::Schema {
@@ -182,7 +184,7 @@ impl ToTokens for NodeToken {
                 }
             }
 
-            impl #crate_name::Node for #struct_name_ident {
+            impl #impl_generics #crate_name::Node for #struct_name_ident #ty_generics #where_clause {
                 type TableNameChecker = #module_name_internal::TableNameStaticChecker;
                 // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name_internal::#aliases_struct_name;
@@ -239,7 +241,7 @@ impl ToTokens for NodeToken {
                 ) *
             }
 
-            impl #struct_name_ident {
+            impl #impl_generics #struct_name_ident #ty_generics #where_clause {
                   // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
 
                 pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
@@ -247,7 +249,7 @@ impl ToTokens for NodeToken {
                 }
             }
 
-            impl #crate_name::Model for #struct_name_ident {
+            impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause {
                 type Id = #table_id_type;
                 type NonNullUpdater = #non_null_updater_struct_name;
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
@@ -357,59 +359,59 @@ impl ToTokens for NodeToken {
                     }
                 }
 
-                impl #crate_name::Aliasable for #struct_name_ident {}
+                impl #impl_generics #crate_name::Aliasable for #struct_name_ident #ty_generics #where_clause {}
 
-                impl From<#struct_name_ident> for #crate_name::ValueLike {
+                impl #impl_generics From<#struct_name_ident> for #crate_name::ValueLike {
                     fn from(node: #struct_name_ident) -> Self {
                        Self::new(node)
                     }
                 }
 
-                impl #crate_name::Parametric for #struct_name_ident {
+                impl #crate_name::Parametric for #struct_name_ident #ty_generics #where_clause {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for #struct_name_ident {
+                impl #impl_generics #crate_name::Buildable for #struct_name_ident #ty_generics #where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for #struct_name_ident {
+                impl #impl_generics #crate_name::Erroneous for #struct_name_ident #ty_generics #where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl ::std::fmt::Display for #struct_name_ident {
+                impl #impl_generics ::std::fmt::Display for #struct_name_ident #ty_generics #where_clause {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
 
-                impl #crate_name::Aliasable for &#struct_name_ident {}
+                impl #crate_name::Aliasable for &#struct_name_ident #ty_generics #where_clause {}
 
-                impl #crate_name::Parametric for &#struct_name_ident {
+                impl #impl_generics #crate_name::Parametric for &#struct_name_ident #ty_generics #where_clause {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for &#struct_name_ident {
+                impl #impl_generics #crate_name::Buildable for &#struct_name_ident {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for &#struct_name_ident {
+                impl #impl_generics #crate_name::Erroneous for &#struct_name_ident #ty_generics #where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl #struct_name_ident {
+                impl #impl_generics #struct_name_ident #ty_generics #where_clause {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
