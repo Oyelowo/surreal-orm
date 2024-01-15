@@ -59,12 +59,15 @@ impl ToTokens for EdgeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let TableDeriveAttributes {
             ident: struct_name_ident,
+            generics,
             table_name,
             data,
             rename_all,
             relax_table_name,
             ..
         } = &self.0;
+        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
         let Ok(table_definitions) = self.get_table_definition_token() else {
             return tokens.extend(
                 syn::Error::new_spanned(self, "Error in parsing table definition")
@@ -170,14 +173,14 @@ impl ToTokens for EdgeToken {
         tokens.extend(quote!(
                 use #crate_name::{ToRaw as _};
 
-                impl<In: #crate_name::Node, Out: #crate_name::Node> #struct_name_ident<In, Out> {
+                impl #impl_generics #struct_name_ident #ty_generics #where_clause {
                       // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
                     pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
                         [#( #serializable_fields_as_str), *]
                     }
                 }
 
-                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
+                impl #impl_generics #crate_name::SchemaGetter for #struct_name_ident #ty_generics #where_clause  {
                     type Schema = #module_name_internal::#struct_name_ident;
 
                     fn schema() -> #module_name_rexported::Schema {
@@ -190,7 +193,7 @@ impl ToTokens for EdgeToken {
                 }
 
                 #[allow(non_snake_case)]
-                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::Edge for #struct_name_ident<In, Out> {
+                impl #impl_generics #crate_name::Edge for #struct_name_ident #ty_generics #where_clause   {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name_internal::TableNameStaticChecker;
@@ -224,7 +227,7 @@ impl ToTokens for EdgeToken {
                 }
 
                 #[allow(non_snake_case)]
-                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::Model for #struct_name_ident<In, Out> {
+                impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause   {
                     type Id = #table_id_type;
                     type NonNullUpdater = #non_null_updater_struct_name;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;
