@@ -24,7 +24,6 @@ use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
 #[derive(Debug, Clone)]
 pub struct Resources;
 
-// #[allow(unused_macros)]
 define_function!(get_animal_by_id(id: int){ return id;} );
 define_function!(get_animal_by_id2(id: int){ return id;} );
 
@@ -202,7 +201,7 @@ impl DbResources for ResourcesV10 {
 pub mod invalid_cases {
     use super::*;
 
-    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default, TableResources)]
+    #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(
         table_name = "user_renaming_from_currently_used_field_name_disallowed",
@@ -215,14 +214,13 @@ pub mod invalid_cases {
         pub first_name: String,
         pub created_at: chrono::DateTime<Utc>,
     }
-    impl TableResources for UserRenamingFromCurrentlyUsedFieldNameDisallowed {}
 
     pub struct ResourcesVRenamingFromCurrentlyUsedFieldNameDisallowed;
     impl DbResources for ResourcesVRenamingFromCurrentlyUsedFieldNameDisallowed {
         create_table_resources!(UserRenamingFromCurrentlyUsedFieldNameDisallowed);
     }
 
-    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(
         table_name = "user_renaming_with_same_old_field_name_disallowed",
@@ -235,7 +233,6 @@ pub mod invalid_cases {
         pub another_stuff: String,
         pub created_at: chrono::DateTime<Utc>,
     }
-    impl TableResources for UserRenamingWithSameOldFieldNameDisallowed {}
 
     #[derive(Debug, Clone)]
     pub struct ResourcesVRenamingWithSameOldFieldNameDisallowed;
@@ -264,9 +261,7 @@ pub struct NewStuff {
     pub updated_at: chrono::DateTime<Utc>,
 }
 
-impl TableResources for NewStuff {}
-
-#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet", schemafull)]
 pub struct Planet {
@@ -278,13 +273,10 @@ pub struct Planet {
     pub labels: Vec<String>,
 }
 
-impl TableResources for Planet {}
-
-#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet", schemafull, relax_table_name)]
 pub struct PlanetV2 {
-    // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
     // #[surreal_orm(old_name = "firstName")]
     pub new_name: String,
@@ -294,9 +286,7 @@ pub struct PlanetV2 {
     pub labels: Vec<String>,
 }
 
-impl TableResources for PlanetV2 {}
-
-#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "student", schemafull)]
 pub struct Student {
@@ -307,27 +297,22 @@ pub struct Student {
     pub created_at: chrono::DateTime<Utc>,
 }
 
-impl TableResources for Student {}
-
 pub mod snake_cases {
     use super::*;
 
-    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[surreal_orm(table_name = "animal_snake_case", schemafull)]
     pub struct AnimalSnakeCase {
         pub id: SurrealSimpleId<Self>,
         pub species: String,
-        // Improve error message for old_nmae using word similarity algo
         pub attributes: Vec<String>,
         pub created_at: chrono::DateTime<Utc>,
         pub updated_at: chrono::DateTime<Utc>,
         pub velocity: u64,
     }
 
-    impl TableResources for AnimalSnakeCase {}
-
     // We are relaxing table name, so that this serves as second version of AnimalSnakeCase
-    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[surreal_orm(table_name = "animal_snake_case", schemafull, relax_table_name)]
     pub struct AnimalSnakeCaseV2 {
         pub id: SurrealSimpleId<Self>,
@@ -336,8 +321,8 @@ pub mod snake_cases {
         pub characteristics: Vec<String>,
         pub velocity: u64,
     }
-    impl TableResources for AnimalSnakeCaseV2 {}
-    #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+
+    #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[surreal_orm(table_name = "eats_snake_case", schemafull)]
     pub struct EatsSnakeCase<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Self>,
@@ -349,7 +334,6 @@ pub mod snake_cases {
     }
 
     pub type AnimalSnakeCaseEatsCrop = EatsSnakeCase<AnimalSnakeCase, Crop>;
-    impl TableResources for AnimalSnakeCaseEatsCrop {}
 }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
@@ -358,7 +342,6 @@ pub mod snake_cases {
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    // Improve error message for old_nmae using word similarity algo
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,
@@ -443,7 +426,7 @@ impl TableResources for AnimalV2 {
     }
 }
 
-#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "eats", schemafull)]
 pub struct Eats<In: Node, Out: Node> {
@@ -456,9 +439,8 @@ pub struct Eats<In: Node, Out: Node> {
 }
 
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
-impl TableResources for AnimalEatsCrop {}
 
-#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "eats", schemafull, relax_table_name)]
 pub struct EatsV2<In: Node, Out: Node> {
@@ -472,14 +454,11 @@ pub struct EatsV2<In: Node, Out: Node> {
 }
 
 pub type AnimalEatsCropV2 = EatsV2<AnimalV2, Crop>;
-impl TableResources for AnimalEatsCropV2 {}
 
-#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "crop", schemafull)]
 pub struct Crop {
     pub id: SurrealSimpleId<Self>,
     pub color: String,
 }
-
-impl TableResources for Crop {}

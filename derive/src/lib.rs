@@ -47,6 +47,6 @@ pub fn surreal_object_trait_derive(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_derive(TableResources, attributes(surreal_orm))]
-pub fn surreal_table_resourcesderive(input: TokenStream) -> TokenStream {
+pub fn surreal_table_resources_derive(input: TokenStream) -> TokenStream {
     migrations::table::generate_table_resources_trait(input)
 }
