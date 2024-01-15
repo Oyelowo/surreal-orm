@@ -41,7 +41,7 @@ pub struct Alien {
     // This is a read only field
     #[surreal_orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
     #[serde(skip_serializing, default)]
-    pub planets_to_visit: Relate<Planet>,
+    pub planets_to_visit: Relate<Planet<u64>>,
 }
 
 // Explicityly specifying all field types. Most of it can be inferred.

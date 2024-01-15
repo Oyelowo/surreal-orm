@@ -363,7 +363,11 @@ impl SchemaFieldsProperties {
         {
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
-            let x = is_generic_type(field_type, generics);
+            let numeric_type_setter = if is_generic_type(field_type, generics) {
+                quote!(#crate_name::sql::Value)
+            } else {
+                quote!(#field_type)
+            };
             let field_name_original = field_receiver
                 .ident
                 .as_ref()
@@ -446,7 +450,7 @@ impl SchemaFieldsProperties {
 
                 let numeric_trait = if field_receiver.is_numeric() {
                     quote!(
-                        impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
+                        impl #crate_name::SetterNumeric<#numeric_type_setter> for self::#field_name_as_camel  {}
 
                         impl ::std::convert::From<self::#field_name_as_camel> for #crate_name::NumberLike {
                             fn from(val: self::#field_name_as_camel) -> Self {

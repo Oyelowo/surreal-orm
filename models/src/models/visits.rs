@@ -41,11 +41,11 @@ pub struct Visits<In: Node, Out: Node> {
     // This is a read only field
     #[surreal_orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
     #[serde(skip_serializing, default)]
-    pub planets_to_visit: Relate<Planet>,
+    pub planets_to_visit: Relate<Planet<u64>>,
 }
 
 // Connects Alien to Planet via Visits
-pub type AlienVisitsPlanet = Visits<Alien, Planet>;
+pub type AlienVisitsPlanet = Visits<Alien, Planet<u64>>;
 
 // VisitsExplicit
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
@@ -65,7 +65,7 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
 }
 
 // Connects Alien to Planet via Visits
-pub type AlienVisitsPlanetExplicit = VisitsExplicit<Alien, Planet>;
+pub type AlienVisitsPlanetExplicit = VisitsExplicit<Alien, Planet<u64>>;
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -109,4 +109,4 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     space_ships: LinkMany<SpaceShip>,
 }
 
-pub type AlienVisitsPlanetWithExplicitAttributes = VisitsWithExplicitAttributes<Alien, Planet>;
+pub type AlienVisitsPlanetWithExplicitAttributes = VisitsWithExplicitAttributes<Alien, Planet<u64>>;

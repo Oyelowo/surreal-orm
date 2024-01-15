@@ -13,7 +13,7 @@ use surreal_orm::{Node, SurrealSimpleId};
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet")]
-pub struct Planet {
+pub struct Planet<T: Clone + Serialize + surreal_orm::validators::Int> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     // area: Polygon,
@@ -28,6 +28,8 @@ pub struct Planet {
     pub population: u64,
     pub created: DateTime<Utc>,
     pub tags: Vec<u64>,
+    #[surreal_orm(type_ = "int")]
+    pub data: T,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -64,10 +66,37 @@ type Population = u64;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surreal_orm::{SchemaGetter, SetterArray};
+    use surreal_orm::{SchemaGetter, SetterArray, SetterAssignable};
 
     #[test]
     fn test_auto_inference() {
-        Planet::schema().tags.append(45u64);
+        Planet::<u64>::schema().tags.append(45u64);
+        PlanetX::<u64>::schema().tags.append(45u64);
+        PlanetX::<u64>::schema().data.equal_to(45u64);
     }
 }
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+// #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "planet_x")]
+pub struct PlanetX<T: Clone + Serialize + surreal_orm::validators::Int> {
+    pub id: SurrealSimpleId<Self>,
+    pub name: String,
+    // area: Polygon,
+    // #[surreal_orm(type_ = "any")]
+    // #[surreal_orm(type_ = "array")]
+    // #[surreal_orm(type_ = "array", item_type = "int")]
+    // #[surreal_orm(type_ = "array", item_type = "int")]
+    // #[surreal_orm(type_ = "int")]
+    // pub population: Population,
+    // pub population: PopArray,
+    // pub population: Vec<Population>,
+    pub population: u64,
+    pub created: DateTime<Utc>,
+    pub tags: Vec<u64>,
+    #[surreal_orm(type_ = "int")]
+    pub data: T,
+}
+
+struct Nama;
