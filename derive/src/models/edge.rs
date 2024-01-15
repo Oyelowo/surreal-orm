@@ -82,7 +82,10 @@ impl ToTokens for EdgeToken {
                 .expect("table_name attribute must be provided")
         );
         let table_name_str =
-            errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
+            match errors::validate_table_name(struct_name_ident, table_name, relax_table_name) {
+                Ok(table_name) => table_name,
+                Err(err) => return tokens.extend(err.write_errors()),
+            };
 
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -134,7 +137,8 @@ impl ToTokens for EdgeToken {
             table_id_type,
             field_metadata,
             ..
-        }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Edge)
+        }) =
+            SchemaFieldsProperties::from_receiver_data(schema_props_args, generics, DataType::Edge)
         else {
             return tokens.extend(
                 syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),

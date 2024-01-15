@@ -3,6 +3,8 @@ pub use static_assertions::assert_fields;
 pub use static_assertions::assert_impl_all;
 pub use static_assertions::assert_impl_any;
 pub use static_assertions::assert_impl_one;
+pub use static_assertions::assert_trait_sub_all;
+pub use static_assertions::assert_trait_super_all;
 pub use static_assertions::assert_type_eq_all;
 use std::any::TypeId;
 use std::collections::HashSet;

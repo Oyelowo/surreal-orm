@@ -47,6 +47,7 @@ impl ToTokens for NodeToken {
             ..
         } = &self.0;
 
+        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
         let table_name_ident = &format_ident!(
             "{}",
             table_name
@@ -54,8 +55,10 @@ impl ToTokens for NodeToken {
                 .expect("table_name attribute must be provided")
         );
         let table_name_str =
-            errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
-        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+            match errors::validate_table_name(struct_name_ident, table_name, relax_table_name) {
+                Ok(table_name) => table_name.as_str(),
+                Err(err) => return tokens.extend(err.write_errors()),
+            };
 
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -79,7 +82,16 @@ impl ToTokens for NodeToken {
             table_name: table_name_str.to_string(),
         };
 
-        let Ok(SchemaFieldsProperties {
+        let schema_props = match SchemaFieldsProperties::from_receiver_data(
+            schema_props_args,
+            generics,
+            DataType::Node,
+        ) {
+            Ok(props) => props,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+
+        let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -105,12 +117,7 @@ impl ToTokens for NodeToken {
             table_id_type,
             field_metadata,
             ..
-        }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Node)
-        else {
-            return tokens.extend(
-                syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),
-            );
-        };
+        } = schema_props;
 
         let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
@@ -188,7 +195,7 @@ impl ToTokens for NodeToken {
                 type TableNameChecker = #module_name_internal::TableNameStaticChecker;
                 // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name_internal::#aliases_struct_name;
-                type NonNullUpdater = #non_null_updater_struct_name;
+                type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
 
                 fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
@@ -226,7 +233,7 @@ impl ToTokens for NodeToken {
 
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-            pub struct #non_null_updater_struct_name {
+            pub struct  #non_null_updater_struct_name #impl_generics {
                #(
                     #[serde(skip_serializing_if = "Option::is_none")]
                     #non_null_updater_fields
@@ -251,7 +258,7 @@ impl ToTokens for NodeToken {
 
             impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause {
                 type Id = #table_id_type;
-                type NonNullUpdater = #non_null_updater_struct_name;
+                type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
                 fn table_name() -> #crate_name::Table {
@@ -475,7 +482,7 @@ impl ToTokens for NodeToken {
 
             // #[test] // Comment out to make compiler tests fail in doctests. 25th August, 2023.
             #[allow(non_snake_case)]
-            fn #test_function_name() {
+            fn #test_function_name #impl_generics() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions
 

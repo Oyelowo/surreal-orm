@@ -7,6 +7,7 @@
 
 pub use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
 use quote::quote;
+use syn::{Generics, Type, TypePath};
 
 pub fn generate_nested_vec_type(
     foreign_node: &syn::Ident,
@@ -48,4 +49,76 @@ pub fn count_vec_nesting(field_type: &syn::Type) -> usize {
         }
         _ => 0, // Not a type path, so it can't be a Vec.
     }
+}
+
+// pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
+//     match ty {
+//         Type::Path(TypePath { path, .. }) => {
+//             // Check if the type matches any of the generic type parameters
+//             generics.params.iter().any(|param| match param {
+//                 syn::GenericParam::Type(type_param) => path.is_ident(&type_param.ident),
+//                 _ => false,
+//             })
+//         }
+//         _ => false,
+//     }
+// }
+
+pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
+    match ty {
+        Type::Path(TypePath { path, .. }) => {
+            // Check each segment of the path for generic parameters
+            path.segments.iter().any(|segment| {
+                // Check if this segment is a generic parameter itself
+                if generics.params.iter().any(|param| matches!(param, syn::GenericParam::Type(type_param) if segment.ident == type_param.ident)) {
+                    return true;
+                }
+
+                // Check if this segment has arguments that are generic parameters
+                if let syn::PathArguments::AngleBracketed(args) = &segment.arguments {
+                    args.args.iter().any(|arg| {
+                        if let syn::GenericArgument::Type(ty) = arg {
+                            is_generic_type(ty, generics)
+                        } else {
+                            false
+                        }
+                    })
+                } else {
+                    false
+                }
+            })
+        }
+        // You can extend this match to handle other types like tuples, slices, etc.
+        _ => false,
+    }
+}
+
+use syn::{visit::Visit, GenericParam};
+
+struct GenericTypeChecker<'a> {
+    generics: &'a Generics,
+    found: bool,
+}
+
+impl<'a> Visit<'a> for GenericTypeChecker<'a> {
+    fn visit_type_path(&mut self, i: &'a TypePath) {
+        if self.generics.params.iter().any(|param| {
+            matches!(param, GenericParam::Type(type_param) if i.path.is_ident(&type_param.ident))
+        }) {
+            self.found = true;
+        }
+        // Continue walking down the tree
+        syn::visit::visit_type_path(self, i);
+    }
+
+    // Implement other visit_* methods as needed to handle different type constructs
+}
+
+fn is_generic_type2(ty: &Type, generics: &Generics) -> bool {
+    let mut checker = GenericTypeChecker {
+        generics,
+        found: false,
+    };
+    checker.visit_type(ty);
+    checker.found
 }
