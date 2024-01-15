@@ -21,7 +21,7 @@ use super::{
     casing::CaseString,
     count_vec_nesting,
     errors::ExtractorResult,
-    generate_nested_vec_type, get_crate_name,
+    generate_nested_vec_type, get_crate_name, is_generic_type,
     relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
     variables::VariablesModelMacro,
 };
@@ -324,6 +324,7 @@ impl std::hash::Hash for TokenStreamHashable {
     }
 }
 
+#[derive(Clone)]
 pub struct SchemaPropertiesArgs<'a> {
     pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
     pub struct_level_casing: Option<CaseString>,
@@ -342,6 +343,7 @@ impl SchemaFieldsProperties {
     /// Derive the schema properties for a struct
     pub(crate) fn from_receiver_data(
         args: SchemaPropertiesArgs,
+        generics: &syn::Generics,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
         let SchemaPropertiesArgs {
@@ -361,6 +363,7 @@ impl SchemaFieldsProperties {
         {
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
+            let x = is_generic_type(field_type, generics);
             let field_name_original = field_receiver
                 .ident
                 .as_ref()
@@ -597,7 +600,8 @@ impl SchemaFieldsProperties {
                     if field_ident_normalised_as_str == "id" || is_edge_nodes {
                         quote!(#crate_name::sql::Thing)
                     } else {
-                        quote!(#field_type)
+                        quote!(#crate_name::sql::Value)
+                        // quote!(#field_type)
                     };
 
                 store.field_wrapper_type_custom_implementations

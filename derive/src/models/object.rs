@@ -72,7 +72,16 @@ impl ToTokens for ObjectToken {
             table_name: "".to_string(), // table_name_ident,
         };
 
-        let Ok(SchemaFieldsProperties {
+        let schema_props = match SchemaFieldsProperties::from_receiver_data(
+            schema_props_args.clone(),
+            generics,
+            DataType::Object,
+        ) {
+            Ok(props) => props,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+
+        let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -84,16 +93,8 @@ impl ToTokens for ObjectToken {
             schema_struct_fields_names_kv_empty,
             non_null_updater_fields,
             ..
-        }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Object)
-        else {
-            // panic!("Error in parsing struct fields");
-            // return syn::Error::new_spanned(self, "Error in parsing struct fields")
-            //     .to_compile_error();
-            // return tokens.extend(
-            //     syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),
-            // );
-            panic!("Error in parsing struct fields");
-        };
+        } = schema_props;
+
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()
