@@ -187,19 +187,19 @@ impl ToTokens for ObjectToken {
                 pub type #struct_name_ident = #_____schema_def::Schema;
 
 
-                impl #crate_name::Parametric for #struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for #struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Buildable for #struct_name_ident {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for #struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Erroneous for #struct_name_ident {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
@@ -211,28 +211,28 @@ impl ToTokens for ObjectToken {
                     }
                 }
 
-                impl #crate_name::Aliasable for &#struct_name_ident #ty_generics #where_clause {}
+                impl #crate_name::Aliasable for &#struct_name_ident {}
 
-                impl #crate_name::Parametric for &#struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Parametric for &#struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for &#struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Buildable for &#struct_name_ident {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for &#struct_name_ident #ty_generics #where_clause {
+                impl #crate_name::Erroneous for &#struct_name_ident {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
 
-                impl #struct_name_ident #ty_generics #where_clause {
+                impl #struct_name_ident {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
