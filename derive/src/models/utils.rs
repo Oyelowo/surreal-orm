@@ -141,25 +141,25 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
 
             // Recursively visit nested generic arguments
             if let PathArguments::AngleBracketed(args) = &segment.arguments {
-                for arg in &args.args {
-                    match arg {
-                        // Recursively visit the nested type
-                        syn::GenericArgument::Type(ty) => self.visit_type(&ty),
-                        syn::GenericArgument::Lifetime(lt) => {
-                            // Here we handle lifetime arguments
-                            if !self.field_generics.params.iter().any(|param| matches!(param, GenericParam::Lifetime(lifetime_def) if lifetime_def.lifetime == *lt)) {
-                                // Only add the lifetime if it's not already in the list
-                                self.field_generics.params.push(GenericParam::Lifetime(syn::LifetimeParam {
-                                    attrs: Vec::new(),
-                                    lifetime: lt.clone(),
-                                    colon_token: None,
-                                    bounds: syn::punctuated::Punctuated::new(),
-                                }));
-                            }
-                        }
-                        _ => {}
-                    }
-                }
+                // for arg in &args.args {
+                //     match arg {
+                //         // Recursively visit the nested type
+                //         syn::GenericArgument::Type(ty) => self.visit_type(ty),
+                //         syn::GenericArgument::Lifetime(lt) => {
+                //             // Here we handle lifetime arguments
+                //             if !self.field_generics.params.iter().any(|param| matches!(param, GenericParam::Lifetime(lifetime_def) if lifetime_def.lifetime == *lt)) {
+                //                 // Only add the lifetime if it's not already in the list
+                //                 self.field_generics.params.push(GenericParam::Lifetime(syn::LifetimeParam {
+                //                     attrs: Vec::new(),
+                //                     lifetime: lt.clone(),
+                //                     colon_token: None,
+                //                     bounds: syn::punctuated::Punctuated::new(),
+                //                 }));
+                //             }
+                //         }
+                //         _ => {}
+                //     }
+                // }
             }
         }
 
