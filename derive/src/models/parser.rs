@@ -365,11 +365,6 @@ impl SchemaFieldsProperties {
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
 
-            let mut field_extractor = GenericTypeExtractor::new(struct_generics);
-            let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
-                .extract_generics_for_complex_type(field_type)
-                .split_for_impl();
-
             // let numeric_type_setter = if is_generic_type(field_type, struct_generics) {
             //     quote!(#crate_name::sql::Value)
             // } else {
@@ -389,6 +384,23 @@ impl SchemaFieldsProperties {
                 ref field_ident_normalised,
                 ref field_ident_normalised_as_str,
             } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
+
+            let mut field_extractor = GenericTypeExtractor::new(struct_generics);
+            let (field_impl_generics, _field_ty_generics, field_where_clause) = field_extractor
+                .extract_generics_for_complex_type(field_type)
+                .split_for_impl();
+            let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
+                && matches!(data_type, DataType::Edge);
+            let field_impl_generics = if is_edge_nodes {
+                quote!()
+            } else {
+                quote!(#field_impl_generics)
+            };
+            let field_type_for_setter = if field_ident_normalised_as_str == "id" || is_edge_nodes {
+                quote!(#crate_name::sql::Thing)
+            } else {
+                quote!(#field_type)
+            };
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -606,15 +618,6 @@ impl SchemaFieldsProperties {
                 } else {
                     quote!()
                 };
-
-                let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
-                    && matches!(data_type, DataType::Edge);
-                let field_type_for_setter =
-                    if field_ident_normalised_as_str == "id" || is_edge_nodes {
-                        quote!(#crate_name::sql::Thing)
-                    } else {
-                        quote!(#field_type)
-                    };
 
                 store.field_wrapper_type_custom_implementations
                         .push(quote!(
