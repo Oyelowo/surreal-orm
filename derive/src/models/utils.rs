@@ -87,7 +87,7 @@ pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
     }
 }
 
-struct GenericTypeExtractor<'a> {
+pub(crate) struct GenericTypeExtractor<'a> {
     struct_generics: &'a Generics,
     field_generics: Generics,
 }
@@ -105,8 +105,11 @@ impl<'a> GenericTypeExtractor<'a> {
         &self.field_generics
     }
 
-    // fn extract_generics_for_complex_type(ty: &Type, struct_generics: &Generics) -> Generics {
-    //     let mut extractor = GenericTypeExtractor {
+    // pub fn extract_generics_for_complex_type(
+    //     ty: &'a Type,
+    //     struct_generics: &'a Generics,
+    // ) -> Generics {
+    //     let mut extractor = Self {
     //         struct_generics,
     //         field_generics: Generics::default(),
     //     };
@@ -142,14 +145,28 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
             // Recursively visit nested generic arguments
             if let PathArguments::AngleBracketed(args) = &segment.arguments {
                 for arg in &args.args {
-                    if let syn::GenericArgument::Type(ty) = arg {
-                        self.visit_type(ty); // Recursively visit the nested type
+                    match arg {
+                        // Recursively visit the nested type
+                        syn::GenericArgument::Type(ty) => self.visit_type(ty),
+                        syn::GenericArgument::Lifetime(lt) => {
+                            // Here we handle lifetime arguments
+                            if !self.field_generics.params.iter().any(|param| matches!(param, GenericParam::Lifetime(lifetime_def) if lifetime_def.lifetime == *lt)) {
+                                // Only add the lifetime if it's not already in the list
+                                self.field_generics.params.push(GenericParam::Lifetime(syn::LifetimeParam {
+                                    attrs: Vec::new(),
+                                    lifetime: lt.clone(),
+                                    colon_token: None,
+                                    bounds: syn::punctuated::Punctuated::new(),
+                                }));
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }
         }
 
-        // Proceed with the default visitation of this type path
+        // default visitation of this type path
         syn::visit::visit_type_path(self, i);
     }
     // Visit tuple types like (T, U, V)
@@ -190,9 +207,6 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
             self.visit_bare_fn_arg(input);
         }
         self.visit_return_type(&i.output);
-        // if let ReturnType(output) = &i.output {
-        //     self.visit_return_type(output);
-        // }
         syn::visit::visit_type_bare_fn(self, i);
     }
 

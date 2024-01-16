@@ -47,7 +47,8 @@ impl ToTokens for NodeToken {
             ..
         } = &self.0;
 
-        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+        let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
+            generics.split_for_impl();
         let table_name_ident = &format_ident!(
             "{}",
             table_name
@@ -179,7 +180,7 @@ impl ToTokens for NodeToken {
             use #crate_name::{ToRaw as _};
             use #crate_name::Aliasable as _;
 
-            impl #impl_generics #crate_name::SchemaGetter for #struct_name_ident #ty_generics #where_clause {
+            impl #struct_impl_generics #crate_name::SchemaGetter for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type Schema = #module_name_rexported::Schema;
 
                 fn schema() -> #module_name_rexported::Schema {
@@ -191,11 +192,11 @@ impl ToTokens for NodeToken {
                 }
             }
 
-            impl #impl_generics #crate_name::Node for #struct_name_ident #ty_generics #where_clause {
+            impl #struct_impl_generics #crate_name::Node for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type TableNameChecker = #module_name_internal::TableNameStaticChecker;
                 // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name_internal::#aliases_struct_name;
-                type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
+                type NonNullUpdater = #non_null_updater_struct_name #struct_ty_generics;
 
                 fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
@@ -233,7 +234,7 @@ impl ToTokens for NodeToken {
 
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-            pub struct  #non_null_updater_struct_name #impl_generics {
+            pub struct  #non_null_updater_struct_name #struct_impl_generics {
                #(
                     #[serde(skip_serializing_if = "Option::is_none")]
                     #non_null_updater_fields
@@ -248,7 +249,7 @@ impl ToTokens for NodeToken {
                 ) *
             }
 
-            impl #impl_generics #struct_name_ident #ty_generics #where_clause {
+            impl #struct_impl_generics #struct_name_ident #struct_ty_generics #struct_where_clause {
                   // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
 
                 pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
@@ -256,9 +257,9 @@ impl ToTokens for NodeToken {
                 }
             }
 
-            impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause {
+            impl #struct_impl_generics #crate_name::Model for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type Id = #table_id_type;
-                type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
+                type NonNullUpdater = #non_null_updater_struct_name #struct_ty_generics;
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
                 fn table_name() -> #crate_name::Table {
@@ -482,7 +483,7 @@ impl ToTokens for NodeToken {
 
             // #[test] // Comment out to make compiler tests fail in doctests. 25th August, 2023.
             #[allow(non_snake_case)]
-            fn #test_function_name #impl_generics() {
+            fn #test_function_name #struct_impl_generics() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions
 
