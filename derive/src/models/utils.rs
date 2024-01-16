@@ -5,16 +5,13 @@
  * Licensed under the MIT license
  */
 
-use convert_case::{Case, Casing};
-use proc_macro::TokenStream;
 pub use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
-use quote::{format_ident, quote};
+use quote::quote;
+use syn::{parse2, GenericArgument, Ident, Path, PathSegment, TypeGenerics, TypeMacro};
 use syn::{
-    visit::Visit, DeriveInput, GenericParam, Generics, PathArguments, Type, TypeArray, TypeBareFn,
-    TypeGroup, TypeImplTrait, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple,
-    WherePredicate,
+    visit::Visit, GenericParam, Generics, PathArguments, Type, TypeArray, TypeBareFn, TypeGroup,
+    TypeImplTrait, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple, WherePredicate,
 };
-use syn::{ReturnType, TypeMacro};
 
 pub fn generate_nested_vec_type(
     foreign_node: &syn::Ident,
@@ -147,7 +144,7 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
                 for arg in &args.args {
                     match arg {
                         // Recursively visit the nested type
-                        syn::GenericArgument::Type(ty) => self.visit_type(ty),
+                        syn::GenericArgument::Type(ty) => self.visit_type(&ty),
                         syn::GenericArgument::Lifetime(lt) => {
                             // Here we handle lifetime arguments
                             if !self.field_generics.params.iter().any(|param| matches!(param, GenericParam::Lifetime(lifetime_def) if lifetime_def.lifetime == *lt)) {
@@ -229,4 +226,63 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
         // Macro types require special handling based on the macro expansion
         syn::visit::visit_type_macro(self, i);
     }
+}
+
+fn construct_replacement_segment(
+    struct_name: &syn::Ident,
+    ty_generics: &syn::TypeGenerics,
+) -> PathSegment {
+    // Generate the replacement tokens
+    let replacement_tokens: proc_macro2::TokenStream = quote!(#struct_name #ty_generics);
+
+    // Parse the tokens into a PathSegment
+    let replacement_segment: PathSegment =
+        parse2(replacement_tokens).expect("Failed to parse replacement segment");
+
+    replacement_segment
+}
+
+// Function to recursively replace `Self` in the type
+// pub fn replace_self_in_id(ty: &mut Type, replacement: &TypePath) {
+pub fn replace_self_in_id(ty: &Type, struct_name: &Ident, ty_generics: &TypeGenerics) -> Type {
+    let mut ty = ty.clone();
+
+    // Create the replacement type
+    let replacement_path: Path =
+        parse2(quote!(#struct_name #ty_generics)).expect("Failed to parse replacement type");
+
+    // Nested function to recursively replace 'Self'
+    fn replace_segment(segment: &mut PathSegment, replacement_path: &Path) {
+        if segment.ident == "Self" {
+            if let Some(first_segment) = replacement_path.segments.first() {
+                *segment = first_segment.clone();
+            }
+        } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
+            for arg in &mut angle_args.args {
+                if let GenericArgument::Type(t) = arg {
+                    *t = replace_self_in_type(t, replacement_path);
+                }
+            }
+        }
+    }
+
+    // Nested helper function to replace 'Self' within a nested type
+    fn replace_self_in_type(ty: &Type, replacement_path: &Path) -> Type {
+        let mut new_ty = ty.clone();
+        if let Type::Path(type_path) = &mut new_ty {
+            for segment in &mut type_path.path.segments {
+                replace_segment(segment, replacement_path);
+            }
+        }
+        new_ty
+    }
+
+    // Recursively replace 'Self' in the type
+    if let Type::Path(type_path) = &mut ty {
+        for segment in &mut type_path.path.segments {
+            replace_segment(segment, &replacement_path);
+        }
+    }
+
+    ty
 }

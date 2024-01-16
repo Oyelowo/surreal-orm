@@ -21,8 +21,9 @@ use super::{
     casing::CaseString,
     count_vec_nesting,
     errors::ExtractorResult,
-    generate_nested_vec_type, get_crate_name, is_generic_type,
+    generate_nested_vec_type, get_crate_name,
     relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
+    replace_self_in_id,
     variables::VariablesModelMacro,
     GenericTypeExtractor,
 };
@@ -376,7 +377,9 @@ impl SchemaFieldsProperties {
                 .as_ref()
                 .expect("field identifier does not exist");
             let old_field_name = match field_receiver.old_name.as_ref() {
-                Some(old_name) if !old_name.is_empty() => quote!(Some(#old_name.into())),
+                Some(old_name) if !old_name.is_empty() => {
+                    quote!(::std::option::Some(#old_name.into()))
+                }
                 _ => quote!(::std::option::Option::None),
             };
             let relationship = RelationType::from(field_receiver);
@@ -385,22 +388,32 @@ impl SchemaFieldsProperties {
                 ref field_ident_normalised_as_str,
             } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
 
+            let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
             let mut field_extractor = GenericTypeExtractor::new(struct_generics);
+            let field_type_for_setter =
+                replace_self_in_id(&field_type, struct_name_ident, &struct_ty_generics);
             let (field_impl_generics, _field_ty_generics, field_where_clause) = field_extractor
-                .extract_generics_for_complex_type(field_type)
+                .extract_generics_for_complex_type(&field_type_for_setter)
                 .split_for_impl();
-            let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
-                && matches!(data_type, DataType::Edge);
-            let field_impl_generics = if is_edge_nodes {
-                quote!()
-            } else {
-                quote!(#field_impl_generics)
-            };
-            let field_type_for_setter = if field_ident_normalised_as_str == "id" || is_edge_nodes {
-                quote!(#crate_name::sql::Thing)
-            } else {
-                quote!(#field_type)
-            };
+            // let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
+            //     && matches!(data_type, DataType::Edge);
+            // let is_id = field_ident_normalised_as_str == "id";
+            // let field_impl_generics = if is_id {
+            //     quote!()
+            // } else {
+            //     quote!(#field_impl_generics)
+            // };
+            // let field_type_for_setter = if is_id {
+            //     quote!(#crate_name::sql::Thing)
+            // } else {
+            //     quote!(#field_type)
+            // };
+
+            // let field_type_for_setter = if field_ident_normalised_as_str == "id" || is_edge_nodes {
+            //     quote!(#crate_name::sql::Thing)
+            // } else {
+            //     quote!(#field_type)
+            // };
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
