@@ -5,9 +5,16 @@
  * Licensed under the MIT license
  */
 
+use convert_case::{Case, Casing};
+use proc_macro::TokenStream;
 pub use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
-use quote::quote;
-use syn::{Generics, Type, TypePath};
+use quote::{format_ident, quote};
+use syn::{
+    visit::Visit, DeriveInput, GenericParam, Generics, PathArguments, Type, TypeArray, TypeBareFn,
+    TypeGroup, TypeImplTrait, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple,
+    WherePredicate,
+};
+use syn::{ReturnType, TypeMacro};
 
 pub fn generate_nested_vec_type(
     foreign_node: &syn::Ident,
@@ -51,19 +58,6 @@ pub fn count_vec_nesting(field_type: &syn::Type) -> usize {
     }
 }
 
-// pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
-//     match ty {
-//         Type::Path(TypePath { path, .. }) => {
-//             // Check if the type matches any of the generic type parameters
-//             generics.params.iter().any(|param| match param {
-//                 syn::GenericParam::Type(type_param) => path.is_ident(&type_param.ident),
-//                 _ => false,
-//             })
-//         }
-//         _ => false,
-//     }
-// }
-
 pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
     match ty {
         Type::Path(TypePath { path, .. }) => {
@@ -93,32 +87,132 @@ pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
     }
 }
 
-use syn::{visit::Visit, GenericParam};
-
-struct GenericTypeChecker<'a> {
-    generics: &'a Generics,
-    found: bool,
+struct GenericTypeExtractor<'a> {
+    struct_generics: &'a Generics,
+    field_generics: Generics,
 }
 
-impl<'a> Visit<'a> for GenericTypeChecker<'a> {
-    fn visit_type_path(&mut self, i: &'a TypePath) {
-        if self.generics.params.iter().any(|param| {
-            matches!(param, GenericParam::Type(type_param) if i.path.is_ident(&type_param.ident))
-        }) {
-            self.found = true;
+impl<'a> GenericTypeExtractor<'a> {
+    pub fn new(struct_generics: &'a Generics) -> Self {
+        Self {
+            struct_generics,
+            field_generics: Generics::default(),
         }
-        // Continue walking down the tree
-        syn::visit::visit_type_path(self, i);
     }
 
-    // Implement other visit_* methods as needed to handle different type constructs
+    pub fn extract_generics_for_complex_type(&mut self, field_ty: &'a Type) -> &Generics {
+        self.visit_type(field_ty);
+        &self.field_generics
+    }
+
+    // fn extract_generics_for_complex_type(ty: &Type, struct_generics: &Generics) -> Generics {
+    //     let mut extractor = GenericTypeExtractor {
+    //         struct_generics,
+    //         field_generics: Generics::default(),
+    //     };
+    //     extractor.visit_type(ty);
+    //     extractor.field_generics
+    // }
 }
 
-fn is_generic_type2(ty: &Type, generics: &Generics) -> bool {
-    let mut checker = GenericTypeChecker {
-        generics,
-        found: false,
-    };
-    checker.visit_type(ty);
-    checker.found
+impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
+    // Visit types and extract generics
+    fn visit_type_path(&mut self, i: &'a TypePath) {
+        for segment in &i.path.segments {
+            // Check if segment matches a generic parameter of the struct
+            if let Some(gen_param) = self.struct_generics.params.iter().find(|param| {
+                matches!(param, GenericParam::Type(type_param) if segment.ident == type_param.ident)
+            }) {
+                self.field_generics.params.push(gen_param.clone());
+
+                // Handle constraints on the generic parameter
+                if let Some(where_clause) = &self.struct_generics.where_clause {
+                    for predicate in &where_clause.predicates {
+                        if let WherePredicate::Type(predicate_type) = predicate {
+                            if let syn::Type::Path(type_path) = &predicate_type.bounded_ty {
+                                if type_path.path.is_ident(&segment.ident) {
+                                    self.field_generics.make_where_clause().predicates.push(predicate.clone());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Recursively visit nested generic arguments
+            if let PathArguments::AngleBracketed(args) = &segment.arguments {
+                for arg in &args.args {
+                    if let syn::GenericArgument::Type(ty) = arg {
+                        self.visit_type(ty); // Recursively visit the nested type
+                    }
+                }
+            }
+        }
+
+        // Proceed with the default visitation of this type path
+        syn::visit::visit_type_path(self, i);
+    }
+    // Visit tuple types like (T, U, V)
+    fn visit_type_tuple(&mut self, i: &'a TypeTuple) {
+        for elem in &i.elems {
+            self.visit_type(elem);
+        }
+        syn::visit::visit_type_tuple(self, i);
+    }
+
+    // Visit array types like [T; N]
+    fn visit_type_array(&mut self, i: &'a TypeArray) {
+        self.visit_type(&i.elem);
+        syn::visit::visit_type_array(self, i);
+    }
+
+    // Visit slice types like [T]
+    fn visit_type_slice(&mut self, i: &'a TypeSlice) {
+        self.visit_type(&i.elem);
+        syn::visit::visit_type_slice(self, i);
+    }
+
+    // Visit raw pointer types like *const T and *mut T
+    fn visit_type_ptr(&mut self, i: &'a TypePtr) {
+        self.visit_type(&i.elem);
+        syn::visit::visit_type_ptr(self, i);
+    }
+
+    // Visit reference types like &T and &mut T
+    fn visit_type_reference(&mut self, i: &'a TypeReference) {
+        self.visit_type(&i.elem);
+        syn::visit::visit_type_reference(self, i);
+    }
+
+    // Visit bare function types like fn(T) -> U
+    fn visit_type_bare_fn(&mut self, i: &'a TypeBareFn) {
+        for input in &i.inputs {
+            self.visit_bare_fn_arg(input);
+        }
+        self.visit_return_type(&i.output);
+        // if let ReturnType(output) = &i.output {
+        //     self.visit_return_type(output);
+        // }
+        syn::visit::visit_type_bare_fn(self, i);
+    }
+
+    // Visit impl Trait types used in return position or as standalone types
+    fn visit_type_impl_trait(&mut self, i: &'a TypeImplTrait) {
+        for bound in &i.bounds {
+            self.visit_type_param_bound(bound);
+        }
+        syn::visit::visit_type_impl_trait(self, i);
+    }
+
+    // Visit grouped types, which are used to control the order of evaluation in complex type expressions
+    fn visit_type_group(&mut self, i: &'a TypeGroup) {
+        self.visit_type(&i.elem);
+        syn::visit::visit_type_group(self, i);
+    }
+
+    // Visit macro types. Handling macro types can be complex as their structure depends on the macro's expansion
+    fn visit_type_macro(&mut self, i: &'a TypeMacro) {
+        // Macro types require special handling based on the macro expansion
+        syn::visit::visit_type_macro(self, i);
+    }
 }
