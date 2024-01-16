@@ -378,7 +378,7 @@ impl SchemaFieldsProperties {
                 .expect("field identifier does not exist");
             let old_field_name = match field_receiver.old_name.as_ref() {
                 Some(old_name) if !old_name.is_empty() => {
-                    quote!(::std::option::Some(#old_name.into()))
+                    quote!(::std::option::Option::Some(#old_name.into()))
                 }
                 _ => quote!(::std::option::Option::None),
             };
