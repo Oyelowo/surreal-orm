@@ -144,7 +144,7 @@ struct StudentFnAttrs {
     id: SurrealId<StudentFnAttrs, String>,
 }
 
-#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table_name = "student_with_granular_attributes",
@@ -376,6 +376,11 @@ fn define_age(field: impl Into<Field>) -> DefineFieldStatement {
     define = "define_student_with_define_attr()"
 )]
 pub struct StudentWithDefineAttr {
+    // When using Typedbuilder, you cannot use Self like other
+    // places as TypedBuilder does not support that, in that
+    // case, just use the struct name explicitly.
+    // So, 'SurrealId<StudentWithDefineAttr, String>,' instead of
+    // SurrealId<Self, String>,
     id: SurrealId<StudentWithDefineAttr, String>,
     #[surreal_orm(
         type_ = "string",
@@ -441,7 +446,7 @@ pub struct StudentWithDefineAttr {
 pub type StudentWithDefineAttrWritesBook = Writes<StudentWithDefineAttr, Book>;
 pub type StudentWithDefineAttrWritesBlog = Writes<StudentWithDefineAttr, Blog>;
 
-#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table_name = "student_with_define_fn_attr",
@@ -516,7 +521,7 @@ pub struct StudentWithDefineFnAttr {
 pub type StudentWithDefineFnAttrWritesBook = Writes<StudentWithDefineFnAttr, Book>;
 pub type StudentWithDefineFnAttrWritesBlog = Writes<StudentWithDefineFnAttr, Blog>;
 
-#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "student")]
 pub struct Student {
@@ -580,7 +585,7 @@ impl Default for Student {
     }
 }
 
-#[derive(surreal_orm::Edge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(surreal_orm::Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "writes")]
 pub struct Writes<In: Node, Out: Node> {
@@ -597,7 +602,7 @@ pub struct Writes<In: Node, Out: Node> {
 pub type StudentWritesBook = Writes<Student, Book>;
 pub type StudentWritesBlog = Writes<Student, Blog>;
 
-#[derive(Edge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "likes")]
 pub struct Likes<In: Node, Out: Node> {
