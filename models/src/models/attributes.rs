@@ -155,7 +155,7 @@ struct StudentFnAttrs {
     permissions = "student_permissions()"
 )]
 pub struct StudentWithGranularAttributes {
-    id: SurrealId<StudentWithGranularAttributes, String>,
+    id: SurrealId<Self, String>,
     first_name: String,
     last_name: String,
     #[surreal_orm(
@@ -448,7 +448,8 @@ pub type StudentWithDefineAttrWritesBlog = Writes<StudentWithDefineAttr, Blog>;
     define_fn = "define_student_with_define_attr"
 )]
 pub struct StudentWithDefineFnAttr {
-    id: SurrealId<StudentWithDefineFnAttr, String>,
+    id: SurrealId<Self, String>,
+    // id: SurrealId<StudentWithDefineFnAttr, String>,
     // can be as simple as this
     #[surreal_orm(type_ = "string", define = "define_last_name()")]
     last_name: String,
@@ -519,7 +520,8 @@ pub type StudentWithDefineFnAttrWritesBlog = Writes<StudentWithDefineFnAttr, Blo
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "student")]
 pub struct Student {
-    id: SurrealId<Student, String>,
+    id: SurrealId<Self, String>,
+    // id: SurrealId<Student, String>,
     first_name: String,
     last_name: String,
     #[surreal_orm(
@@ -582,8 +584,8 @@ impl Default for Student {
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "writes")]
 pub struct Writes<In: Node, Out: Node> {
-    pub id: SurrealSimpleId<Writes<In, Out>>,
-
+    pub id: SurrealSimpleId<Self>,
+    // pub id: SurrealSimpleId<Writes<In, Out>>,
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
@@ -599,8 +601,8 @@ pub type StudentWritesBlog = Writes<Student, Blog>;
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "likes")]
 pub struct Likes<In: Node, Out: Node> {
-    pub id: SurrealSimpleId<Likes<In, Out>>,
-
+    pub id: SurrealSimpleId<Self>,
+    // pub id: SurrealSimpleId<Likes<In, Out>>,
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
