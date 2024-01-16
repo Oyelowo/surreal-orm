@@ -24,6 +24,7 @@ use super::{
     generate_nested_vec_type, get_crate_name, is_generic_type,
     relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
     variables::VariablesModelMacro,
+    GenericTypeExtractor,
 };
 
 #[allow(dead_code)]
@@ -343,7 +344,7 @@ impl SchemaFieldsProperties {
     /// Derive the schema properties for a struct
     pub(crate) fn from_receiver_data(
         args: SchemaPropertiesArgs,
-        generics: &syn::Generics,
+        struct_generics: &syn::Generics,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
         let SchemaPropertiesArgs {
@@ -363,11 +364,18 @@ impl SchemaFieldsProperties {
         {
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
-            let numeric_type_setter = if is_generic_type(field_type, generics) {
-                quote!(#crate_name::sql::Value)
-            } else {
-                quote!(#field_type)
-            };
+
+            let mut field_extractor = GenericTypeExtractor::new(struct_generics);
+            let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
+                .extract_generics_for_complex_type(field_type)
+                .split_for_impl();
+
+            // let numeric_type_setter = if is_generic_type(field_type, struct_generics) {
+            //     quote!(#crate_name::sql::Value)
+            // } else {
+            //     quote!(#field_type)
+            // };
+            //     numeric_type_setter = ffi_type;
             let field_name_original = field_receiver
                 .ident
                 .as_ref()
@@ -450,7 +458,8 @@ impl SchemaFieldsProperties {
 
                 let numeric_trait = if field_receiver.is_numeric() {
                     quote!(
-                        impl #crate_name::SetterNumeric<#numeric_type_setter> for self::#field_name_as_camel  {}
+                        impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel
+                        #field_where_clause {}
 
                         impl ::std::convert::From<self::#field_name_as_camel> for #crate_name::NumberLike {
                             fn from(val: self::#field_name_as_camel) -> Self {
@@ -604,8 +613,7 @@ impl SchemaFieldsProperties {
                     if field_ident_normalised_as_str == "id" || is_edge_nodes {
                         quote!(#crate_name::sql::Thing)
                     } else {
-                        quote!(#crate_name::sql::Value)
-                        // quote!(#field_type)
+                        quote!(#field_type)
                     };
 
                 store.field_wrapper_type_custom_implementations
@@ -677,9 +685,9 @@ impl SchemaFieldsProperties {
                                 }
                             }
 
-                            impl #crate_name::SetterAssignable<#field_type_for_setter> for self::#field_name_as_camel  {}
+                            impl #field_impl_generics #crate_name::SetterAssignable<#field_type_for_setter> for self::#field_name_as_camel  #field_where_clause {}
 
-                            impl #crate_name::Patchable<#field_type_for_setter> for self::#field_name_as_camel  {}
+                            impl #field_impl_generics #crate_name::Patchable<#field_type_for_setter> for self::#field_name_as_camel  #field_where_clause {}
 
                             #numeric_trait
 
