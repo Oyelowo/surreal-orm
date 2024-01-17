@@ -27,7 +27,7 @@ use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use surreal_query_builder::FieldType;
-use syn::{Ident, Lit, LitStr, Path};
+use syn::{Ident, Lit, LitStr, Path, Type};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -117,7 +117,7 @@ pub struct MyFieldReceiver {
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
-    pub(crate) old_name: Option<String>,
+    pub(crate) old_name: Option<Ident>,
 
     #[darling(default)]
     pub(crate) rename: Option<Rename>,
@@ -128,21 +128,21 @@ pub struct MyFieldReceiver {
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) link_one: Option<String>,
+    pub(crate) link_one: Option<Type>,
 
     // reference singular: LinkSelf<Account>
     #[darling(default)]
-    pub(crate) link_self: Option<String>,
+    pub(crate) link_self: Option<Type>,
 
     // reference plural: LinkMany<Account>
     #[darling(default)]
-    pub(crate) link_many: Option<String>,
+    pub(crate) link_many: Option<Type>,
 
     #[darling(default)]
-    pub(crate) nest_array: Option<String>,
+    pub(crate) nest_array: Option<Type>,
 
     #[darling(default)]
-    pub(crate) nest_object: Option<String>,
+    pub(crate) nest_object: Option<Type>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,
@@ -1413,7 +1413,7 @@ pub struct TableDeriveAttributes {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 
     #[darling(default)]
-    pub(crate) table_name: ::std::option::Option<String>,
+    pub(crate) table_name: ::std::option::Option<Ident>,
 
     #[darling(default)]
     pub(crate) relax_table_name: ::std::option::Option<bool>,
