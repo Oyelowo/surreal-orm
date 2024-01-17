@@ -8,6 +8,8 @@
 use quote::{format_ident, quote};
 use syn::{self, Type};
 
+use crate::models::replace_lifetimes_with_underscore;
+
 use super::{attributes::FieldTypeDerived, get_crate_name, parser::DataType, TypeStripper};
 
 #[derive(Debug, Default)]
@@ -26,7 +28,7 @@ pub struct FieldRustType<'a> {
 
 impl<'a> FieldRustType<'a> {
     pub fn new(ty: Type, attributes: Attributes<'a>) -> Self {
-        let ty = TypeStripper::strip_references_and_lifetimes(&ty);
+        // let ty = TypeStripper::strip_references_and_lifetimes(&ty);
         Self { ty, attributes }
     }
 
@@ -336,26 +338,27 @@ impl<'a> FieldRustType<'a> {
         println!("infer_surreal_type_heuristically");
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
+        let delifed_type_for_static_assert = replace_lifetimes_with_underscore(&mut ty.clone());
 
         if self.raw_type_is_bool() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Bool),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<::std::primitive::bool>);),
             }
         } else if self.raw_type_is_float() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Float),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_integer() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Int),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_string() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::String),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
         } else if self.raw_type_is_optional() {
             let get_option_item_type = self.get_option_item_type();
@@ -379,7 +382,7 @@ impl<'a> FieldRustType<'a> {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
                 static_assertion: quote!(
-                    #crate_name::validators::assert_option::<#ty>();
+                    #crate_name::validators::assert_option::<#delifed_type_for_static_assert>();
                     #item_static_assertion
                 ),
             }
@@ -408,35 +411,35 @@ impl<'a> FieldRustType<'a> {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
                 static_assertion: quote!(
-                            #crate_name::validators::assert_is_vec::<#ty>();
+                            #crate_name::validators::assert_is_vec::<#delifed_type_for_static_assert>();
                             #inner_static_assertion
                 ),
             }
         } else if self.raw_type_is_hash_set() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
-                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
+                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#delifed_type_for_static_assert>();),
             }
         } else if self.raw_type_is_object() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Object),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Object>);),
             }
         } else if self.raw_type_is_duration() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Duration),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Duration>);),
             }
         } else if self.raw_type_is_datetime() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Datetime),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Datetime>);),
             }
         } else if self.raw_type_is_geometry() {
             FieldTypeDerived {
                 // TODO: check if to auto-infer more speicific geometry type?
                 field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else {
             let Attributes {

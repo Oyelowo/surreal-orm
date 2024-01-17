@@ -101,23 +101,25 @@ pub struct Visits<'a, In: Node, Out>
 where
     Out: Node,
 {
-    // pub id: SurrealSimpleId<Self>,
     pub id: SurrealSimpleId<Self>,
+    // pub id: SurrealSimpleId<Self>,
     // #[serde(rename = "in")]
-    pub in_: In,
-    pub out: Out,
+    pub in_: LinkOne<In>,
+    pub out: LinkOne<Out>,
+    pub name: &'a str,
+    pub hair_color: Option<&'a str>,
     pub time_visited: Duration,
     // pub age: &'a u8,
     // pub zdf: &'static u8,
     // pub zdf: &'static str,
-    pub name: &'a String,
-    pub name2: &'a str,
-    pub created: DateTime<Utc>,
-    pub life_expectancy: Duration,
-    pub line_polygon: geo::LineString,
-    pub territory_area: geo::Polygon,
-    pub home: geo::Point,
-    pub tags: Vec<String>,
+    // pub name: &'a String,
+    // pub name2: &'a str,
+    // pub created: DateTime<Utc>,
+    // pub life_expectancy: Duration,
+    // pub line_polygon: geo::LineString,
+    // pub territory_area: geo::Polygon,
+    // pub home: geo::Point,
+    // pub tags: Vec<String>,
     // #[surreal_orm(link_one = "Weapon")]
     // pub weapon: LinkOne<Weapon>,
     // Again, we dont have to provide the type attribute, it can auto detect
@@ -129,6 +131,7 @@ where
     // pub planets_to_visit: Relate<Planet<u64>>,
 }
 
+//
 //
 //
 //
