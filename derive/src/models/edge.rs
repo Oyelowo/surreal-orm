@@ -114,7 +114,15 @@ impl ToTokens for EdgeToken {
             table_name: table_name_str.to_string(), // table_name_ident,
         };
 
-        let Ok(SchemaFieldsProperties {
+        let schema_props = match SchemaFieldsProperties::from_receiver_data(
+            schema_props_args,
+            generics,
+            DataType::Edge,
+        ) {
+            Ok(schema_props) => schema_props,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+        let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -137,13 +145,7 @@ impl ToTokens for EdgeToken {
             table_id_type,
             field_metadata,
             ..
-        }) =
-            SchemaFieldsProperties::from_receiver_data(schema_props_args, generics, DataType::Edge)
-        else {
-            return tokens.extend(
-                syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),
-            );
-        };
+        } = schema_props;
         // if serialized_field_names_normalised.conta("")
         if !serialized_field_names_normalised.contains(&"in".into())
             || !serialized_field_names_normalised.contains(&"out".into())
