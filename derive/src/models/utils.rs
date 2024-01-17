@@ -6,8 +6,12 @@
  */
 
 pub use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
-use quote::quote;
-use syn::{parse2, GenericArgument, Ident, Path, PathSegment, TypeGenerics, TypeMacro};
+use quote::{quote, ToTokens};
+use syn::visit_mut::VisitMut;
+use syn::{
+    parse2, parse_quote, parse_str, GenericArgument, Ident, Lifetime, LifetimeParam, Path,
+    PathSegment, TypeGenerics, TypeMacro,
+};
 use syn::{
     visit::Visit, GenericParam, Generics, PathArguments, Type, TypeArray, TypeBareFn, TypeGroup,
     TypeImplTrait, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple, WherePredicate,
@@ -113,6 +117,25 @@ impl<'a> GenericTypeExtractor<'a> {
     //     extractor.visit_type(ty);
     //     extractor.field_generics
     // }
+
+    fn add_lifetime_if_not_exists(&mut self, lt: &Lifetime) {
+        let lifetime_exists = self
+            .field_generics
+            .params
+            .iter()
+            .any(|param| matches!(param, GenericParam::Lifetime(lifetime_def) if lifetime_def.lifetime == *lt));
+
+        if !lifetime_exists {
+            self.field_generics
+                .params
+                .push(GenericParam::Lifetime(LifetimeParam {
+                    attrs: Vec::new(),
+                    lifetime: lt.clone(),
+                    colon_token: None,
+                    bounds: syn::punctuated::Punctuated::new(),
+                }));
+        }
+    }
 }
 
 impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
@@ -138,7 +161,13 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
                     }
                 }
             }
-
+            if let PathArguments::AngleBracketed(args) = &segment.arguments {
+                for arg in &args.args {
+                    if let syn::GenericArgument::Lifetime(lt) = arg {
+                        self.add_lifetime_if_not_exists(lt);
+                    }
+                }
+            }
             // Recursively visit nested generic arguments
             if let PathArguments::AngleBracketed(args) = &segment.arguments {
                 // for arg in &args.args {
@@ -194,7 +223,11 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
 
     // Visit reference types like &T and &mut T
     fn visit_type_reference(&mut self, i: &'a TypeReference) {
-        self.visit_type(&i.elem);
+        // self.visit_type(&i.elem);
+        // syn::visit::visit_type_reference(self, i);
+        if let Some(lifetime) = &i.lifetime {
+            self.add_lifetime_if_not_exists(lifetime);
+        }
         syn::visit::visit_type_reference(self, i);
     }
 
@@ -242,47 +275,135 @@ fn construct_replacement_segment(
     replacement_segment
 }
 
+// use quote::quote;
+// use syn::parse_str;
+
+pub fn replace_self_in_type_str(
+    ty: &Type,
+    // struct_name: &str,
+    // ty_generics_str: &str,
+    struct_name: &syn::Ident,
+    ty_generics: &syn::TypeGenerics,
+) -> Result<Type, syn::Error> {
+    // Convert the type to a string
+    let ty_str = quote!(#ty).to_string();
+
+    // Construct the replacement string
+    let replacement = format!("{}{}", struct_name, ty_generics.into_token_stream());
+
+    // Replace "Self" with the desired type
+    let modified_ty_str = ty_str.replace("Self", &replacement);
+    println!("rara---ty_str: {}", ty_str);
+    println!("rara---replacement: {}", replacement);
+    println!("rara---modified_ty_str: {}", modified_ty_str);
+
+    // Parse the string back into a Type
+    let parsed = parse_str::<Type>(&modified_ty_str).map_err(|e| syn::Error::new_spanned(ty, e));
+    println!(
+        "rara---parsed: {}",
+        parsed.clone().unwrap().into_token_stream()
+    );
+    parsed
+}
+
+// Example usage
+// let ty: Type = /* ... */; // Your Type here
+// let struct_name = "MyStruct";
+// let ty_generics_str = "<T, U>"; // Generics as a string
+
+// match replace_self_in_type_str(&ty, struct_name, ty_generics_str) {
+//     Ok(replaced_type) => {
+//         // Use the replaced type
+//     }
+//     Err(e) => {
+//         // Handle the error
+//     }
+// }
 // Function to recursively replace `Self` in the type
-// pub fn replace_self_in_id(ty: &mut Type, replacement: &TypePath) {
-pub fn replace_self_in_id(ty: &Type, struct_name: &Ident, ty_generics: &TypeGenerics) -> Type {
+// pub fn replace_self_in_id(
+//     ty: &Type,
+//     struct_name: &syn::Ident,
+//     ty_generics: &syn::TypeGenerics,
+// ) -> Type {
+//     // Create the replacement type
+//     let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
+//
+//     // Helper function to replace 'Self' in a path segment
+//     fn replace_segment(segment: &mut PathSegment, replacement_path: &Path) {
+//         if segment.ident == "Self" {
+//             if let Some(first_segment) = replacement_path.segments.first() {
+//                 *segment = first_segment.clone();
+//             }
+//         } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
+//             for arg in angle_args.args.iter_mut() {
+//                 println!("rara1---arg: {}", arg.to_token_stream().to_string());
+//                 if let GenericArgument::Type(t) = arg {
+//                     *t = replace_type(t, replacement_path);
+//                 }
+//             }
+//         }
+//     }
+//
+//     // Function to handle replacement within types
+//     fn replace_type(ty: &Type, replacement_path: &Path) -> Type {
+//         match ty {
+//             Type::Path(type_path) => {
+//                 let mut new_type_path = type_path.clone();
+//                 for segment in &mut new_type_path.path.segments {
+//                     replace_segment(segment, replacement_path);
+//                 }
+//                 Type::Path(new_type_path)
+//             }
+//             Type::Reference(type_reference) => {
+//                 let elem = Box::new(replace_type(&type_reference.elem, replacement_path));
+//                 Type::Reference(TypeReference {
+//                     and_token: type_reference.and_token,
+//                     lifetime: type_reference.lifetime.clone(),
+//                     mutability: type_reference.mutability,
+//                     elem,
+//                 })
+//             }
+//             // Extend to handle other types like Tuple, Array, etc.
+//             _ => ty.clone(),
+//         }
+//     }
+//
+//     replace_type(ty, &replacement_path)
+// }
+
+pub struct TypeStripper;
+
+impl TypeStripper {
+    pub fn strip_references_and_lifetimes(ty: &Type) -> Type {
+        let mut stripped_type = ty.clone();
+        TypeStripper.visit_type_mut(&mut stripped_type);
+        stripped_type
+    }
+}
+
+impl VisitMut for TypeStripper {
+    fn visit_type_mut(&mut self, i: &mut Type) {
+        if let Type::Reference(TypeReference { elem, .. }) = i {
+            // Replace the type with the type it refers to
+            *i = *elem.clone();
+        }
+
+        // Continue traversing the type
+        syn::visit_mut::visit_type_mut(self, i);
+    }
+}
+
+pub fn replace_lifetimes_with_underscore(ty: &Type) -> Type {
     let mut ty = ty.clone();
+    struct ReplaceLifetimesVisitor;
 
-    // Create the replacement type
-    let replacement_path: Path =
-        parse2(quote!(#struct_name #ty_generics)).expect("Failed to parse replacement type");
-
-    // Nested function to recursively replace 'Self'
-    fn replace_segment(segment: &mut PathSegment, replacement_path: &Path) {
-        if segment.ident == "Self" {
-            if let Some(first_segment) = replacement_path.segments.first() {
-                *segment = first_segment.clone();
-            }
-        } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
-            for arg in &mut angle_args.args {
-                if let GenericArgument::Type(t) = arg {
-                    *t = replace_self_in_type(t, replacement_path);
-                }
-            }
+    impl VisitMut for ReplaceLifetimesVisitor {
+        fn visit_lifetime_mut(&mut self, i: &mut Lifetime) {
+            *i = Lifetime::new("'_", i.apostrophe);
         }
     }
 
-    // Nested helper function to replace 'Self' within a nested type
-    fn replace_self_in_type(ty: &Type, replacement_path: &Path) -> Type {
-        let mut new_ty = ty.clone();
-        if let Type::Path(type_path) = &mut new_ty {
-            for segment in &mut type_path.path.segments {
-                replace_segment(segment, replacement_path);
-            }
-        }
-        new_ty
-    }
-
-    // Recursively replace 'Self' in the type
-    if let Type::Path(type_path) = &mut ty {
-        for segment in &mut type_path.path.segments {
-            replace_segment(segment, &replacement_path);
-        }
-    }
-
+    let mut visitor = ReplaceLifetimesVisitor;
+    visitor.visit_type_mut(&mut ty);
     ty
 }

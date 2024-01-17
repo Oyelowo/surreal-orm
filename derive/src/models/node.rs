@@ -234,7 +234,7 @@ impl ToTokens for NodeToken {
 
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-            pub struct  #non_null_updater_struct_name #struct_impl_generics {
+            pub struct  #non_null_updater_struct_name #struct_impl_generics #struct_where_clause {
                #(
                     #[serde(skip_serializing_if = "Option::is_none")]
                     #non_null_updater_fields

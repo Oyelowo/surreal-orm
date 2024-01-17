@@ -12,6 +12,8 @@ use std::{
     ops::Deref,
 };
 
+use crate::models::replace_lifetimes_with_underscore;
+
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     errors::ExtractorResult,
@@ -196,6 +198,7 @@ pub struct MyFieldReceiver {
     default: ::darling::util::Ignored,
 }
 
+#[derive(Debug, Clone)]
 pub struct FieldTypeDerived {
     pub(crate) field_type: TokenStream,
     pub(crate) static_assertion: TokenStream,
@@ -218,11 +221,19 @@ impl MyFieldReceiver {
         model_type: &DataType,
         table: &String,
     ) -> ExtractorResult<Option<FieldTypeDerived>> {
+        println!(
+            "get_type1 fieldname {}; model_type {:?}; table {}",
+            field_name_normalized, model_type, table
+        );
         let mut static_assertions = vec![];
         let crate_name = get_crate_name(false);
 
         if let Some(type_) = &self.type_ {
             let field_type = type_.deref();
+            println!(
+                "get_type2 fieldname {}; field_type {:?};",
+                field_name_normalized, field_type
+            );
             // id: record<student>
             // in: record
             // out: record
@@ -347,8 +358,6 @@ impl MyFieldReceiver {
             };
 
             // Gather assertions for all field types
-            let raw_type = &self.ty;
-
             if let DataType::Edge = model_type {
                 match field_name_normalized.as_str() {
                     "id" => {
@@ -382,18 +391,20 @@ impl MyFieldReceiver {
                 }
             }
 
+            let raw_type = &self.ty;
+            let delifed_raw_type = replace_lifetimes_with_underscore(&mut raw_type.clone());
             let static_assertion = match field_type {
                 FieldType::Any => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
                 }
                 FieldType::Null => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
                 }
                 FieldType::Uuid => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Uuid>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Uuid>);)
                 }
                 FieldType::Bytes => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Bytes>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Bytes>);)
                 }
                 FieldType::Union(_) => {
                     // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
@@ -404,64 +415,69 @@ impl MyFieldReceiver {
                     quote!()
                 }
                 FieldType::String => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::string::String>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<::std::string::String>);)
                 }
                 FieldType::Int => {
                     quote!(
-                        #crate_name::validators::is_int::<#raw_type>();
+                        #crate_name::validators::is_int::<#delifed_raw_type>();
                         // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
                 }
                 FieldType::Float => {
                     quote!(
-                        #crate_name::validators::is_float::<#raw_type>();
+                        #crate_name::validators::is_float::<#delifed_raw_type>();
                         // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
                     // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Bool => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::primitive::bool>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<::std::primitive::bool>);)
                 }
                 FieldType::Array(_, _) => {
                     quote!(
-                        #crate_name::validators::assert_is_vec::<#raw_type>();
+                        #crate_name::validators::assert_is_vec::<#delifed_raw_type>();
                     )
                 }
                 FieldType::Set(_, _) => {
                     quote!(
-                        #crate_name::validators::assert_is_vec::<#raw_type>();
+                        #crate_name::validators::assert_is_vec::<#delifed_raw_type>();
                     )
                 }
                 FieldType::Datetime => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
                 }
                 FieldType::Decimal => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Duration => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
                 }
                 FieldType::Number => {
                     quote!(
-                        #crate_name::validators::is_number::<#raw_type>();
+                        #crate_name::validators::is_number::<#delifed_raw_type>();
                         // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
                     // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Object => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
                 }
                 FieldType::Record(_) => {
                     if let DataType::Edge = model_type {
                         quote!()
                     } else {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                        quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
                     }
                 }
                 FieldType::Geometry(_) => {
-                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
                 }
             };
+
+            println!(
+                "get_type4 fieldname {}; field_type {:?};",
+                field_name_normalized, field_type
+            );
 
             static_assertions.push(static_assertion);
 
@@ -487,6 +503,7 @@ impl MyFieldReceiver {
                 model_type,
             )))
         } else {
+            println!("problem fieldname {}", field_name_normalized);
             return Err(syn::Error::new_spanned(field_name_normalized, format!(
                 r#"Unable to infer database type for the field. Type must be provided for field - {}.\
             e.g use the annotation #[surreal_orm(type_="int")] to provide the type explicitly."#,
@@ -593,6 +610,12 @@ impl MyFieldReceiver {
     }
 
     pub fn rust_type(&self) -> FieldRustType {
+        let ty = if self.ident.to_token_stream().to_string() == "age" {
+            //create u8 type for age
+            syn::parse_str::<syn::Type>("u8").unwrap()
+        } else {
+            self.ty.clone()
+        };
         let attrs = Attributes {
             link_one: self.link_one.as_ref(),
             link_self: self.link_self.as_ref(),
@@ -600,7 +623,7 @@ impl MyFieldReceiver {
             nest_array: self.nest_array.as_ref(),
             nest_object: self.nest_object.as_ref(),
         };
-        let rust_type = FieldRustType::new(self.ty.clone(), attrs);
+        let rust_type = FieldRustType::new(ty.clone(), attrs);
         rust_type
     }
 }
@@ -696,15 +719,28 @@ impl ReferencedNodeMeta {
         data_type: &DataType,
         table: &String,
     ) -> ExtractorResult<Self> {
+        println!(
+            "with_field_definition1 fieldname {}; ",
+            field_name_normalized,
+        );
         let crate_name = get_crate_name(false);
         let mut define_field: Option<TokenStream> = None;
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
         let mut static_assertions = vec![];
 
-        let field_type_resolved = if let Some(type_data) =
-            field_receiver.get_type(field_name_normalized, data_type, table)?
-        {
+        println!(
+            "with_field_definition2 fieldname {}; ",
+            field_name_normalized,
+        );
+        let type_inf = field_receiver.get_type(field_name_normalized, data_type, table)?;
+        // println!("type_inf {}", type_inf.unwrap_or_default());
+
+        println!(
+            "with_field_definition3 fieldname {}; ",
+            field_name_normalized,
+        );
+        let field_type_resolved = if let Some(type_data) = type_inf {
             let FieldTypeDerived {
                 field_type,
                 static_assertion,

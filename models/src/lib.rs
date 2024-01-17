@@ -13,7 +13,7 @@
 pub mod migrations;
 mod models;
 // pub use migrations::*;
-pub use models::alien::*;
+// pub use models::alien::*;
 pub use models::attributes::*;
 pub use models::configuration::*;
 pub use models::planet::*;

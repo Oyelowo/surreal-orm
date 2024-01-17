@@ -39,7 +39,7 @@ pub struct WeaponOld {
     // pub rocket: Rocket,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Rocket {
     pub name: String,
