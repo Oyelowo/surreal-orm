@@ -16,7 +16,7 @@ use darling::{ast, util, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-use crate::models::replace_lifetimes_with_underscore;
+use crate::models::{replace_lifetimes_with_underscore, replace_self_in_type_str};
 
 use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
@@ -413,12 +413,8 @@ impl SchemaFieldsProperties {
             let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
             let mut field_extractor = GenericTypeExtractor::new(struct_generics);
             println!("Prinnntts1");
-            let field_type = &crate::models::replace_self_in_type_str(
-                &field_type,
-                struct_name_ident,
-                &struct_ty_generics,
-            )
-            .expect("Could not replace self in type str");
+            let field_type =
+                &replace_self_in_type_str(&field_type, struct_name_ident, &struct_ty_generics);
             // let field_type_for_setter =
             //     replace_self_in_id(&field_type, struct_name_ident, &struct_ty_generics);
             println!("Prinnntts2");

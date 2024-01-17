@@ -278,33 +278,31 @@ fn construct_replacement_segment(
 // use quote::quote;
 // use syn::parse_str;
 
-pub fn replace_self_in_type_str(
-    ty: &Type,
-    // struct_name: &str,
-    // ty_generics_str: &str,
-    struct_name: &syn::Ident,
-    ty_generics: &syn::TypeGenerics,
-) -> Result<Type, syn::Error> {
-    // Convert the type to a string
-    let ty_str = quote!(#ty).to_string();
-
-    // Construct the replacement string
-    let replacement = format!("{}{}", struct_name, ty_generics.into_token_stream());
-
-    // Replace "Self" with the desired type
-    let modified_ty_str = ty_str.replace("Self", &replacement);
-    println!("rara---ty_str: {}", ty_str);
-    println!("rara---replacement: {}", replacement);
-    println!("rara---modified_ty_str: {}", modified_ty_str);
-
-    // Parse the string back into a Type
-    let parsed = parse_str::<Type>(&modified_ty_str).map_err(|e| syn::Error::new_spanned(ty, e));
-    println!(
-        "rara---parsed: {}",
-        parsed.clone().unwrap().into_token_stream()
-    );
-    parsed
-}
+// pub fn replace_self_in_type_str(
+//     ty: &Type,
+//     struct_name: &syn::Ident,
+//     ty_generics: &syn::TypeGenerics,
+// ) -> Result<Type, syn::Error> {
+//     // Convert the type to a string
+//     let ty_str = quote!(#ty).to_string();
+//
+//     // Construct the replacement string
+//     let replacement = format!("{}{}", struct_name, ty_generics.into_token_stream());
+//
+//     // Replace "Self" with the desired type
+//     let modified_ty_str = ty_str.replace("Self", &replacement);
+//     println!("rara---ty_str: {}", ty_str);
+//     println!("rara---replacement: {}", replacement);
+//     println!("rara---modified_ty_str: {}", modified_ty_str);
+//
+//     // Parse the string back into a Type
+//     let parsed = parse_str::<Type>(&modified_ty_str).map_err(|e| syn::Error::new_spanned(ty, e));
+//     println!(
+//         "rara---parsed: {}",
+//         parsed.clone().unwrap().into_token_stream()
+//     );
+//     parsed
+// }
 
 // Example usage
 // let ty: Type = /* ... */; // Your Type here
@@ -320,56 +318,56 @@ pub fn replace_self_in_type_str(
 //     }
 // }
 // Function to recursively replace `Self` in the type
-// pub fn replace_self_in_id(
-//     ty: &Type,
-//     struct_name: &syn::Ident,
-//     ty_generics: &syn::TypeGenerics,
-// ) -> Type {
-//     // Create the replacement type
-//     let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
-//
-//     // Helper function to replace 'Self' in a path segment
-//     fn replace_segment(segment: &mut PathSegment, replacement_path: &Path) {
-//         if segment.ident == "Self" {
-//             if let Some(first_segment) = replacement_path.segments.first() {
-//                 *segment = first_segment.clone();
-//             }
-//         } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
-//             for arg in angle_args.args.iter_mut() {
-//                 println!("rara1---arg: {}", arg.to_token_stream().to_string());
-//                 if let GenericArgument::Type(t) = arg {
-//                     *t = replace_type(t, replacement_path);
-//                 }
-//             }
-//         }
-//     }
-//
-//     // Function to handle replacement within types
-//     fn replace_type(ty: &Type, replacement_path: &Path) -> Type {
-//         match ty {
-//             Type::Path(type_path) => {
-//                 let mut new_type_path = type_path.clone();
-//                 for segment in &mut new_type_path.path.segments {
-//                     replace_segment(segment, replacement_path);
-//                 }
-//                 Type::Path(new_type_path)
-//             }
-//             Type::Reference(type_reference) => {
-//                 let elem = Box::new(replace_type(&type_reference.elem, replacement_path));
-//                 Type::Reference(TypeReference {
-//                     and_token: type_reference.and_token,
-//                     lifetime: type_reference.lifetime.clone(),
-//                     mutability: type_reference.mutability,
-//                     elem,
-//                 })
-//             }
-//             // Extend to handle other types like Tuple, Array, etc.
-//             _ => ty.clone(),
-//         }
-//     }
-//
-//     replace_type(ty, &replacement_path)
-// }
+pub fn replace_self_in_type_str(
+    ty: &Type,
+    struct_name: &syn::Ident,
+    ty_generics: &syn::TypeGenerics,
+) -> Type {
+    // Create the replacement type
+    let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
+
+    // Helper function to replace 'Self' in a path segment
+    fn replace_segment(segment: &mut PathSegment, replacement_path: &Path) {
+        if segment.ident == "Self" {
+            if let Some(first_segment) = replacement_path.segments.first() {
+                *segment = first_segment.clone();
+            }
+        } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
+            for arg in angle_args.args.iter_mut() {
+                println!("rara1---arg: {}", arg.to_token_stream().to_string());
+                if let GenericArgument::Type(t) = arg {
+                    *t = replace_type(t, replacement_path);
+                }
+            }
+        }
+    }
+
+    // Function to handle replacement within types
+    fn replace_type(ty: &Type, replacement_path: &Path) -> Type {
+        match ty {
+            Type::Path(type_path) => {
+                let mut new_type_path = type_path.clone();
+                for segment in &mut new_type_path.path.segments {
+                    replace_segment(segment, replacement_path);
+                }
+                Type::Path(new_type_path)
+            }
+            Type::Reference(type_reference) => {
+                let elem = Box::new(replace_type(&type_reference.elem, replacement_path));
+                Type::Reference(TypeReference {
+                    and_token: type_reference.and_token,
+                    lifetime: type_reference.lifetime.clone(),
+                    mutability: type_reference.mutability,
+                    elem,
+                })
+            }
+            // Extend to handle other types like Tuple, Array, etc.
+            _ => ty.clone(),
+        }
+    }
+
+    replace_type(ty, &replacement_path)
+}
 
 pub struct TypeStripper;
 
