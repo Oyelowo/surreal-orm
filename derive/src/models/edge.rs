@@ -217,7 +217,7 @@ impl ToTokens for EdgeToken {
 
                 #[allow(non_snake_case)]
                 #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-                pub struct #non_null_updater_struct_name {
+                pub struct #non_null_updater_struct_name #impl_generics #where_clause {
                    #(
                         #[serde(skip_serializing_if = "Option::is_none")]
                         #non_null_updater_fields
@@ -235,7 +235,7 @@ impl ToTokens for EdgeToken {
                 #[allow(non_snake_case)]
                 impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause {
                     type Id = #table_id_type;
-                    type NonNullUpdater = #non_null_updater_struct_name;
+                    type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
                     fn table_name() -> #crate_name::Table {

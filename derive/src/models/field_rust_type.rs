@@ -8,7 +8,7 @@
 use quote::{format_ident, quote};
 use syn::{self, Type};
 
-use super::{attributes::FieldTypeDerived, get_crate_name, parser::DataType};
+use super::{attributes::FieldTypeDerived, get_crate_name, parser::DataType, TypeStripper};
 
 #[derive(Debug, Default)]
 pub struct Attributes<'a> {
@@ -26,6 +26,7 @@ pub struct FieldRustType<'a> {
 
 impl<'a> FieldRustType<'a> {
     pub fn new(ty: Type, attributes: Attributes<'a>) -> Self {
+        let ty = TypeStripper::strip_references_and_lifetimes(&ty);
         Self { ty, attributes }
     }
 
@@ -82,12 +83,23 @@ impl<'a> FieldRustType<'a> {
     }
 
     pub fn raw_type_is_string(&self) -> bool {
-        match self.ty {
+        match &self.ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
                     let ident = &path.segments[0].ident.to_string();
-                    ["String"].iter().any(|&x| x == ident)
+                    ["String", "str"].contains(&ident.as_str())
+                }
+            }
+            syn::Type::Reference(ref r) => {
+                if let syn::Type::Path(ref p) = *r.elem {
+                    let path = &p.path;
+                    path.leading_colon.is_none() && path.segments.len() == 1 && {
+                        let ident = &path.segments[0].ident.to_string();
+                        ["String", "str"].contains(&ident.as_str())
+                    }
+                } else {
+                    false
                 }
             }
             _ => false,
@@ -321,6 +333,7 @@ impl<'a> FieldRustType<'a> {
         field_name_normalized: &str,
         model_type: &DataType,
     ) -> FieldTypeDerived {
+        println!("infer_surreal_type_heuristically");
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
 

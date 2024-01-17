@@ -16,16 +16,20 @@ use darling::{ast, util, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
+use crate::models::replace_lifetimes_with_underscore;
+
 use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
     casing::CaseString,
     count_vec_nesting,
     errors::ExtractorResult,
-    generate_nested_vec_type, get_crate_name,
+    generate_nested_vec_type,
+    get_crate_name,
     relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
-    replace_self_in_id,
+    // replace_self_in_id,
     variables::VariablesModelMacro,
     GenericTypeExtractor,
+    TypeStripper,
 };
 
 #[allow(dead_code)]
@@ -335,6 +339,7 @@ pub struct SchemaPropertiesArgs<'a> {
     pub table_name: String,
 }
 
+#[derive(Debug, Clone)]
 pub enum DataType {
     Node,
     Edge,
@@ -363,6 +368,7 @@ impl SchemaFieldsProperties {
             .expect("Should never be enum")
             .fields
         {
+            println!("Start...");
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
 
@@ -376,6 +382,21 @@ impl SchemaFieldsProperties {
                 .ident
                 .as_ref()
                 .expect("field identifier does not exist");
+            // let ref field_type = if field_name_original == "age" {
+            //     //create u8 type
+            //     let u8_type = syn::parse_str::<syn::Type>("u8").unwrap();
+            //     u8_type
+            // } else {
+            //     field_type.clone()
+            // };
+            // let ref field_type = TypeStripper::strip_references_and_lifetimes(&field_type);
+            println!(
+                "struct_name: {}; field_name: {}; field_type: {}",
+                struct_name_ident,
+                field_name_original,
+                field_type.to_token_stream()
+            );
+            // let ref field_type = syn::parse2::<syn::Type>(quote!("u8")).unwrap();
             let old_field_name = match field_receiver.old_name.as_ref() {
                 Some(old_name) if !old_name.is_empty() => {
                     quote!(::std::option::Option::Some(#old_name.into()))
@@ -388,13 +409,23 @@ impl SchemaFieldsProperties {
                 ref field_ident_normalised_as_str,
             } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
 
+            println!("Prinnntts0");
             let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
             let mut field_extractor = GenericTypeExtractor::new(struct_generics);
-            let field_type_for_setter =
-                replace_self_in_id(&field_type, struct_name_ident, &struct_ty_generics);
+            println!("Prinnntts1");
+            let field_type = &crate::models::replace_self_in_type_str(
+                &field_type,
+                struct_name_ident,
+                &struct_ty_generics,
+            )
+            .expect("Could not replace self in type str");
+            // let field_type_for_setter =
+            //     replace_self_in_id(&field_type, struct_name_ident, &struct_ty_generics);
+            println!("Prinnntts2");
             let (field_impl_generics, _field_ty_generics, field_where_clause) = field_extractor
-                .extract_generics_for_complex_type(&field_type_for_setter)
+                .extract_generics_for_complex_type(&field_type)
                 .split_for_impl();
+            println!("Prinnntts3");
             // let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
             //     && matches!(data_type, DataType::Edge);
             // let is_id = field_ident_normalised_as_str == "id";
@@ -701,9 +732,9 @@ impl SchemaFieldsProperties {
                                 }
                             }
 
-                            impl #field_impl_generics #crate_name::SetterAssignable<#field_type_for_setter> for self::#field_name_as_camel  #field_where_clause {}
+                            impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  #field_where_clause {}
 
-                            impl #field_impl_generics #crate_name::Patchable<#field_type_for_setter> for self::#field_name_as_camel  #field_where_clause {}
+                            impl #field_impl_generics #crate_name::Patchable<#field_type> for self::#field_name_as_camel  #field_where_clause {}
 
                             #numeric_trait
 
@@ -736,13 +767,16 @@ impl SchemaFieldsProperties {
             };
 
             let mut insert_non_null_updater_token = |updater_field_token: TokenStream| {
-                let is_invalid =
-                    &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
-                if !is_invalid {
-                    store
-                        .non_null_updater_fields
-                        .push(updater_field_token.clone());
-                }
+                // let is_invalid =
+                //     &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                // if !is_invalid {
+                //     store
+                //         .non_null_updater_fields
+                //         .push(updater_field_token.clone());
+                // }
+                store
+                    .non_null_updater_fields
+                    .push(updater_field_token.clone());
                 // We dont care about the field type. We just use this struct to check for
                 // renamed serialed field names at compile time by asserting that the a field
                 // exist.
@@ -751,7 +785,9 @@ impl SchemaFieldsProperties {
                     .push(quote!(pub #field_ident_normalised: &'static str, ));
             };
 
+            println!("Prinnntts4");
             update_ser_field_type(&mut store.serializable_fields);
+            println!("Prinnntts5");
 
             let referenced_node_meta = match relationship.clone() {
                 RelationType::Relate(relation) => {
@@ -775,6 +811,7 @@ impl SchemaFieldsProperties {
                         quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
                     );
 
+                    // let delifed_type = replace_lifetimes_with_underscore(&mut field_type.clone());
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
                     get_link_meta_with_defs(&node_object, false)
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
@@ -793,6 +830,9 @@ impl SchemaFieldsProperties {
                         .into());
                     }
 
+                    // insert_non_null_updater_token(
+                    //     quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                    // );
                     update_ser_field_type(&mut store.link_self_fields);
                     update_ser_field_type(&mut store.link_one_and_self_fields);
                     update_ser_field_type(&mut store.linked_fields);
@@ -857,16 +897,20 @@ impl SchemaFieldsProperties {
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
                 RelationType::None => {
+                    println!("RelationType::None 1");
                     update_field_names_fields_types_kv(None);
+                    println!("RelationType::None 2");
                     insert_non_null_updater_token(
                         quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
                     );
+                    println!("RelationType::None 3");
 
                     let ref_node_meta = if field_receiver.rust_type().is_list() {
                         ReferencedNodeMeta::from_simple_array(field_ident_normalised)
                     } else {
                         ReferencedNodeMeta::default()
                     };
+                    println!("RelationType::None 4");
                     ref_node_meta
                         .with_field_definition(
                             field_receiver,
@@ -878,11 +922,13 @@ impl SchemaFieldsProperties {
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
             };
+            println!("Prinnntts6");
 
             if field_ident_normalised_as_str == "id" {
                 store.table_id_type = quote!(#field_type);
                 // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
             }
+            println!("Prinnntts7");
 
             if !referenced_node_meta.field_definition.is_empty() {
                 store
@@ -919,6 +965,7 @@ impl SchemaFieldsProperties {
                 .push(field_ident_normalised_as_str.to_owned());
         }
 
+        println!("end...");
         Ok(store)
     }
 }

@@ -135,7 +135,7 @@ impl ToTokens for ObjectToken {
             impl #impl_generics #crate_name::Object for #struct_name_ident #ty_generics #where_clause {
                 // type Schema = #module_name::#struct_name_ident;
                 // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
-                type NonNullUpdater = #non_null_updater_struct_name;
+                type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
 
                 // fn schema() -> Self::Schema {
                 //     #module_name::#struct_name_ident::new()
@@ -144,7 +144,7 @@ impl ToTokens for ObjectToken {
 
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-            pub struct #non_null_updater_struct_name {
+            pub struct #non_null_updater_struct_name #impl_generics #where_clause {
                #(
                     #[serde(skip_serializing_if = "Option::is_none")]
                     #non_null_updater_fields
