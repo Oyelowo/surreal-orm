@@ -1,5 +1,5 @@
 pub use num_traits::{Float, Num, PrimInt as Int};
-pub use static_assertions::assert_fields;
+// pub use static_assertions::assert_fields;
 pub use static_assertions::assert_impl_all;
 pub use static_assertions::assert_impl_any;
 // pub use static_assertions::assert_impl_one;
@@ -8,6 +8,32 @@ pub use static_assertions::assert_trait_super_all;
 // pub use static_assertions::assert_type_eq_all;
 use std::any::TypeId;
 use std::collections::HashSet;
+
+// macro_rules! assert_fields {
+//     ($ty:ty: $($field:ident),+) => {
+//         {
+//             let _ = |_: $ty| {};
+//             $(
+//                 let _ = |val: $ty| { let _ = val.$field; };
+//             )+
+//         }
+//     };
+// }
+
+/// Checks that struct has all the fields specified
+#[macro_export]
+macro_rules! assert_fields {
+    ($ty:ty: $($field:ident),+) => {
+        {
+            let _ = |_: $ty| {};
+                let _ = |val: $ty| {
+          $(
+              let _ = val.$field;
+           )+
+        };
+        }
+    };
+}
 
 #[macro_export]
 macro_rules! assert_type_eq_all {
