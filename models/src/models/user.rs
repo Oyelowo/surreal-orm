@@ -13,7 +13,7 @@ use surrealdb::sql;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "user")]
+#[surreal_orm(table_name = user)]
 pub struct User {
     pub id: SurrealId<Self, String>,
     pub name: String,
@@ -36,33 +36,33 @@ impl Default for User {
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "like")]
+#[surreal_orm(table_name = like)]
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
     pub out: LinkOne<Out>,
-    #[surreal_orm(nest_object = "Time")]
+    #[surreal_orm(nest_object = Time)]
     pub time: Time,
 }
 pub type CompanyLikeUser = Like<Company, User>;
 
 #[derive(surreal_orm::Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "company")]
+#[surreal_orm(table_name = company)]
 pub struct Company {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    #[surreal_orm(link_many = "User")]
+    #[surreal_orm(link_many = User)]
     pub users: LinkMany<User>,
 
-    #[surreal_orm(relate(model = "CompanyLikeUser", connection = "->like->user"))]
+    #[surreal_orm(relate(model = CompanyLikeUser, connection = "->like->user"))]
     pub devs: Relate<User>,
 }
 
 #[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = camelCase)]
 pub struct Time {
     // pub name: String,
     pub connected: DateTime<Utc>,
@@ -70,13 +70,13 @@ pub struct Time {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "organization")]
+#[surreal_orm(table_name = organization)]
 pub struct Organization {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    #[surreal_orm(link_many = "User")]
+    #[surreal_orm(link_many = User)]
     pub users: LinkMany<User>,
-    #[surreal_orm(nest_object = "Time")]
+    #[surreal_orm(nest_object = Time)]
     pub time: Time,
     pub age: u8,
 }

@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-// pub mod alien;
+pub mod alien;
 pub mod attributes;
 pub mod combined;
 pub mod configuration;
