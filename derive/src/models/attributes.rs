@@ -12,7 +12,9 @@ use std::{
     ops::Deref,
 };
 
-use crate::models::replace_lifetimes_with_underscore;
+use crate::models::{
+    replace_lifetimes_with_underscore, replace_self_in_type_str, GenericTypeExtractor,
+};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -27,7 +29,7 @@ use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use surreal_query_builder::FieldType;
-use syn::{Ident, Lit, LitStr, Path, Type};
+use syn::{Generics, Ident, Lit, LitStr, Path, Type};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -214,12 +216,60 @@ impl Default for FieldTypeDerived {
     }
 }
 
+pub struct FieldGenericsMeta<'a> {
+    pub(crate) field_impl_generics: syn::ImplGenerics<'a>,
+    pub(crate) field_ty_generics: syn::TypeGenerics<'a>,
+    pub(crate) field_where_clause: Option<&'a syn::WhereClause>,
+}
+
 impl MyFieldReceiver {
+    pub fn replace_self_in_type_str(
+        &self,
+        struct_name_ident: &Ident,
+        struct_generics: &Generics,
+    ) -> Type {
+        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
+        replace_self_in_type_str(&self.ty, struct_name_ident, &struct_ty_generics)
+    }
+
+    pub fn get_field_generics_meta<'a>(
+        &self,
+        struct_name_ident: &Ident,
+        struct_generics: &Generics,
+    ) -> FieldGenericsMeta<'a> {
+        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
+        let field_type =
+            &replace_self_in_type_str(&self.ty, struct_name_ident, &struct_ty_generics);
+        let mut field_extractor = GenericTypeExtractor::new(struct_generics);
+        let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
+            .extract_generics_for_complex_type(&field_type)
+            .split_for_impl();
+        FieldGenericsMeta {
+            field_impl_generics,
+            field_ty_generics,
+            field_where_clause,
+        }
+    }
+
+    fn get_impl_generics(&self) -> syn::Generics {
+        let mut generics = syn::Generics::default();
+        generics
+            .params
+            .push(syn::GenericParam::Lifetime(syn::LifetimeParam::new(
+                syn::Lifetime::new("'a", proc_macro2::Span::call_site()),
+            )));
+        generics
+    }
+
+    // pub fn get_ty_generics
+
     pub fn get_type(
         &self,
         field_name_normalized: &String,
         model_type: &DataType,
         table: &String,
+        field_impl_generics: &syn::Generics,
+        field_ty_generics: &syn::Generics,
     ) -> ExtractorResult<Option<FieldTypeDerived>> {
         println!(
             "get_type1 fieldname {}; model_type {:?}; table {}",
@@ -266,6 +316,8 @@ impl MyFieldReceiver {
                     let field_type = type_.deref();
                     let ref_node_table_name_checker_ident =
                         format_ident!("I{field_name_normalized}RefChecker");
+                    // TODO: Check
+                    let xx = quote!(#ref_node_table_name_checker_ident );
 
                     if let Some(link_single_ref_node) = linked_node {
                         // Validate that it is a type - record, when link_one or link_self used,
@@ -318,12 +370,13 @@ impl MyFieldReceiver {
                                                         .expect("Table should be present here. This is a bug if not so.")
                                                         .to_string()
                                                 );
-                                                let ref_node =
-                                                    NodeTypeName::from(link_many_ref_node);
-                                                let ref_node_token: TokenStream = ref_node.into();
+                                                // TODO: Remove
+                                                // let ref_node =
+                                                //     NodeTypeName::from(link_many_ref_node);
+                                                // let ref_node_token: TokenStream = ref_node.into();
 
                                                 static_assertions.push(quote!(
-                                            type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::Node>::TableNameChecker;
+                                            type #ref_node_table_name_checker_ident = <#link_many_ref_node as #crate_name::Node>::TableNameChecker;
                                             #crate_name::validators::assert_fields!(#ref_node_table_name_checker_ident: #array_item_table_name);
                                         ));
                                             }

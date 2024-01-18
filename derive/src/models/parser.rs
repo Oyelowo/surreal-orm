@@ -16,7 +16,9 @@ use darling::{ast, util, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-use crate::models::{replace_lifetimes_with_underscore, replace_self_in_type_str};
+use crate::models::{
+    attributes::FieldGenericsMeta, replace_lifetimes_with_underscore, replace_self_in_type_str,
+};
 
 use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
@@ -398,7 +400,8 @@ impl SchemaFieldsProperties {
             );
             // let ref field_type = syn::parse2::<syn::Type>(quote!("u8")).unwrap();
             let old_field_name = match field_receiver.old_name.as_ref() {
-                Some(old_name) if !old_name.is_empty() => {
+                Some(old_name) => {
+                    let old_name = old_name.to_string();
                     quote!(::std::option::Option::Some(#old_name.into()))
                 }
                 _ => quote!(::std::option::Option::None),
@@ -411,16 +414,16 @@ impl SchemaFieldsProperties {
 
             println!("Prinnntts0");
             let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-            let mut field_extractor = GenericTypeExtractor::new(struct_generics);
             println!("Prinnntts1");
             let field_type =
-                &replace_self_in_type_str(&field_type, struct_name_ident, &struct_ty_generics);
-            // let field_type_for_setter =
-            //     replace_self_in_id(&field_type, struct_name_ident, &struct_ty_generics);
+                &field_receiver.replace_self_in_type_str(struct_name_ident, &struct_generics);
             println!("Prinnntts2");
-            let (field_impl_generics, _field_ty_generics, field_where_clause) = field_extractor
-                .extract_generics_for_complex_type(&field_type)
-                .split_for_impl();
+            let FieldGenericsMeta {
+                field_impl_generics,
+                field_ty_generics,
+                field_where_clause,
+                ..
+            } = field_receiver.get_field_generics_meta(&struct_name_ident, struct_generics);
             println!("Prinnntts3");
             // let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
             //     && matches!(data_type, DataType::Edge);
@@ -654,7 +657,7 @@ impl SchemaFieldsProperties {
                         .map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
                         })
-                        .unwrap_or_default()
+                        .expect("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>")
                 } else {
                     quote!()
                 };
