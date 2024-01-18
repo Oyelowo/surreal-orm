@@ -274,7 +274,7 @@ impl DefineStatementRaw {
                     };
                     remove_stmt.to_raw().build()
                 }
-                DefineStatement::MlModel(ml) => remove_model(get_resource_name(ml.name.to_raw()))
+                DefineStatement::Model(ml) => remove_model(get_resource_name(ml.name.to_raw()))
                     .version(ml.version)
                     .to_raw()
                     .build(),
