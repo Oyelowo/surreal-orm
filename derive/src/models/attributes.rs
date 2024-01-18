@@ -73,7 +73,7 @@ pub struct Relate {
     // #[darling(default)]
     /// e.g StudentWritesBook,
     /// derived from: type StudentWritesBook = Writes<Student, Book>;
-    pub model: Option<String>,
+    pub model: Option<Type>,
 }
 //#[rename(se)]
 impl FromMeta for Relate {
@@ -87,7 +87,7 @@ impl FromMeta for Relate {
     fn from_list(items: &[darling::ast::NestedMeta]) -> darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRelate {
-            model: String,
+            model: Type,
             connection: String,
         }
 
@@ -281,15 +281,16 @@ impl MyFieldReceiver {
                                         .map(ToString::to_string)
                                         .unwrap_or_default()
                                 );
-                                let ref_node = NodeTypeName::from(&link_single_ref_node);
-                                let ref_node_token: TokenStream = ref_node.into();
+                                // TODO: Remove
+                                // let ref_node = NodeTypeName::from(&link_single_ref_node);
+                                // let ref_node_token: TokenStream = ref_node.into();
                                 // Generate validation for the record type content at compile
                                 // time
                                 // Check that the link name in the type is same used lin
                                 // link_one attribute e.g record(book), when link_one="Book",
                                 // which gives <Book as Node>::TableNameChecker
                                 static_assertions.push(quote!(
-                                type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::Node>::TableNameChecker;
+                                type #ref_node_table_name_checker_ident = <#link_single_ref_node as #crate_name::Node>::TableNameChecker;
                                 #crate_name::validators::assert_fields!(#ref_node_table_name_checker_ident: #link_table_name);
                                            ));
                             }

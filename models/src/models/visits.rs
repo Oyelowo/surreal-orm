@@ -1103,6 +1103,7 @@ fn test_visits_edge_name<T: surreal_orm::validators::Int + serde::Serialize>() {
         LinkOne<Planet<u64>>,
         surreal_orm::LinkOne<Planet<_>>
     );
-    surreal_orm::validators::assert_impl_one!(Planet<T>:surreal_orm::Node);
+    type Mana = Planet<T>;
+    surreal_orm::validators::assert_impl_one!(Mana:surreal_orm::Node);
     assert_impl!(Planet<T>, surreal_orm::Node);
 }
