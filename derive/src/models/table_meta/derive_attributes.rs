@@ -11,7 +11,10 @@ use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
 use quote::quote;
 use syn::Ident;
 
-use crate::models::{MyFieldReceiver, Permissions, PermissionsFn, Rename};
+use crate::{
+    errors::ExtractorResult,
+    models::{MyFieldReceiver, Permissions, PermissionsFn, Rename},
+};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
@@ -61,7 +64,7 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
-    pub fn get_table_definition_token(&self) -> Result<TokenStream, &str> {
+    pub fn get_table_definition_token(&self) -> ExtractorResult<TokenStream> {
         let TableDeriveAttributes {
             ref drop,
             ref flexible,
@@ -101,7 +104,7 @@ impl TableDeriveAttributes {
 
         match (define, define_fn){
             (Some(define), None) => {
-                let define = parse_lit_to_tokenstream(define).expect("Unable to parse define attribute");
+                let define = parse_lit_to_tokenstream(define).map_err(|e| e.to_compile_error())?;
                 define_table = Some(quote!(#define.to_raw()));
             },
             (None, Some(define_fn)) => {
@@ -121,7 +124,7 @@ impl TableDeriveAttributes {
 
         match (as_, as_fn){
             (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(as_).expect("Unable to parse 'as' attribute");
+                let as_ = parse_lit_to_tokenstream(define).map_err(|e| e.to_compile_error())?;
                 define_table_methods.push(quote!(.as_(#as_)))
             },
             (None, Some(as_fn)) => {

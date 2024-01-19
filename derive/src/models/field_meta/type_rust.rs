@@ -19,10 +19,10 @@ use crate::{errors::ExtractorResult, models::DataType};
 
 use super::*;
 
-pub struct LinkRustFieldType(pub RustFieldType);
+pub struct LinkRustFieldType(pub RustFieldTypeSelfAllowed);
 
 impl LinkRustFieldType {
-    pub fn into_inner(self) -> RustFieldType {
+    pub fn into_inner(self) -> RustFieldTypeSelfAllowed {
         self.0
     }
 
@@ -64,21 +64,28 @@ impl FromMeta for LinkRustFieldType {
             }
             _ => return Err(darling::Error::custom("Expected a type").with_span(&item.span())),
         };
-        Ok(Self(RustFieldType::new(ty)))
+        Ok(Self(RustFieldTypeSelfAllowed::new(ty)))
     }
 }
 
 impl std::ops::Deref for LinkRustFieldType {
-    type Target = RustFieldType;
+    type Target = RustFieldTypeSelfAllowed;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-pub struct RustFieldType(Type);
+pub struct RustFieldTypeSelfAllowed(Type);
+pub struct RustFieldTypeNoSelf(Type);
 
-impl RustFieldType {
+impl From<Type> for RustFieldTypeSelfAllowed {
+    fn from(ty: Type) -> Self {
+        Self(ty)
+    }
+}
+
+impl RustFieldTypeSelfAllowed {
     pub fn new(ty: Type) -> Self {
         Self(ty)
     }
@@ -103,7 +110,7 @@ impl RustFieldType {
         &self,
         struct_name: &syn::Ident,
         ty_generics: &syn::TypeGenerics,
-    ) -> Type {
+    ) -> RustFieldTypeNoSelf {
         let ty = &self.0.ty;
         // TODO: Remove, every trait and lifetime bounds from struct type generics
         let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
@@ -147,7 +154,7 @@ impl RustFieldType {
             }
         }
 
-        replace_type(ty, &replacement_path)
+        replace_type(ty, &replacement_path).into()
     }
 
     pub fn is_numeric(&self) -> bool {

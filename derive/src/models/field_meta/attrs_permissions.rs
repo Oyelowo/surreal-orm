@@ -7,7 +7,11 @@
 
 use darling::FromMeta;
 use proc_macro2::TokenStream;
+use proc_macros_helpers::parse_lit_to_tokenstream;
+use quote::quote;
 use syn::{Lit, LitStr, Path};
+
+use crate::errors::ExtractorResult;
 
 #[derive(Debug, Clone)]
 pub enum Permissions {
@@ -17,8 +21,8 @@ pub enum Permissions {
 }
 
 impl Permissions {
-    pub fn get_token_stream(&self) -> TokenStream {
-        match self {
+    pub fn get_token_stream(&self) -> ExtractorResult<TokenStream> {
+        let permission = match self {
             Self::Full => {
                 quote!(.permissions_full())
             }
@@ -27,10 +31,12 @@ impl Permissions {
             }
             Self::FnName(permissions) => {
                 let permissions =
-                    parse_lit_to_tokenstream(permissions).expect("Unable to parse permissions");
+                    parse_lit_to_tokenstream(permissions).map_err(|e| e.to_compile_error())?;
                 quote!(.permissions(#permissions.to_raw()))
             }
-        }
+        };
+
+        Ok(permission)
     }
 }
 
