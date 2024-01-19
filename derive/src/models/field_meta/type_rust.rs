@@ -100,10 +100,11 @@ impl RustFieldType {
     }
 
     pub fn replace_self_with_struct_concrete_type(
-        ty: &Type,
+        &self,
         struct_name: &syn::Ident,
         ty_generics: &syn::TypeGenerics,
     ) -> Type {
+        let ty = &self.0.ty;
         // TODO: Remove, every trait and lifetime bounds from struct type generics
         let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
 
