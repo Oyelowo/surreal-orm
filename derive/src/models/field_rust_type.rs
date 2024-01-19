@@ -10,24 +10,25 @@ use syn::{self, Type};
 
 use crate::models::replace_lifetimes_with_underscore;
 
-use super::{attributes::FieldTypeDerived, get_crate_name, parser::DataType, TypeStripper};
+use super::{attributes::DbFieldTypeMeta, get_crate_name, parser::DataType, TypeStripper};
 
 #[derive(Debug, Default)]
 pub struct Attributes<'a> {
-    pub(crate) link_one: Option<&'a String>,
-    pub(crate) link_self: Option<&'a String>,
-    pub(crate) link_many: Option<&'a String>,
-    pub(crate) nest_array: Option<&'a String>,
-    pub(crate) nest_object: Option<&'a String>,
+    pub(crate) link_one: Option<&'a Type>,
+    pub(crate) link_self: Option<&'a Type>,
+    pub(crate) link_many: Option<&'a Type>,
+    pub(crate) nest_array: Option<&'a Type>,
+    pub(crate) nest_object: Option<&'a Type>,
 }
 
-pub struct FieldRustType<'a> {
+pub struct DbFieldTypeManager<'a> {
     pub(crate) ty: Type,
     pub(crate) attributes: Attributes<'a>,
 }
 
-impl<'a> FieldRustType<'a> {
+impl<'a> DbFieldTypeManager<'a> {
     pub fn new(ty: Type, attributes: Attributes<'a>) -> Self {
+        // TODO: Remove this
         // let ty = TypeStripper::strip_references_and_lifetimes(&ty);
         Self { ty, attributes }
     }
@@ -334,31 +335,31 @@ impl<'a> FieldRustType<'a> {
         &self,
         field_name_normalized: &str,
         model_type: &DataType,
-    ) -> FieldTypeDerived {
-        println!("infer_surreal_type_heuristically");
+    ) -> DbFieldTypeMeta {
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
-        let delifed_type_for_static_assert = replace_lifetimes_with_underscore(&mut ty.clone());
+        // TODO: Remove
+        // let delifed_type_for_static_assert = replace_lifetimes_with_underscore(&mut ty.clone());
 
         if self.raw_type_is_bool() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Bool),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<::std::primitive::bool>);),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Bool),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
             }
         } else if self.raw_type_is_float() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Float),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Number>);),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Float),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_integer() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Int),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Number>);),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Int),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_string() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::String),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Strand>);),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::String),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
         } else if self.raw_type_is_optional() {
             let get_option_item_type = self.get_option_item_type();
@@ -376,13 +377,13 @@ impl<'a> FieldRustType<'a> {
                 })
                 .unwrap_or_default();
 
-            let inner_type = item.field_type;
+            let inner_type = item.db_field_type;
             let item_static_assertion = item.static_assertion;
 
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
                 static_assertion: quote!(
-                    #crate_name::validators::assert_option::<#delifed_type_for_static_assert>();
+                    #crate_name::validators::assert_option::<#ty>();
                     #item_static_assertion
                 ),
             }
@@ -406,40 +407,40 @@ impl<'a> FieldRustType<'a> {
                 })
                 .unwrap_or_default();
 
-            let inner_type = inner_item.field_type;
+            let inner_type = inner_item.db_field_type;
             let inner_static_assertion = inner_item.static_assertion;
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
                 static_assertion: quote!(
-                            #crate_name::validators::assert_is_vec::<#delifed_type_for_static_assert>();
+                            #crate_name::validators::assert_is_vec::<#ty>();
                             #inner_static_assertion
                 ),
             }
         } else if self.raw_type_is_hash_set() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
-                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#delifed_type_for_static_assert>();),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
+                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
             }
         } else if self.raw_type_is_object() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Object),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Object>);),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Object),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
             }
         } else if self.raw_type_is_duration() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Duration),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Duration>);),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Duration),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
             }
         } else if self.raw_type_is_datetime() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Datetime),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Datetime>);),
+            DbFieldTypeMeta {
+                db_field_type: quote!(#crate_name::FieldType::Datetime),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
             }
         } else if self.raw_type_is_geometry() {
-            FieldTypeDerived {
+            DbFieldTypeMeta {
                 // TODO: check if to auto-infer more speicific geometry type?
-                field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#delifed_type_for_static_assert: ::std::convert::Into<#crate_name::sql::Geometry>);),
+                db_field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else {
             let Attributes {
@@ -451,8 +452,8 @@ impl<'a> FieldRustType<'a> {
             } = self.attributes;
 
             if field_name_normalized == "id" {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
+                DbFieldTypeMeta {
+                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                     static_assertion: quote!(),
                 }
             } else if (field_name_normalized == "out" || field_name_normalized == "in")
@@ -460,55 +461,55 @@ impl<'a> FieldRustType<'a> {
             {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
+                DbFieldTypeMeta {
+                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
                     static_assertion: quote!(),
                 }
             } else if let Some(ref_node_type) = link_one.or(link_self) {
                 let ref_node_type = format_ident!("{ref_node_type}");
 
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node_type::table_name()])),
+                DbFieldTypeMeta {
+                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node_type::table_name()])),
                     static_assertion: quote!(),
                 }
             } else if let Some(ref_node_type) = link_many {
                 let ref_struct_name = format_ident!("{ref_node_type}");
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Array(
+                DbFieldTypeMeta {
+                    db_field_type: quote!(#crate_name::FieldType::Array(
                         ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_struct_name::table_name()])),
                         ::std::option::Option::None
                     )),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = nest_object {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Object),
+                DbFieldTypeMeta {
+                    db_field_type: quote!(#crate_name::FieldType::Object),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = nest_array {
-                FieldTypeDerived {
+                DbFieldTypeMeta {
                     // provide the inner type for when the array part start recursing
-                    field_type: quote!(#crate_name::FieldType::Object),
-                    // field_type: quote!(#crate_name::FieldType::Array(
+                    db_field_type: quote!(#crate_name::FieldType::Object),
+                    // db_field_type: quote!(#crate_name::FieldType::Array(
                     //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
                     //     ::std::option::Option::None
                     // )),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = link_one {
-                FieldTypeDerived {
+                DbFieldTypeMeta {
                     // #crate_name::SurrealId<#foreign_node>
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
+                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = link_self {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
+                DbFieldTypeMeta {
+                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
                     static_assertion: quote!(),
                 }
             } else {
-                // FieldTypeDerived {
-                //     field_type: quote!(#crate_name::FieldType::Any),
+                // DbFieldTypeMeta {
+                //     db_field_type: quote!(#crate_name::FieldType::Any),
                 //     static_assertion: quote!(),
                 // }
                 panic!(

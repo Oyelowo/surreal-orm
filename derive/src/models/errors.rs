@@ -6,17 +6,22 @@
  */
 
 use convert_case::{Case, Casing};
+use proc_macro2::Ident;
+use quote::format_ident;
 use syn::spanned::Spanned;
 use thiserror::Error;
 
 pub(crate) fn validate_table_name<'a>(
     struct_name_ident: &proc_macro2::Ident,
-    table_name: &'a Option<String>,
+    table_name: &'a Option<Ident>,
     relax_table_name: &Option<bool>,
-) -> ExtractorResult<&'a String> {
+) -> ExtractorResult<Ident> {
     let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
-    let table_name = table_name.as_ref().expect("table name must be provided");
-    if !relax_table_name.unwrap_or(false) && table_name != &expected_table_name {
+    let table_name = table_name
+        .as_ref()
+        .expect("table name must be provided")
+        .to_string();
+    if !relax_table_name.unwrap_or(false) && table_name != expected_table_name {
         return Err(syn::Error::new(
             table_name.span(),
             "table name must be in snake case of the current struct name. 
@@ -27,7 +32,7 @@ pub(crate) fn validate_table_name<'a>(
         .into());
     };
 
-    Ok(table_name)
+    Ok(format_ident!("{table_name}"))
 }
 
 #[derive(Error, Debug)]

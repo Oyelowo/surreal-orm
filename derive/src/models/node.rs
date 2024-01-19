@@ -55,9 +55,9 @@ impl ToTokens for NodeToken {
                 .as_ref()
                 .expect("table_name attribute must be provided")
         );
-        let table_name_str =
+        let table_name =
             match errors::validate_table_name(struct_name_ident, table_name, relax_table_name) {
-                Ok(table_name) => table_name.as_str(),
+                Ok(table_name) => table_name,
                 Err(err) => return tokens.extend(err.write_errors()),
             };
 
@@ -80,7 +80,7 @@ impl ToTokens for NodeToken {
             data,
             struct_level_casing,
             struct_name_ident,
-            table_name: table_name_str.to_string(),
+            table_name,
         };
 
         let schema_props = match SchemaFieldsProperties::from_receiver_data(
@@ -203,7 +203,7 @@ impl ToTokens for NodeToken {
 
                     #module_name_internal::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
                                 #module_name_internal::#struct_name_ident::empty(),
-                                clause.with_table(#table_name_str),
+                                clause.with_table(#table_name),
                     )
                 }
                 //
@@ -221,7 +221,7 @@ impl ToTokens for NodeToken {
 
 
                 fn get_table_name() -> #crate_name::Table {
-                    #table_name_str.into()
+                    #table_name.into()
                 }
 
                 fn get_fields_relations_aliased() -> Vec<#crate_name::Alias> {
@@ -263,7 +263,7 @@ impl ToTokens for NodeToken {
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
                 fn table_name() -> #crate_name::Table {
-                    #table_name_str.into()
+                    #table_name.into()
                 }
 
                 fn get_id(self) -> Self::Id {

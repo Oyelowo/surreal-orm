@@ -13,11 +13,11 @@ use std::{
 
 use convert_case::{Case, Casing};
 use darling::{ast, util, ToTokens};
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
 use crate::models::{
-    attributes::FieldGenericsMeta, replace_lifetimes_with_underscore, replace_self_in_type_str,
+    attributes::FieldGenericsMeta, replace_lifetimes_with_underscore, replace_self_in_type_str, relations::NodeType,
 };
 
 use super::{
@@ -338,7 +338,7 @@ pub struct SchemaPropertiesArgs<'a> {
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
     // pub table_name_ident: &'a syn::Ident,
-    pub table_name: String,
+    pub table_name: Ident,
 }
 
 #[derive(Debug, Clone)]
@@ -454,7 +454,7 @@ impl SchemaFieldsProperties {
                 ..
             } = VariablesModelMacro::new();
 
-            let get_link_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
+            let get_link_meta_with_defs = |node_object: &NodeType, is_list: bool| {
                 ReferencedNodeMeta::from_record_link(
                     node_object,
                     field_ident_normalised,
@@ -800,7 +800,8 @@ impl SchemaFieldsProperties {
                 }
 
                 RelationType::LinkOne(node_object) => {
-                    let foreign_node = format_ident!("{node_object}");
+                    // let foreign_node = format_ident!("{node_object}");
+                    let foreign_node = node_object.into_inner();
                     update_ser_field_type(&mut store.link_one_fields);
                     update_ser_field_type(&mut store.link_one_and_self_fields);
                     update_ser_field_type(&mut store.linked_fields);
@@ -993,24 +994,22 @@ impl NodeEdgeMetadataStore {
         field_type: &syn::Type,
     ) -> TokenStream {
         let crate_name = get_crate_name(false);
-        let relation_model = &format_ident!(
-            "{}",
-            relation
-                .model
-                .as_ref()
-                .expect("relation model does not exist")
-        );
+        let relation_model = relation
+            .model
+            .as_ref()
+            .expect("relation model does not exist");
         let relation_attributes = RelateAttribute::from(relation);
         let edge_table_name = &TokenStream::from(&relation_attributes.edge_table_name);
         let foreign_node_table_name = &TokenStream::from(&relation_attributes.node_table_name);
 
-        let edge_table_name_checker_ident = format_ident!("{}EdgeTableNameChecker", relation_model);
-        let home_node_ident = format_ident!("{}HomeNode", relation_model);
-        let home_node_table_name_checker_ident =
-            format_ident!("{}HomeNodeTableNameChecker", relation_model);
-        let foreign_node_ident = format_ident!("{}ForeignNode", relation_model);
-        let foreign_node_table_name_checker_ident =
-            format_ident!("{}ForeignNodeTableNameChecker", relation_model);
+        // TODO: Remove this
+        // let edge_table_name_checker_ident = format_ident!("{}EdgeTableNameChecker", relation_model);
+        // let home_node_ident = format_ident!("{}HomeNode", relation_model);
+        // let home_node_table_name_checker_ident =
+        //     format_ident!("{}HomeNodeTableNameChecker", relation_model);
+        // let foreign_node_ident = format_ident!("{}ForeignNode", relation_model);
+        // let foreign_node_table_name_checker_ident =
+        //     format_ident!("{}ForeignNodeTableNameChecker", relation_model);
 
         let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
             match &relation_attributes.edge_direction {
@@ -1029,10 +1028,13 @@ impl NodeEdgeMetadataStore {
             // #crate_name::validators::assert_type_eq_all!(HomeIdent, Student);
             // #crate_name::validators::assert_impl_one!(HomeIdent, surreal_macros::Node);
             quote!(
-             type #home_node_ident = <#relation_model as #crate_name::Edge>::#home_node_associated_type_ident;
+            {
+            type #home_node_ident = <#relation_model as #crate_name::Edge>::#home_node_associated_type_ident;
              type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::Node>::TableNameChecker;
              #crate_name::validators::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
              #crate_name::validators::assert_impl_one!(#home_node_ident: #crate_name::Node);
+
+            }
             ),
             quote!(
              type #foreign_node_ident = <#relation_model as #crate_name::Edge>::#foreign_node_associated_type_ident;

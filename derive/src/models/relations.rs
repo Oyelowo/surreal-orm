@@ -5,17 +5,24 @@
  * Licensed under the MIT license
  */
 
-use super::attributes::{MyFieldReceiver, Relate};
+use proc_macro::TokenStream;
+use quote::ToTokens;
+use syn::{spanned::Spanned, Type};
+
+use super::{
+    attributes::{MyFieldReceiver, Relate},
+    errors::ExtractorResult,
+};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
     // ->studies->Course
     Relate(Relate),
-    LinkOne(NodeTypeName),
-    LinkSelf(NodeTypeName),
-    LinkMany(NodeTypeName),
-    NestObject(NodeTypeName),
-    NestArray(NodeTypeName),
+    LinkOne(NodeType),
+    LinkSelf(NodeType),
+    LinkMany(NodeType),
+    NestObject(NodeType),
+    NestArray(NodeType),
     None,
 }
 
@@ -55,6 +62,16 @@ impl From<&MyFieldReceiver> for RelationType {
 pub(crate) enum EdgeDirection {
     OutArrowRight,
     InArrowLeft,
+}
+
+impl ToTokens for EdgeDirection {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let arrow = match self {
+            EdgeDirection::OutArrowRight => "->",
+            EdgeDirection::InArrowLeft => "<-",
+        };
+        tokens.extend(arrow.parse::<proc_macro2::TokenStream>().unwrap());
+    }
 }
 
 impl From<EdgeDirection> for ::proc_macro2::TokenStream {
@@ -151,6 +168,62 @@ wrapper_struct_to_ident!(NodeTableName);
 pub(crate) struct NodeTypeName(String);
 wrapper_struct_to_ident!(NodeTypeName);
 
+//
+#[derive(Debug, Clone)]
+pub(crate) struct EdgeType(Type);
+
+impl From<&Type> for EdgeType {
+    fn from(ty: &Type) -> Self {
+        Self(ty.clone())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct NodeType(Type);
+
+impl ToTokens for NodeType {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let ty = &self.0;
+        tokens.extend(ty.to_token_stream());
+    }
+}
+
+impl NodeType {
+    pub fn into_inner(self) -> Type {
+        self.0
+    }
+
+    // pub fn to_type(self) -> Type {
+    //     self.0.clone()
+    // }
+
+    pub fn ident(&self) -> ExtractorResult<syn::Ident> {
+        match &self.0 {
+            Type::Path(type_path) => {
+                let ident = type_path
+                    .path
+                    .segments
+                    .last()
+                    .expect("type path must have at least one segment")
+                    .ident
+                    .clone();
+                Ok(ident)
+            }
+            _ => Err(syn::Error::new(
+                self.0.to_token_stream().span(),
+                "Only path type is supported",
+            )
+            .into()),
+        }
+    }
+}
+
+impl From<&Type> for NodeType {
+    fn from(ty: &Type) -> Self {
+        Self(ty.clone())
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
@@ -158,17 +231,18 @@ pub(crate) struct RelateAttribute {
     pub(crate) node_table_name: NodeTableName,
 }
 
-impl From<RelateAttribute> for ::proc_macro2::TokenStream {
-    fn from(relate_attrs: RelateAttribute) -> Self {
-        let edge_direction = ::proc_macro2::TokenStream::from(relate_attrs.edge_direction);
-        let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_table_name);
-        let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_table_name);
-        // ->action->NodeObject
-        // <-action<-NodeObject
-        // e.g ->manages->Project
-        ::quote::quote!(#edge_direction #edge_name #edge_direction #node_name)
-    }
-}
+// TODO: Remove
+// impl From<RelateAttribute> for ::proc_macro2::TokenStream {
+//     fn from(relate_attrs: RelateAttribute) -> Self {
+//         let edge_direction = ::proc_macro2::TokenStream::from(relate_attrs.edge_direction);
+//         let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_table_name);
+//         let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_table_name);
+//         // ->action->NodeObject
+//         // <-action<-NodeObject
+//         // e.g ->manages->Project
+//         ::quote::quote!(#edge_direction #edge_name #edge_direction #node_name)
+//     }
+// }
 
 impl From<&Relate> for RelateAttribute {
     fn from(relation: &Relate) -> Self {
