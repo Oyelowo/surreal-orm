@@ -5,17 +5,8 @@
  * Licensed under the MIT license
  */
 
-pub use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
-use quote::{quote, ToTokens};
-use syn::visit_mut::VisitMut;
-use syn::{
-    parse2, parse_quote, parse_str, GenericArgument, Ident, Lifetime, LifetimeParam, Path,
-    PathSegment, TypeGenerics, TypeMacro,
-};
-use syn::{
-    visit::Visit, GenericParam, Generics, PathArguments, Type, TypeArray, TypeBareFn, TypeGroup,
-    TypeImplTrait, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple, WherePredicate,
-};
+pub use proc_macros_helpers::get_crate_name;
+use quote::quote;
 
 pub fn generate_nested_vec_type(
     foreign_node: &syn::Ident,

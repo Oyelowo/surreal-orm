@@ -7,6 +7,8 @@
 
 use syn::{visit::Visit, *};
 
+use crate::models::RustFieldType;
+
 pub struct FieldGenericsMeta<'a> {
     pub(crate) field_impl_generics: syn::ImplGenerics<'a>,
     pub(crate) field_ty_generics: syn::TypeGenerics<'a>,
@@ -27,11 +29,11 @@ impl<'a> FieldGenericsMeta<'a> {
         &self,
         struct_name_ident: &Ident,
         struct_generics: &Generics,
-        field_type: &Type,
+        field_type: &RustFieldType,
     ) -> FieldGenericsMeta<'a> {
         let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        let field_type =
-            &replace_self_in_type_str(&field_type, struct_name_ident, &struct_ty_generics);
+        let field_type = field_type
+            .replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics);
         let mut field_extractor = GenericTypeExtractor::new(struct_generics);
         let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
             .extract_generics_for_complex_type(&field_type)
