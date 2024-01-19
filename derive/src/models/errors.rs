@@ -9,7 +9,8 @@ use convert_case::{Case, Casing};
 use proc_macro2::Ident;
 use quote::format_ident;
 use syn::spanned::Spanned;
-use thiserror::Error;
+
+use crate::errors::ExtractorResult;
 
 pub(crate) fn validate_table_name<'a>(
     struct_name_ident: &proc_macro2::Ident,

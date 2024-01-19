@@ -15,13 +15,7 @@ use std::{ops::Deref, str::FromStr};
 
 use syn::{self, parse_macro_input};
 
-use super::{
-    attributes::TableDeriveAttributes,
-    casing::CaseString,
-    errors,
-    parser::{DataType, SchemaFieldsProperties, SchemaPropertiesArgs},
-    variables::VariablesModelMacro,
-};
+use super::{derive_attributes::TableDeriveAttributes, *, variables::VariablesModelMacro};
 
 // #[derive(Debug, FromDeriveInput)]
 // #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]

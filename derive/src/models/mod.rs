@@ -14,10 +14,12 @@ pub(crate) mod parser;
 pub(crate) mod table_meta;
 pub(crate) mod utils;
 pub(crate) mod variables;
-pub(crate) use utils::*;
 
+pub use casing::*;
 pub use field_meta::*;
+pub use parser::*;
 pub use table_meta::*;
+pub(crate) use utils::*;
 
 #[derive(Debug, Clone)]
 pub enum DataType {
