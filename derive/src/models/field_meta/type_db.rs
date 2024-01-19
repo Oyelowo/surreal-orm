@@ -14,6 +14,12 @@ pub struct DbFieldTypeMeta {
 pub struct FieldTypeWrapper(FieldType);
 
 impl FieldTypeWrapper {
+    pub fn into_inner(self) -> FieldType {
+        self.0
+    }
+}
+
+impl FieldTypeWrapper {
     pub fn generate_static_assertions(
         &self,
         rust_field_type: &Type,

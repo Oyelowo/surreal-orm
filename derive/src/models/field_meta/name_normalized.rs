@@ -5,6 +5,12 @@
  * Licensed under the MIT license
  */
 
+use syn::Ident;
+
+use crate::models::casing::*;
+
+use super::*;
+
 pub(crate) struct NormalisedField {
     pub(crate) field_ident_normalised: Ident,
     pub(crate) field_ident_normalised_as_str: String,

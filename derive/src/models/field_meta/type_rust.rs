@@ -14,22 +14,15 @@
 use quote::quote;
 use syn::{self, spanned::Spanned, Type};
 
-use super::{
-    attributes::DbFieldTypeMeta, errors::ExtractorResult, get_crate_name, parser::DataType,
-    relations::RelationType, FieldNameNormalized,
-};
+use crate::{errors::ExtractorResult, models::DataType};
 
-pub struct DbFieldTypeManager {
-    pub(crate) ty: Type,
-    // pub(crate) relation_type: RelationType,
-}
+use super::*;
 
-impl DbFieldTypeManager {
+pub struct RustFieldType(Type);
+
+impl RustFieldType {
     pub fn new(ty: Type) -> Self {
-        Self {
-            ty,
-            // relation_type: RelationType::None,
-        }
+        Self(ty)
     }
 
     pub fn is_numeric(&self) -> bool {
@@ -388,13 +381,12 @@ impl DbFieldTypeManager {
         } else if self.raw_type_is_list() {
             let inner_type = self.get_array_inner_type();
             let inner_item = inner_type
-                .clone()
-                .as_ref()
                 .map(|ct| {
-                    let ty = ct.clone();
-                    let item = Self { ty };
-
-                    item.infer_surreal_type_heuristically(field_name, relation_type, model_type)
+                    Self::new(ct).infer_surreal_type_heuristically(
+                        field_name,
+                        relation_type,
+                        model_type,
+                    )
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),

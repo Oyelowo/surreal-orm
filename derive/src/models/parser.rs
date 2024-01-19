@@ -342,19 +342,6 @@ pub struct SchemaPropertiesArgs<'a> {
     pub table_name: Ident,
 }
 
-#[derive(Debug, Clone)]
-pub enum DataType {
-    Node,
-    Edge,
-    Object,
-}
-
-impl DataType {
-    pub fn is_edge(&self) -> bool {
-        matches!(self, Self::Edge)
-    }
-}
-
 impl SchemaFieldsProperties {
     /// Derive the schema properties for a struct
     pub(crate) fn from_receiver_data(

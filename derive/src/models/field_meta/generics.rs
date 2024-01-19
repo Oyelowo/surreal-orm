@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use syn::{visit::Visit, *};
+
 pub struct FieldGenericsMeta<'a> {
     pub(crate) field_impl_generics: syn::ImplGenerics<'a>,
     pub(crate) field_ty_generics: syn::TypeGenerics<'a>,
