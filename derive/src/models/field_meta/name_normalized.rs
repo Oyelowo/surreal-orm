@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use quote::format_ident;
 use syn::Ident;
 
 use crate::models::casing::*;

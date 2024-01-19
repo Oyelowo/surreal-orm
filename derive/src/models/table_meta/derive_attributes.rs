@@ -5,6 +5,14 @@
  * Licensed under the MIT license
  */
 
+use darling::{ast::Data, util, FromDeriveInput};
+use proc_macro2::TokenStream;
+use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
+use quote::quote;
+use syn::Ident;
+
+use crate::models::{MyFieldReceiver, Permissions, PermissionsFn, Rename};
+
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
@@ -13,7 +21,7 @@ pub struct TableDeriveAttributes {
     pub(crate) generics: syn::Generics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
-    pub data: Data<util::Ignored, self::MyFieldReceiver>,
+    pub data: Data<util::Ignored, MyFieldReceiver>,
 
     #[darling(default)]
     pub(crate) rename_all: ::std::option::Option<Rename>,
@@ -67,7 +75,7 @@ impl TableDeriveAttributes {
             ..
         } = *self;
 
-        let crate_name = super::get_crate_name(false);
+        let crate_name = get_crate_name(false);
 
         if (define_fn.is_some() || define.is_some())
             && (drop.is_some()
