@@ -18,3 +18,16 @@ pub(crate) use utils::*;
 
 pub use field_meta::*;
 pub use table_meta::*;
+
+#[derive(Debug, Clone)]
+pub enum DataType {
+    Node,
+    Edge,
+    Object,
+}
+
+impl DataType {
+    pub fn is_edge(&self) -> bool {
+        matches!(self, Self::Edge)
+    }
+}

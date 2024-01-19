@@ -34,24 +34,3 @@ pub(crate) fn validate_table_name<'a>(
 
     Ok(format_ident!("{table_name}"))
 }
-
-#[derive(Error, Debug)]
-pub enum ExtractorError {
-    #[error("{0}")]
-    Syn(#[from] syn::Error),
-
-    #[error("{0}")]
-    Darling(#[from] darling::Error),
-}
-
-impl ExtractorError {
-    #[allow(dead_code)]
-    pub fn write_errors(self) -> proc_macro2::TokenStream {
-        match self {
-            ExtractorError::Syn(err) => err.to_compile_error(),
-            ExtractorError::Darling(err) => err.write_errors(),
-        }
-    }
-}
-
-pub type ExtractorResult<T> = std::result::Result<T, ExtractorError>;

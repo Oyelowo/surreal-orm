@@ -7,7 +7,9 @@
 
 use std::fmt::{Display, Formatter};
 
-use super::parser::DataType;
+use crate::models::DataType;
+
+use super::*;
 
 pub struct FieldNameNormalized(String);
 

@@ -5,6 +5,14 @@
  * Licensed under the MIT license
  */
 
+use crate::{errors::ExtractorResult, models::DataType};
+
+use super::*;
+use proc_macro2::TokenStream;
+use proc_macros_helpers::get_crate_name;
+use surreal_query_builder::FieldType;
+use syn::*;
+
 #[derive(Debug, FromField)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
@@ -139,13 +147,16 @@ impl MyFieldReceiver {
         let db_field_type_string = self.type_;
     }
 
-    pub fn get_fallback_array_item_concrete_type(&self) -> Result<TokenStream, &str> {
-        let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
+    pub fn get_fallback_array_item_concrete_type(&self) -> ExtractorResult<TokenStream> {
+        let field_type = self
+            .type_
+            .clone()
+            .map_or(FieldType::Any, |t| t.into_inner());
 
         let item_type = match field_type {
             FieldType::Array(item_type, _) => item_type,
             // TODO: Check if to error out here or just use Any
-            _ => return Err("Must be array type"),
+            _ => return Err(syn::Error::new_spanned(&self.ty, "Not an array").into()),
             // _ => Box::new(FieldType::Any),
         };
 
@@ -218,7 +229,10 @@ impl MyFieldReceiver {
     }
 
     pub fn is_numeric(&self) -> bool {
-        let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
+        let field_type = self
+            .type_
+            .clone()
+            .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_numeric = matches!(
             field_type,
             FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
@@ -227,7 +241,10 @@ impl MyFieldReceiver {
     }
 
     pub fn is_list(&self) -> bool {
-        let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
+        let field_type = self
+            .type_
+            .clone()
+            .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_list =
             matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
@@ -237,14 +254,7 @@ impl MyFieldReceiver {
     }
 
     pub fn rust_type(&self) -> DbFieldTypeManager {
-        let attrs = Attributes {
-            link_one: self.link_one.as_ref(),
-            link_self: self.link_self.as_ref(),
-            link_many: self.link_many.as_ref(),
-            nest_array: self.nest_array.as_ref(),
-            nest_object: self.nest_object.as_ref(),
-        };
-        let rust_type = DbFieldTypeManager::new(ty.clone(), attrs);
+        let rust_type = DbFieldTypeManager::new(self.ty);
         rust_type
     }
 }
