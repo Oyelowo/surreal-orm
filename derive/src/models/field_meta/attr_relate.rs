@@ -1,9 +1,7 @@
-#![allow(missing_docs)]
-#![allow(dead_code)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2023 Oyelowo Oyedayo
+ * Copyright (c) 2024 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
 

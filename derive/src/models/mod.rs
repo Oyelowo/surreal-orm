@@ -15,3 +15,6 @@ pub(crate) mod table_meta;
 pub(crate) mod utils;
 pub(crate) mod variables;
 pub(crate) use utils::*;
+
+pub use field_meta::*;
+pub use table_meta::*;
