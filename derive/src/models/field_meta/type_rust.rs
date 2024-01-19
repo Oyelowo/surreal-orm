@@ -5,32 +5,25 @@
  * Licensed under the MIT license
  */
 
-use quote::{format_ident, quote};
-use syn::{self, Type};
+use quote::quote;
+use syn::{self, spanned::Spanned, Type};
 
-use crate::models::replace_lifetimes_with_underscore;
+use super::{
+    attributes::DbFieldTypeMeta, errors::ExtractorResult, get_crate_name, parser::DataType,
+    relations::RelationType, FieldNameNormalized,
+};
 
-use super::{attributes::DbFieldTypeMeta, get_crate_name, parser::DataType, TypeStripper};
-
-#[derive(Debug, Default)]
-pub struct Attributes<'a> {
-    pub(crate) link_one: Option<&'a Type>,
-    pub(crate) link_self: Option<&'a Type>,
-    pub(crate) link_many: Option<&'a Type>,
-    pub(crate) nest_array: Option<&'a Type>,
-    pub(crate) nest_object: Option<&'a Type>,
-}
-
-pub struct DbFieldTypeManager<'a> {
+pub struct DbFieldTypeManager {
     pub(crate) ty: Type,
-    pub(crate) attributes: Attributes<'a>,
+    // pub(crate) relation_type: RelationType,
 }
 
-impl<'a> DbFieldTypeManager<'a> {
-    pub fn new(ty: Type, attributes: Attributes<'a>) -> Self {
-        // TODO: Remove this
-        // let ty = TypeStripper::strip_references_and_lifetimes(&ty);
-        Self { ty, attributes }
+impl DbFieldTypeManager {
+    pub fn new(ty: Type) -> Self {
+        Self {
+            ty,
+            // relation_type: RelationType::None,
+        }
     }
 
     pub fn is_numeric(&self) -> bool {
@@ -333,15 +326,14 @@ impl<'a> DbFieldTypeManager<'a> {
 
     pub fn infer_surreal_type_heuristically(
         &self,
-        field_name_normalized: &str,
+        field_name: &FieldNameNormalized,
+        relation_type: &RelationType,
         model_type: &DataType,
-    ) -> DbFieldTypeMeta {
+    ) -> ExtractorResult<DbFieldTypeMeta> {
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
-        // TODO: Remove
-        // let delifed_type_for_static_assert = replace_lifetimes_with_underscore(&mut ty.clone());
 
-        if self.raw_type_is_bool() {
+        let meta = if self.raw_type_is_bool() {
             DbFieldTypeMeta {
                 db_field_type: quote!(#crate_name::FieldType::Bool),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
@@ -368,14 +360,14 @@ impl<'a> DbFieldTypeManager<'a> {
                 .as_ref()
                 .map(|ct| {
                     let ty = ct.clone();
-                    let item = Self {
-                        ty,
-                        attributes: Default::default(),
-                    };
+                    let item = Self { ty };
 
-                    item.infer_surreal_type_heuristically(field_name_normalized, model_type)
+                    item.infer_surreal_type_heuristically(field_name, relation_type, model_type)
                 })
-                .unwrap_or_default();
+                .ok_or(syn::Error::new(
+                    ty.span(),
+                    "Could not infer type for the field",
+                ))??;
 
             let inner_type = item.db_field_type;
             let item_static_assertion = item.static_assertion;
@@ -394,18 +386,14 @@ impl<'a> DbFieldTypeManager<'a> {
                 .as_ref()
                 .map(|ct| {
                     let ty = ct.clone();
-                    let item = Self {
-                        ty,
-                        attributes: Attributes {
-                            nest_array: self.attributes.nest_array,
-                            nest_object: self.attributes.nest_object,
-                            ..Default::default()
-                        },
-                    };
+                    let item = Self { ty };
 
-                    item.infer_surreal_type_heuristically(field_name_normalized, model_type)
+                    item.infer_surreal_type_heuristically(field_name, relation_type, model_type)
                 })
-                .unwrap_or_default();
+                .ok_or(syn::Error::new(
+                    ty.span(),
+                    "Could not infer type for the field",
+                ))??;
 
             let inner_type = inner_item.db_field_type;
             let inner_static_assertion = inner_item.static_assertion;
@@ -443,92 +431,82 @@ impl<'a> DbFieldTypeManager<'a> {
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else {
-            let Attributes {
-                link_one,
-                link_self,
-                link_many,
-                nest_array,
-                nest_object,
-            } = self.attributes;
-
-            if field_name_normalized == "id" {
+            if field_name.is_id() {
                 DbFieldTypeMeta {
                     db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                     static_assertion: quote!(),
                 }
-            } else if (field_name_normalized == "out" || field_name_normalized == "in")
-                && matches!(model_type, DataType::Edge)
-            {
+            } else if field_name.is_orig_or_dest_edge_node(model_type) {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
                 DbFieldTypeMeta {
                     db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
                     static_assertion: quote!(),
                 }
-            } else if let Some(ref_node_type) = link_one.or(link_self) {
-                let ref_node_type = format_ident!("{ref_node_type}");
-
-                DbFieldTypeMeta {
-                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node_type::table_name()])),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(ref_node_type) = link_many {
-                let ref_struct_name = format_ident!("{ref_node_type}");
-                DbFieldTypeMeta {
-                    db_field_type: quote!(#crate_name::FieldType::Array(
-                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_struct_name::table_name()])),
-                        ::std::option::Option::None
-                    )),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = nest_object {
-                DbFieldTypeMeta {
-                    db_field_type: quote!(#crate_name::FieldType::Object),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = nest_array {
-                DbFieldTypeMeta {
-                    // provide the inner type for when the array part start recursing
-                    db_field_type: quote!(#crate_name::FieldType::Object),
-                    // db_field_type: quote!(#crate_name::FieldType::Array(
-                    //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
-                    //     ::std::option::Option::None
-                    // )),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = link_one {
-                DbFieldTypeMeta {
-                    // #crate_name::SurrealId<#foreign_node>
-                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = link_self {
-                DbFieldTypeMeta {
-                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
-                    static_assertion: quote!(),
+            } else if relation_type.is_some() {
+                match relation_type {
+                    RelationType::Relate(ref_node) => {
+                        // Relation are not stored on nodes, but
+                        // on edges. Just used on nodes for convenience
+                        // during deserialization
+                        DbFieldTypeMeta {
+                            db_field_type: quote!(),
+                            static_assertion: quote!(),
+                        }
+                    }
+                    RelationType::LinkOne(ref_node) => DbFieldTypeMeta {
+                        db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
+                        static_assertion: quote!(),
+                    },
+                    RelationType::LinkSelf(self_node) => DbFieldTypeMeta {
+                        db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
+                        static_assertion: quote!(),
+                    },
+                    RelationType::LinkMany(ref_node) => DbFieldTypeMeta {
+                        db_field_type: quote!(#crate_name::FieldType::Array(
+                            ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
+                            ::std::option::Option::None
+                        )),
+                        static_assertion: quote!(),
+                    },
+                    RelationType::NestObject(ref_object) => DbFieldTypeMeta {
+                        db_field_type: quote!(#crate_name::FieldType::Object),
+                        static_assertion: quote!(),
+                    },
+                    RelationType::NestArray(ref_array) => DbFieldTypeMeta {
+                        // provide the inner type for when the array part start recursing
+                        db_field_type: quote!(#crate_name::FieldType::Object),
+                        // db_field_type: quote!(#crate_name::FieldType::Array(
+                        //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
+                        //     ::std::option::Option::None
+                        // )),
+                        static_assertion: quote!(),
+                    },
+                    RelationType::None => {
+                        return Err(syn::Error::new(
+                            ty.span(),
+                            "Could not infer type for the field",
+                        )
+                        .into())
+                    }
                 }
             } else {
-                // DbFieldTypeMeta {
-                //     db_field_type: quote!(#crate_name::FieldType::Any),
-                //     static_assertion: quote!(),
-                // }
-                panic!(
-                    "Could not infer type for the field {}",
-                    field_name_normalized
+                return Err(
+                    syn::Error::new(ty.span(), "Could not infer type for the field").into(),
                 );
             }
-        }
+        };
+        Ok(meta)
     }
 
-    pub fn type_is_inferrable(&self, field_name_normalized_str: &String) -> bool {
-        self.attributes.link_one.is_some()
-            || self.attributes.link_self.is_some()
-            || self.attributes.link_many.is_some()
-            || self.attributes.nest_object.is_some()
-            || self.attributes.nest_array.is_some()
-            || field_name_normalized_str == "id"
-            || field_name_normalized_str == "in"
-            || field_name_normalized_str == "out"
+    pub fn type_is_inferrable(
+        &self,
+        field_name: &FieldNameNormalized,
+        model_type: &DataType,
+    ) -> bool {
+        self.relation_type.is_some()
+            || field_name.is_id()
+            || field_name.is_orig_or_dest_edge_node(model_type)
             || self.raw_type_is_float()
             || self.raw_type_is_integer()
             || self.raw_type_is_string()

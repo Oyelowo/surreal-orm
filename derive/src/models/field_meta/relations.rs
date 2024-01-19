@@ -26,6 +26,16 @@ pub(crate) enum RelationType {
     None,
 }
 
+impl RelationType {
+    pub fn is_none(&self) -> bool {
+        matches!(self, RelationType::None)
+    }
+
+    pub fn is_some(&self) -> bool {
+        !matches!(self, RelationType::None)
+    }
+}
+
 impl From<&MyFieldReceiver> for RelationType {
     fn from(field_receiver: &MyFieldReceiver) -> Self {
         match field_receiver {
@@ -180,6 +190,12 @@ impl From<&Type> for EdgeType {
 
 #[derive(Debug, Clone)]
 pub(crate) struct NodeType(Type);
+
+impl From<Type> for NodeType {
+    fn from(ty: Type) -> Self {
+        Self(ty)
+    }
+}
 
 impl ToTokens for NodeType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
