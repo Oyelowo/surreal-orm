@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use syn::{visit_mut::VisitMut, Lifetime, Type, TypeReference};
+use syn::{visit_mut::VisitMut, Type, TypeReference};
 
 pub struct TypeStripper;
 
