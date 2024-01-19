@@ -5,9 +5,9 @@
  * Licensed under the MIT license
  */
 
+use crate::models::RustFieldTypeSelfAllowed;
+use quote::quote;
 use syn::{visit::Visit, *};
-
-use crate::models::RustFieldType;
 
 pub struct FieldGenericsMeta<'a> {
     pub(crate) field_impl_generics: syn::ImplGenerics<'a>,
@@ -29,7 +29,7 @@ impl<'a> FieldGenericsMeta<'a> {
         &self,
         struct_name_ident: &Ident,
         struct_generics: &Generics,
-        field_type: &RustFieldType,
+        field_type: &RustFieldTypeSelfAllowed,
     ) -> FieldGenericsMeta<'a> {
         let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
         let field_type = field_type
@@ -74,6 +74,44 @@ pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
         _ => false,
     }
 }
+
+struct CustomGenerics(pub Generics);
+impl CustomGenerics {
+    fn strip_bounds_from_generics(original_generics: &Generics) -> Generics {
+        let stripped_params = original_generics
+            .params
+            .iter()
+            .map(|param| {
+                match param {
+                    GenericParam::Type(type_param) => {
+                        // Keep only the type identifier
+                        let ident = &type_param.ident;
+                        parse_quote!(#ident)
+                    }
+                    GenericParam::Lifetime(lifetime_def) => {
+                        // Keep only the lifetime identifier
+                        let lifetime = &lifetime_def.lifetime;
+                        parse_quote!(#lifetime)
+                    }
+                    GenericParam::Const(const_param) => {
+                        // Keep only the const parameter
+                        let ident = &const_param.ident;
+                        parse_quote!(const #ident: usize)
+                    }
+                }
+            })
+            .collect();
+
+        Generics {
+            params: stripped_params,
+            where_clause: None,
+            ..*original_generics
+        }
+    }
+}
+
+struct StructGenerics(pub CustomGenerics);
+struct FieldGenerics(pub CustomGenerics);
 
 pub(crate) struct GenericTypeExtractor<'a> {
     struct_generics: &'a Generics,

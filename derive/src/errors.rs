@@ -1,3 +1,5 @@
+use thiserror::Error;
+
 #[derive(Error, Debug)]
 pub enum ExtractorError {
     #[error("{0}")]

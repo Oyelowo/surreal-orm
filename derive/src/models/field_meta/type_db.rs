@@ -16,7 +16,7 @@ use proc_macros_helpers::get_crate_name;
 use quote::quote;
 use surreal_query_builder::FieldType;
 
-use crate::models::{DataType, RustFieldType};
+use crate::models::{DataType, RustFieldTypeSelfAllowed};
 
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldTypeAst {
@@ -36,7 +36,7 @@ impl DbFieldType {
 impl DbFieldType {
     pub fn generate_static_assertions(
         &self,
-        rust_field_type: &RustFieldType,
+        rust_field_type: &RustFieldTypeSelfAllowed,
         model_type: &DataType,
     ) -> TokenStream {
         let rust_field_type = &mut rust_field_type.clone();

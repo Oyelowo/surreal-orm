@@ -7,6 +7,8 @@
 
 use convert_case::{Case, Casing};
 
+use crate::models::CaseString;
+
 #[derive(Debug, Clone)]
 pub(crate) struct FieldIdentUnCased {
     pub(crate) uncased_field_name: String,

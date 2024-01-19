@@ -11,6 +11,7 @@ use super::*;
 use darling::FromField;
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
+use quote::quote;
 use surreal_query_builder::FieldType;
 use syn::*;
 
@@ -22,7 +23,7 @@ pub struct MyFieldReceiver {
     pub(crate) ident: Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
     // pub(crate) ty: syn::Type,
-    pub(crate) ty: RustFieldType,
+    pub(crate) ty: RustFieldTypeSelfAllowed,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
@@ -114,7 +115,8 @@ impl MyFieldReceiver {
         struct_generics: &Generics,
     ) -> Type {
         let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        replace_self_in_type_str(&self.ty, struct_name_ident, &struct_ty_generics)
+        self.ty
+            .replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics)
     }
 
     pub fn get_field_generics_meta<'a>(
@@ -123,8 +125,9 @@ impl MyFieldReceiver {
         struct_generics: &Generics,
     ) -> FieldGenericsMeta<'a> {
         let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        let field_type =
-            &replace_self_in_type_str(&self.ty, struct_name_ident, &struct_ty_generics);
+        let field_type = &self
+            .ty
+            .replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics);
         let mut field_extractor = GenericTypeExtractor::new(struct_generics);
         let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
             .extract_generics_for_complex_type(&field_type)
@@ -255,8 +258,8 @@ impl MyFieldReceiver {
             || self.link_many.is_some()
     }
 
-    pub fn rust_type(&self) -> RustFieldType {
-        let rust_type = RustFieldType::new(self.ty);
+    pub fn rust_type(&self) -> RustFieldTypeSelfAllowed {
+        let rust_type = RustFieldTypeSelfAllowed::new(self.ty);
         rust_type
     }
 }
