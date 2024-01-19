@@ -4,6 +4,11 @@
  * Copyright (c) 2024 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
+
+use proc_macro2::TokenStream;
+use proc_macros_helpers::get_crate_name;
+use quote::{quote, ToTokens};
+
 #[derive(Debug, Clone)]
 struct DbfieldTypeToken(TokenStream);
 

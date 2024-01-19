@@ -4,42 +4,56 @@
  * Copyright (c) 2024 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
+
+use std::{
+    fmt::{Display, Formatter},
+    ops::Deref,
+};
+
+use darling::FromMeta;
+use proc_macro2::TokenStream;
+use proc_macros_helpers::get_crate_name;
+use quote::quote;
+use surreal_query_builder::FieldType;
+
+use crate::models::{DataType, RustFieldType};
+
 #[derive(Debug, Clone, Default)]
-pub struct DbFieldTypeMeta {
+pub struct DbFieldTypeAst {
     pub(crate) db_field_type: TokenStream,
     pub(crate) static_assertion: TokenStream,
 }
 
 #[derive(Debug, Clone)]
-pub struct FieldTypeWrapper(FieldType);
+pub struct DbFieldType(FieldType);
 
-impl FieldTypeWrapper {
+impl DbFieldType {
     pub fn into_inner(self) -> FieldType {
         self.0
     }
 }
 
-impl FieldTypeWrapper {
+impl DbFieldType {
     pub fn generate_static_assertions(
         &self,
-        rust_field_type: &Type,
+        rust_field_type: &RustFieldType,
         model_type: &DataType,
     ) -> TokenStream {
-        let delifed_raw_type = replace_lifetimes_with_underscore(&mut rust_field_type.clone());
+        let rust_field_type = &mut rust_field_type.clone();
         let crate_name = get_crate_name(false);
 
         let static_assertion = match self.0 {
             FieldType::Any => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Value>);)
             }
             FieldType::Null => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Value>);)
             }
             FieldType::Uuid => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Uuid>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Uuid>);)
             }
             FieldType::Bytes => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Bytes>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Bytes>);)
             }
             FieldType::Union(_) => {
                 // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
@@ -50,75 +64,75 @@ impl FieldTypeWrapper {
                 quote!()
             }
             FieldType::String => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<::std::string::String>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<::std::string::String>);)
             }
             FieldType::Int => {
                 quote!(
-                    #crate_name::validators::is_int::<#delifed_raw_type>();
+                    #crate_name::validators::is_int::<#rust_field_type>();
                     // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                 )
             }
             FieldType::Float => {
                 quote!(
-                    #crate_name::validators::is_float::<#delifed_raw_type>();
+                    #crate_name::validators::is_float::<#rust_field_type>();
                     // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                 )
                 // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
             }
             FieldType::Bool => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<::std::primitive::bool>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<::std::primitive::bool>);)
             }
             FieldType::Array(_, _) => {
                 quote!(
-                    #crate_name::validators::assert_is_vec::<#delifed_raw_type>();
+                    #crate_name::validators::assert_is_vec::<#rust_field_type>();
                 )
             }
             FieldType::Set(_, _) => {
                 quote!(
-                    #crate_name::validators::assert_is_vec::<#delifed_raw_type>();
+                    #crate_name::validators::assert_is_vec::<#rust_field_type>();
                 )
             }
             FieldType::Datetime => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
             }
             FieldType::Decimal => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Number>);)
             }
             FieldType::Duration => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Duration>);)
             }
             FieldType::Number => {
                 quote!(
-                    #crate_name::validators::is_number::<#delifed_raw_type>();
+                    #crate_name::validators::is_number::<#rust_field_type>();
                     // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                 )
                 // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
             }
             FieldType::Object => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Object>);)
             }
             FieldType::Record(_) => {
                 if model_type.is_edge() {
                     quote!()
                 } else {
-                    quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
                 }
             }
             FieldType::Geometry(_) => {
-                quote!(#crate_name::validators::assert_impl_one!(#delifed_raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
             }
         };
         static_assertion
     }
 }
 
-impl Display for FieldTypeWrapper {
+impl Display for DbFieldType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl Deref for FieldTypeWrapper {
+impl Deref for DbFieldType {
     type Target = FieldType;
 
     fn deref(&self) -> &Self::Target {
@@ -126,7 +140,7 @@ impl Deref for FieldTypeWrapper {
     }
 }
 
-impl FromMeta for FieldTypeWrapper {
+impl FromMeta for DbFieldType {
     fn from_string(value: &str) -> darling::Result<Self> {
         match value.parse::<FieldType>() {
             Ok(f) => Ok(Self(f)),

@@ -4,6 +4,9 @@
  * Copyright (c) 2024 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
+
+use syn::{visit_mut::VisitMut, Lifetime, Type, TypeReference};
+
 pub struct TypeStripper;
 
 impl TypeStripper {
@@ -24,19 +27,4 @@ impl VisitMut for TypeStripper {
         // Continue traversing the type
         syn::visit_mut::visit_type_mut(self, i);
     }
-}
-
-pub fn replace_lifetimes_with_underscore(ty: &Type) -> Type {
-    let mut ty = ty.clone();
-    struct ReplaceLifetimesVisitor;
-
-    impl VisitMut for ReplaceLifetimesVisitor {
-        fn visit_lifetime_mut(&mut self, i: &mut Lifetime) {
-            *i = Lifetime::new("'_", i.apostrophe);
-        }
-    }
-
-    let mut visitor = ReplaceLifetimesVisitor;
-    visitor.visit_type_mut(&mut ty);
-    ty
 }
