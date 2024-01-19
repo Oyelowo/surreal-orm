@@ -108,7 +108,7 @@ impl RustFieldType {
         let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
 
         // Helper function to replace 'Self' in a path segment
-        fn replace_segment(segment: &mut PathSegment, replacement_path: &Path) {
+        fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
             if segment.ident == "Self" {
                 if let Some(first_segment) = replacement_path.segments.first() {
                     *segment = first_segment.clone();
@@ -128,7 +128,7 @@ impl RustFieldType {
                 Type::Path(type_path) => {
                     let mut new_type_path = type_path.clone();
                     for segment in &mut new_type_path.path.segments {
-                        replace_segment(segment, replacement_path);
+                        replace_self_in_segment(segment, replacement_path);
                     }
                     Type::Path(new_type_path)
                 }
@@ -483,7 +483,7 @@ impl RustFieldType {
                 .as_ref()
                 .map(|ct| {
                     let ty = ct.clone();
-                    let item = Self { ty };
+                    let item = Self::new(ty);
 
                     item.infer_surreal_type_heuristically(field_name, relation_type, model_type)
                 })

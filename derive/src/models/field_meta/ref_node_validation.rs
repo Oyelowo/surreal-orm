@@ -5,7 +5,13 @@
  * Licensed under the MIT license
  */
 
-use crate::models::LinkRustFieldType;
+use proc_macros_helpers::get_crate_name;
+use quote::quote;
+
+use crate::{
+    errors::ExtractorResult,
+    models::{variables::VariablesModelMacro, LinkRustFieldType},
+};
 
 #[derive(Default, Clone)]
 pub(crate) struct ReferencedNodeMeta {
@@ -544,26 +550,27 @@ impl ReferencedNodeMeta {
     }
 
     pub(crate) fn from_nested(
-        node_type_name: &LinkRustFieldType,
+        node_type: &LinkRustFieldType,
         normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
         is_list: bool,
-    ) -> Self {
+    ) -> ExtractorResult<Self> {
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
 
-        let schema_type_ident = format_ident!("{node_type_name}");
         let normalized_field_name_str = normalized_field_name.to_string();
         let crate_name = get_crate_name(false);
 
-        let foreign_node_schema_import = if *struct_name_ident == node_type_name.to_string() {
+        let foreign_node_schema_import = if *struct_name_ident == node_type.struct_type_name()? {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
-            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SchemaGetter>::Schema;)
+            // e.g type Book = <super::Book as SchemaGetter>::Schema;
+            // type Book<'a, 'b, T, U: Clone + Default, V: Node> = <super::Book<'a, 'b, T, U, V> as SchemaGetter>::Schema;
+            quote!(type #node_type = <super::#node_type as #crate_name::SchemaGetter>::Schema;)
         };
 
         let record_link_default_alias_as_method = if is_list {
