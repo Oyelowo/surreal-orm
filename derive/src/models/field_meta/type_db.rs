@@ -1,3 +1,9 @@
+#[derive(Debug, Clone, Default)]
+pub struct DbFieldTypeMeta {
+    pub(crate) db_field_type: TokenStream,
+    pub(crate) static_assertion: TokenStream,
+}
+
 #[derive(Debug, Clone)]
 pub struct FieldTypeWrapper(FieldType);
 

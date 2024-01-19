@@ -1,39 +1,13 @@
-#![allow(missing_docs)]
-#![allow(dead_code)]
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
- */
+pub(crate) mod attr_relate;
+pub(crate) mod attrs_permissions;
+pub(crate) mod generics;
+pub(crate) mod name;
+pub(crate) mod name_normalized;
+pub(crate) mod receiver;
+pub(crate) mod ref_node_validation;
+pub(crate) mod relations;
+pub(crate) mod rename;
+pub(crate) mod token_wrappers;
+pub(crate) mod type_db;
+pub(crate) mod type_rust;
 
-use std::{
-    fmt::{Display, Formatter},
-    ops::Deref,
-};
-
-use crate::models::{
-    replace_lifetimes_with_underscore, replace_self_in_type_str, GenericTypeExtractor,
-};
-
-use super::{
-    casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
-    errors::ExtractorResult,
-    field_rust_type::DbFieldTypeManager,
-    get_crate_name, parse_lit_to_tokenstream,
-    parser::DataType,
-    relations::{NodeType, NodeTypeName},
-    variables::VariablesModelMacro,
-    FieldNameNormalized,
-};
-use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
-use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use surreal_query_builder::FieldType;
-use syn::{Generics, Ident, Lit, LitStr, Path, Type};
-
-#[derive(Debug, Clone, Default)]
-pub struct DbFieldTypeMeta {
-    pub(crate) db_field_type: TokenStream,
-    pub(crate) static_assertion: TokenStream,
-}
