@@ -30,8 +30,7 @@ impl Permissions {
                 quote!(.permissions_none())
             }
             Self::FnName(permissions) => {
-                let permissions =
-                    parse_lit_to_tokenstream(permissions).map_err(|e| e.to_compile_error())?;
+                let permissions = parse_lit_to_tokenstream(permissions)?;
                 quote!(.permissions(#permissions.to_raw()))
             }
         };

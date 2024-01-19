@@ -77,6 +77,13 @@ impl std::ops::Deref for LinkRustFieldType {
 }
 
 pub struct RustFieldTypeSelfAllowed(Type);
+
+impl RustFieldTypeSelfAllowed {
+    pub fn into_inner(self) -> Type {
+        self.0
+    }
+}
+
 pub struct RustFieldTypeNoSelf(Type);
 
 impl From<Type> for RustFieldTypeSelfAllowed {
@@ -88,6 +95,50 @@ impl From<Type> for RustFieldTypeSelfAllowed {
 impl RustFieldTypeSelfAllowed {
     pub fn new(ty: Type) -> Self {
         Self(ty)
+    }
+
+    fn strip_bounds_from_type_generics(&self) -> Self {
+        let stripped_ty = match self.into_inner() {
+            Type::Path(type_path) => {
+                let mut new_type_path = type_path.clone();
+
+                // Iterate through the path segments
+                for segment in &mut new_type_path.path.segments {
+                    if let PathArguments::AngleBracketed(angle_bracketed) = &mut segment.arguments {
+                        // Collect only the generic identifiers, dropping bounds
+                        let modified_args = angle_bracketed
+                            .args
+                            .iter()
+                            .map(|arg| {
+                                match arg {
+                                    GenericArgument::Type(Type::Path(tp)) => {
+                                        // Keep only the type identifier
+                                        let ident = &tp.path.get_ident().unwrap();
+                                        parse_quote!(#ident)
+                                    }
+                                    GenericArgument::Lifetime(lifetime) => {
+                                        // Keep only the lifetime identifier
+                                        parse_quote!(#lifetime)
+                                    }
+                                    GenericArgument::Const(const_param) => {
+                                        // Keep only the const parameter
+                                        parse_quote!(#const_param)
+                                    }
+                                    _ => arg.clone(), // Other types of arguments are left as is
+                                }
+                            })
+                            .collect();
+
+                        // Replace the arguments with the modified ones
+                        angle_bracketed.args = modified_args;
+                    }
+                }
+
+                Type::Path(new_type_path)
+            }
+            _ => self.into_inner().clone(),
+        };
+        Self(stripped_ty)
     }
 
     pub fn replace_lifetimes_with_underscore(&self) -> Self {
@@ -111,7 +162,7 @@ impl RustFieldTypeSelfAllowed {
         struct_name: &syn::Ident,
         ty_generics: &syn::TypeGenerics,
     ) -> RustFieldTypeNoSelf {
-        let ty = &self.0.ty;
+        let ty = &self.into_inner();
         // TODO: Remove, every trait and lifetime bounds from struct type generics
         let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
 

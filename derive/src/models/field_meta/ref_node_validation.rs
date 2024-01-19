@@ -5,12 +5,15 @@
  * Licensed under the MIT license
  */
 
+use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
+use syn::Ident;
 
+use super::*;
 use crate::{
     errors::ExtractorResult,
-    models::{variables::VariablesModelMacro, LinkRustFieldType},
+    models::{variables::VariablesModelMacro, DataType, LinkRustFieldType},
 };
 
 #[derive(Default, Clone)]
@@ -563,6 +566,7 @@ impl ReferencedNodeMeta {
 
         let normalized_field_name_str = normalized_field_name.to_string();
         let crate_name = get_crate_name(false);
+        let node_type_alias_with_trait_bounds = node_type;
 
         let foreign_node_schema_import = if *struct_name_ident == node_type.struct_type_name()? {
             // Dont import for current struct since that already exists in scope
