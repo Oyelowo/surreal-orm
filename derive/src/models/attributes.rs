@@ -19,10 +19,10 @@ use crate::models::{
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     errors::ExtractorResult,
-    field_rust_type::{Attributes, FieldRustType},
+    field_rust_type::{Attributes, DbFieldTypeManager},
     get_crate_name, parse_lit_to_tokenstream,
     parser::DataType,
-    relations::NodeTypeName,
+    relations::{NodeType, NodeTypeName},
     variables::VariablesModelMacro,
 };
 use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
@@ -201,25 +201,80 @@ pub struct MyFieldReceiver {
 }
 
 #[derive(Debug, Clone)]
-pub struct FieldTypeDerived {
-    pub(crate) field_type: TokenStream,
-    pub(crate) static_assertion: TokenStream,
-}
+struct DbfieldTypeToken(TokenStream);
 
-impl Default for FieldTypeDerived {
+impl Default for DbfieldTypeToken {
     fn default() -> Self {
         let crate_name = get_crate_name(false);
-        Self {
-            field_type: quote!(#crate_name::FieldType::Any),
-            static_assertion: Default::default(),
-        }
+        Self(quote!(#crate_name::FieldType::Any))
     }
+}
+
+impl From<TokenStream> for DbfieldTypeToken {
+    fn from(value: TokenStream) -> Self {
+        Self(value)
+    }
+}
+impl ToTokens for DbfieldTypeToken {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.0.to_tokens(tokens)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+struct StaticAssertionToken(TokenStream);
+impl ToTokens for StaticAssertionToken {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.0.to_tokens(tokens)
+    }
+}
+impl From<TokenStream> for StaticAssertionToken {
+    fn from(value: TokenStream) -> Self {
+        Self(value)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct DbFieldTypeMeta {
+    pub(crate) db_field_type: TokenStream,
+    pub(crate) static_assertion: TokenStream,
 }
 
 pub struct FieldGenericsMeta<'a> {
     pub(crate) field_impl_generics: syn::ImplGenerics<'a>,
     pub(crate) field_ty_generics: syn::TypeGenerics<'a>,
     pub(crate) field_where_clause: Option<&'a syn::WhereClause>,
+}
+
+impl<'a> FieldGenericsMeta<'a> {
+    // This extracts generics metadata for field and from struct generics metadata.
+    // This could come from the concrete rust field type or
+    // as an attribute on the field from links which link to
+    // other tables structs models i.e Edge, Node and Objects.
+    // These are usually specified using the link_one, link_self
+    // and link_many and relate attributes.
+    // e.g
+    // #[surreal_orm(link_one = User<'a, T, u32>)]
+    // student: LinkOne<User<'a, T, u32>
+    pub fn new(
+        &self,
+        struct_name_ident: &Ident,
+        struct_generics: &Generics,
+        field_type: &Type,
+    ) -> FieldGenericsMeta<'a> {
+        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
+        let field_type =
+            &replace_self_in_type_str(&field_type, struct_name_ident, &struct_ty_generics);
+        let mut field_extractor = GenericTypeExtractor::new(struct_generics);
+        let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
+            .extract_generics_for_complex_type(&field_type)
+            .split_for_impl();
+        FieldGenericsMeta {
+            field_impl_generics,
+            field_ty_generics,
+            field_where_clause,
+        }
+    }
 }
 
 impl MyFieldReceiver {
@@ -251,39 +306,21 @@ impl MyFieldReceiver {
         }
     }
 
-    fn get_impl_generics(&self) -> syn::Generics {
-        let mut generics = syn::Generics::default();
-        generics
-            .params
-            .push(syn::GenericParam::Lifetime(syn::LifetimeParam::new(
-                syn::Lifetime::new("'a", proc_macro2::Span::call_site()),
-            )));
-        generics
-    }
-
-    // pub fn get_ty_generics
+    pub fn get_db_type(&self) -> ExtractorResult<DbFieldTypeMeta> {}
 
     pub fn get_type(
         &self,
         field_name_normalized: &String,
         model_type: &DataType,
-        table: &String,
-        field_impl_generics: &syn::Generics,
-        field_ty_generics: &syn::Generics,
-    ) -> ExtractorResult<Option<FieldTypeDerived>> {
-        println!(
-            "get_type1 fieldname {}; model_type {:?}; table {}",
-            field_name_normalized, model_type, table
-        );
+        table: &Ident,
+        // field_impl_generics: &syn::Generics,
+        // field_ty_generics: &syn::Generics,
+    ) -> ExtractorResult<Option<DbFieldTypeMeta>> {
         let mut static_assertions = vec![];
         let crate_name = get_crate_name(false);
 
         if let Some(type_) = &self.type_ {
             let field_type = type_.deref();
-            println!(
-                "get_type2 fieldname {}; field_type {:?};",
-                field_name_normalized, field_type
-            );
             // id: record<student>
             // in: record
             // out: record
@@ -418,7 +455,7 @@ impl MyFieldReceiver {
                         if !field_type.is_record_of_the_table(table) && !field_type.is_record_any()
                         {
                             let err = format!(
-                                "`id` field must be of type `record({})` or `record()`",
+                                "`id` field must be of type `record<{}>` or `record<any>`",
                                 table
                             );
                             return Err(syn::Error::new_spanned(
@@ -431,7 +468,7 @@ impl MyFieldReceiver {
                     "in" | "out" => {
                         if !field_type.is_record() {
                             let err = format!(
-                                "`{}` field must be of type `record()`",
+                                "`{}` field must be of type `record<any>`",
                                 field_name_normalized
                             );
                             return Err(syn::Error::new_spanned(
@@ -528,11 +565,6 @@ impl MyFieldReceiver {
                 }
             };
 
-            println!(
-                "get_type4 fieldname {}; field_type {:?};",
-                field_name_normalized, field_type
-            );
-
             static_assertions.push(static_assertion);
 
             // Get the field type
@@ -543,8 +575,8 @@ impl MyFieldReceiver {
             // define_field_methods.push(quote!(.type_(#crate_name::FieldType::String)));
             // let content
             let ft_string = field_type.to_string();
-            Ok(Some(FieldTypeDerived {
-                field_type: quote!(#ft_string.parse::<#crate_name::FieldType>()
+            Ok(Some(DbFieldTypeMeta {
+                db_field_type: quote!(#ft_string.parse::<#crate_name::FieldType>()
                                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
                 static_assertion: quote!( # ( #static_assertions ) *),
             }))
@@ -557,7 +589,6 @@ impl MyFieldReceiver {
                 model_type,
             )))
         } else {
-            println!("problem fieldname {}", field_name_normalized);
             return Err(syn::Error::new_spanned(field_name_normalized, format!(
                 r#"Unable to infer database type for the field. Type must be provided for field - {}.\
             e.g use the annotation #[surreal_orm(type_="int")] to provide the type explicitly."#,
@@ -663,13 +694,7 @@ impl MyFieldReceiver {
             || self.link_many.is_some()
     }
 
-    pub fn rust_type(&self) -> FieldRustType {
-        let ty = if self.ident.to_token_stream().to_string() == "age" {
-            //create u8 type for age
-            syn::parse_str::<syn::Type>("u8").unwrap()
-        } else {
-            self.ty.clone()
-        };
+    pub fn rust_type(&self) -> DbFieldTypeManager {
         let attrs = Attributes {
             link_one: self.link_one.as_ref(),
             link_self: self.link_self.as_ref(),
@@ -677,7 +702,7 @@ impl MyFieldReceiver {
             nest_array: self.nest_array.as_ref(),
             nest_object: self.nest_object.as_ref(),
         };
-        let rust_type = FieldRustType::new(ty.clone(), attrs);
+        let rust_type = DbFieldTypeManager::new(ty.clone(), attrs);
         rust_type
     }
 }
@@ -771,7 +796,7 @@ impl ReferencedNodeMeta {
         _struct_name_ident: &Ident,
         field_name_normalized: &String,
         data_type: &DataType,
-        table: &String,
+        table: &Ident,
     ) -> ExtractorResult<Self> {
         println!(
             "with_field_definition1 fieldname {}; ",
@@ -795,8 +820,8 @@ impl ReferencedNodeMeta {
             field_name_normalized,
         );
         let field_type_resolved = if let Some(type_data) = type_inf {
-            let FieldTypeDerived {
-                field_type,
+            let DbFieldTypeMeta {
+                db_field_type: field_type,
                 static_assertion,
             } = type_data;
 
@@ -1212,7 +1237,7 @@ impl ReferencedNodeMeta {
     }
 
     pub(crate) fn from_record_link(
-        node_type_name: &NodeTypeName,
+        node_type: &NodeType,
         normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
         is_list: bool,
@@ -1224,19 +1249,19 @@ impl ReferencedNodeMeta {
         } = VariablesModelMacro::new();
         let normalized_field_name_str = normalized_field_name.to_string();
 
-        let schema_type_ident = format_ident!("{node_type_name}");
+        let schema_type = node_type;
         let crate_name = get_crate_name(false);
 
-        let foreign_node_schema_import = if *struct_name_ident == node_type_name.to_string() {
+        let foreign_node_schema_import = if *struct_name_ident == node_type.to_string() {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
-            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SchemaGetter>::Schema;)
+            quote!(type #schema_type = <super::#schema_type as #crate_name::SchemaGetter>::Schema;)
         };
 
         let record_link_default_alias_as_method = if is_list {
             quote!(
-                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #schema_type_ident {
+                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #schema_type {
                      let clause: #crate_name::NodeAliasClause = clause.into();
                      let clause: #crate_name::NodeClause = clause.into_inner();
 
@@ -1247,7 +1272,7 @@ impl ReferencedNodeMeta {
                     };
 
 
-                    #schema_type_ident::#__________connect_node_to_graph_traversal_string(
+                    #schema_type::#__________connect_node_to_graph_traversal_string(
                         self,
                         clause.with_field(normalized_field_name_str)
                     )
@@ -1256,7 +1281,7 @@ impl ReferencedNodeMeta {
             )
         } else {
             quote!(
-                pub fn #normalized_field_name(&self) -> #schema_type_ident {
+                pub fn #normalized_field_name(&self) -> #schema_type {
                     let clause = #crate_name::Clause::from(#crate_name::Empty);
 
                     let normalized_field_name_str = if self.build().is_empty(){
@@ -1265,7 +1290,7 @@ impl ReferencedNodeMeta {
                         format!(".{}", #normalized_field_name_str)
                     };
 
-                    #schema_type_ident::#__________connect_node_to_graph_traversal_string(
+                    #schema_type::#__________connect_node_to_graph_traversal_string(
                         self,
                         clause.with_field(normalized_field_name_str)
                     )
@@ -1280,7 +1305,7 @@ impl ReferencedNodeMeta {
             foreign_node_schema_import,
 
             foreign_node_type_validator: quote!(
-                #crate_name::validators::assert_impl_one!(#schema_type_ident: #crate_name::Node);
+                #crate_name::validators::assert_impl_one!(#schema_type: #crate_name::Node);
             ),
 
             record_link_default_alias_as_method,
