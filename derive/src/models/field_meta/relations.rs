@@ -5,14 +5,12 @@
  * Licensed under the MIT license
  */
 
-use proc_macro::TokenStream;
 use quote::ToTokens;
 use syn::{spanned::Spanned, Type};
 
-use super::{
-    attributes::{MyFieldReceiver, Relate},
-    errors::ExtractorResult,
-};
+use crate::{errors::ExtractorResult, models::MyFieldReceiver};
+
+use super::*;
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
@@ -27,7 +25,7 @@ pub(crate) enum RelationType {
 }
 
 impl RelationType {
-    pub fn is_none(&self) -> bool {
+    pub fn is_none_relational(&self) -> bool {
         matches!(self, RelationType::None)
     }
 
@@ -174,9 +172,10 @@ wrapper_struct_to_ident!(EdgeTableName);
 pub(crate) struct NodeTableName(String);
 wrapper_struct_to_ident!(NodeTableName);
 
-#[derive(Debug, Clone)]
-pub(crate) struct NodeTypeName(String);
-wrapper_struct_to_ident!(NodeTypeName);
+// TODO: Remove. Just use LinkRustType from which type name could be extracted
+// #[derive(Debug, Clone)]
+// pub(crate) struct NodeTypeName(String);
+// wrapper_struct_to_ident!(NodeTypeName);
 
 //
 #[derive(Debug, Clone)]
@@ -208,10 +207,6 @@ impl NodeType {
     pub fn into_inner(self) -> Type {
         self.0
     }
-
-    // pub fn to_type(self) -> Type {
-    //     self.0.clone()
-    // }
 
     pub fn ident(&self) -> ExtractorResult<syn::Ident> {
         match &self.0 {

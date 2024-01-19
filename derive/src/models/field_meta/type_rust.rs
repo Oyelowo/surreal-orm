@@ -7,16 +7,74 @@
 
 use std::path::Path;
 
+use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
 use syn::{
-    self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Lifetime,
+    self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Ident, Lifetime,
     PathArguments, PathSegment, Type, TypeReference,
 };
 
 use crate::{errors::ExtractorResult, models::DataType};
 
 use super::*;
+
+pub struct LinkRustFieldType(pub RustFieldType);
+
+impl LinkRustFieldType {
+    pub fn into_inner(self) -> RustFieldType {
+        self.0
+    }
+
+    pub fn to_type(&self) -> Type {
+        self.0.ty.clone()
+    }
+
+    pub fn struct_type_name(&self) -> ExtractorResult<Ident> {
+        match self.to_type() {
+            Type::Path(type_path) => {
+                let last_segment = type_path
+                    .path
+                    .segments
+                    .last()
+                    .ok_or_else(|| darling::Error::custom("Expected a type. Make sure there are no typos and you are using a proper struct as the linked Node."))?;
+                Ok(last_segment.ident.clone())
+            }
+            _ => Err(syn::Error::new(self.to_type().span(), "Expected a struct type").into()),
+        }
+    }
+}
+
+impl FromMeta for LinkRustFieldType {
+    fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
+        let ty = match item {
+            syn::Meta::Path(path) => {
+                let ty = path
+                    .segments
+                    .last()
+                    .ok_or_else(|| darling::Error::custom("Expected a type"))?;
+                // TODO: Cross check if to check last part of the segment
+                // in case full path is provided. Confirm that get_ident takes care of that
+                // if not, then we need to check the last segment
+                // let ty = path
+                //     .get_ident()
+                //     .ok_or_else(|| darling::Error::custom("Expected a type"))?;
+                let ty = syn::parse_str::<syn::Type>(&ty.to_string())?;
+                ty
+            }
+            _ => return Err(darling::Error::custom("Expected a type").with_span(&item.span())),
+        };
+        Ok(Self(RustFieldType::new(ty)))
+    }
+}
+
+impl std::ops::Deref for LinkRustFieldType {
+    type Target = RustFieldType;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 pub struct RustFieldType(Type);
 

@@ -8,6 +8,7 @@
 use crate::{errors::ExtractorResult, models::DataType};
 
 use super::*;
+use darling::FromField;
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use surreal_query_builder::FieldType;
@@ -20,7 +21,8 @@ pub struct MyFieldReceiver {
     /// enum bodies, this can be `None`.
     pub(crate) ident: Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
-    pub(crate) ty: syn::Type,
+    // pub(crate) ty: syn::Type,
+    pub(crate) ty: RustFieldType,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
@@ -35,21 +37,21 @@ pub struct MyFieldReceiver {
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) link_one: Option<Type>,
+    pub(crate) link_one: Option<LinkRustFieldType>,
 
     // reference singular: LinkSelf<Account>
     #[darling(default)]
-    pub(crate) link_self: Option<Type>,
+    pub(crate) link_self: Option<LinkRustFieldType>,
 
     // reference plural: LinkMany<Account>
     #[darling(default)]
-    pub(crate) link_many: Option<Type>,
+    pub(crate) link_many: Option<LinkRustFieldType>,
 
     #[darling(default)]
-    pub(crate) nest_array: Option<Type>,
+    pub(crate) nest_array: Option<LinkRustFieldType>,
 
     #[darling(default)]
-    pub(crate) nest_object: Option<Type>,
+    pub(crate) nest_object: Option<LinkRustFieldType>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,
@@ -60,7 +62,7 @@ pub struct MyFieldReceiver {
     // #[darling(default)]
     // default: ::std::option::Option<syn::Expr>,
     // #[darling(default, rename = "type")]
-    pub(crate) type_: Option<FieldTypeWrapper>,
+    pub(crate) type_: Option<DbFieldType>,
 
     #[darling(default)]
     pub(crate) assert: Option<syn::LitStr>,
@@ -143,7 +145,7 @@ impl MyFieldReceiver {
         table: &Ident,
         // field_impl_generics: &syn::Generics,
         // field_ty_generics: &syn::Generics,
-    ) -> ExtractorResult<Option<DbFieldTypeMeta>> {
+    ) -> ExtractorResult<Option<DbFieldTypeAst>> {
         let db_field_type_string = self.type_;
     }
 
@@ -253,8 +255,8 @@ impl MyFieldReceiver {
             || self.link_many.is_some()
     }
 
-    pub fn rust_type(&self) -> DbFieldTypeManager {
-        let rust_type = DbFieldTypeManager::new(self.ty);
+    pub fn rust_type(&self) -> RustFieldType {
+        let rust_type = RustFieldType::new(self.ty);
         rust_type
     }
 }

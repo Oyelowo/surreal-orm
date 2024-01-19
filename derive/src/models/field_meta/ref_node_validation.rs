@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use crate::models::LinkRustFieldType;
+
 #[derive(Default, Clone)]
 pub(crate) struct ReferencedNodeMeta {
     pub(crate) foreign_node_type: TokenStream,
@@ -542,7 +544,7 @@ impl ReferencedNodeMeta {
     }
 
     pub(crate) fn from_nested(
-        node_type_name: &NodeTypeName,
+        node_type_name: &LinkRustFieldType,
         normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
         is_list: bool,

@@ -18,7 +18,7 @@ use quote::{format_ident, quote};
 
 use crate::models::{
     attributes::FieldGenericsMeta, relations::NodeType, replace_lifetimes_with_underscore,
-    replace_self_in_type_str,
+    replace_self_in_type_str, LinkRustFieldType, ReferencedNodeMeta,
 };
 
 use super::{
@@ -464,7 +464,7 @@ impl SchemaFieldsProperties {
                 )
             };
 
-            let get_nested_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
+            let get_nested_meta_with_defs = |node_object: &LinkRustFieldType, is_list: bool| {
                 ReferencedNodeMeta::from_nested(
                     node_object,
                     field_ident_normalised,
