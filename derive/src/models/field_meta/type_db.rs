@@ -1,3 +1,9 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2024 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldTypeMeta {
     pub(crate) db_field_type: TokenStream,
