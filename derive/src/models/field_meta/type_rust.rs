@@ -15,10 +15,14 @@ use syn::{
     PathArguments, PathSegment, Type, TypeReference,
 };
 
-use crate::{errors::ExtractorResult, models::DataType};
+use crate::{
+    errors::ExtractorResult,
+    models::{derive_attributes::TableDeriveAttributes, DataType},
+};
 
 use super::*;
 
+#[derive(Debug)]
 pub struct LinkRustFieldType(pub RustFieldTypeSelfAllowed);
 
 impl LinkRustFieldType {
@@ -76,6 +80,7 @@ impl std::ops::Deref for LinkRustFieldType {
     }
 }
 
+#[derive(Debug)]
 pub struct RustFieldTypeSelfAllowed(Type);
 
 impl RustFieldTypeSelfAllowed {
@@ -85,6 +90,12 @@ impl RustFieldTypeSelfAllowed {
 }
 
 pub struct RustFieldTypeNoSelf(Type);
+
+impl RustFieldTypeNoSelf {
+    pub fn into_inner(self) -> Type {
+        self.0
+    }
+}
 
 impl From<Type> for RustFieldTypeSelfAllowed {
     fn from(ty: Type) -> Self {
@@ -206,6 +217,26 @@ impl RustFieldTypeSelfAllowed {
         }
 
         replace_type(ty, &replacement_path).into()
+    }
+
+    pub fn get_field_generics_meta<'a>(
+        &self,
+        table_def: &TableDeriveAttributes,
+    ) -> FieldGenericsMeta<'a> {
+        let struct_name_ident = table_def.ident;
+        let struct_generics = table_def.generics;
+        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
+        // let field_type =
+        //     &self.replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics);
+        let mut field_extractor = GenericTypeExtractor::new(&struct_generics);
+        let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
+            .extract_generics_for_complex_type(&self.into_inner())
+            .split_for_impl();
+        FieldGenericsMeta {
+            field_impl_generics,
+            field_ty_generics,
+            field_where_clause,
+        }
     }
 
     pub fn is_numeric(&self) -> bool {

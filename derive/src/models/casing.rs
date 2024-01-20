@@ -13,10 +13,12 @@ use strum_macros::EnumString;
 /// "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
 #[derive(Debug, Clone, Copy, EnumString, Default)]
 pub enum CaseString {
+    #[default]
+    None,
+    
     #[strum(serialize = "camelCase")]
     Camel,
     #[strum(serialize = "snake_case")]
-    #[default]
     Snake,
     // Normal,
     #[strum(serialize = "PascalCase")]

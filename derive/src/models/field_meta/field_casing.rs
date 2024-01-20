@@ -6,13 +6,14 @@
  */
 
 use convert_case::{Case, Casing};
+use syn::Ident;
 
 use crate::models::CaseString;
 
 #[derive(Debug, Clone)]
 pub(crate) struct FieldIdentUnCased {
-    pub(crate) uncased_field_name: String,
-    pub(crate) casing: Option<CaseString>,
+    pub(crate) uncased_field_name: Ident,
+    pub(crate) casing: CaseString,
 }
 
 #[derive(Debug, Clone)]
@@ -36,18 +37,18 @@ impl From<FieldIdentUnCased> for FieldIdentCased {
     /// it defaults to exactly how the fields are written out.
     /// However, Field rename attribute overrides this.
     fn from(field_uncased: FieldIdentUnCased) -> Self {
-        let field_name = field_uncased.uncased_field_name;
+        let field_name = field_uncased.uncased_field_name.to_string();
 
         match field_uncased.casing {
-            None => field_name,
-            Some(CaseString::Camel) => field_name.to_case(Case::Camel),
-            Some(CaseString::Snake) => field_name.to_case(Case::Snake),
-            Some(CaseString::Pascal) => field_name.to_case(Case::Pascal),
-            Some(CaseString::Lower) => field_name.to_case(Case::Lower),
-            Some(CaseString::Upper) => field_name.to_case(Case::Upper),
-            Some(CaseString::ScreamingSnake) => field_name.to_case(Case::ScreamingSnake),
-            Some(CaseString::Kebab) => field_name.to_case(Case::Kebab),
-            Some(CaseString::ScreamingKebab) => field_name.to_case(Case::ScreamingSnake),
+            CaseString::None => field_name,
+            CaseString::Camel => field_name.to_case(Case::Camel),
+            CaseString::Snake => field_name.to_case(Case::Snake),
+            CaseString::Pascal => field_name.to_case(Case::Pascal),
+            CaseString::Lower => field_name.to_case(Case::Lower),
+            CaseString::Upper => field_name.to_case(Case::Upper),
+            CaseString::ScreamingSnake => field_name.to_case(Case::ScreamingSnake),
+            CaseString::Kebab => field_name.to_case(Case::Kebab),
+            CaseString::ScreamingKebab => field_name.to_case(Case::ScreamingSnake),
         }
         .into()
     }

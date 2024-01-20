@@ -77,7 +77,7 @@ impl TableDeriveAttributes {
         let casing = match struct_level_casing {
             Some(Ok(case)) => case,
             Some(Err(e)) => return Err(darling::Error::custom(e.to_string()).into()),
-            None => CaseString::Snake,
+            None => CaseString::None,
         };
         Ok(casing)
     }

@@ -18,7 +18,7 @@ use quote::{format_ident, quote};
 
 use crate::models::{
     attributes::FieldGenericsMeta, relations::NodeType, replace_lifetimes_with_underscore,
-    replace_self_in_type_str, LinkRustFieldType, ReferencedNodeMeta,
+    replace_self_in_type_str, LinkRustFieldType, NormalisedField, ReferencedNodeMeta,
 };
 
 use super::{
@@ -374,9 +374,9 @@ impl SchemaFieldsProperties {
             };
             let relationship = RelationType::from(field_receiver);
             let NormalisedField {
-                ref field_ident_normalised,
-                ref field_ident_normalised_as_str,
-            } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
+                field_ident_raw_to_underscore_suffix,
+                field_ident_serialized_fmt,
+            } = &NormalisedField::from_receiever(field_receiver, struct_level_casing);
 
             println!("Prinnntts0");
             let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
@@ -423,14 +423,14 @@ impl SchemaFieldsProperties {
             let get_link_meta_with_defs = |node_object: &NodeType, is_list: bool| {
                 ReferencedNodeMeta::from_record_link(
                     node_object,
-                    field_ident_normalised,
+                    field_ident_raw_to_underscore_suffix,
                     struct_name_ident,
                     is_list,
                 )
                 .with_field_definition(
                     field_receiver,
                     struct_name_ident,
-                    field_ident_normalised_as_str,
+                    field_ident_serialized_fmt,
                     &data_type,
                     &table_name,
                 )
@@ -439,14 +439,14 @@ impl SchemaFieldsProperties {
             let get_nested_meta_with_defs = |node_object: &LinkRustFieldType, is_list: bool| {
                 ReferencedNodeMeta::from_nested(
                     node_object,
-                    field_ident_normalised,
+                    field_ident_raw_to_underscore_suffix,
                     struct_name_ident,
                     is_list,
                 )
                 .with_field_definition(
                     field_receiver,
                     struct_name_ident,
-                    field_ident_normalised_as_str,
+                    field_ident_serialized_fmt,
                     &data_type,
                     &table_name,
                 )
@@ -455,26 +455,24 @@ impl SchemaFieldsProperties {
             let update_ser_field_type = |serializable_field_type: &mut Vec<TokenStream>| {
                 if !field_receiver.skip_serializing && !field_receiver.skip {
                     serializable_field_type
-                        .push(quote!(#crate_name::Field::new(#field_ident_normalised_as_str)));
+                        .push(quote!(#crate_name::Field::new(#field_ident_serialized_fmt)));
                 }
             };
 
             let mut update_aliases_struct_fields_types_kv = || {
-                store
-                    .aliases_struct_fields_types_kv
-                    .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
+                store.aliases_struct_fields_types_kv.push(
+                    quote!(pub #field_ident_raw_to_underscore_suffix: #crate_name::AliasName, ),
+                );
 
                 store
                     .aliases_struct_fields_names_kv
-                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                    .push(quote!(#field_ident_raw_to_underscore_suffix: #field_ident_serialized_fmt.into(),));
             };
 
             let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
                 let field_name_as_camel = format_ident!(
                     "{}_______________",
-                    field_ident_normalised_as_str
-                        .to_string()
-                        .to_case(Case::Pascal)
+                    field_ident_serialized_fmt.to_string().to_case(Case::Pascal)
                 );
 
                 let numeric_trait = if field_receiver.is_numeric() {
@@ -707,26 +705,26 @@ impl SchemaFieldsProperties {
                         ));
 
                 store.schema_struct_fields_types_kv.push(
-                    quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ),
+                    quote!(pub #field_ident_raw_to_underscore_suffix: #_____field_names::#field_name_as_camel, ),
                 );
 
                 store
                     .schema_struct_fields_names_kv
-                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                    .push(quote!(#field_ident_raw_to_underscore_suffix: #field_ident_serialized_fmt.into(),));
 
                 store.schema_struct_fields_names_kv_prefixed
-                            .push(quote!(#field_ident_normalised:
-                                                #crate_name::Field::new(format!("{}.{}", prefix.build(), #field_ident_normalised_as_str))
+                            .push(quote!(#field_ident_raw_to_underscore_suffix:
+                                                #crate_name::Field::new(format!("{}.{}", prefix.build(), #field_ident_serialized_fmt))
                                                 .with_bindings(prefix.get_bindings()).into(),));
 
                 store
                     .schema_struct_fields_names_kv_empty
-                    .push(quote!(#field_ident_normalised: "".into(),));
+                    .push(quote!(#field_ident_raw_to_underscore_suffix: "".into(),));
 
                 store.connection_with_field_appended
                         .push(quote!(
-                                    #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
-                                      .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
+                                    #schema_instance.#field_ident_raw_to_underscore_suffix = #schema_instance.#field_ident_raw_to_underscore_suffix
+                                      .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_serialized_fmt))
                                             .#____________update_many_bindings(#bindings).into();
                                 ));
             };
@@ -747,7 +745,7 @@ impl SchemaFieldsProperties {
                 // exist.
                 store
                     .renamed_serialized_fields
-                    .push(quote!(pub #field_ident_normalised: &'static str, ));
+                    .push(quote!(pub #field_ident_raw_to_underscore_suffix: &'static str, ));
             };
 
             println!("Prinnntts4");
@@ -761,7 +759,7 @@ impl SchemaFieldsProperties {
                         .update(&relation, struct_name_ident, field_type);
                     update_aliases_struct_fields_types_kv();
                     let connection = relation.connection_model;
-                    store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
+                    store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_serialized_fmt))));
                     ReferencedNodeMeta::default()
                 }
 
@@ -774,7 +772,7 @@ impl SchemaFieldsProperties {
                     update_field_names_fields_types_kv(None);
 
                     insert_non_null_updater_token(
-                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
 
                     // let delifed_type = replace_lifetimes_with_underscore(&mut field_type.clone());
@@ -805,7 +803,7 @@ impl SchemaFieldsProperties {
                     update_field_names_fields_types_kv(None);
 
                     store.non_null_updater_fields.push(
-                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
 
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
@@ -823,7 +821,7 @@ impl SchemaFieldsProperties {
                     ));
 
                     insert_non_null_updater_token(
-                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
 
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
@@ -837,7 +835,7 @@ impl SchemaFieldsProperties {
                     update_field_names_fields_types_kv(None);
 
                     insert_non_null_updater_token(
-                        quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ),
+                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ),
                     );
 
                     get_nested_meta_with_defs(&node_object, false)
@@ -848,7 +846,7 @@ impl SchemaFieldsProperties {
                     let foreign_node = format_ident!("{node_object}");
 
                     insert_non_null_updater_token(
-                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
 
                     let nesting_level = count_vec_nesting(field_type);
@@ -867,12 +865,12 @@ impl SchemaFieldsProperties {
                     update_field_names_fields_types_kv(None);
                     println!("RelationType::None 2");
                     insert_non_null_updater_token(
-                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
                     println!("RelationType::None 3");
 
                     let ref_node_meta = if field_receiver.rust_type().is_list() {
-                        ReferencedNodeMeta::from_simple_array(field_ident_normalised)
+                        ReferencedNodeMeta::from_simple_array(field_ident_raw_to_underscore_suffix)
                     } else {
                         ReferencedNodeMeta::default()
                     };
@@ -881,7 +879,7 @@ impl SchemaFieldsProperties {
                         .with_field_definition(
                             field_receiver,
                             struct_name_ident,
-                            field_ident_normalised_as_str,
+                            field_ident_serialized_fmt,
                             &data_type,
                             &table_name,
                         )
@@ -890,7 +888,7 @@ impl SchemaFieldsProperties {
             };
             println!("Prinnntts6");
 
-            if field_ident_normalised_as_str == "id" {
+            if field_ident_serialized_fmt == "id" {
                 store.table_id_type = quote!(#field_type);
                 // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
             }
@@ -905,7 +903,7 @@ impl SchemaFieldsProperties {
                 store
                     .field_metadata
                     .push(quote!(#crate_name::FieldMetadata {
-                        name: #field_ident_normalised_as_str.into(),
+                        name: #field_ident_serialized_fmt.into(),
                         old_name: #old_field_name_ts,
                         definition: ::std::vec![ #field_definition ]
                     }));
@@ -928,7 +926,7 @@ impl SchemaFieldsProperties {
 
             store
                 .serialized_field_names_normalised
-                .push(field_ident_normalised_as_str.to_owned());
+                .push(field_ident_serialized_fmt.to_owned());
         }
 
         println!("end...");
