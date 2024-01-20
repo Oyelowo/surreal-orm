@@ -11,11 +11,12 @@ use strum_macros::EnumString;
 
 /// Options: "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case",
 /// "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
-#[derive(Debug, Clone, Copy, EnumString)]
+#[derive(Debug, Clone, Copy, EnumString, Default)]
 pub enum CaseString {
     #[strum(serialize = "camelCase")]
     Camel,
     #[strum(serialize = "snake_case")]
+    #[default]
     Snake,
     // Normal,
     #[strum(serialize = "PascalCase")]
