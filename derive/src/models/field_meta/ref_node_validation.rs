@@ -474,22 +474,24 @@ impl ReferencedNodeMeta {
     }
 
     pub(crate) fn from_record_link(
-        node_type: &NodeType,
-        normalized_field_name: &::syn::Ident,
+        linked_node_type: &LinkRustFieldType,
+        normalized_field_name: &NormalisedField,
+        // normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
         is_list: bool,
     ) -> Self {
+        let normalized_field_name_str = normalized_field_name.field_ident_serialized_fmt;
+        let normalized_field_name = normalized_field_name.field_ident_raw_to_underscore_suffix;
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
-        let normalized_field_name_str = normalized_field_name.to_string();
 
-        let schema_type = node_type;
+        let schema_type = linked_node_type;
         let crate_name = get_crate_name(false);
 
-        let foreign_node_schema_import = if *struct_name_ident == node_type.to_string() {
+        let foreign_node_schema_import = if *struct_name_ident == linked_node_type.to_string() {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {

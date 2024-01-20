@@ -8,6 +8,8 @@
 use darling::FromMeta;
 use syn::Type;
 
+use crate::models::{LinkRustFieldType, RustFieldTypeSelfAllowed};
+
 #[derive(Debug, Clone)]
 pub struct Relate {
     /// e.g ->writes->book
@@ -15,7 +17,7 @@ pub struct Relate {
     // #[darling(default)]
     /// e.g StudentWritesBook,
     /// derived from: type StudentWritesBook = Writes<Student, Book>;
-    pub model: Option<Type>,
+    pub model: Option<LinkRustFieldType>,
 }
 //#[rename(se)]
 impl FromMeta for Relate {
