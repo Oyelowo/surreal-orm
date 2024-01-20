@@ -25,6 +25,7 @@ use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
     casing::CaseString,
     count_vec_nesting,
+    derive_attributes::TableDeriveAttributes,
     errors::ExtractorResult,
     generate_nested_vec_type,
     get_crate_name,
@@ -346,6 +347,7 @@ impl SchemaFieldsProperties {
     /// Derive the schema properties for a struct
     pub(crate) fn from_receiver_data(
         args: SchemaPropertiesArgs,
+        table_derive_attributes: &TableDeriveAttributes,
         struct_generics: &syn::Generics,
         data_type: DataType,
     ) -> ExtractorResult<Self> {

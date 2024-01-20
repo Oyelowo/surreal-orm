@@ -15,7 +15,7 @@ use std::{ops::Deref, str::FromStr};
 
 use syn::{self, parse_macro_input};
 
-use super::{derive_attributes::TableDeriveAttributes, *, variables::VariablesModelMacro};
+use super::{derive_attributes::TableDeriveAttributes, variables::VariablesModelMacro, *};
 
 // #[derive(Debug, FromDeriveInput)]
 // #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
@@ -51,6 +51,7 @@ impl Deref for EdgeToken {
 
 impl ToTokens for EdgeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
+        let table_derive_attributes = &self.0;
         let TableDeriveAttributes {
             ident: struct_name_ident,
             generics,
@@ -59,7 +60,7 @@ impl ToTokens for EdgeToken {
             rename_all,
             relax_table_name,
             ..
-        } = &self.0;
+        } = &table_derive_attributes;
         let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
         let Ok(table_definitions) = self.get_table_definition_token() else {
@@ -81,9 +82,7 @@ impl ToTokens for EdgeToken {
                 Err(err) => return tokens.extend(err.write_errors()),
             };
 
-        let struct_level_casing = rename_all.as_ref().map(|case| {
-            CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
-        });
+        let struct_level_casing = table_derive_attributes.struct_level_casing();
 
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
