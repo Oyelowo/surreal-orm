@@ -32,6 +32,7 @@ use super::{
     relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
     // replace_self_in_id,
     variables::VariablesModelMacro,
+    DataType,
     GenericTypeExtractor,
     TypeStripper,
 };
@@ -334,30 +335,21 @@ impl std::hash::Hash for TokenStreamHashable {
     }
 }
 
-#[derive(Clone)]
-pub struct SchemaPropertiesArgs<'a> {
-    pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
-    pub struct_level_casing: Option<CaseString>,
-    pub struct_name_ident: &'a syn::Ident,
-    // pub table_name_ident: &'a syn::Ident,
-    pub table_name: Ident,
-}
-
 impl SchemaFieldsProperties {
     /// Derive the schema properties for a struct
     pub(crate) fn from_receiver_data(
-        args: SchemaPropertiesArgs,
         table_derive_attributes: &TableDeriveAttributes,
-        struct_generics: &syn::Generics,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
-        let SchemaPropertiesArgs {
+        let struct_level_casing = table_derive_attributes.struct_level_casing()?;
+        let struct_generics = &table_derive_attributes.generics;
+        let TableDeriveAttributes {
             data,
-            struct_level_casing,
-            struct_name_ident,
+            ident: struct_name_ident,
             table_name,
+            generics,
             ..
-        } = args;
+        } = table_derive_attributes;
 
         let mut store = Self::default();
         for field_receiver in data
@@ -369,33 +361,11 @@ impl SchemaFieldsProperties {
             println!("Start...");
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
-
-            // let numeric_type_setter = if is_generic_type(field_type, struct_generics) {
-            //     quote!(#crate_name::sql::Value)
-            // } else {
-            //     quote!(#field_type)
-            // };
-            //     numeric_type_setter = ffi_type;
             let field_name_original = field_receiver
                 .ident
                 .as_ref()
                 .expect("field identifier does not exist");
-            // let ref field_type = if field_name_original == "age" {
-            //     //create u8 type
-            //     let u8_type = syn::parse_str::<syn::Type>("u8").unwrap();
-            //     u8_type
-            // } else {
-            //     field_type.clone()
-            // };
-            // let ref field_type = TypeStripper::strip_references_and_lifetimes(&field_type);
-            println!(
-                "struct_name: {}; field_name: {}; field_type: {}",
-                struct_name_ident,
-                field_name_original,
-                field_type.to_token_stream()
-            );
-            // let ref field_type = syn::parse2::<syn::Type>(quote!("u8")).unwrap();
-            let old_field_name = match field_receiver.old_name.as_ref() {
+            let old_field_name_ts = match field_receiver.old_name.as_ref() {
                 Some(old_name) => {
                     let old_name = old_name.to_string();
                     quote!(::std::option::Option::Some(#old_name.into()))
@@ -936,7 +906,7 @@ impl SchemaFieldsProperties {
                     .field_metadata
                     .push(quote!(#crate_name::FieldMetadata {
                         name: #field_ident_normalised_as_str.into(),
-                        old_name: #old_field_name,
+                        old_name: #old_field_name_ts,
                         definition: ::std::vec![ #field_definition ]
                     }));
             }
