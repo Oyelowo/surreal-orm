@@ -359,9 +359,7 @@ impl SchemaFieldsProperties {
             .expect("Should never be enum")
             .fields
         {
-            println!("Start...");
             let crate_name = get_crate_name(false);
-            let field_type = &field_receiver.ty;
             let field_name_original = field_receiver
                 .ident
                 .as_ref()
@@ -400,7 +398,7 @@ impl SchemaFieldsProperties {
                 ..
             } = VariablesModelMacro::new();
 
-            let get_link_meta_with_defs = |node_object: &NodeType, is_list: bool| {
+            let get_link_meta_with_defs = |node_object: &LinkRustFieldType, is_list: bool| {
                 ReferencedNodeMeta::from_record_link(
                     node_object,
                     field_ident_raw_to_underscore_suffix,
@@ -728,9 +726,7 @@ impl SchemaFieldsProperties {
                     .push(quote!(pub #field_ident_raw_to_underscore_suffix: &'static str, ));
             };
 
-            println!("Prinnntts4");
             update_ser_field_type(&mut store.serializable_fields);
-            println!("Prinnntts5");
 
             let referenced_node_meta = match relationship.clone() {
                 RelationType::Relate(relation) => {
@@ -792,8 +788,7 @@ impl SchemaFieldsProperties {
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
 
-                RelationType::LinkMany(node_object) => {
-                    let foreign_node = format_ident!("{node_object}");
+                RelationType::LinkMany(foreign_node) => {
                     update_ser_field_type(&mut store.link_many_fields);
                     update_ser_field_type(&mut store.linked_fields);
                     update_field_names_fields_types_kv(Some(

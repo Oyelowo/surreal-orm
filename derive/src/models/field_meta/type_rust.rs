@@ -20,8 +20,14 @@ use crate::{
 
 use super::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LinkRustFieldType(pub RustFieldTypeSelfAllowed);
+
+impl ToTokens for LinkRustFieldType {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.into_inner().into_inner().to_tokens(tokens)
+    }
+}
 
 impl LinkRustFieldType {
     pub fn into_inner(self) -> RustFieldTypeSelfAllowed {
@@ -78,7 +84,7 @@ impl std::ops::Deref for LinkRustFieldType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RustFieldTypeSelfAllowed(Type);
 
 impl RustFieldTypeSelfAllowed {

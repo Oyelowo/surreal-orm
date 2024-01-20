@@ -16,11 +16,11 @@ use super::*;
 pub(crate) enum RelationType {
     // ->studies->Course
     Relate(Relate),
-    LinkOne(NodeType),
-    LinkSelf(NodeType),
-    LinkMany(NodeType),
-    NestObject(NodeType),
-    NestArray(NodeType),
+    LinkOne(LinkRustFieldType),
+    LinkSelf(LinkRustFieldType),
+    LinkMany(LinkRustFieldType),
+    NestObject(LinkRustFieldType),
+    NestArray(LinkRustFieldType),
     None,
 }
 
@@ -44,23 +44,23 @@ impl From<&MyFieldReceiver> for RelationType {
             MyFieldReceiver {
                 link_one: Some(link_one),
                 ..
-            } => RelationType::LinkOne(link_one.into()),
+            } => RelationType::LinkOne(link_one.to_owned()),
             MyFieldReceiver {
                 link_self: Some(link_self),
                 ..
-            } => RelationType::LinkSelf(link_self.into()),
+            } => RelationType::LinkSelf(link_self.to_owned()),
             MyFieldReceiver {
                 link_many: Some(link_many),
                 ..
-            } => RelationType::LinkMany(link_many.into()),
+            } => RelationType::LinkMany(link_many.to_owned()),
             MyFieldReceiver {
                 nest_object: Some(nest_object),
                 ..
-            } => RelationType::NestObject(nest_object.into()),
+            } => RelationType::NestObject(nest_object.to_owned()),
             MyFieldReceiver {
                 nest_array: Some(nest_array),
                 ..
-            } => RelationType::NestArray(nest_array.into()),
+            } => RelationType::NestArray(nest_array.to_owned()),
             _ => RelationType::None,
         }
     }
