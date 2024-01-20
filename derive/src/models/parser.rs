@@ -18,7 +18,8 @@ use quote::{format_ident, quote};
 
 use crate::models::{
     attributes::FieldGenericsMeta, relations::NodeType, replace_lifetimes_with_underscore,
-    replace_self_in_type_str, LinkRustFieldType, NormalisedField, ReferencedNodeMeta,
+    replace_self_in_type_str, FieldGenericsMeta, LinkRustFieldType, NormalisedField,
+    ReferencedNodeMeta,
 };
 
 use super::{
@@ -376,40 +377,19 @@ impl SchemaFieldsProperties {
             let NormalisedField {
                 field_ident_raw_to_underscore_suffix,
                 field_ident_serialized_fmt,
-            } = &NormalisedField::from_receiever(field_receiver, struct_level_casing);
-
-            println!("Prinnntts0");
+            } = &field_receiver.normalize_ident(struct_level_casing);
             let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-            println!("Prinnntts1");
-            let field_type =
-                &field_receiver.replace_self_in_type_str(struct_name_ident, &struct_generics);
-            println!("Prinnntts2");
+            let field_type = &field_receiver
+                .rust_type()
+                .replace_self_with_struct_concrete_type(table_derive_attributes);
             let FieldGenericsMeta {
                 field_impl_generics,
                 field_ty_generics,
                 field_where_clause,
                 ..
-            } = field_receiver.get_field_generics_meta(&struct_name_ident, struct_generics);
-            println!("Prinnntts3");
-            // let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
-            //     && matches!(data_type, DataType::Edge);
-            // let is_id = field_ident_normalised_as_str == "id";
-            // let field_impl_generics = if is_id {
-            //     quote!()
-            // } else {
-            //     quote!(#field_impl_generics)
-            // };
-            // let field_type_for_setter = if is_id {
-            //     quote!(#crate_name::sql::Thing)
-            // } else {
-            //     quote!(#field_type)
-            // };
-
-            // let field_type_for_setter = if field_ident_normalised_as_str == "id" || is_edge_nodes {
-            //     quote!(#crate_name::sql::Thing)
-            // } else {
-            //     quote!(#field_type)
-            // };
+            } = field_receiver
+                .rust_type()
+                .get_field_generics_meta(table_derive_attributes);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -442,7 +422,7 @@ impl SchemaFieldsProperties {
                     field_ident_raw_to_underscore_suffix,
                     struct_name_ident,
                     is_list,
-                )
+                )?
                 .with_field_definition(
                     field_receiver,
                     struct_name_ident,

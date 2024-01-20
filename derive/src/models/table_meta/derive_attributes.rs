@@ -33,8 +33,8 @@ pub struct TableDeriveAttributes {
     #[darling(default)]
     pub(crate) rename_all: ::std::option::Option<Rename>,
 
-    #[darling(default)]
-    pub(crate) table_name: ::std::option::Option<Ident>,
+    // #[darling(default)]
+    pub(crate) table_name: Ident,
 
     #[darling(default)]
     pub(crate) relax_table_name: ::std::option::Option<bool>,
@@ -68,6 +68,14 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
+    pub fn table_name(&self) -> Ident {
+        let table_name_ident = &format_ident!(
+            "{}",
+            table_name
+                .as_ref()
+                .expect("table_name attribute must be provided")
+        );
+    }
     pub fn struct_level_casing(&self) -> ExtractorResult<CaseString> {
         let struct_level_casing = self
             .rename_all
@@ -80,6 +88,13 @@ impl TableDeriveAttributes {
             None => CaseString::None,
         };
         Ok(casing)
+    }
+
+    pub fn struct_as_path(&self) -> Path {
+        // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
+        self.construct_type_without_bounds()
+            .replace_self_with_struct_concrete_type(self)
+            .to_path()
     }
 
     pub fn construct_type_without_bounds(&self) -> RustFieldTypeSelfAllowed {

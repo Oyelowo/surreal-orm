@@ -5,14 +5,12 @@
  * Licensed under the MIT license
  */
 
-use std::path::Path;
-
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
 use syn::{
     self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Ident, Lifetime,
-    PathArguments, PathSegment, Type, TypeReference,
+    Path, PathArguments, PathSegment, Type, TypeReference,
 };
 
 use crate::{
@@ -92,8 +90,26 @@ impl RustFieldTypeSelfAllowed {
 pub struct RustFieldTypeNoSelf(Type);
 
 impl RustFieldTypeNoSelf {
+    pub fn to_path(&self) -> Path {
+        let ty = &self.0;
+        let path: Path = parse_quote!(#ty);
+
+        // match self.0 {
+        //     Type::Path(ref type_path) => type_path.path.clone(),
+        //     _ => panic!("Expected a path"),
+        // }
+        path
+    }
+}
+
+impl RustFieldTypeNoSelf {
     pub fn into_inner(self) -> Type {
         self.0
+    }
+}
+impl From<Type> for RustFieldTypeNoSelf {
+    fn from(ty: Type) -> Self {
+        Self(ty)
     }
 }
 
@@ -165,19 +181,16 @@ impl RustFieldTypeSelfAllowed {
 
         let mut visitor = ReplaceLifetimesVisitor;
         visitor.visit_type_mut(&mut ty);
-        Self(ty)
+        ty.into()
     }
 
     pub fn replace_self_with_struct_concrete_type(
         &self,
-        struct_name: &syn::Ident,
-        ty_generics: &syn::TypeGenerics,
+        table_def: &TableDeriveAttributes,
     ) -> RustFieldTypeNoSelf {
         let ty = &self.into_inner();
-        // TODO: Remove, every trait and lifetime bounds from struct type generics
-        let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
+        let replacement_path_from_current_struct = table_def.struct_as_path();
 
-        // Helper function to replace 'Self' in a path segment
         fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
             if segment.ident == "Self" {
                 if let Some(first_segment) = replacement_path.segments.first() {
@@ -216,18 +229,16 @@ impl RustFieldTypeSelfAllowed {
             }
         }
 
-        replace_type(ty, &replacement_path).into()
+        replace_type(ty, &replacement_path_from_current_struct).into()
     }
 
     pub fn get_field_generics_meta<'a>(
         &self,
-        table_def: &TableDeriveAttributes,
+        table_derive_attributes: &TableDeriveAttributes,
     ) -> FieldGenericsMeta<'a> {
-        let struct_name_ident = table_def.ident;
-        let struct_generics = table_def.generics;
+        let struct_name_ident = table_derive_attributes.ident;
+        let struct_generics = table_derive_attributes.generics;
         let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        // let field_type =
-        //     &self.replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics);
         let mut field_extractor = GenericTypeExtractor::new(&struct_generics);
         let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
             .extract_generics_for_complex_type(&self.into_inner())
@@ -240,7 +251,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn is_numeric(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         let type_is_numeric = match ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -261,7 +272,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_float(&self) -> bool {
-        match self.ty {
+        match self.into_inner() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -274,7 +285,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_integer(&self) -> bool {
-        match self.ty {
+        match self.into_inner() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -292,7 +303,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_string(&self) -> bool {
-        match &self.ty {
+        match &self.into_inner() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -316,7 +327,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_bool(&self) -> bool {
-        match self.ty {
+        match self.into_inner() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -330,12 +341,12 @@ impl RustFieldTypeSelfAllowed {
 
     pub fn is_list(&self) -> bool {
         self.raw_type_is_list()
-        // || self.type_.as_ref().map_or(false, |t| t.deref().is_array())
+        // || self.into_inner()pe_.as_ref().map_or(false, |t| t.deref().is_array())
         // || self.link_many.is_some()
     }
 
     pub fn raw_type_is_list(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -359,7 +370,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_optional(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -383,7 +394,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_hash_set(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -407,7 +418,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_object(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -431,7 +442,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_datetime(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path
@@ -446,7 +457,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_duration(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path
@@ -461,7 +472,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn raw_type_is_geometry(&self) -> bool {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -484,7 +495,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn get_array_inner_type(&self) -> Option<Type> {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
 
         let item_ty = match ty {
             syn::Type::Path(type_path) => {
@@ -511,7 +522,7 @@ impl RustFieldTypeSelfAllowed {
     }
 
     pub fn get_option_item_type(&self) -> Option<Type> {
-        let ty = &self.ty;
+        let ty = &self.into_inner();
 
         let item_ty = match ty {
             syn::Type::Path(type_path) => {
@@ -544,7 +555,7 @@ impl RustFieldTypeSelfAllowed {
         model_type: &DataType,
     ) -> ExtractorResult<DbFieldTypeAst> {
         let crate_name = get_crate_name(false);
-        let ty = &self.ty;
+        let ty = &self.into_inner();
 
         let meta = if self.raw_type_is_bool() {
             DbFieldTypeAst {
