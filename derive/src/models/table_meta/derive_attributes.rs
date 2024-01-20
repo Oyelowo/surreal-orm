@@ -5,15 +5,19 @@
  * Licensed under the MIT license
  */
 
+use std::str::FromStr;
+
 use darling::{ast::Data, util, FromDeriveInput};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
 use quote::quote;
-use syn::Ident;
+use syn::{parse_quote, GenericArgument, Ident, Path, PathArguments, Type};
 
 use crate::{
     errors::ExtractorResult,
-    models::{MyFieldReceiver, Permissions, PermissionsFn, Rename},
+    models::{
+        CaseString, MyFieldReceiver, Permissions, PermissionsFn, Rename, RustFieldTypeSelfAllowed,
+    },
 };
 
 #[derive(Debug, FromDeriveInput)]
@@ -64,6 +68,59 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
+    pub fn struct_level_casing(&self) -> ExtractorResult<CaseString> {
+        let struct_level_casing = self
+            .rename_all
+            .as_ref()
+            .map(|case| CaseString::from_str(case.serialize.as_str()));
+
+        let casing = match struct_level_casing {
+            Some(Ok(case)) => case,
+            Some(Err(e)) => return Err(darling::Error::custom(e.to_string()).into()),
+            None => CaseString::Snake,
+        };
+        Ok(casing)
+    }
+
+    pub fn construct_type_without_bounds(&self) -> RustFieldTypeSelfAllowed {
+        let mut path = Path::from(self.ident.clone());
+        let generics = self.generics;
+
+        // Process generics, excluding bounds
+        if !generics.params.is_empty() {
+            let args = generics
+                .params
+                .iter()
+                .map(|param| match param {
+                    syn::GenericParam::Type(type_param) => {
+                        GenericArgument::Type(parse_quote!(#type_param))
+                    }
+                    syn::GenericParam::Lifetime(lifetime_def) => {
+                        GenericArgument::Lifetime(lifetime_def.lifetime.clone())
+                    }
+                    syn::GenericParam::Const(const_param) => {
+                        // TODO: Test this in struct
+                        GenericArgument::Const(
+                            const_param
+                                .default
+                                .clone()
+                                .expect("absent const expression"),
+                        )
+                    }
+                })
+                .collect();
+
+            path.segments.last_mut().unwrap().arguments =
+                PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+                    colon2_token: None,
+                    lt_token: generics.lt_token.unwrap(),
+                    args,
+                    gt_token: generics.gt_token.unwrap(),
+                });
+        }
+
+        Type::Path(syn::TypePath { qself: None, path }).into()
+    }
     pub fn get_table_definition_token(&self) -> ExtractorResult<TokenStream> {
         let TableDeriveAttributes {
             ref drop,
@@ -89,28 +146,40 @@ impl TableDeriveAttributes {
                 || permissions.is_some()
                 || permissions_fn.is_some())
         {
-            return Err("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+            return Err(
+                syn::Error::new_spanned(
+                    self.ident.clone(),
+                    "Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
                             flexible,
                             as,
                             as_fn,
                             schemafull,
                             permissions,
-                            permissions_fn");
+                            permissions_fn",
+                )
+                .into(),
+            );
         }
 
         let mut define_table: Option<TokenStream> = None;
-        let mut define_table_methods = vec![];
+        let mut define_table_methods: Vec<TokenStream> = vec![];
 
         match (define, define_fn){
             (Some(define), None) => {
-                let define = parse_lit_to_tokenstream(define).map_err(|e| e.to_compile_error())?;
+                let define = parse_lit_to_tokenstream(define).map_err(|e| darling::Error::custom("invalid define statement"))?;
                 define_table = Some(quote!(#define.to_raw()));
             },
             (None, Some(define_fn)) => {
                 define_table = Some(quote!(#define_fn().to_raw()));
             },
-            (Some(_), Some(_)) => return Err("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (Some(_), Some(_)) => return Err(
+                syn::Error::new_spanned(
+                    self.ident.clone(),
+                    "define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
+                )
+                .into(),
+            ),
             (None, None) => (),
         };
 
@@ -124,13 +193,17 @@ impl TableDeriveAttributes {
 
         match (as_, as_fn){
             (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(define).map_err(|e| e.to_compile_error())?;
+                let as_ = parse_lit_to_tokenstream(as_).map_err(|e| darling::Error::custom(format!("Invalid as expression: {e}")))?;
                 define_table_methods.push(quote!(.as_(#as_)))
             },
             (None, Some(as_fn)) => {
                     define_table_methods.push(quote!(.as_(#as_fn())));
             },
-            (Some(_), Some(_)) => return Err("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (Some(_), Some(_)) => return Err(
+                darling::Error::custom(
+                    "as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
+                ).into()
+            ),
             (None, None) => (),
         };
 
@@ -143,9 +216,9 @@ impl TableDeriveAttributes {
                     define_table_methods.push(p_fn.get_token_stream());
             },
             (Some(p), None) => {
-                    define_table_methods.push(p.get_token_stream());
+                    define_table_methods.push(p.get_token_stream()?);
             },
-            (Some(_), Some(_)) => return Err("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (Some(_), Some(_)) => return Err(darling::Error::custom("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.").into()),
             (None, None) => (),
         };
 
