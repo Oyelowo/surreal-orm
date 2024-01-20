@@ -5,7 +5,10 @@
  * Licensed under the MIT license
  */
 
-use crate::{errors::ExtractorResult, models::DataType};
+use crate::{
+    errors::ExtractorResult,
+    models::{CaseString, DataType},
+};
 
 use super::*;
 use darling::FromField;
@@ -109,34 +112,8 @@ pub struct MyFieldReceiver {
 }
 
 impl MyFieldReceiver {
-    pub fn replace_self_in_type_str(
-        &self,
-        struct_name_ident: &Ident,
-        struct_generics: &Generics,
-    ) -> Type {
-        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        self.ty
-            .replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics)
-    }
-
-    pub fn get_field_generics_meta<'a>(
-        &self,
-        struct_name_ident: &Ident,
-        struct_generics: &Generics,
-    ) -> FieldGenericsMeta<'a> {
-        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        let field_type = &self
-            .ty
-            .replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics);
-        let mut field_extractor = GenericTypeExtractor::new(struct_generics);
-        let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
-            .extract_generics_for_complex_type(&field_type)
-            .split_for_impl();
-        FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        }
+    pub fn normalize_ident(&self, struct_level_casing: CaseString) -> NormalisedField {
+        NormalisedField::from_receiever(self, struct_level_casing)
     }
 
     // pub fn get_db_type(&self) -> ExtractorResult<DbFieldTypeMeta> {}
