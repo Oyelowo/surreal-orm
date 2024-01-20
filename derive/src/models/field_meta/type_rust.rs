@@ -7,7 +7,7 @@
 
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{
     self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Ident, Lifetime,
     Path, PathArguments, PathSegment, Type, TypeReference,
@@ -29,7 +29,7 @@ impl LinkRustFieldType {
     }
 
     pub fn to_type(&self) -> Type {
-        self.0.ty.clone()
+        self.0.into_inner()
     }
 
     pub fn struct_type_name(&self) -> ExtractorResult<Ident> {
@@ -88,6 +88,12 @@ impl RustFieldTypeSelfAllowed {
 }
 
 pub struct RustFieldTypeNoSelf(Type);
+
+impl ToTokens for RustFieldTypeNoSelf {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.0.to_tokens(tokens)
+    }
+}
 
 impl RustFieldTypeNoSelf {
     pub fn to_path(&self) -> Path {
