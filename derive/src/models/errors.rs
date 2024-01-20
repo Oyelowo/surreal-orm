@@ -13,15 +13,12 @@ use syn::spanned::Spanned;
 use crate::errors::ExtractorResult;
 
 pub(crate) fn validate_table_name<'a>(
-    struct_name_ident: &proc_macro2::Ident,
-    table_name: &'a Option<Ident>,
+    struct_name_ident: &syn::Ident,
+    table_name: &'a Ident,
     relax_table_name: &Option<bool>,
 ) -> ExtractorResult<Ident> {
     let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
-    let table_name = table_name
-        .as_ref()
-        .expect("table name must be provided")
-        .to_string();
+    let table_name = table_name.to_string();
     if !relax_table_name.unwrap_or(false) && table_name != expected_table_name {
         return Err(syn::Error::new(
             table_name.span(),

@@ -55,7 +55,7 @@ impl ToTokens for EdgeToken {
         let TableDeriveAttributes {
             ident: struct_name_ident,
             generics,
-            table_name,
+            table_name: table_name_ident,
             data,
             rename_all,
             relax_table_name,
@@ -70,17 +70,14 @@ impl ToTokens for EdgeToken {
             );
         };
 
-        let table_name_ident = &format_ident!(
-            "{}",
-            table_name
-                .as_ref()
-                .expect("table_name attribute must be provided")
-        );
-        let table_name_str =
-            match errors::validate_table_name(struct_name_ident, table_name, relax_table_name) {
-                Ok(table_name) => table_name,
-                Err(err) => return tokens.extend(err.write_errors()),
-            };
+        let table_name_str = match errors::validate_table_name(
+            struct_name_ident,
+            &table_name_ident,
+            relax_table_name,
+        ) {
+            Ok(table_name) => table_name,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
 
         let struct_level_casing = table_derive_attributes.struct_level_casing();
 
