@@ -10,7 +10,7 @@ use std::str::FromStr;
 use darling::{ast::Data, util, FromDeriveInput};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{parse_quote, GenericArgument, Ident, Path, PathArguments, Type};
 
 use crate::{
@@ -68,13 +68,8 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
-    pub fn table_name(&self) -> Ident {
-        let table_name_ident = &format_ident!(
-            "{}",
-            table_name
-                .as_ref()
-                .expect("table_name attribute must be provided")
-        );
+    pub fn table_name(&self) -> ExtractorResult<Ident> {
+        Ok(self.table_name)
     }
     pub fn struct_level_casing(&self) -> ExtractorResult<CaseString> {
         let struct_level_casing = self

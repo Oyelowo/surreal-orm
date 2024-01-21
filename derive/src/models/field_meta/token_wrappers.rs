@@ -10,7 +10,7 @@ use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 
 #[derive(Debug, Clone)]
-struct DbfieldTypeToken(TokenStream);
+pub struct DbfieldTypeToken(TokenStream);
 
 impl Default for DbfieldTypeToken {
     fn default() -> Self {
@@ -31,7 +31,7 @@ impl ToTokens for DbfieldTypeToken {
 }
 
 #[derive(Debug, Clone, Default)]
-struct StaticAssertionToken(TokenStream);
+pub struct StaticAssertionToken(TokenStream);
 impl ToTokens for StaticAssertionToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         self.0.to_tokens(tokens)

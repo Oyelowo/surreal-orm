@@ -13,7 +13,10 @@ use syn::Ident;
 use super::*;
 use crate::{
     errors::ExtractorResult,
-    models::{variables::VariablesModelMacro, DataType, LinkRustFieldType},
+    models::{
+        derive_attributes::TableDeriveAttributes, variables::VariablesModelMacro, DataType,
+        LinkRustFieldType,
+    },
 };
 
 #[derive(Default, Clone)]
@@ -49,7 +52,8 @@ impl ReferencedNodeMeta {
             "with_field_definition2 fieldname {}; ",
             field_name_normalized,
         );
-        let type_inf = field_receiver.get_db_type(field_name_normalized, data_type, table)?;
+        let type_inf =
+            field_receiver.get_db_type_with_assertion(field_name_normalized, data_type, table)?;
         // println!("type_inf {}", type_inf.unwrap_or_default());
 
         println!(
@@ -475,7 +479,7 @@ impl ReferencedNodeMeta {
 
     pub(crate) fn from_record_link(
         linked_node_type: &LinkRustFieldType,
-        normalized_field_name: &NormalisedField,
+        normalized_field_name: &NormalisedFieldMeta,
         // normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
         is_list: bool,
