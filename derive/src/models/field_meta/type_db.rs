@@ -16,15 +16,15 @@ use proc_macros_helpers::get_crate_name;
 use quote::quote;
 use surreal_query_builder::FieldType;
 
-use crate::models::{DataType, RustFieldTypeSelfAllowed};
+use crate::models::{DataType, RustFieldTypeSelfAllowed, StaticAssertionToken};
 
 #[derive(Debug, Clone, Default)]
-pub struct DbFieldTypeAst {
-    pub(crate) db_field_type: TokenStream,
-    pub(crate) static_assertion: TokenStream,
+pub struct DbFieldTypeAstMeta {
+    pub(crate) db_field_type: DbFieldType,
+    pub(crate) static_assertion: StaticAssertionToken,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct DbFieldType(FieldType);
 
 impl DbFieldType {
@@ -38,7 +38,7 @@ impl DbFieldType {
         &self,
         rust_field_type: &RustFieldTypeSelfAllowed,
         model_type: &DataType,
-    ) -> TokenStream {
+    ) -> StaticAssertionToken {
         let rust_field_type = &mut rust_field_type.clone();
         let crate_name = get_crate_name(false);
 
@@ -122,7 +122,7 @@ impl DbFieldType {
                 quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
             }
         };
-        static_assertion
+        static_assertion.into()
     }
 }
 

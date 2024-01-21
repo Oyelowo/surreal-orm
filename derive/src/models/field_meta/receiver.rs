@@ -112,24 +112,28 @@ pub struct MyFieldReceiver {
 }
 
 impl MyFieldReceiver {
-    pub fn normalize_ident(&self, struct_level_casing: CaseString) -> NormalisedField {
-        NormalisedField::from_receiever(self, struct_level_casing)
+    pub fn normalize_ident(&self, struct_level_casing: CaseString) -> NormalisedFieldMeta {
+        NormalisedFieldMeta::from_receiever(self, struct_level_casing)
     }
 
     // pub fn get_db_type(&self) -> ExtractorResult<DbFieldTypeMeta> {}
 
-    pub fn get_db_type(
+    pub fn get_db_type_with_assertion(
         &self,
         field_name: &FieldNameNormalized,
         model_type: &DataType,
         table: &Ident,
         // field_impl_generics: &syn::Generics,
         // field_ty_generics: &syn::Generics,
-    ) -> ExtractorResult<Option<DbFieldTypeAst>> {
-        let db_field_type_string = self.type_;
+    ) -> ExtractorResult<DbFieldTypeAstMeta> {
+        // TODO: Add the compile time assertion/validations/checks for the dbtype here
+        Ok(DbFieldTypeAstMeta {
+            db_field_type: self.type_,
+            static_assertion: todo!(),
+        })
     }
 
-    pub fn get_fallback_array_item_concrete_type(&self) -> ExtractorResult<TokenStream> {
+    pub fn get_fallback_array_item_concrete_db_type(&self) -> ExtractorResult<DbfieldTypeToken> {
         let field_type = self
             .type_
             .clone()
@@ -207,7 +211,7 @@ impl MyFieldReceiver {
                 quote!(#crate_name::sql::Geometry)
             }
         };
-        Ok(value)
+        Ok(value.into())
     }
 
     pub fn is_numeric(&self) -> bool {

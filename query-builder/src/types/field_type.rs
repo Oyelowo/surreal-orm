@@ -121,10 +121,11 @@ impl Display for GeometryType {
 }
 
 #[allow(missing_docs)]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Default, Debug, PartialEq)]
 pub enum FieldType {
     /// Use this when you explicitly don't want to specify the field's data type. The field will
     /// allow any data type supported by SurrealDB.
+    #[default]
     Any,
     Null,
     /// true of false

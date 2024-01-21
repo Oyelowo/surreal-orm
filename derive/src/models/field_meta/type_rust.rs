@@ -136,6 +136,8 @@ impl RustFieldTypeSelfAllowed {
         Self(ty)
     }
 
+    // pub fn ident
+
     fn strip_bounds_from_type_generics(&self) -> Self {
         let stripped_ty = match self.into_inner() {
             Type::Path(type_path) => {
