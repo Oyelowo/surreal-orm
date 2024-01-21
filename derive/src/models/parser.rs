@@ -18,7 +18,7 @@ use quote::{format_ident, quote};
 
 use crate::models::{
     attributes::FieldGenericsMeta, relations::NodeType, replace_lifetimes_with_underscore,
-    replace_self_in_type_str, FieldGenericsMeta, LinkRustFieldType, NormalisedField,
+    replace_self_in_type_str, FieldGenericsMeta, LinkRustFieldType, NormalisedFieldMeta,
     ReferencedNodeMeta,
 };
 
@@ -372,7 +372,7 @@ impl SchemaFieldsProperties {
                 _ => quote!(::std::option::Option::None),
             };
             let relationship = RelationType::from(field_receiver);
-            let NormalisedField {
+            let NormalisedFieldMeta {
                 field_ident_raw_to_underscore_suffix,
                 field_ident_serialized_fmt,
             } = &field_receiver.normalize_ident(struct_level_casing);
@@ -591,7 +591,7 @@ impl SchemaFieldsProperties {
                     array_element
                         .or_else(||field_receiver.rust_type().get_array_inner_type().map(|inner| inner.into_token_stream()))
                         .or_else(|| {
-                                Some(field_receiver.get_fallback_array_item_concrete_type().map_err(|e| {
+                                Some(field_receiver.get_fallback_array_item_concrete_db_type().map_err(|e| {
                                     // errors.push("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>");
                                     syn::Error::new_spanned(field_type, e)
                                 }).unwrap_or_default())
