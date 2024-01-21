@@ -17,6 +17,7 @@ use crate::{
     errors::ExtractorResult,
     models::{
         CaseString, MyFieldReceiver, Permissions, PermissionsFn, Rename, RustFieldTypeSelfAllowed,
+        StructGenerics,
     },
 };
 
@@ -25,7 +26,7 @@ use crate::{
 pub struct TableDeriveAttributes {
     pub(crate) ident: syn::Ident,
     // pub(crate) attrs: Vec<syn::Attribute>,
-    pub(crate) generics: syn::Generics,
+    pub(crate) generics: StructGenerics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
     pub data: Data<util::Ignored, MyFieldReceiver>,

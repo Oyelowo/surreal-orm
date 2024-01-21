@@ -131,12 +131,12 @@ impl From<Type> for RustFieldTypeSelfAllowed {
     }
 }
 
-impl RustFieldTypeSelfAllowed {
+struct CustomType(Type);
+
+impl CustomType {
     pub fn new(ty: Type) -> Self {
         Self(ty)
     }
-
-    // pub fn ident
 
     fn strip_bounds_from_type_generics(&self) -> Self {
         let stripped_ty = match self.into_inner() {
@@ -244,24 +244,6 @@ impl RustFieldTypeSelfAllowed {
         }
 
         replace_type(ty, &replacement_path_from_current_struct).into()
-    }
-
-    pub fn get_field_generics_meta<'a>(
-        &self,
-        table_derive_attributes: &TableDeriveAttributes,
-    ) -> FieldGenericsMeta<'a> {
-        let struct_name_ident = table_derive_attributes.ident;
-        let struct_generics = table_derive_attributes.generics;
-        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        let mut field_extractor = GenericTypeExtractor::new(&struct_generics);
-        let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
-            .extract_generics_for_complex_type(&self.into_inner())
-            .split_for_impl();
-        FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        }
     }
 
     pub fn is_numeric(&self) -> bool {

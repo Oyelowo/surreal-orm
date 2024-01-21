@@ -836,20 +836,16 @@ impl SchemaFieldsProperties {
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
                 RelationType::None => {
-                    println!("RelationType::None 1");
                     update_field_names_fields_types_kv(None);
-                    println!("RelationType::None 2");
                     insert_non_null_updater_token(
                         quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
-                    println!("RelationType::None 3");
 
                     let ref_node_meta = if field_receiver.rust_type().is_list() {
                         ReferencedNodeMeta::from_simple_array(field_ident_raw_to_underscore_suffix)
                     } else {
                         ReferencedNodeMeta::default()
                     };
-                    println!("RelationType::None 4");
                     ref_node_meta
                         .with_field_definition(
                             field_receiver,
@@ -861,13 +857,11 @@ impl SchemaFieldsProperties {
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
             };
-            println!("Prinnntts6");
 
             if field_ident_serialized_fmt == "id" {
                 store.table_id_type = quote!(#field_type);
                 // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
             }
-            println!("Prinnntts7");
 
             if !referenced_node_meta.field_definition.is_empty() {
                 store
@@ -904,7 +898,6 @@ impl SchemaFieldsProperties {
                 .push(field_ident_serialized_fmt.to_owned());
         }
 
-        println!("end...");
         Ok(store)
     }
 }

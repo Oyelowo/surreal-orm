@@ -5,75 +5,11 @@
  * Licensed under the MIT license
  */
 
-use crate::models::RustFieldTypeSelfAllowed;
+use crate::models::{
+    derive_attributes::TableDeriveAttributes, MyFieldReceiver, RustFieldTypeSelfAllowed,
+};
 use quote::quote;
 use syn::{visit::Visit, *};
-
-pub struct FieldGenericsMeta<'a> {
-    pub(crate) field_impl_generics: syn::ImplGenerics<'a>,
-    pub(crate) field_ty_generics: syn::TypeGenerics<'a>,
-    pub(crate) field_where_clause: Option<&'a syn::WhereClause>,
-}
-
-impl<'a> FieldGenericsMeta<'a> {
-    // This extracts generics metadata for field and from struct generics metadata.
-    // This could come from the concrete rust field type or
-    // as an attribute on the field from links which link to
-    // other tables structs models i.e Edge, Node and Objects.
-    // These are usually specified using the link_one, link_self
-    // and link_many and relate attributes.
-    // e.g
-    // #[surreal_orm(link_one = User<'a, T, u32>)]
-    // student: LinkOne<User<'a, T, u32>
-    pub fn new(
-        &self,
-        struct_name_ident: &Ident,
-        struct_generics: &Generics,
-        field_type: &RustFieldTypeSelfAllowed,
-    ) -> FieldGenericsMeta<'a> {
-        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        let field_type = field_type
-            .replace_self_with_struct_concrete_type(struct_name_ident, &struct_ty_generics);
-        let mut field_extractor = GenericTypeExtractor::new(struct_generics);
-        let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
-            .extract_generics_for_complex_type(&field_type)
-            .split_for_impl();
-        FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        }
-    }
-}
-
-pub fn is_generic_type(ty: &Type, generics: &Generics) -> bool {
-    match ty {
-        Type::Path(TypePath { path, .. }) => {
-            // Check each segment of the path for generic parameters
-            path.segments.iter().any(|segment| {
-                // Check if this segment is a generic parameter itself
-                if generics.params.iter().any(|param| matches!(param, syn::GenericParam::Type(type_param) if segment.ident == type_param.ident)) {
-                    return true;
-                }
-
-                // Check if this segment has arguments that are generic parameters
-                if let syn::PathArguments::AngleBracketed(args) = &segment.arguments {
-                    args.args.iter().any(|arg| {
-                        if let syn::GenericArgument::Type(ty) = arg {
-                            is_generic_type(ty, generics)
-                        } else {
-                            false
-                        }
-                    })
-                } else {
-                    false
-                }
-            })
-        }
-        // You can extend this match to handle other types like tuples, slices, etc.
-        _ => false,
-    }
-}
 
 struct CustomGenerics(pub Generics);
 impl CustomGenerics {
@@ -110,18 +46,18 @@ impl CustomGenerics {
     }
 }
 
-struct StructGenerics(pub CustomGenerics);
-struct FieldGenerics(pub CustomGenerics);
+pub struct StructGenerics(pub CustomGenerics);
+pub struct FieldGenerics(pub CustomGenerics);
 
 pub(crate) struct GenericTypeExtractor<'a> {
-    struct_generics: &'a Generics,
-    field_generics: Generics,
+    struct_generics: &'a StructGenerics,
+    field_generics: FieldGenerics,
 }
 
 impl<'a> GenericTypeExtractor<'a> {
-    pub fn new(struct_generics: &'a Generics) -> Self {
+    pub fn new(table_attributes: &'a TableDeriveAttributes) -> Self {
         Self {
-            struct_generics,
+            struct_generics: &table_attributes.generics,
             field_generics: Generics::default(),
         }
     }
@@ -130,18 +66,6 @@ impl<'a> GenericTypeExtractor<'a> {
         self.visit_type(field_ty);
         &self.field_generics
     }
-
-    // pub fn extract_generics_for_complex_type(
-    //     ty: &'a Type,
-    //     struct_generics: &'a Generics,
-    // ) -> Generics {
-    //     let mut extractor = Self {
-    //         struct_generics,
-    //         field_generics: Generics::default(),
-    //     };
-    //     extractor.visit_type(ty);
-    //     extractor.field_generics
-    // }
 
     fn add_lifetime_if_not_exists(&mut self, lt: &Lifetime) {
         let lifetime_exists = self
@@ -285,60 +209,3 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
         syn::visit::visit_type_macro(self, i);
     }
 }
-
-fn construct_replacement_segment(
-    struct_name: &syn::Ident,
-    ty_generics: &syn::TypeGenerics,
-) -> PathSegment {
-    // Generate the replacement tokens
-    let replacement_tokens: proc_macro2::TokenStream = quote!(#struct_name #ty_generics);
-
-    // Parse the tokens into a PathSegment
-    let replacement_segment: PathSegment =
-        parse2(replacement_tokens).expect("Failed to parse replacement segment");
-
-    replacement_segment
-}
-
-// use quote::quote;
-// use syn::parse_str;
-
-// pub fn replace_self_in_type_str(
-//     ty: &Type,
-//     struct_name: &syn::Ident,
-//     ty_generics: &syn::TypeGenerics,
-// ) -> Result<Type, syn::Error> {
-//     // Convert the type to a string
-//     let ty_str = quote!(#ty).to_string();
-//
-//     // Construct the replacement string
-//     let replacement = format!("{}{}", struct_name, ty_generics.into_token_stream());
-//
-//     // Replace "Self" with the desired type
-//     let modified_ty_str = ty_str.replace("Self", &replacement);
-//     println!("rara---ty_str: {}", ty_str);
-//     println!("rara---replacement: {}", replacement);
-//     println!("rara---modified_ty_str: {}", modified_ty_str);
-//
-//     // Parse the string back into a Type
-//     let parsed = parse_str::<Type>(&modified_ty_str).map_err(|e| syn::Error::new_spanned(ty, e));
-//     println!(
-//         "rara---parsed: {}",
-//         parsed.clone().unwrap().into_token_stream()
-//     );
-//     parsed
-// }
-
-// Example usage
-// let ty: Type = /* ... */; // Your Type here
-// let struct_name = "MyStruct";
-// let ty_generics_str = "<T, U>"; // Generics as a string
-
-// match replace_self_in_type_str(&ty, struct_name, ty_generics_str) {
-//     Ok(replaced_type) => {
-//         // Use the replaced type
-//     }
-//     Err(e) => {
-//         // Handle the error
-//     }
-// }
