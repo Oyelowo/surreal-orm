@@ -13,25 +13,30 @@ use crate::models::LinkRustFieldType;
 #[derive(Debug, Clone)]
 pub struct Relate {
     /// e.g ->writes->book
-    pub connection_model: String,
+    pub connection: String,
     // #[darling(default)]
     /// e.g StudentWritesBook,
     /// derived from: type StudentWritesBook = Writes<Student, Book>;
     /// e.g2
     /// StudentWritesBook<'a, 'b: 'a, T, U>,
     /// derived from: type StudentWritesBook<'a, 'b: 'a, T, U> = Writes<'a, 'b: 'a, T, U><Student<'a, 'b, T, Book<U>>;
-    pub model: Option<LinkRustFieldType>,
+    pub model: LinkRustFieldType,
 }
-//#[rename(se)]
+
 impl FromMeta for Relate {
-    fn from_string(value: &str) -> darling::Result<Self> {
-        Ok(Self {
-            connection_model: value.into(),
-            model: None,
-        })
-    }
-    //TODO: Check to maybe remove cos I probably dont need this
+    // // TODO: Revisit this whether we can and should allow only the
+    // model to be specified if we can infer the connection direction at
+    // compile time.
+    // fn from_string(value: &str) -> darling::Result<Self> {
+    //     Ok(Self {
+    //         connection: value.into(),
+    //         model: None,
+    //     })
+    // }
+
     fn from_list(items: &[darling::ast::NestedMeta]) -> darling::Result<Self> {
+        // Todo: Just use Rrelate alone if we dont have to specify connection direction
+        // explicitly
         #[derive(FromMeta)]
         struct FullRelate {
             model: Type,
@@ -43,10 +48,7 @@ impl FromMeta for Relate {
                 let FullRelate {
                     connection, model, ..
                 } = v;
-                Self {
-                    connection_model: connection,
-                    model: Some(model),
-                }
+                Self { connection, model }
             }
         }
         FullRelate::from_list(items).map(Relate::from)
