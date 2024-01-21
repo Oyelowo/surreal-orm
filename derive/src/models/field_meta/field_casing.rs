@@ -10,12 +10,14 @@ use syn::Ident;
 
 use crate::models::CaseString;
 
+// Used when explicit field casing not defined and cannot be inferred
 #[derive(Debug, Clone)]
 pub(crate) struct FieldIdentUnCased {
     pub(crate) uncased_field_name: Ident,
     pub(crate) casing: CaseString,
 }
 
+// Used when field casing is defined or can be inferred
 #[derive(Debug, Clone)]
 pub(crate) struct FieldIdentCased(String);
 
