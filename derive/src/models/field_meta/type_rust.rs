@@ -38,7 +38,7 @@ impl LinkRustFieldType {
         self.0.into_inner()
     }
 
-    pub fn struct_type_name(&self) -> ExtractorResult<Ident> {
+    pub fn type_name(&self) -> ExtractorResult<Ident> {
         match self.to_type() {
             Type::Path(type_path) => {
                 let last_segment = type_path
@@ -567,27 +567,27 @@ impl RustFieldTypeSelfAllowed {
         field_name: &FieldNameNormalized,
         relation_type: &RelationType,
         model_type: &DataType,
-    ) -> ExtractorResult<DbFieldTypeAst> {
+    ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let crate_name = get_crate_name(false);
         let ty = &self.into_inner();
 
         let meta = if self.raw_type_is_bool() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Bool),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
             }
         } else if self.raw_type_is_float() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Float),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_integer() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Int),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_string() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::String),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
@@ -610,7 +610,7 @@ impl RustFieldTypeSelfAllowed {
             let inner_type = item.db_field_type;
             let item_static_assertion = item.static_assertion;
 
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
                 static_assertion: quote!(
                     #crate_name::validators::assert_option::<#ty>();
@@ -634,7 +634,7 @@ impl RustFieldTypeSelfAllowed {
 
             let inner_type = inner_item.db_field_type;
             let inner_static_assertion = inner_item.static_assertion;
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
                 static_assertion: quote!(
                             #crate_name::validators::assert_is_vec::<#ty>();
@@ -642,41 +642,41 @@ impl RustFieldTypeSelfAllowed {
                 ),
             }
         } else if self.raw_type_is_hash_set() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
             }
         } else if self.raw_type_is_object() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Object),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
             }
         } else if self.raw_type_is_duration() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Duration),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
             }
         } else if self.raw_type_is_datetime() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 db_field_type: quote!(#crate_name::FieldType::Datetime),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
             }
         } else if self.raw_type_is_geometry() {
-            DbFieldTypeAst {
+            DbFieldTypeAstMeta {
                 // TODO: check if to auto-infer more speicific geometry type?
                 db_field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else {
             if field_name.is_id() {
-                DbFieldTypeAst {
+                DbFieldTypeAstMeta {
                     db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                     static_assertion: quote!(),
                 }
             } else if field_name.is_orig_or_dest_edge_node(model_type) {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
-                DbFieldTypeAst {
+                DbFieldTypeAstMeta {
                     db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
                     static_assertion: quote!(),
                 }
@@ -686,31 +686,31 @@ impl RustFieldTypeSelfAllowed {
                         // Relation are not stored on nodes, but
                         // on edges. Just used on nodes for convenience
                         // during deserialization
-                        DbFieldTypeAst {
+                        DbFieldTypeAstMeta {
                             db_field_type: quote!(),
                             static_assertion: quote!(),
                         }
                     }
-                    RelationType::LinkOne(ref_node) => DbFieldTypeAst {
+                    RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
                         db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
                         static_assertion: quote!(),
                     },
-                    RelationType::LinkSelf(self_node) => DbFieldTypeAst {
+                    RelationType::LinkSelf(self_node) => DbFieldTypeAstMeta {
                         db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                         static_assertion: quote!(),
                     },
-                    RelationType::LinkMany(ref_node) => DbFieldTypeAst {
+                    RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
                         db_field_type: quote!(#crate_name::FieldType::Array(
                             ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
                             ::std::option::Option::None
                         )),
                         static_assertion: quote!(),
                     },
-                    RelationType::NestObject(ref_object) => DbFieldTypeAst {
+                    RelationType::NestObject(ref_object) => DbFieldTypeAstMeta {
                         db_field_type: quote!(#crate_name::FieldType::Object),
                         static_assertion: quote!(),
                     },
-                    RelationType::NestArray(ref_array) => DbFieldTypeAst {
+                    RelationType::NestArray(ref_array) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
                         db_field_type: quote!(#crate_name::FieldType::Object),
                         // db_field_type: quote!(#crate_name::FieldType::Array(
