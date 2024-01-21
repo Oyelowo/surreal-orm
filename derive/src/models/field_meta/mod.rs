@@ -8,6 +8,7 @@
 pub(crate) mod attr_relate;
 pub(crate) mod attrs_permissions;
 pub(crate) mod field_casing;
+pub(crate) mod field_generics;
 pub(crate) mod generics;
 pub(crate) mod name;
 pub(crate) mod name_normalized;
@@ -23,6 +24,7 @@ pub(crate) mod type_stripper;
 pub use attr_relate::*;
 pub use attrs_permissions::*;
 pub use field_casing::*;
+pub use field_generics::*;
 pub use generics::*;
 pub use name::*;
 pub use name_normalized::*;
