@@ -8,8 +8,8 @@
 use darling::FromMeta;
 use proc_macro2::TokenStream;
 use proc_macros_helpers::parse_lit_to_tokenstream;
-use quote::quote;
-use syn::{Lit, LitStr, Path};
+use quote::{quote, ToTokens};
+use syn::{Expr, ExprLit, Lit, LitStr, Path};
 
 use crate::errors::ExtractorResult;
 
@@ -17,11 +17,11 @@ use crate::errors::ExtractorResult;
 pub enum Permissions {
     Full,
     None,
-    FnName(LitStr),
+    FnName(Expr),
 }
 
-impl Permissions {
-    pub fn get_token_stream(&self) -> ExtractorResult<TokenStream> {
+impl ToTokens for Permissions {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
         let permission = match self {
             Self::Full => {
                 quote!(.permissions_full())
@@ -30,16 +30,24 @@ impl Permissions {
                 quote!(.permissions_none())
             }
             Self::FnName(permissions) => {
-                let permissions = parse_lit_to_tokenstream(permissions)?;
+                // TODO: Remove this
+                // let permissions = parse_lit_to_tokenstream(permissions)?;
                 quote!(.permissions(#permissions.to_raw()))
             }
         };
 
-        Ok(permission)
+        tokens.extend(permission);
     }
 }
 
 impl FromMeta for Permissions {
+    fn from_expr(expr: &syn::Expr) -> darling::Result<Self> {
+        match expr {
+            syn::Expr::Lit(lit) => Self::from_value(&lit.lit),
+            _ => Ok(Self::FnName(expr.clone())),
+        }
+    }
+
     fn from_value(value: &Lit) -> darling::Result<Self> {
         match value {
             Lit::Str(str_lit) => {
@@ -67,9 +75,9 @@ pub enum PermissionsFn {
     FnPath(Path),
 }
 
-impl PermissionsFn {
-    pub fn get_token_stream(&self) -> TokenStream {
-        match self {
+impl ToTokens for PermissionsFn {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let perms = match self {
             Self::Full => {
                 quote!(.permissions_full())
             }
@@ -79,11 +87,19 @@ impl PermissionsFn {
             Self::FnPath(permissions_fn) => {
                 quote!(.permissions(#permissions_fn().to_raw()))
             }
-        }
+        };
+        tokens.extend(perms);
     }
 }
 
 impl FromMeta for PermissionsFn {
+    fn from_expr(expr: &Expr) -> darling::Result<Self> {
+        match expr {
+            Expr::Path(path) => Ok(Self::FnPath(path.path.clone())),
+            Expr::Lit(lit) => Self::from_value(&lit.lit),
+            _ => Err(darling::Error::unexpected_expr_type(expr)),
+        }
+    }
     fn from_string(value: &str) -> darling::Result<Self> {
         match value.to_lowercase().as_str() {
             "none" => Ok(Self::None),
