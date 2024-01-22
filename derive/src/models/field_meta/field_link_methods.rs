@@ -36,6 +36,10 @@ impl RelationType {
                 let method = list.get_field_link_method();
                 LinkerMethodToken(method)
             }
+            RelationType::Relate(relate) => {
+                let method = relate.get_field_link_method();
+                LinkerMethodToken(method)
+            }
             RelationType::None => {
                 let method = quote!();
                 LinkerMethodToken(method)
