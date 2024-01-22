@@ -25,7 +25,6 @@ pub struct MyFieldReceiver {
     /// enum bodies, this can be `None`.
     pub(crate) ident: Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
-    // pub(crate) ty: syn::Type,
     pub(crate) ty: CustomType,
     attrs: Vec<syn::Attribute>,
 

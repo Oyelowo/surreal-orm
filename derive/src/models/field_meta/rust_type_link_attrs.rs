@@ -21,6 +21,9 @@ use crate::{
 use super::*;
 
 #[derive(Debug, Clone)]
+pub struct ListSimple;
+
+#[derive(Debug, Clone)]
 pub struct DestinationNodeTypeOriginal(pub CustomType);
 
 impl DestinationNodeTypeOriginal {

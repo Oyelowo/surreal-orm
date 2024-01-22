@@ -12,6 +12,7 @@ mod attrs_expr_or_path;
 pub(crate) mod field_casing;
 pub mod field_define_statement;
 pub(crate) mod field_generics;
+pub mod field_link_methods;
 pub(crate) mod field_receiver;
 pub(crate) mod generics_extractor;
 pub(crate) mod name_normalized;
