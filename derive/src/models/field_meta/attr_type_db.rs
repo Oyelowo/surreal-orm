@@ -28,39 +28,6 @@ pub struct DbFieldTypeAstMeta {
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldType(FieldType);
 
-impl DbFieldType {
-    pub fn get_static_assertions_for_value_attr(&self, value_expr: Expr) -> StaticAssertionToken {
-        let convertible_values_to_db_type = match field_type {
-            FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value_expr)),
-            FieldType::Null => quote!(#crate_name::sql::Value::Null),
-            // FieldType::Union(_) => quote!(#crate_name::sql::Value::from(#value_expr)),
-            FieldType::Union(_) => quote!(),
-            // FieldType::Option(_) => quote!(#crate_name::sql::Value::from(#value_expr)),
-            FieldType::Option(_) => quote!(),
-            FieldType::Uuid => quote!(#crate_name::sql::Uuid::from(#value_expr)),
-            FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_expr)),
-            FieldType::String => quote!(#crate_name::sql::String::from(#value_expr)),
-            FieldType::Int => quote!(#crate_name::sql::Number::from(#value_expr)),
-            FieldType::Float => quote!(#crate_name::sql::Number::from(#value_expr)),
-            FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value_expr)),
-            FieldType::Array(_, _) => quote!(),
-            FieldType::Set(_, _) => quote!(),
-            // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
-            FieldType::Datetime => quote!(#crate_name::sql::Datetime::from(#value_expr)),
-            FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value_expr)),
-            FieldType::Number => quote!(#crate_name::sql::Number::from(#value_expr)),
-            FieldType::Object => quote!(),
-            // FieldType::Object => quote!(#crate_name::sql::Value::from(#value_expr)),
-            FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value_expr)),
-            FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value_expr)),
-            FieldType::Any => quote!(#crate_name::sql::Value::from(#value_expr)),
-        };
-        tokens.extend(convertible_values_to_db_type);
-
-        let x = quote!(let _ = #static_assertion;);
-    }
-}
-
 impl ToTokens for DbFieldType {
     fn to_tokens(&self, tokens: &mut TokenStream) {}
 }
@@ -72,6 +39,8 @@ impl DbFieldType {
 }
 
 impl DbFieldType {
+    // Even if db type provided, it is still checked against the rust type
+    // to make sure it's compatible
     pub fn generate_static_assertions(
         &self,
         rust_field_type: &MainFieldTypeSelfAllowed,
