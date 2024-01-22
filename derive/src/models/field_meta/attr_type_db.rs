@@ -148,10 +148,14 @@ impl Deref for DbFieldType {
 }
 
 impl FromMeta for DbFieldType {
-    fn from_string(value: &str) -> darling::Result<Self> {
-        match value.parse::<FieldType>() {
-            Ok(f) => Ok(Self(f)),
-            Err(e) => Err(darling::Error::unknown_value(&e)),
-        }
+    fn from_value(value: &syn::Lit) -> darling::Result<Self> {
+        let field_type = match value {
+            syn::Lit::Str(lit_str) => lit_str.value(),
+            _ => return Err(darling::Error::custom("Expected a string literal for ty")),
+        };
+        let field_type = FieldType::from_str(&field_type).map_err(|_| {
+            darling::Error::custom(format!("Invalid db_field_type: {}", field_type))
+        })?;
+        Ok(Self(field_type))
     }
 }

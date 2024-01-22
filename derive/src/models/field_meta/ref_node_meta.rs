@@ -38,350 +38,41 @@ impl ReferencedNodeMeta {
         data_type: &DataType,
         table: &Ident,
     ) -> ExtractorResult<Self> {
-        println!(
-            "with_field_definition1 fieldname {}; ",
-            field_name_normalized,
-        );
         let crate_name = get_crate_name(false);
         let mut define_field: Option<TokenStream> = None;
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
         let mut static_assertions = vec![];
-
-        println!(
-            "with_field_definition2 fieldname {}; ",
-            field_name_normalized,
-        );
-        let type_inf =
-            field_receiver.get_db_type_with_assertion(field_name_normalized, data_type, table)?;
-        // println!("type_inf {}", type_inf.unwrap_or_default());
-
-        println!(
-            "with_field_definition3 fieldname {}; ",
-            field_name_normalized,
-        );
-        let field_type_resolved = if let Some(type_data) = type_inf {
-            let DbFieldTypeMeta {
-                db_field_type: field_type,
+        let DbFieldTypeAstMeta {
+                db_field_type,
                 static_assertion,
-            } = type_data;
+            } = field_receiver.get_db_type_with_assertion(field_name, model_type, table)?;
 
-            define_field_methods.push(quote!(.type_(#field_type)));
-            static_assertions.push(static_assertion);
+        if let Some(value) = validate_field_attributes(field_receiver, field_name_normalized) {
+            return value;
+        }
 
-            // TODO: Check if this would be needed.
-            // if let Some(field_item_type) = field_item_type {
-            //     define_array_field_item_methods.push(quote!(.type_(#field_item_type)));
-            // }
-            // Return field_type for later overriding type information in define_fn/define
-            // attributes in case user uses either of those attributes. This is cause the type
-            // attribute should supersede as it is what is used to validate field data at compile
-            // time. Doing that with the `define` function attributes at compile-time may be tricky/impossible.
-            field_type
-        } else {
-            return Err(
-                syn::Error::new_spanned(field_name_normalized, "Invalid type provided").into(),
-            );
-        };
+        if let Some(define) = field_receiver.define {
+            quote!(#define.to_raw());
+        }
 
-        match field_receiver {
-            MyFieldReceiver {
-                define,
-                define_fn,
-                // type_,
-                assert,
-                assert_fn,
-                value,
-                value_fn,
-                permissions,
-                permissions_fn,
-                // item_type,
-                item_assert,
-                item_assert_fn,
-                ..
-            } if (define_fn.is_some() || define.is_some())
-                && (
-                    // I think type should be allowed in addition to define or define_fn but will
-                    // override whatever is defined in define or define_fn, so we can use it for
-                    // code inference and generation.
-                    // type_.is_some()
-                    assert.is_some()
-                        || assert_fn.is_some()
-                        || value.is_some()
-                        || value_fn.is_some()
-                        || permissions.is_some()
-                        || permissions_fn.is_some()
-                        || item_assert.is_some()
-                        || item_assert_fn.is_some()
-                ) =>
-            {
-                return Err(
-                syn::Error::new_spanned(
-                    field_name_normalized,
-                    r#"Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
-    assert,
-    assert_fn,
-    value,
-    value_fn,
-    permissions,
-    permissions_fn,
-    item_assert,
-    item_assert_fn"#).into());
-            }
-            MyFieldReceiver {
-                define,
-                define_fn,
-                // type_,
-                assert,
-                assert_fn,
-                value,
-                value_fn,
-                permissions,
-                permissions_fn,
-                item_assert,
-                item_assert_fn,
-                relate,
-                ..
-            } if (relate.is_some())
-                && (
-                    // type_.is_some()
-                    define.is_some()
-                        || define_fn.is_some()
-                        || assert.is_some()
-                        || assert_fn.is_some()
-                        || value.is_some()
-                        || value_fn.is_some()
-                        || permissions.is_some()
-                        || permissions_fn.is_some()
-                        || item_assert.is_some()
-                        || item_assert_fn.is_some()
-                ) =>
-            {
-                //             return Err("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
-                // define,
-                // define_fn,
-                // assert,
-                // assert_fn,
-                // value,
-                // value_fn,
-                // permissions,
-                // permissions_fn,
-                // item_assert,
-                // item_assert_fn");
+if let Some(assert) = field_receiver.assert {
+            define_field_methods.push(quote!(.assert(#assert)));
+        }
 
-                return Err(
-                syn::Error::new_spanned(
-                    field_name_normalized,
-                    r#"Invalid combination. When `relate`, the following attributes cannot be use in combination to prevent confusion:
-    define,
-    define_fn,
-    assert,
-    assert_fn,
-    value,
-    value_fn,
-    permissions,
-    permissions_fn,
-    item_assert,
-    item_assert_fn"#).into());
-            }
-            MyFieldReceiver {
-                define: Some(_),
-                define_fn: Some(_),
-                ..
-            } => {
-                return Err(
-                syn::Error::new_spanned(
-                    field_name_normalized,
-                    "define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.").into());
-            }
-            MyFieldReceiver {
-                define: Some(define),
-                ..
-            } => {
-                let define = parse_lit_to_tokenstream(define).expect("Unable to parse define");
-                if define.to_token_stream().to_string().chars().count() < 3 {
-                    // If empty, we get only the `()` of the function, so we can assume that it is empty
-                    // if there are less than 3 characters.
-                    // return Err("define attribute is empty. Please provide a define_fn attribute.");
-                    return Err(syn::Error::new_spanned(
-                        field_name_normalized,
-                        "define attribute is empty. Please provide a define_fn attribute.",
-                    )
-                    .into());
-                }
-                define_field = Some(
-                    quote!(#define.on_table(Self::table_name()).type_(#field_type_resolved).to_raw()),
-                );
-            }
-            MyFieldReceiver {
-                define_fn: Some(define_fn),
-                ..
-            } => {
-                if define_fn.to_token_stream().to_string().is_empty() {
-                    return Err(syn::Error::new_spanned(
-                        field_name_normalized,
-                        "define_fn attribute is empty. Please provide a define_fn attribute.",
-                    )
-                    .into());
-                }
+        if let Some(item_assert) = field_receiver.item_assert {
+            define_array_field_item_methods.push(quote!(.assert(#item_assert)));  {
+        }
 
-                define_field = Some(quote!(#define_fn().type_(#field_type_resolved).to_raw()));
-            }
-            _ => {}
-        };
+        if let Some(value) = field_receiver.value {
+            define_array_field_item_methods.push(quote!(.value(#value)));
+            // TODO: Continue tomorrow or at night
+            static_assertions.push(value.get_static_assrtion(db_field_type.into_inner()));
+        }
 
-        match field_receiver {
-            MyFieldReceiver {
-                item_assert: Some(_),
-                item_assert_fn: Some(_),
-                ..
-            } => {
-                return Err(syn::Error::new_spanned(
-                    field_name_normalized,
-                    "item_assert and item_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
-                ).into());
-            }
-            MyFieldReceiver {
-                item_assert: Some(item_assert),
-                ..
-            } => {
-                let item_assert =
-                    parse_lit_to_tokenstream(item_assert).expect("Unable to parse item_assert");
-                define_array_field_item_methods.push(quote!(.assert(#item_assert)));
-            }
-            MyFieldReceiver {
-                item_assert_fn: Some(item_assert_fn),
-                ..
-            } => {
-                define_array_field_item_methods.push(quote!(.assert(#item_assert_fn())));
-            }
-            _ => {}
-        };
-
-        // Gather default values
-        match field_receiver {
-            MyFieldReceiver {
-                value: Some(_value),
-                value_fn: Some(_value_fn),
-                ..
-            } => {
-                return Err(syn::Error::new_spanned(
-                    field_name_normalized,
-                    "value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
-                ).into());
-            }
-            MyFieldReceiver {
-                value: Some(value),
-                type_: Some(type_),
-                ..
-            } => {
-                let value = parse_lit_to_tokenstream(value).expect("unable to parse value");
-                let field_type = type_.deref();
-                let static_assertion = match field_type {
-                    FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
-                    FieldType::Uuid => quote!(#crate_name::sql::Uuid::from(#value)),
-                    FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value)),
-                    FieldType::Null => quote!(#crate_name::sql::Value::Null),
-                    // FieldType::Union(_) => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Union(_) => quote!(),
-                    // FieldType::Option(_) => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Option(_) => quote!(),
-                    FieldType::String => quote!(#crate_name::sql::String::from(#value)),
-                    FieldType::Int => quote!(#crate_name::sql::Number::from(#value)),
-                    FieldType::Float => quote!(#crate_name::sql::Number::from(#value)),
-                    FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value)),
-                    FieldType::Array(_, _) => quote!(),
-                    FieldType::Set(_, _) => quote!(),
-                    // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Datetime => quote!(#crate_name::sql::Datetime::from(#value)),
-                    FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value)),
-                    FieldType::Number => quote!(#crate_name::sql::Number::from(#value)),
-                    FieldType::Object => quote!(),
-                    // FieldType::Object => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value)),
-                    FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value)),
-                    FieldType::Any => quote!(#crate_name::sql::Value::from(#value)),
-                };
-
-                static_assertions.push(quote!(let _ = #static_assertion;));
-
-                define_field_methods
-                    // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
-                    .push(quote!(.value(#crate_name::sql::to_value(&#value).unwrap())));
-            }
-            MyFieldReceiver {
-                value_fn: Some(value_fn),
-                type_: Some(db_type_),
-                ..
-            } => {
-                let field_type = type_.deref();
-                let db_type = ;
-                static_assertions.push(quote!(let _ = #db_type;));
-
-                define_field_methods
-                    // .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));
-                    // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
-                    .push(quote!(.value(#crate_name::sql::to_value(&#value_fn()).unwrap())));
-            }
-            _ => {}
-        };
-
-        // Gather assertions
-        match field_receiver {
-            MyFieldReceiver {
-                assert: Some(_),
-                assert_fn: Some(_),
-                ..
-            } => {
-                return Err(
-                syn::Error::new_spanned(
-                    field_name_normalized,
-                    "assert and assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
-                ).into());
-            }
-            MyFieldReceiver {
-                assert: Some(assert),
-                ..
-            } => {
-                // let assert = parse_lit_to_tokenstream(assert).expect("unable to parse assert");
-                define_field_methods.push(quote!(.assert(#assert)));
-            }
-            MyFieldReceiver {
-                assert_fn: Some(assert_fn),
-                ..
-            } => {
-                define_field_methods.push(quote!(.assert(#assert_fn())));
-            }
-            _ => {}
-        };
-
-        // Gather permissions
-        match field_receiver {
-            MyFieldReceiver {
-                permissions: Some(_),
-                permissions_fn: Some(_),
-                ..
-            } => {
-                return Err(
-                syn::Error::new_spanned(
-                    field_name_normalized,
-                    "permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
-                ).into());
-            }
-            MyFieldReceiver {
-                permissions: Some(permissions),
-                ..
-            } => {
-                define_field_methods.push(permissions);
-            }
-            MyFieldReceiver {
-                permissions_fn: Some(permissions_fn),
-                ..
-            } => {
-                define_field_methods.push(permissions_fn);
-            }
-            _ => {}
-        };
+        if let Some(permissions) = field_receiver.permissions {
+            define_field_methods.push(permissions);  {
+        }
 
         // Helps to define the schema definition of the content
         let array_field_item_str = format!("{field_name_normalized}.*");
@@ -412,6 +103,65 @@ impl ReferencedNodeMeta {
 
         Ok(self)
     }
+
+    fn validate_field_attributes(field_receiver: &MyFieldReceiver, field_name_normalized: &String) -> Option<Result<ReferencedNodeMeta, crate::errors::ExtractorError>> {
+    match field_receiver {
+        MyFieldReceiver {
+            define,
+            assert,
+            value,
+            permissions,
+            item_assert,
+            ..
+        } if (define_fn.is_some() || define.is_some())
+            && (assert.is_some()
+                || assert_fn.is_some()
+                || value.is_some()
+                || value_fn.is_some()
+                || permissions.is_some()
+                || permissions_fn.is_some()
+                || item_assert.is_some()
+                || item_assert_fn.is_some()) =>
+        {
+            return Some(Err(
+            syn::Error::new_spanned(
+                field_name_normalized,
+                r#"Invalid combination. When `define`, the following attributes cannot be use in combination to prevent confusion:
+    assert,
+    value,
+    permissions,
+    item_assert"#).into()));
+        }
+        MyFieldReceiver {
+            define,
+            assert,
+            value,
+            permissions,
+            item_assert,
+            relate,
+            ..
+        } if (relate.is_some())
+            && (define.is_some()
+                || assert.is_some()
+                || value.is_some()
+                || permissions.is_some()
+                || item_assert.is_some()) =>
+        {
+            return Some(Err(
+            syn::Error::new_spanned(
+                field_name_normalized,
+                r#"This is a read-only relation field and does not allow the following attributes:
+    define,
+    assert,
+    value,
+    permissions,
+    item_assert"#).into()));
+        }
+        _ => {}
+    };
+    None
+}
+
 
     pub(crate) fn from_simple_array(normalized_field_name: &::syn::Ident) -> Self {
         let normalized_field_name_str = normalized_field_name.to_string();
@@ -614,3 +364,4 @@ impl ReferencedNodeMeta {
         }
     }
 }
+
