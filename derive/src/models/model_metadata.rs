@@ -1,4 +1,4 @@
-use super::Relate;
+use super::{EdgeDirection, Relate};
 
 type EdgeNameWithDirectionIndicator = String;
 

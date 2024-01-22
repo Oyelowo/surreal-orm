@@ -40,21 +40,21 @@ pub struct MyFieldReceiver {
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) link_one: Option<DestinationNodeTypeOriginal>,
+    pub(crate) link_one: Option<LinkOneAttrType>,
 
     // reference singular: LinkSelf<Account>
     #[darling(default)]
-    pub(crate) link_self: Option<DestinationNodeTypeOriginal>,
+    pub(crate) link_self: Option<LinkSelfAttrType>,
 
     // reference plural: LinkMany<Account>
     #[darling(default)]
-    pub(crate) link_many: Option<DestinationNodeTypeOriginal>,
+    pub(crate) link_many: Option<LinkManyAttrType>,
 
     #[darling(default)]
-    pub(crate) nest_array: Option<DestinationNodeTypeOriginal>,
+    pub(crate) nest_array: Option<NestArrayAttrType>,
 
     #[darling(default)]
-    pub(crate) nest_object: Option<DestinationNodeTypeOriginal>,
+    pub(crate) nest_object: Option<NestObjectAttrType>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,

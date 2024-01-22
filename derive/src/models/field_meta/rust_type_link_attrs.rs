@@ -23,6 +23,27 @@ use super::*;
 #[derive(Debug, Clone)]
 pub struct ListSimple;
 
+macro_rules! create_link_wrapper {
+    ($name:ident) => {
+        #[derive(Debug, Clone)]
+        pub struct $name(DestinationNodeTypeOriginal);
+
+        impl ::std::ops::Deref for $name {
+            type Target = DestinationNodeTypeOriginal;
+
+            fn deref(&self) -> &Self::Target {
+                &self.0
+            }
+        }
+    };
+}
+
+create_link_wrapper!(LinkSelfAttrType);
+create_link_wrapper!(LinkOneAttrType);
+create_link_wrapper!(LinkManyAttrType);
+create_link_wrapper!(NestObjectAttrType);
+create_link_wrapper!(NestArrayAttrType);
+
 #[derive(Debug, Clone)]
 pub struct DestinationNodeTypeOriginal(pub CustomType);
 

@@ -356,7 +356,7 @@ impl SchemaFieldsProperties {
         for field_receiver in data
             .as_ref()
             .take_struct()
-            .expect("Should never be enum")
+            .ok_or_else(|| darling::Error::custom("Expected a struct"))?
             .fields
         {
             let crate_name = get_crate_name(false);
