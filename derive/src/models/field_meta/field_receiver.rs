@@ -69,36 +69,19 @@ pub struct MyFieldReceiver {
     pub(crate) type_: Option<DbFieldType>,
 
     #[darling(default)]
-    pub(crate) assert: Option<Expr>,
+    pub(crate) assert: Option<AttributeAssert>,
 
     #[darling(default)]
-    pub(crate) assert_fn: Option<syn::Path>,
+    pub(crate) define: Option<AttributeDefine>,
 
     #[darling(default)]
-    pub(crate) define: Option<Expr>,
-
-    #[darling(default)]
-    pub(crate) define_fn: Option<syn::Path>,
-
-    #[darling(default)]
-    pub(crate) value: Option<Expr>,
-
-    #[darling(default)]
-    pub(crate) value_fn: Option<syn::Path>,
+    pub(crate) value: Option<AttributeValue>,
 
     #[darling(default)]
     pub(crate) permissions: Option<Permissions>,
 
     #[darling(default)]
-    pub(crate) permissions_fn: Option<PermissionsFn>,
-
-    // #[darling(default)]
-    // pub(crate) item_type: Option<FieldTypeWrapper>,
-    #[darling(default)]
-    item_assert: Option<syn::LitStr>,
-
-    #[darling(default)]
-    item_assert_fn: Option<syn::Path>,
+    item_assert: Option<AttributeItemAssert>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
