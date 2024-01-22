@@ -8,7 +8,7 @@
 use darling::FromMeta;
 use syn::Type;
 
-use crate::models::{CustomType, LinkRustFieldType, RustFieldTypeSelfAllowed};
+use crate::models::{CustomType, DestinationNodeTypeOriginal, RustFieldTypeSelfAllowed};
 
 #[derive(Debug, Clone)]
 pub struct Relate {

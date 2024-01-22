@@ -18,7 +18,7 @@ use quote::{format_ident, quote};
 
 use crate::models::{
     attributes::FieldGenericsMeta, relations::NodeType, replace_lifetimes_with_underscore,
-    replace_self_in_type_str, FieldGenericsMeta, LinkRustFieldType, NormalisedFieldMeta,
+    replace_self_in_type_str, DestinationNodeTypeOriginal, FieldGenericsMeta, NormalisedFieldMeta,
     ReferencedNodeMeta,
 };
 
@@ -396,37 +396,39 @@ impl SchemaFieldsProperties {
                 ..
             } = VariablesModelMacro::new();
 
-            let get_link_meta_with_defs = |node_object: &LinkRustFieldType, is_list: bool| {
-                ReferencedNodeMeta::from_record_link(
-                    node_object,
-                    field_ident_raw_to_underscore_suffix,
-                    struct_name_ident,
-                    is_list,
-                )
-                .with_field_definition(
-                    field_receiver,
-                    struct_name_ident,
-                    field_ident_serialized_fmt,
-                    &data_type,
-                    &table_name,
-                )
-            };
+            let get_link_meta_with_defs =
+                |node_object: &DestinationNodeTypeOriginal, is_list: bool| {
+                    ReferencedNodeMeta::from_record_link(
+                        node_object,
+                        field_ident_raw_to_underscore_suffix,
+                        struct_name_ident,
+                        is_list,
+                    )
+                    .with_field_definition(
+                        field_receiver,
+                        struct_name_ident,
+                        field_ident_serialized_fmt,
+                        &data_type,
+                        &table_name,
+                    )
+                };
 
-            let get_nested_meta_with_defs = |node_object: &LinkRustFieldType, is_list: bool| {
-                ReferencedNodeMeta::from_nested(
-                    node_object,
-                    field_ident_raw_to_underscore_suffix,
-                    struct_name_ident,
-                    is_list,
-                )?
-                .with_field_definition(
-                    field_receiver,
-                    struct_name_ident,
-                    field_ident_serialized_fmt,
-                    &data_type,
-                    &table_name,
-                )
-            };
+            let get_nested_meta_with_defs =
+                |node_object: &DestinationNodeTypeOriginal, is_list: bool| {
+                    ReferencedNodeMeta::from_nested(
+                        node_object,
+                        field_ident_raw_to_underscore_suffix,
+                        struct_name_ident,
+                        is_list,
+                    )?
+                    .with_field_definition(
+                        field_receiver,
+                        struct_name_ident,
+                        field_ident_serialized_fmt,
+                        &data_type,
+                        &table_name,
+                    )
+                };
 
             let update_ser_field_type = |serializable_field_type: &mut Vec<TokenStream>| {
                 if !field_receiver.skip_serializing && !field_receiver.skip {

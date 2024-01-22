@@ -493,7 +493,7 @@ impl CustomType {
 
     pub fn infer_surreal_type_heuristically(
         &self,
-        field_name: &FieldNameNormalized,
+        field_name: &FieldIdentSerialized,
         relation_type: &RelationType,
         model_type: &DataType,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
@@ -667,7 +667,7 @@ impl CustomType {
 
     pub fn type_is_inferrable(
         &self,
-        field_name: &FieldNameNormalized,
+        field_name: &FieldIdentSerialized,
         model_type: &DataType,
     ) -> bool {
         self.relation_type.is_some()
