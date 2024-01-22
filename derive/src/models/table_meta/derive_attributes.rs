@@ -10,14 +10,14 @@ use std::str::FromStr;
 use darling::{ast::Data, util, FromDeriveInput};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::{parse_quote, GenericArgument, Ident, Path, PathArguments, Type};
 
 use crate::{
     errors::ExtractorResult,
     models::{
-        CaseString, MyFieldReceiver, Permissions, PermissionsFn, Rename, RustFieldTypeSelfAllowed,
-        StructGenerics,
+        AttributeAs, AttributeDefine, CaseString, MyFieldReceiver, Permissions, PermissionsFn,
+        Rename, RustFieldTypeSelfAllowed, StructGenerics,
     },
 };
 
@@ -50,22 +50,13 @@ pub struct TableDeriveAttributes {
     pub(crate) flexible: ::std::option::Option<bool>,
 
     // #[darling(default, rename = "as_")]
-    pub(crate) as_: ::std::option::Option<syn::LitStr>,
-
-    #[darling(default)]
-    pub(crate) as_fn: ::std::option::Option<syn::Path>,
+    pub(crate) as_: ::std::option::Option<AttributeAs>,
 
     #[darling(default)]
     pub(crate) permissions: ::std::option::Option<Permissions>,
 
     #[darling(default)]
-    pub(crate) permissions_fn: ::std::option::Option<PermissionsFn>,
-
-    #[darling(default)]
-    pub(crate) define: ::std::option::Option<syn::LitStr>,
-
-    #[darling(default)]
-    pub(crate) define_fn: ::std::option::Option<syn::Path>,
+    pub(crate) define: ::std::option::Option<AttributeDefine>,
 }
 
 impl TableDeriveAttributes {
@@ -138,36 +129,29 @@ impl TableDeriveAttributes {
             ref flexible,
             ref schemafull,
             ref as_,
-            ref as_fn,
             ref permissions,
-            ref permissions_fn,
             ref define,
-            ref define_fn,
             ..
         } = *self;
 
         let crate_name = get_crate_name(false);
 
-        if (define_fn.is_some() || define.is_some())
+        if (define.is_some())
             && (drop.is_some()
                 || as_.is_some()
-                || as_fn.is_some()
                 || schemafull.is_some()
                 || flexible.is_some()
-                || permissions.is_some()
-                || permissions_fn.is_some())
+                || permissions.is_some())
         {
             return Err(
                 syn::Error::new_spanned(
                     self.ident.clone(),
-                    "Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                    "Invalid combination. When `define`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
                             flexible,
                             as,
-                            as_fn,
                             schemafull,
-                            permissions,
-                            permissions_fn",
+                            permissions",
                 )
                 .into(),
             );
@@ -176,23 +160,9 @@ impl TableDeriveAttributes {
         let mut define_table: Option<TokenStream> = None;
         let mut define_table_methods: Vec<TokenStream> = vec![];
 
-        match (define, define_fn){
-            (Some(define), None) => {
-                let define = parse_lit_to_tokenstream(define).map_err(|e| darling::Error::custom("invalid define statement"))?;
-                define_table = Some(quote!(#define.to_raw()));
-            },
-            (None, Some(define_fn)) => {
-                define_table = Some(quote!(#define_fn().to_raw()));
-            },
-            (Some(_), Some(_)) => return Err(
-                syn::Error::new_spanned(
-                    self.ident.clone(),
-                    "define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
-                )
-                .into(),
-            ),
-            (None, None) => (),
-        };
+        if let Some(define) = define {
+            define_table = Some(quote!(#define.to_raw()));
+        }
 
         if let Some(_drop) = drop {
             define_table_methods.push(quote!(.drop()))
@@ -202,36 +172,17 @@ impl TableDeriveAttributes {
             define_table_methods.push(quote!(.flexible()))
         }
 
-        match (as_, as_fn){
-            (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(as_).map_err(|e| darling::Error::custom(format!("Invalid as expression: {e}")))?;
-                define_table_methods.push(quote!(.as_(#as_)))
-            },
-            (None, Some(as_fn)) => {
-                    define_table_methods.push(quote!(.as_(#as_fn())));
-            },
-            (Some(_), Some(_)) => return Err(
-                darling::Error::custom(
-                    "as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.",
-                ).into()
-            ),
-            (None, None) => (),
-        };
+        if let Some(as_) = as_ {
+            define_table_methods.push(quote!(.as_(#as_)))
+        }
 
         if let Some(_schemafull) = schemafull {
             define_table_methods.push(quote!(.schemafull()))
         }
 
-        match (permissions, permissions_fn){
-            (None, Some(p_fn)) => {
-                    define_table_methods.push(p_fn.get_token_stream());
-            },
-            (Some(p), None) => {
-                    define_table_methods.push(p.get_token_stream()?);
-            },
-            (Some(_), Some(_)) => return Err(darling::Error::custom("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.").into()),
-            (None, None) => (),
-        };
+        if let Some(permissions) = permissions {
+            define_table_methods.push(permissions.to_token_stream());
+        }
 
         Ok(define_table.unwrap_or_else(|| {
             quote!(
