@@ -63,9 +63,7 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) skip: bool,
 
-    // #[darling(default)]
-    // default: ::std::option::Option<syn::Expr>,
-    // #[darling(default, rename = "type")]
+    #[darling(default, rename = "ty")]
     pub(crate) type_: Option<DbFieldType>,
 
     #[darling(default)]
@@ -81,7 +79,7 @@ pub struct MyFieldReceiver {
     pub(crate) permissions: Option<Permissions>,
 
     #[darling(default)]
-    item_assert: Option<AttributeItemAssert>,
+    pub(crate) item_assert: Option<AttributeItemAssert>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
@@ -107,6 +105,7 @@ impl MyFieldReceiver {
         // field_impl_generics: &syn::Generics,
         // field_ty_generics: &syn::Generics,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
+        // Infer/use user specified or error out
         // TODO: Add the compile time assertion/validations/checks for the dbtype here
         Ok(DbFieldTypeAstMeta {
             db_field_type: self.type_,
