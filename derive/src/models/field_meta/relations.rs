@@ -5,10 +5,14 @@
  * Licensed under the MIT license
  */
 
+use proc_macro::Span;
 use quote::ToTokens;
 use syn::{spanned::Spanned, Type};
 
-use crate::{errors::ExtractorResult, models::MyFieldReceiver};
+use crate::{
+    errors::{ExtractorError, ExtractorResult},
+    models::MyFieldReceiver,
+};
 
 use super::*;
 // Tuple, Array (T, T), [T; N]
@@ -39,22 +43,18 @@ use super::*;
 // - Company<'a, 'b, T, U>
 // - Like<'a, 'b, T, U>  // Bridge or edge or link between origin and destination nodes
 // - User<'a, T, U >
-type RelatedUser<'a, T> = Relate<User<'a, T>>;
+// type RelatedUser<'a, T> = Relate<User<'a, T>>;
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
     // ->studies->Course
     Relate(Relate),
-    LinkOne(LinkOneRustFieldType),
-    LinkSelf(LinkSelfRustFieldType),
-    LinkMany(LinkManyRustFieldType),
-    NestObject(NestObjectRustFieldType),
-    NestArray(NestArrayRustFieldType),
+    LinkOne(DestinationNodeTypeOriginal),
+    LinkSelf(DestinationNodeTypeOriginal),
+    LinkMany(DestinationNodeTypeOriginal),
+    NestObject(DestinationNodeTypeOriginal),
+    NestArray(DestinationNodeTypeOriginal),
     None,
-    Exaple {
-        main_type: CustomType,
-        attribute_type: CustomType,
-    },
 }
 
 impl RelationType {
@@ -205,69 +205,6 @@ wrapper_struct_to_ident!(EdgeTableName);
 pub(crate) struct NodeTableName(String);
 wrapper_struct_to_ident!(NodeTableName);
 
-// TODO: Remove. Just use LinkRustType from which type name could be extracted
-// #[derive(Debug, Clone)]
-// pub(crate) struct NodeTypeName(String);
-// wrapper_struct_to_ident!(NodeTypeName);
-
-//
-#[derive(Debug, Clone)]
-pub(crate) struct EdgeType(Type);
-
-impl From<&Type> for EdgeType {
-    fn from(ty: &Type) -> Self {
-        Self(ty.clone())
-    }
-}
-
-#[derive(Debug, Clone)]
-pub(crate) struct NodeType(Type);
-
-impl From<Type> for NodeType {
-    fn from(ty: Type) -> Self {
-        Self(ty)
-    }
-}
-
-impl ToTokens for NodeType {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let ty = &self.0;
-        tokens.extend(ty.to_token_stream());
-    }
-}
-
-impl NodeType {
-    pub fn into_inner(self) -> Type {
-        self.0
-    }
-
-    pub fn ident(&self) -> ExtractorResult<syn::Ident> {
-        match &self.0 {
-            Type::Path(type_path) => {
-                let ident = type_path
-                    .path
-                    .segments
-                    .last()
-                    .expect("type path must have at least one segment")
-                    .ident
-                    .clone();
-                Ok(ident)
-            }
-            _ => Err(syn::Error::new(
-                self.0.to_token_stream().span(),
-                "Only path type is supported",
-            )
-            .into()),
-        }
-    }
-}
-
-impl From<&Type> for NodeType {
-    fn from(ty: &Type) -> Self {
-        Self(ty.clone())
-    }
-}
-
 #[derive(Debug, Clone)]
 pub(crate) struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
@@ -288,14 +225,22 @@ pub(crate) struct RelateAttribute {
 //     }
 // }
 
-impl From<&Relate> for RelateAttribute {
-    fn from(relation: &Relate) -> Self {
+impl TryFrom<&Relate> for RelateAttribute {
+    type Error = ExtractorError;
+
+    fn try_from(value: &Relate) -> Result<Self, Self::Error> {
         let right_arrow_count = relation.connection.matches("->").count();
         let left_arrow_count = relation.connection.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
             (2, 0) => EdgeDirection::InArrowLeft,
             (0, 2) => EdgeDirection::OutArrowRight,
-            _ => panic!("Arrow incorrectly used"),
+            _ => {
+                return Err(syn::Error::new(
+                    Span::call_site(),
+                    "Invalid arrow direction usage. Should be either only -> or <-",
+                )
+                .into())
+            }
         };
 
         let edge_direction_str: String = edge_direction.into();
@@ -309,17 +254,19 @@ impl From<&Relate> for RelateAttribute {
                 (Some(action), Some(node_obj), None) => {
                     (EdgeTableName(action.into()), NodeTableName(node_obj.into()))
                 }
-                _ => panic!(
-                    "too many actions or object, {}",
-                    get_relation_error(relation)
-                ),
+                _ => {
+                    return Err(syn::Error::new(
+                        Span::call_site(),
+                        format!("too many edges or nodes, {}", get_relation_error(relation)),
+                    ))
+                }
             };
 
-        Self {
+        Ok(Self {
             node_table_name: node_object,
             edge_table_name: edge_action,
             edge_direction,
-        }
+        })
     }
 }
 

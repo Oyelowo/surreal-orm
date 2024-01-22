@@ -8,8 +8,11 @@
 use crate::models::{
     derive_attributes::TableDeriveAttributes, MyFieldReceiver, RustFieldTypeSelfAllowed,
 };
+use darling::ast::GenericParam;
 use quote::quote;
 use syn::{visit::Visit, *};
+
+use super::CustomType;
 
 struct CustomGenerics(pub Generics);
 struct StrippedBoundsGenerics(pub Generics);
@@ -56,15 +59,15 @@ pub(crate) struct GenericTypeExtractor<'a> {
 }
 
 impl<'a> GenericTypeExtractor<'a> {
-    pub fn new(table_attributes: &'a TableDeriveAttributes) -> Self {
-        Self {
+    pub fn extract_generics_for_complex_type(
+        table_attributes: &'a TableDeriveAttributes,
+        field_ty: &'a CustomType,
+    ) -> &Generics {
+        let generics = Self {
             struct_generics: &table_attributes.generics,
             field_generics: Generics::default(),
-        }
-    }
-
-    pub fn extract_generics_for_complex_type(&mut self, field_ty: &'a Type) -> &Generics {
-        self.visit_type(field_ty);
+        };
+        generics.visit_type(&field_ty.to_basic_type());
         &self.field_generics
     }
 
