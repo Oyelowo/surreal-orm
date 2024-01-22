@@ -68,6 +68,21 @@ impl CustomType {
         }
     }
 
+    pub fn get_generics_meta<'a>(
+        &self,
+        table_attributes: TableDeriveAttributes,
+    ) -> FieldGenericsMeta<'a> {
+        let (field_impl_generics, field_ty_generics, field_where_clause) =
+            GenericTypeExtractor::new(&table_attributes.generics)
+                .extract_generics_for_complex_type(&self.to_basic_type())
+                .split_for_impl();
+        FieldGenericsMeta {
+            field_impl_generics,
+            field_ty_generics,
+            field_where_clause,
+        }
+    }
+
     pub fn replace_self_with_current_struct_ident(
         &self,
         table_def: &TableDeriveAttributes,

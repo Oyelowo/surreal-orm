@@ -7,6 +7,8 @@
 
 use syn::{visit_mut::VisitMut, Type, TypeReference};
 
+use super::CustomType;
+
 pub struct TypeStripper;
 
 impl TypeStripper {
@@ -26,5 +28,15 @@ impl VisitMut for TypeStripper {
 
         // Continue traversing the type
         syn::visit_mut::visit_type_mut(self, i);
+    }
+}
+
+struct CustomTypeRefLifetimeStripped(CustomType);
+
+impl CustomType {
+    pub fn strip_references_and_lifetimes(&self) -> CustomTypeRefLifetimeStripped {
+        CustomTypeRefLifetimeStripped(TypeStripper::strip_references_and_lifetimes(
+            &self.to_basic_type(),
+        ))
     }
 }
