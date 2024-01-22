@@ -204,7 +204,7 @@ if let Some(assert) = field_receiver.assert {
     }
 
     pub(crate) fn from_record_link(
-        linked_node_type: &LinkRustFieldType,
+        linked_node_type: &DestinationNodeTypeOriginal,
         normalized_field_name: &NormalisedFieldMeta,
         // normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
