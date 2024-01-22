@@ -44,7 +44,7 @@ impl FromMeta for DestinationNodeTypeOriginal {
             }
             _ => return Err(darling::Error::custom("Expected a type").with_span(&item.span())),
         };
-        Ok(Self(RustFieldTypeSelfAllowed::new(ty)))
+        Ok(Self(CustomType::new(ty)))
     }
 }
 

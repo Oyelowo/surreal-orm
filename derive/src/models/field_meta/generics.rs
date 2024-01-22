@@ -12,8 +12,9 @@ use quote::quote;
 use syn::{visit::Visit, *};
 
 struct CustomGenerics(pub Generics);
+struct StrippedBoundsGenerics(pub Generics);
 impl CustomGenerics {
-    fn strip_bounds_from_generics(original_generics: &Generics) -> Generics {
+    fn strip_bounds_from_generics(original_generics: &Generics) -> StrippedBoundsGenerics {
         let stripped_params = original_generics
             .params
             .iter()
@@ -38,11 +39,11 @@ impl CustomGenerics {
             })
             .collect();
 
-        Generics {
+        StrippedBoundsGenerics(Generics {
             params: stripped_params,
             where_clause: None,
             ..*original_generics
-        }
+        })
     }
 }
 

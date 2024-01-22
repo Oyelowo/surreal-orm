@@ -72,8 +72,8 @@ impl MyFieldReceiver {
     }
 
     // Get generics for a field type
-    // 'a, T, T:Clone
-    pub fn get_field_type_generics_meta<'a>(
+    // 'a, T, T: Clone
+    pub fn get_type_generics_meta<'a>(
         &self,
         table_derive_attributes: &TableDeriveAttributes,
     ) -> FieldGenericsMeta<'a> {
