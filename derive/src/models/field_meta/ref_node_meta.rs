@@ -311,36 +311,12 @@ impl ReferencedNodeMeta {
             }
             MyFieldReceiver {
                 value_fn: Some(value_fn),
-                type_: Some(type_),
+                type_: Some(db_type_),
                 ..
             } => {
                 let field_type = type_.deref();
-                let static_assertion = match field_type {
-                    FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value_fn())),
-                    FieldType::Null => quote!(#crate_name::sql::Value::Null),
-                    // FieldType::Union(_) => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::Union(_) => quote!(),
-                    // FieldType::Option(_) => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::Option(_) => quote!(),
-                    FieldType::Uuid => quote!(#crate_name::sql::Uuid::from(#value_fn())),
-                    FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_fn())),
-                    FieldType::String => quote!(#crate_name::sql::String::from(#value_fn())),
-                    FieldType::Int => quote!(#crate_name::sql::Number::from(#value_fn())),
-                    FieldType::Float => quote!(#crate_name::sql::Number::from(#value_fn())),
-                    FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value_fn())),
-                    FieldType::Array(_, _) => quote!(),
-                    FieldType::Set(_, _) => quote!(),
-                    // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Datetime => quote!(#crate_name::sql::Datetime::from(#value_fn())),
-                    FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value_fn())),
-                    FieldType::Number => quote!(#crate_name::sql::Number::from(#value_fn())),
-                    FieldType::Object => quote!(),
-                    // FieldType::Object => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value_fn())),
-                    FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value_fn())),
-                    FieldType::Any => quote!(#crate_name::sql::Value::from(#value_fn())),
-                };
-                static_assertions.push(quote!(let _ = #static_assertion;));
+                let db_type = ;
+                static_assertions.push(quote!(let _ = #db_type;));
 
                 define_field_methods
                     // .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));
@@ -367,7 +343,7 @@ impl ReferencedNodeMeta {
                 assert: Some(assert),
                 ..
             } => {
-                let assert = parse_lit_to_tokenstream(assert).expect("unable to parse assert");
+                // let assert = parse_lit_to_tokenstream(assert).expect("unable to parse assert");
                 define_field_methods.push(quote!(.assert(#assert)));
             }
             MyFieldReceiver {
@@ -396,13 +372,13 @@ impl ReferencedNodeMeta {
                 permissions: Some(permissions),
                 ..
             } => {
-                define_field_methods.push(permissions.get_token_stream());
+                define_field_methods.push(permissions);
             }
             MyFieldReceiver {
                 permissions_fn: Some(permissions_fn),
                 ..
             } => {
-                define_field_methods.push(permissions_fn.get_token_stream());
+                define_field_methods.push(permissions_fn);
             }
             _ => {}
         };

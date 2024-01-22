@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::fmt::Display;
+
 use quote::format_ident;
 use syn::Ident;
 
@@ -14,6 +16,30 @@ use super::*;
 
 #[derive(Debug, PartialEq, Eq)]
 struct FieldIdentSerialized(String);
+
+impl Display for FieldIdentSerialized {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl FieldIdentSerialized {
+    pub fn is_id(&self) -> bool {
+        self.0 == "id"
+    }
+
+    pub fn is_in_edge_node(&self, model_type: DataType) -> bool {
+        model_type.is_edge() && self.0 == "in"
+    }
+
+    pub fn is_out_edge_node(&self, model_type: DataType) -> bool {
+        model_type.is_edge() && self.0 == "out"
+    }
+
+    pub fn is_orig_or_dest_edge_node(&self, model_type: &DataType) -> bool {
+        model_type.is_edge() && (self.0 == "in" || self.0 == "out")
+    }
+}
 
 impl From<Ident> for FieldIdentSerialized {
     fn from(s: Ident) -> Self {

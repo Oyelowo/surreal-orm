@@ -69,19 +69,19 @@ pub struct MyFieldReceiver {
     pub(crate) type_: Option<DbFieldType>,
 
     #[darling(default)]
-    pub(crate) assert: Option<syn::LitStr>,
+    pub(crate) assert: Option<Expr>,
 
     #[darling(default)]
     pub(crate) assert_fn: Option<syn::Path>,
 
     #[darling(default)]
-    pub(crate) define: Option<syn::LitStr>,
+    pub(crate) define: Option<Expr>,
 
     #[darling(default)]
     pub(crate) define_fn: Option<syn::Path>,
 
     #[darling(default)]
-    pub(crate) value: Option<syn::LitStr>,
+    pub(crate) value: Option<Expr>,
 
     #[darling(default)]
     pub(crate) value_fn: Option<syn::Path>,
@@ -118,7 +118,7 @@ impl MyFieldReceiver {
 
     pub fn get_db_type_with_assertion(
         &self,
-        field_name: &FieldNameNormalized,
+        field_name: &FieldIdentSerialized,
         model_type: &DataType,
         table: &Ident,
         // field_impl_generics: &syn::Generics,
