@@ -97,6 +97,11 @@ impl MyFieldReceiver {
         NormalisedFieldMeta::from_receiever(self, struct_level_casing)
     }
 
+    pub fn get_db_type(&self) -> ExtractorResult<DbFieldType> {
+        // TODO: Handle error incase heuristics does not work and user does not specify
+        Ok(self.type_.clone())
+    }
+
     pub fn get_db_type_with_assertion(
         &self,
         field_name: &FieldIdentSerialized,
