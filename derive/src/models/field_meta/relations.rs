@@ -49,11 +49,11 @@ use super::*;
 pub(crate) enum RelationType {
     // ->studies->Course
     Relate(Relate),
-    LinkOne(DestinationNodeTypeOriginal),
-    LinkSelf(DestinationNodeTypeOriginal),
-    LinkMany(DestinationNodeTypeOriginal),
-    NestObject(DestinationNodeTypeOriginal),
-    NestArray(DestinationNodeTypeOriginal),
+    LinkOne(LinkOneAttrType),
+    LinkSelf(LinkSelfAttrType),
+    LinkMany(LinkManyAttrType),
+    NestObject(NestObjectAttrType),
+    NestArray(NestArrayAttrType),
     List(ListSimple),
     None,
 }

@@ -15,7 +15,7 @@ use crate::models::casing::*;
 use super::*;
 
 #[derive(Debug, PartialEq, Eq)]
-struct FieldIdentSerialized(String);
+pub struct FieldIdentSerialized(String);
 
 impl Display for FieldIdentSerialized {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

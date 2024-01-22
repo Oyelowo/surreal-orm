@@ -7,7 +7,7 @@
 
 use std::str::FromStr;
 
-use darling::{ast::Data, util, FromDeriveInput};
+use darling::{ast::Data, util, FromDeriveInput, FromMeta};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
 use quote::{format_ident, quote, ToTokens};
@@ -21,10 +21,14 @@ use crate::{
     },
 };
 
+#[derive(Debug, Clone, FromMeta)]
+struct StructIdent(Ident);
+
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
-    pub(crate) ident: syn::Ident,
+    // pub(crate) ident: syn::Ident,
+    pub(crate) ident: StructIdent,
     // pub(crate) attrs: Vec<syn::Attribute>,
     pub(crate) generics: StructGenerics,
     /// Receives the body of the struct or enum. We don't care about
