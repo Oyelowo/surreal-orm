@@ -113,15 +113,11 @@ if let Some(assert) = field_receiver.assert {
             permissions,
             item_assert,
             ..
-        } if (define_fn.is_some() || define.is_some())
+        } if (define.is_some())
             && (assert.is_some()
-                || assert_fn.is_some()
                 || value.is_some()
-                || value_fn.is_some()
                 || permissions.is_some()
-                || permissions_fn.is_some()
-                || item_assert.is_some()
-                || item_assert_fn.is_some()) =>
+                || item_assert.is_some()) =>
         {
             return Some(Err(
             syn::Error::new_spanned(
