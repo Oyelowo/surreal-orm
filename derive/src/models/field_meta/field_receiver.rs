@@ -26,7 +26,7 @@ pub struct MyFieldReceiver {
     pub(crate) ident: Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
     // pub(crate) ty: syn::Type,
-    pub(crate) ty: RustFieldTypeSelfAllowed,
+    pub(crate) ty: CustomType,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
@@ -41,21 +41,21 @@ pub struct MyFieldReceiver {
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) link_one: Option<LinkRustFieldType>,
+    pub(crate) link_one: Option<DestinationNodeTypeOriginal>,
 
     // reference singular: LinkSelf<Account>
     #[darling(default)]
-    pub(crate) link_self: Option<LinkRustFieldType>,
+    pub(crate) link_self: Option<DestinationNodeTypeOriginal>,
 
     // reference plural: LinkMany<Account>
     #[darling(default)]
-    pub(crate) link_many: Option<LinkRustFieldType>,
+    pub(crate) link_many: Option<DestinationNodeTypeOriginal>,
 
     #[darling(default)]
-    pub(crate) nest_array: Option<LinkRustFieldType>,
+    pub(crate) nest_array: Option<DestinationNodeTypeOriginal>,
 
     #[darling(default)]
-    pub(crate) nest_object: Option<LinkRustFieldType>,
+    pub(crate) nest_object: Option<DestinationNodeTypeOriginal>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,
@@ -115,8 +115,6 @@ impl MyFieldReceiver {
     pub fn normalize_ident(&self, struct_level_casing: CaseString) -> NormalisedFieldMeta {
         NormalisedFieldMeta::from_receiever(self, struct_level_casing)
     }
-
-    // pub fn get_db_type(&self) -> ExtractorResult<DbFieldTypeMeta> {}
 
     pub fn get_db_type_with_assertion(
         &self,
