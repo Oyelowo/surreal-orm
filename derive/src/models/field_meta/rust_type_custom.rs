@@ -73,9 +73,11 @@ impl CustomType {
         table_attributes: TableDeriveAttributes,
     ) -> FieldGenericsMeta<'a> {
         let (field_impl_generics, field_ty_generics, field_where_clause) =
-            GenericTypeExtractor::new(&table_attributes.generics)
-                .extract_generics_for_complex_type(&self.to_basic_type())
-                .split_for_impl();
+            GenericTypeExtractor::extract_generics_for_complex_type(
+                &table_attributes,
+                &self.to_basic_type(),
+            )
+            .split_for_impl();
         FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,
