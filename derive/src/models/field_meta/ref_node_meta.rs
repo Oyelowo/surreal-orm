@@ -44,24 +44,24 @@ impl ReferencedNodeMeta {
         let mut define_array_field_item_methods = vec![];
         let mut static_assertions = vec![];
         let DbFieldTypeAstMeta {
-                db_field_type,
-                static_assertion,
-            } = field_receiver.get_db_type_with_assertion(field_name, model_type, table)?;
+            db_field_type,
+            static_assertion,
+        } = field_receiver.get_db_type_with_assertion(field_name, model_type, table)?;
 
-        if let Some(value) = validate_field_attributes(field_receiver, field_name_normalized) {
-            return value;
-        }
+        // if let Some(value) = validate_field_attributes(field_receiver, field_name_normalized) {
+        //     return value;
+        // }
 
         if let Some(define) = field_receiver.define {
             quote!(#define.to_raw());
         }
 
-if let Some(assert) = field_receiver.assert {
+        if let Some(assert) = field_receiver.assert {
             define_field_methods.push(quote!(.assert(#assert)));
         }
 
         if let Some(item_assert) = field_receiver.item_assert {
-            define_array_field_item_methods.push(quote!(.assert(#item_assert)));  {
+            define_array_field_item_methods.push(quote!(.assert(#item_assert)));
         }
 
         if let Some(value) = field_receiver.value {
@@ -71,27 +71,27 @@ if let Some(assert) = field_receiver.assert {
         }
 
         if let Some(permissions) = field_receiver.permissions {
-            define_field_methods.push(permissions);  {
-        }
+            define_field_methods.push(permissions);
+            {}
 
-        // Helps to define the schema definition of the content
-        let array_field_item_str = format!("{field_name_normalized}.*");
-        // Im putting coma before this to separate from the top field array type definition in case
-        // it is present
-        let array_item_definition = if define_array_field_item_methods.is_empty() {
-            quote!()
-        } else {
-            quote!(
-                    ,
-                #crate_name::statements::define_field(#crate_name::Field::new(#array_field_item_str))
-                                        .on_table(#crate_name::Table::from(Self::table_name()))
-                                        #( # define_array_field_item_methods) *
-                                        .to_raw()
+            // Helps to define the schema definition of the content
+            let array_field_item_str = format!("{field_name_normalized}.*");
+            // Im putting coma before this to separate from the top field array type definition in case
+            // it is present
+            let array_item_definition = if define_array_field_item_methods.is_empty() {
+                quote!()
+            } else {
+                quote!(
+                        ,
+                    #crate_name::statements::define_field(#crate_name::Field::new(#array_field_item_str))
+                                            .on_table(#crate_name::Table::from(Self::table_name()))
+                                            #( # define_array_field_item_methods) *
+                                            .to_raw()
 
-            )
-        };
+                )
+            };
 
-        self.field_definition = define_field.unwrap_or_else(||quote!(
+            self.field_definition = define_field.unwrap_or_else(||quote!(
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
                                             .on_table(#crate_name::Table::from(Self::table_name()))
                                             #( # define_field_methods) *
@@ -99,27 +99,31 @@ if let Some(assert) = field_receiver.assert {
                     #array_item_definition
             ));
 
-        self.field_type_validation_asserts.extend(static_assertions);
+            self.field_type_validation_asserts.extend(static_assertions);
 
-        Ok(self)
+            Ok(self)
+        }
     }
 
-    fn validate_field_attributes(field_receiver: &MyFieldReceiver, field_name_normalized: &String) -> Option<Result<ReferencedNodeMeta, crate::errors::ExtractorError>> {
-    match field_receiver {
-        MyFieldReceiver {
-            define,
-            assert,
-            value,
-            permissions,
-            item_assert,
-            ..
-        } if (define.is_some())
-            && (assert.is_some()
-                || value.is_some()
-                || permissions.is_some()
-                || item_assert.is_some()) =>
-        {
-            return Some(Err(
+    fn validate_field_attributes(
+        field_receiver: &MyFieldReceiver,
+        field_name_normalized: &String,
+    ) -> Option<Result<ReferencedNodeMeta, crate::errors::ExtractorError>> {
+        match field_receiver {
+            MyFieldReceiver {
+                define,
+                assert,
+                value,
+                permissions,
+                item_assert,
+                ..
+            } if (define.is_some())
+                && (assert.is_some()
+                    || value.is_some()
+                    || permissions.is_some()
+                    || item_assert.is_some()) =>
+            {
+                return Some(Err(
             syn::Error::new_spanned(
                 field_name_normalized,
                 r#"Invalid combination. When `define`, the following attributes cannot be use in combination to prevent confusion:
@@ -127,23 +131,23 @@ if let Some(assert) = field_receiver.assert {
     value,
     permissions,
     item_assert"#).into()));
-        }
-        MyFieldReceiver {
-            define,
-            assert,
-            value,
-            permissions,
-            item_assert,
-            relate,
-            ..
-        } if (relate.is_some())
-            && (define.is_some()
-                || assert.is_some()
-                || value.is_some()
-                || permissions.is_some()
-                || item_assert.is_some()) =>
-        {
-            return Some(Err(
+            }
+            MyFieldReceiver {
+                define,
+                assert,
+                value,
+                permissions,
+                item_assert,
+                relate,
+                ..
+            } if (relate.is_some())
+                && (define.is_some()
+                    || assert.is_some()
+                    || value.is_some()
+                    || permissions.is_some()
+                    || item_assert.is_some()) =>
+            {
+                return Some(Err(
             syn::Error::new_spanned(
                 field_name_normalized,
                 r#"This is a read-only relation field and does not allow the following attributes:
@@ -152,12 +156,11 @@ if let Some(assert) = field_receiver.assert {
     value,
     permissions,
     item_assert"#).into()));
-        }
-        _ => {}
-    };
-    None
-}
-
+            }
+            _ => {}
+        };
+        None
+    }
 
     pub(crate) fn from_simple_array(normalized_field_name: &::syn::Ident) -> Self {
         let normalized_field_name_str = normalized_field_name.to_string();
@@ -360,4 +363,3 @@ if let Some(assert) = field_receiver.assert {
         }
     }
 }
-
