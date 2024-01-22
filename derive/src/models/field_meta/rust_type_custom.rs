@@ -9,8 +9,12 @@ use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use syn::{
-    self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Ident, Lifetime,
-    Path, PathArguments, PathSegment, Type, TypeReference,
+    self,
+    parse::{Parse, ParseStream, Parser},
+    parse_quote,
+    spanned::Spanned,
+    visit_mut::VisitMut,
+    GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
 };
 
 use crate::{
@@ -37,7 +41,15 @@ impl CustomTypeNoSelf {
     }
 }
 
+#[derive(Debug, Clone, FromMeta)]
 pub struct CustomType(Type);
+
+impl Parse for CustomType {
+    // TODO: Handle type parsing if frommeta does not work or manually implement fromMeta
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        todo!()
+    }
+}
 
 impl ToTokens for CustomType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {

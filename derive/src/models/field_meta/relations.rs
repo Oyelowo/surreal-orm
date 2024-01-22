@@ -54,6 +54,7 @@ pub(crate) enum RelationType {
     LinkMany(DestinationNodeTypeOriginal),
     NestObject(DestinationNodeTypeOriginal),
     NestArray(DestinationNodeTypeOriginal),
+    List(ListSimple),
     None,
 }
 
@@ -94,6 +95,7 @@ impl From<&MyFieldReceiver> for RelationType {
                 nest_array: Some(nest_array),
                 ..
             } => RelationType::NestArray(nest_array.to_owned()),
+            _ if field_receiver.is_list() => RelationType::List(ListSimple),
             _ => RelationType::None,
         }
     }
