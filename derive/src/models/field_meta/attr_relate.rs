@@ -8,7 +8,7 @@
 use darling::FromMeta;
 use syn::Type;
 
-use crate::models::LinkRustFieldType;
+use crate::models::{CustomType, LinkRustFieldType, RustFieldTypeSelfAllowed};
 
 #[derive(Debug, Clone)]
 pub struct Relate {
@@ -20,7 +20,13 @@ pub struct Relate {
     /// e.g2
     /// StudentWritesBook<'a, 'b: 'a, T, U>,
     /// derived from: type StudentWritesBook<'a, 'b: 'a, T, U> = Writes<'a, 'b: 'a, T, U><Student<'a, 'b, T, Book<U>>;
-    pub model: LinkRustFieldType,
+    pub edge_model: CustomType,
+    /// e.g Book, ->writes->book
+    /// derived from: type StudentWritesBook = Writes<Student, Book>;
+    /// e.g2 Book<'a, 'b: 'a, T, U>,
+    /// StudentWritesBook<'a, 'b: 'a, T, U>,
+    /// derived from: type StudentWritesBook<'a, 'b: 'a, T, U> = Writes<'a, 'b: 'a, T, U><Student<'a, 'b, T, Book<U>>;
+    pub destination_model: RustFieldTypeSelfAllowed,
 }
 
 impl FromMeta for Relate {
@@ -48,7 +54,10 @@ impl FromMeta for Relate {
                 let FullRelate {
                     connection, model, ..
                 } = v;
-                Self { connection, model }
+                Self {
+                    connection,
+                    edge_model: model,
+                }
             }
         }
         FullRelate::from_list(items).map(Relate::from)
