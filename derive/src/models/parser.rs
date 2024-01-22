@@ -378,16 +378,14 @@ impl SchemaFieldsProperties {
             } = &field_receiver.normalize_ident(struct_level_casing);
             let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
             let field_type = &field_receiver
-                .rust_type()
-                .replace_self_with_struct_concrete_type(table_derive_attributes);
+                .rust_field_type()
+                .to_type_no_self(table_derive_attributes);
             let FieldGenericsMeta {
                 field_impl_generics,
                 field_ty_generics,
                 field_where_clause,
                 ..
-            } = field_receiver
-                .rust_type()
-                .get_field_generics_meta(table_derive_attributes);
+            } = field_receiver.get_field_generics_meta(table_derive_attributes);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -589,7 +587,7 @@ impl SchemaFieldsProperties {
                 // Only works for vectors
                 let array_trait = if field_receiver.is_list() {
                     array_element
-                        .or_else(||field_receiver.rust_type().get_array_inner_type().map(|inner| inner.into_token_stream()))
+                        .or_else(||field_receiver.rust_field_type().get_array_inner_type().map(|inner| inner.into_token_stream()))
                         .or_else(|| {
                                 Some(field_receiver.get_fallback_array_item_concrete_db_type().map_err(|e| {
                                     // errors.push("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>");
@@ -734,7 +732,7 @@ impl SchemaFieldsProperties {
                         .node_edge_metadata
                         .update(&relation, struct_name_ident, field_type);
                     update_aliases_struct_fields_types_kv();
-                    let connection = relation.connection_model;
+                    let connection = relation.connection;
                     store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_serialized_fmt))));
                     ReferencedNodeMeta::default()
                 }
@@ -841,7 +839,7 @@ impl SchemaFieldsProperties {
                         quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
 
-                    let ref_node_meta = if field_receiver.rust_type().is_list() {
+                    let ref_node_meta = if field_receiver.rust_field_type().is_list() {
                         ReferencedNodeMeta::from_simple_array(field_ident_raw_to_underscore_suffix)
                     } else {
                         ReferencedNodeMeta::default()

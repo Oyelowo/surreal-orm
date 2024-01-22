@@ -21,25 +21,41 @@ use crate::{
 use super::*;
 
 #[derive(Debug, Clone)]
-pub struct LinkRustFieldType(pub RustFieldTypeSelfAllowed);
+pub struct CustomTypeNoSelf(CustomType);
 
-impl ToTokens for LinkRustFieldType {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.into_inner().into_inner().to_tokens(tokens)
-    }
-}
-
-impl LinkRustFieldType {
-    pub fn into_inner(self) -> RustFieldTypeSelfAllowed {
-        self.0
-    }
-
-    pub fn to_type(&self) -> Type {
-        self.0.into_inner()
+impl CustomTypeNoSelf {
+    pub fn new(ty: Type) -> Self {
+        Self(CustomType(ty))
     }
 
     pub fn type_name(&self) -> ExtractorResult<Ident> {
-        match self.to_type() {
+        self.0.type_name()
+    }
+
+    pub fn to_basic_type(self) -> Type {
+        self.0.to_basic_type()
+    }
+}
+
+pub struct CustomType(Type);
+
+impl ToTokens for CustomType {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.0.to_tokens(tokens)
+    }
+}
+
+impl CustomType {
+    pub fn new(ty: Type) -> Self {
+        Self(ty)
+    }
+
+    pub fn to_basic_type(self) -> Type {
+        self.0
+    }
+
+    pub fn type_name(&self) -> ExtractorResult<Ident> {
+        match self.0 {
             Type::Path(type_path) => {
                 let last_segment = type_path
                     .path
@@ -51,94 +67,56 @@ impl LinkRustFieldType {
             _ => Err(syn::Error::new(self.to_type().span(), "Expected a struct type").into()),
         }
     }
-}
 
-impl FromMeta for LinkRustFieldType {
-    fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
-        let ty = match item {
-            syn::Meta::Path(path) => {
-                let ty = path
-                    .segments
-                    .last()
-                    .ok_or_else(|| darling::Error::custom("Expected a type"))?;
-                // TODO: Cross check if to check last part of the segment
-                // in case full path is provided. Confirm that get_ident takes care of that
-                // if not, then we need to check the last segment
-                // let ty = path
-                //     .get_ident()
-                //     .ok_or_else(|| darling::Error::custom("Expected a type"))?;
-                let ty = syn::parse_str::<syn::Type>(&ty.to_string())?;
-                ty
+    pub fn replace_self_with_current_struct_ident(
+        &self,
+        table_def: &TableDeriveAttributes,
+    ) -> CustomTypeNoSelf {
+        let ty = &self.to_basic_type();
+        let replacement_path_from_current_struct = table_def.struct_as_path();
+
+        fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
+            if segment.ident == "Self" {
+                if let Some(first_segment) = replacement_path.segments.first() {
+                    *segment = first_segment.clone();
+                }
+            } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
+                for arg in angle_args.args.iter_mut() {
+                    if let GenericArgument::Type(t) = arg {
+                        *t = replace_type(t, replacement_path);
+                    }
+                }
             }
-            _ => return Err(darling::Error::custom("Expected a type").with_span(&item.span())),
-        };
-        Ok(Self(RustFieldTypeSelfAllowed::new(ty)))
-    }
-}
+        }
 
-impl std::ops::Deref for LinkRustFieldType {
-    type Target = RustFieldTypeSelfAllowed;
+        // handle replacement within types
+        fn replace_type(ty: &Type, replacement_path: &Path) -> Type {
+            match ty {
+                Type::Path(type_path) => {
+                    let mut new_type_path = type_path.clone();
+                    for segment in &mut new_type_path.path.segments {
+                        replace_self_in_segment(segment, replacement_path);
+                    }
+                    Type::Path(new_type_path)
+                }
+                Type::Reference(type_reference) => {
+                    let elem = Box::new(replace_type(&type_reference.elem, replacement_path));
+                    Type::Reference(TypeReference {
+                        and_token: type_reference.and_token,
+                        lifetime: type_reference.lifetime.clone(),
+                        mutability: type_reference.mutability,
+                        elem,
+                    })
+                }
+                // TODO: Extend to handle other types like Tuple, Array, etc.
+                _ => ty.clone(),
+            }
+        }
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct RustFieldTypeSelfAllowed(Type);
-
-impl RustFieldTypeSelfAllowed {
-    pub fn into_inner(self) -> Type {
-        self.0
-    }
-}
-
-pub struct RustFieldTypeNoSelf(Type);
-
-impl ToTokens for RustFieldTypeNoSelf {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.0.to_tokens(tokens)
-    }
-}
-
-impl RustFieldTypeNoSelf {
-    pub fn to_path(&self) -> Path {
-        let ty = &self.0;
-        let path: Path = parse_quote!(#ty);
-
-        // match self.0 {
-        //     Type::Path(ref type_path) => type_path.path.clone(),
-        //     _ => panic!("Expected a path"),
-        // }
-        path
-    }
-}
-
-impl RustFieldTypeNoSelf {
-    pub fn into_inner(self) -> Type {
-        self.0
-    }
-}
-impl From<Type> for RustFieldTypeNoSelf {
-    fn from(ty: Type) -> Self {
-        Self(ty)
-    }
-}
-
-impl From<Type> for RustFieldTypeSelfAllowed {
-    fn from(ty: Type) -> Self {
-        Self(ty)
-    }
-}
-
-struct CustomType(Type);
-
-impl CustomType {
-    pub fn new(ty: Type) -> Self {
-        Self(ty)
+        CustomTypeNoSelf::new(replace_type(ty, &replacement_path_from_current_struct))
     }
 
-    fn strip_bounds_from_type_generics(&self) -> Self {
+    fn strip_bounds_from_generics(&self) -> Self {
         let stripped_ty = match self.into_inner() {
             Type::Path(type_path) => {
                 let mut new_type_path = type_path.clone();
@@ -196,54 +174,6 @@ impl CustomType {
         let mut visitor = ReplaceLifetimesVisitor;
         visitor.visit_type_mut(&mut ty);
         ty.into()
-    }
-
-    pub fn replace_self_with_struct_concrete_type(
-        &self,
-        table_def: &TableDeriveAttributes,
-    ) -> RustFieldTypeNoSelf {
-        let ty = &self.into_inner();
-        let replacement_path_from_current_struct = table_def.struct_as_path();
-
-        fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
-            if segment.ident == "Self" {
-                if let Some(first_segment) = replacement_path.segments.first() {
-                    *segment = first_segment.clone();
-                }
-            } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
-                for arg in angle_args.args.iter_mut() {
-                    if let GenericArgument::Type(t) = arg {
-                        *t = replace_type(t, replacement_path);
-                    }
-                }
-            }
-        }
-
-        // handle replacement within types
-        fn replace_type(ty: &Type, replacement_path: &Path) -> Type {
-            match ty {
-                Type::Path(type_path) => {
-                    let mut new_type_path = type_path.clone();
-                    for segment in &mut new_type_path.path.segments {
-                        replace_self_in_segment(segment, replacement_path);
-                    }
-                    Type::Path(new_type_path)
-                }
-                Type::Reference(type_reference) => {
-                    let elem = Box::new(replace_type(&type_reference.elem, replacement_path));
-                    Type::Reference(TypeReference {
-                        and_token: type_reference.and_token,
-                        lifetime: type_reference.lifetime.clone(),
-                        mutability: type_reference.mutability,
-                        elem,
-                    })
-                }
-                // TODO: Extend to handle other types like Tuple, Array, etc.
-                _ => ty.clone(),
-            }
-        }
-
-        replace_type(ty, &replacement_path_from_current_struct).into()
     }
 
     pub fn is_numeric(&self) -> bool {

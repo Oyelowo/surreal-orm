@@ -223,7 +223,7 @@ impl MyFieldReceiver {
             field_type,
             FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
         );
-        explicit_ty_is_numeric || self.rust_type().is_numeric()
+        explicit_ty_is_numeric || self.rust_field_type().is_numeric()
     }
 
     pub fn is_list(&self) -> bool {
@@ -234,13 +234,12 @@ impl MyFieldReceiver {
         let explicit_ty_is_list =
             matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
-            || self.rust_type().is_list()
+            || self.rust_field_type().is_list()
             || self.type_.as_ref().map_or(false, |t| t.deref().is_array())
             || self.link_many.is_some()
     }
 
-    pub fn rust_type(&self) -> RustFieldTypeSelfAllowed {
-        let rust_type = RustFieldTypeSelfAllowed::new(self.ty);
-        rust_type
+    pub fn rust_field_type(&self) -> RustFieldTypeSelfAllowed {
+        self.ty
     }
 }

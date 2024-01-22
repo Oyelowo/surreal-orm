@@ -11,17 +11,50 @@ use syn::{spanned::Spanned, Type};
 use crate::{errors::ExtractorResult, models::MyFieldReceiver};
 
 use super::*;
+// Tuple, Array (T, T), [T; N]
+
+// FieldTypeMetadata ->
+// 1. RawFieldType -> Ident, LifeTime, Generics.
+// 1. RawFieldType -> Ident, LifeTime, Generics.
+
+// #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+// #[serde(rename_all = "camelCase")]
+// #[surreal_orm(table_name = "company")]
+// pub struct Company<'a, 'b: 'a, T, U: Clone + Default> {
+//     pub id: SurrealSimpleId<Self>,
+//     pub name: &'b T, // &'b T RawField
+//     pub moniker: &'a Somestuff<T, U>, // &'a Somestuff<T, U> RawFieldType
+//     #[surreal_orm(link_self = Self<...>)]
+//     pub branch: LinkSelf<Self<...>>, // user<'a, t>> rawfieldtype, linkrustfieldtype
+//     #[surreal_orm(link_many = user<'a, t>)]
+//     pub users: LinkMany<user<'a, t>>, // user<'a, t>> rawfieldtype, linkrustfieldtype
+//     // impl Company<'a, 'b, T, U> {
+//     //    pub fn users(&self) -> User<'a, T> { }
+//
+//     #[surreal_orm(relate(model = "CompanyLikeUser<'a, 'b, T, U>", connection = "->like->user"))]
+//     pub devs: RelatedUser<'a, T, U>>, // RawFieldType, EdgeFieldType, DestinationFieldType
+//     // pub devs: Relate<User<T>>,
+// }
+
+// - Company<'a, 'b, T, U>
+// - Like<'a, 'b, T, U>  // Bridge or edge or link between origin and destination nodes
+// - User<'a, T, U >
+type RelatedUser<'a, T> = Relate<User<'a, T>>;
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
     // ->studies->Course
     Relate(Relate),
-    LinkOne(LinkRustFieldType),
-    LinkSelf(LinkRustFieldType),
-    LinkMany(LinkRustFieldType),
-    NestObject(LinkRustFieldType),
-    NestArray(LinkRustFieldType),
+    LinkOne(LinkOneRustFieldType),
+    LinkSelf(LinkSelfRustFieldType),
+    LinkMany(LinkManyRustFieldType),
+    NestObject(NestObjectRustFieldType),
+    NestArray(NestArrayRustFieldType),
     None,
+    Exaple {
+        main_type: CustomType,
+        attribute_type: CustomType,
+    },
 }
 
 impl RelationType {
@@ -257,8 +290,8 @@ pub(crate) struct RelateAttribute {
 
 impl From<&Relate> for RelateAttribute {
     fn from(relation: &Relate) -> Self {
-        let right_arrow_count = relation.connection_model.matches("->").count();
-        let left_arrow_count = relation.connection_model.matches("<-").count();
+        let right_arrow_count = relation.connection.matches("->").count();
+        let left_arrow_count = relation.connection.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
             (2, 0) => EdgeDirection::InArrowLeft,
             (0, 2) => EdgeDirection::OutArrowRight,
@@ -267,7 +300,7 @@ impl From<&Relate> for RelateAttribute {
 
         let edge_direction_str: String = edge_direction.into();
         let mut substrings = relation
-            .connection_model
+            .connection
             .split(edge_direction_str.as_str())
             .filter(|x| !x.is_empty());
 
