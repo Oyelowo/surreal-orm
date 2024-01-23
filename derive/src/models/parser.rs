@@ -35,6 +35,7 @@ use super::{
     variables::VariablesModelMacro,
     DataType,
     GenericTypeExtractor,
+    TokenStreamHashable,
     TypeStripper,
 };
 
@@ -207,43 +208,6 @@ pub struct SchemaFieldsProperties {
     pub table_id_type: TokenStream,
 }
 
-#[derive(Clone)]
-pub struct TokenStreamHashable(TokenStream);
-
-impl ToTokens for TokenStreamHashable {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        tokens.extend(self.0.clone());
-    }
-}
-
-impl Deref for TokenStreamHashable {
-    type Target = TokenStream;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl From<TokenStream> for TokenStreamHashable {
-    fn from(value: TokenStream) -> Self {
-        Self(value)
-    }
-}
-
-impl Eq for TokenStreamHashable {}
-
-impl PartialEq for TokenStreamHashable {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.to_string() == other.0.to_string()
-    }
-}
-
-impl std::hash::Hash for TokenStreamHashable {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.to_string().hash(state);
-    }
-}
-
 impl SchemaFieldsProperties {
     /// Derive the schema properties for a struct
     pub(crate) fn from_receiver_data(
@@ -361,138 +325,7 @@ impl SchemaFieldsProperties {
                     field_ident_serialized_fmt.to_string().to_case(Case::Pascal)
                 );
 
-                let numeric_trait = if field_receiver.is_numeric() {
-                    quote!(
-                        impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel
-                        #field_where_clause {}
-
-                        impl ::std::convert::From<self::#field_name_as_camel> for #crate_name::NumberLike {
-                            fn from(val: self::#field_name_as_camel) -> Self {
-                                val.0.into()
-                            }
-                        }
-
-                        impl ::std::convert::From<&self::#field_name_as_camel> for #crate_name::NumberLike {
-                            fn from(val: &self::#field_name_as_camel) -> Self {
-                                val.clone().0.into()
-                            }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for #field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn add(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                        query_string: format!("{} + {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for #field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn sub(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                    query_string: format!("{} - {}", self.build(), rhs.build()),
-                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                    errors: vec![],
-                                }
-                            }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for #field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn mul(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                    query_string: format!("{} * {}", self.build(), rhs.build()),
-                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                    errors: vec![],
-                                }
-                            }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for #field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn div(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                    query_string: format!("{} / {}", self.build(), rhs.build()),
-                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                    errors: vec![],
-                                }
-                            }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for &#field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn add(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                        query_string: format!("{} + {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for &#field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn sub(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                    query_string: format!("{} - {}", self.build(), rhs.build()),
-                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                    errors: vec![],
-                                }
-                            }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for &#field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn mul(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                    query_string: format!("{} * {}", self.build(), rhs.build()),
-                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                    errors: vec![],
-                                }
-                            }
-                        }
-
-                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for &#field_name_as_camel {
-                            type Output = #crate_name::Operation;
-
-                            fn div(self, rhs: T) -> Self::Output {
-                                let rhs: #crate_name::NumberLike = rhs.into();
-
-                                #crate_name::Operation {
-                                    query_string: format!("{} / {}", self.build(), rhs.build()),
-                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                    errors: vec![],
-                                }
-                            }
-                        }
-                    )
-                } else {
-                    quote!()
-                };
+                let numeric_trait = field_receiver.numeric_trait_token();
 
                 // Only works for vectors
                 let array_trait = if field_receiver.is_list() {

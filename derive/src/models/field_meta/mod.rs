@@ -22,6 +22,7 @@ pub(crate) mod relations;
 pub(crate) mod rename;
 pub mod rust_type_custom;
 pub mod rust_type_link_attrs;
+pub mod token_stream_hashable;
 pub(crate) mod token_wrappers;
 pub(crate) mod type_stripper;
 
@@ -42,5 +43,6 @@ pub use rename::*;
 pub use rust_type_custom;
 pub use rust_type_custom::*;
 pub use rust_type_link_attrs::*;
+pub use token_stream_hashable::*;
 pub use token_wrappers::*;
 pub use type_stripper::*;
