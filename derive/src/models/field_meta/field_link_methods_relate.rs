@@ -1,6 +1,108 @@
-use super::{EdgeDirection, Relate};
+use std::{collections::HashMap, fmt::Display};
+
+use proc_macro2::TokenStream;
+use proc_macros_helpers::get_crate_name;
+
+use crate::{
+    errors::ExtractorResult,
+    models::{RelateAttribute, StaticAssertionToken},
+};
+
+use super::{variables::VariablesModelMacro, EdgeDirection, Relate};
 
 type EdgeNameWithDirectionIndicator = String;
+
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+struct NodeEdgeMetadata {
+    /// Example value: writes
+    edge_table_name: syn::Ident,
+    /// The current struct name ident.
+    /// e.g given: struct Student {  }, value = Student
+    origin_struct_ident: syn::Ident,
+    /// The database table name of the edge. Used for generating other tokens
+    /// e.g "writes"
+    direction: EdgeDirection,
+    /// Example of value: `StudentWritesBook`
+    ///
+    /// For each edge table e.g writes, we usually can have many aliases reusing thesame edge
+    /// e.g for Writes<In, Out>, we could have  StudentWritesBook, StudentWritesBlog, for each direction(e.g ->),
+    /// we want to select one of these to use its schema which is aliased as the Cased table name
+    /// in the calling location e.g
+    /// for a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book")
+    /// So we can do
+    /// type Writes = <StudentWritesBook as Edge>::Schema;
+    edge_relation_model_selected_ident: syn::Ident,
+    /// Example Generated:
+    /// ```rust, ignore
+    ///   type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
+    ///   type Book = <BookModel as surreal_macros::Node>::Schema;
+    ///
+    ///   type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
+    ///   type Blog = <BlogModel as surreal_macros::Node>::Schema;
+    /// ```
+    ///
+    /// Example Value:
+    /// ```rust, ignore
+    /// vec![
+    ///    quote!(
+    ///       type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
+    ///       type Book = <BookModel as surreal_macros::Node>::Schema;
+    ///     ),
+    ///     quote!(
+    ///       type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
+    ///       type Blog = <BlogModel as surreal_macros::Node>::Schema;
+    ///     ),
+    /// ],
+    /// ```
+    destination_node_schema: Vec<TokenStream>,
+    destination_node_name: String,
+    /// Example Generated:
+    ///
+    /// ```rust, ignore
+    /// impl Writes__ {
+    ///     fn book(&self, filter: Filter) -> Book {
+    ///         Book::__________connect_to_graph_traversal_string(
+    ///             &self.___________graph_traversal_string,
+    ///             filter,
+    ///         )
+    ///     }
+    ///
+    ///     fn blog(&self, filter: Filter) -> Blog {
+    ///         Blog::__________connect_to_graph_traversal_string(
+    ///             &self.___________graph_traversal_string,
+    ///             filter,
+    ///         )
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Example Value:
+    /// ```rust, ignore
+    /// vec![
+    ///     quote!(
+    ///        fn book(&self, filter: Filter) -> Book {
+    ///            Book::__________connect_to_graph_traversal_string(
+    ///                &self.___________graph_traversal_string,
+    ///                filter,
+    ///            )
+    ///        }
+    ///     ),
+    ///     quote!(
+    ///        fn blog(&self, filter: Filter) -> Blog {
+    ///            Blog::__________connect_to_graph_traversal_string(
+    ///                &self.___________graph_traversal_string,
+    ///                filter,
+    ///            )
+    ///        }
+    ///     ),
+    ///    ]
+    /// ```
+    foreign_node_connection_method: Vec<TokenStream>,
+    static_assertions: Vec<TokenStream>,
+    imports: Vec<TokenStream>,
+    edge_name_as_method_ident: syn::Ident,
+}
 
 #[derive(Default, Clone)]
 pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
@@ -22,24 +124,15 @@ impl NodeEdgeMetadataStore {
         relation: &Relate,
         origin_struct_ident: &syn::Ident,
         field_type: &syn::Type,
-    ) -> TokenStream {
+    ) -> StaticAssertionToken {
         let crate_name = get_crate_name(false);
-        let relation_model = relation
-            .model
-            .as_ref()
-            .expect("relation model does not exist");
+        let relation_model = relation.edge_model;
         let relation_attributes = RelateAttribute::from(relation);
-        let edge_table_name = &TokenStream::from(&relation_attributes.edge_table_name);
-        let foreign_node_table_name = &TokenStream::from(&relation_attributes.node_table_name);
-
-        // TODO: Remove this
-        // let edge_table_name_checker_ident = format_ident!("{}EdgeTableNameChecker", relation_model);
-        // let home_node_ident = format_ident!("{}HomeNode", relation_model);
-        // let home_node_table_name_checker_ident =
-        //     format_ident!("{}HomeNodeTableNameChecker", relation_model);
-        // let foreign_node_ident = format_ident!("{}ForeignNode", relation_model);
-        // let foreign_node_table_name_checker_ident =
-        //     format_ident!("{}ForeignNodeTableNameChecker", relation_model);
+        let RelateAttribute {
+            edge_table_name,
+            node_table_name: foreign_node_table_name,
+            edge_direction,
+        } = relation_attributes;
 
         let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
             match &relation_attributes.edge_direction {
@@ -148,7 +241,7 @@ impl NodeEdgeMetadataStore {
         // i.e Edge to destination Node
         let foreign_node_connection_method = || {
             quote!(
-                pub fn #destination_node_table_name(self, clause: impl Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
+                pub fn #destination_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_name_str);
 

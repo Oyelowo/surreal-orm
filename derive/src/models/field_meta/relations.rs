@@ -196,6 +196,14 @@ macro_rules! wrapper_struct_to_ident {
                 value.0
             }
         }
+
+
+        impl ToTokens for $simple_wrapper_struct {
+            fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+                let ident = ::quote::format_ident!("{self}");
+                tokens.extend(ident.into_token_stream());
+            }
+        }
     };
 }
 
