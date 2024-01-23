@@ -32,6 +32,10 @@ impl RelationType {
                 let method = nest_array.get_field_link_method();
                 LinkerMethodToken(method)
             }
+            RelationType::NestObject(nest_object) => {
+                let method = nest_object.get_field_link_method();
+                LinkerMethodToken(method)
+            }
             RelationType::List(list) => {
                 let method = list.get_field_link_method();
                 LinkerMethodToken(method)
