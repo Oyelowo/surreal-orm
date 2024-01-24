@@ -6,8 +6,8 @@ use quote::{format_ident, quote, ToTokens};
 use crate::{
     errors::ExtractorResult,
     models::{
-        derive_attributes::TableDeriveAttributes, FieldGenerics, FieldGenericsMeta,
-        MyFieldReceiver, RelationType,
+        create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes, FieldGenerics,
+        FieldGenericsMeta, MyFieldReceiver, RelationType,
     },
 };
 
@@ -37,12 +37,112 @@ pub struct ArrayElementFieldSetterToken(TokenStream);
 /// ```
 pub struct FieldSetterImplTokens(TokenStream);
 
+create_tokenstream_wrapper!(FieldNamePascalized);
+
 impl MyFieldReceiver {
     pub fn get_field_value_setter_impl(
         &self,
         table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<FieldSetterImplTokens> {
         let crate_name = get_crate_name(false);
+        let field_name_pascalized = self.field_name_pascalized(table_attributes);
+
+        let numeric_trait = if self.is_numeric() {
+            self.numeric_setter_impl(table_attributes)
+        } else {
+            quote!()
+        };
+
+        let array_trait = if self.is_list() {
+            self.array_trait_impl(&table_attributes)?
+        } else {
+            quote!()
+        };
+
+        store.field_wrapper_type_custom_implementations
+            .push(quote!(
+            #[derive(Debug, Clone)]
+            pub struct #field_name_pascalized(pub #crate_name::Field);
+
+            impl ::std::convert::From<&str> for #field_name_pascalized {
+                fn from(field_name: &str) -> Self {
+                    Self(#crate_name::Field::new(field_name))
+                }
+            }
+
+            impl ::std::convert::From<#crate_name::Field> for #field_name_pascalized {
+                fn from(field_name: #crate_name::Field) -> Self {
+                    Self(field_name)
+                }
+            }
+
+            impl ::std::convert::From<&#field_name_pascalized> for #crate_name::ValueLike {
+                fn from(value: &#field_name_pascalized) -> Self {
+                    let field: #crate_name::Field = value.into();
+                    field.into()
+                }
+            }
+
+            impl ::std::convert::From<#field_name_pascalized> for #crate_name::ValueLike {
+                fn from(value: #field_name_pascalized) -> Self {
+                    let field: #crate_name::Field = value.into();
+                    field.into()
+                }
+            }
+
+            impl ::std::convert::From<&#field_name_pascalized> for #crate_name::Field {
+                fn from(field_name:& #field_name_pascalized) -> Self {
+                    field_name.0.clone()
+                }
+            }
+
+            impl ::std::convert::From<#field_name_pascalized> for #crate_name::Field {
+                fn from(field_name: #field_name_pascalized) -> Self {
+                    field_name.0
+                }
+            }
+
+            impl ::std::ops::Deref for #field_name_pascalized {
+                type Target = #crate_name::Field;
+
+                fn deref(&self) -> &Self::Target {
+                    &self.0
+                }
+            }
+
+            impl ::std::ops::DerefMut for #field_name_pascalized {
+                fn deref_mut(&mut self) -> &mut Self::Target {
+                    &mut self.0
+                }
+            }
+
+            impl<T: #crate_name::serde::Serialize> ::std::convert::From<self::#field_name_pascalized> for #crate_name::SetterArg<T> {
+            fn from(value: self::#field_name_pascalized) -> Self {
+                    Self::Field(value.into())
+                }
+            }
+
+            impl<T: #crate_name::serde::Serialize> ::std::convert::From<&self::#field_name_pascalized> for #crate_name::SetterArg<T> {
+            fn from(value: &self::#field_name_pascalized) -> Self {
+                    Self::Field(value.into())
+                }
+            }
+
+            impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_pascalized  #field_where_clause {}
+
+            impl #field_impl_generics #crate_name::Patchable<#field_type> for self::#field_name_pascalized  #field_where_clause {}
+
+            #numeric_trait
+
+            #array_trait
+        ));
+        todo!()
+    }
+
+    fn field_name_pascalized(
+        &self,
+        table_attributes: &TableDeriveAttributes,
+    ) -> FieldNamePascalized {
         let struct_level_casing = table_attributes.struct_level_casing();
         let field_ident_serialized_fmt = self
             .normalize_ident(struct_level_casing)
@@ -53,104 +153,18 @@ impl MyFieldReceiver {
             field_ident_serialized_fmt.to_string().to_case(Case::Pascal)
         );
 
-        let numeric_trait = if self.is_numeric() {
-            self.numeric_trait_token()
-        } else {
-            quote!()
-        };
-
-        // Only works for vectors
-        let array_trait = if self.is_list() {
-            self.array_trait_impl(&table_attributes)?
-        } else {
-            quote!()
-        };
-
-        store.field_wrapper_type_custom_implementations
-            .push(quote!(
-            #[derive(Debug, Clone)]
-            pub struct #field_name_as_camel(pub #crate_name::Field);
-
-            impl ::std::convert::From<&str> for #field_name_as_camel {
-                fn from(field_name: &str) -> Self {
-                    Self(#crate_name::Field::new(field_name))
-                }
-            }
-
-            impl ::std::convert::From<#crate_name::Field> for #field_name_as_camel {
-                fn from(field_name: #crate_name::Field) -> Self {
-                    Self(field_name)
-                }
-            }
-
-            impl ::std::convert::From<&#field_name_as_camel> for #crate_name::ValueLike {
-                fn from(value: &#field_name_as_camel) -> Self {
-                    let field: #crate_name::Field = value.into();
-                    field.into()
-                }
-            }
-
-            impl ::std::convert::From<#field_name_as_camel> for #crate_name::ValueLike {
-                fn from(value: #field_name_as_camel) -> Self {
-                    let field: #crate_name::Field = value.into();
-                    field.into()
-                }
-            }
-
-            impl ::std::convert::From<&#field_name_as_camel> for #crate_name::Field {
-                fn from(field_name:& #field_name_as_camel) -> Self {
-                    field_name.0.clone()
-                }
-            }
-
-            impl ::std::convert::From<#field_name_as_camel> for #crate_name::Field {
-                fn from(field_name: #field_name_as_camel) -> Self {
-                    field_name.0
-                }
-            }
-
-            impl ::std::ops::Deref for #field_name_as_camel {
-                type Target = #crate_name::Field;
-
-                fn deref(&self) -> &Self::Target {
-                    &self.0
-                }
-            }
-
-            impl ::std::ops::DerefMut for #field_name_as_camel {
-                fn deref_mut(&mut self) -> &mut Self::Target {
-                    &mut self.0
-                }
-            }
-
-            impl<T: #crate_name::serde::Serialize> ::std::convert::From<self::#field_name_as_camel> for #crate_name::SetterArg<T> {
-            fn from(value: self::#field_name_as_camel) -> Self {
-                    Self::Field(value.into())
-                }
-            }
-
-            impl<T: #crate_name::serde::Serialize> ::std::convert::From<&self::#field_name_as_camel> for #crate_name::SetterArg<T> {
-            fn from(value: &self::#field_name_as_camel) -> Self {
-                    Self::Field(value.into())
-                }
-            }
-
-            impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  #field_where_clause {}
-
-            impl #field_impl_generics #crate_name::Patchable<#field_type> for self::#field_name_as_camel  #field_where_clause {}
-
-            #numeric_trait
-
-            #array_trait
-        ));
-        todo!()
+        field_name_as_camel.to_token_stream().into()
     }
 
     fn array_trait_impl(
         &self,
         table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<ArrayElementFieldSetterToken> {
+        struct ArrayItemTypeToken(TokenStream);
+
         let crate_name = get_crate_name(false);
+        let field_name_as_pascalized = self.field_name_pascalized(table_attributes);
+
         let (generics_meta, array_item_type) = match self.to_relation_type() {
             RelationType::LinkMany(foreign_node) => {
                 let generics_meta = foreign_node.get_generics_meta(table_attributes);
@@ -169,16 +183,14 @@ impl MyFieldReceiver {
                         let generics_meta = ty.get_generics_meta(table_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
-                    None => match self.db_type {
-                        Some(ref db_ty) => (
+                    None => match self.db_type.map(|db_ty| db_ty.get_array_item_type()).flatten() {
+                        Some(ref db_array_item_ty) => (
                             None,
-                            db_ty
-                                .get_array_item_type()
-                                .map(|ty| ty.as_db_sql_value_tokenstream().into()),
+                            db_array_item_ty.as_db_sql_value_tokenstream().into(),
                         ),
                         None => {
                             return Err(syn::Error::new_spanned(
-                                field_type,
+                                self.db_type,
                                 "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
                             ))
                         }
@@ -191,12 +203,18 @@ impl MyFieldReceiver {
         let array_setter_impl = array_item_type.map_or(quote!(), |item_type| {
             generics_meta.map_or(
                 quote!(
-                    impl #crate_name::SetterArray<#item_type> for self::#field_name_as_camel {}
+                    impl #crate_name::SetterArray<#item_type> for self::#field_name_as_pascalized {}
                 ),
                 |generics_meta| {
+                    let FieldGenericsMeta {
+                        field_impl_generics,
+                        field_ty_generics,
+                        field_where_clause,
+                    } = generics_meta;
+
                     quote!(
                         impl #field_impl_generics #crate_name::SetterArray<#item_type> for
-                        self::#field_name_as_camel #field_ty_generics #field_where_clause {}
+                        self::#field_name_as_pascalized #field_ty_generics #field_where_clause {}
                     )
                 },
             )
@@ -205,25 +223,30 @@ impl MyFieldReceiver {
         Ok(ArrayElementFieldSetterToken(array_setter_impl))
     }
 
-    fn numeric_trait_token(&self) -> FieldSetterNumericImpl {
+    fn numeric_setter_impl(
+        &self,
+        table_attributes: &TableDeriveAttributes,
+    ) -> FieldSetterNumericImpl {
+        let field_name_pascalized = self.field_name_pascalized(table_attributes);
+
         let numeric_trait = {
             quote!(
-                impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel
+                impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_pascalized
                 #field_where_clause {}
 
-                impl ::std::convert::From<self::#field_name_as_camel> for #crate_name::NumberLike {
-                    fn from(val: self::#field_name_as_camel) -> Self {
+                impl ::std::convert::From<self::#field_name_pascalized> for #crate_name::NumberLike {
+                    fn from(val: self::#field_name_pascalized) -> Self {
                         val.0.into()
                     }
                 }
 
-                impl ::std::convert::From<&self::#field_name_as_camel> for #crate_name::NumberLike {
-                    fn from(val: &self::#field_name_as_camel) -> Self {
+                impl ::std::convert::From<&self::#field_name_pascalized> for #crate_name::NumberLike {
+                    fn from(val: &self::#field_name_pascalized) -> Self {
                         val.clone().0.into()
                     }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for #field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for #field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn add(self, rhs: T) -> Self::Output {
@@ -237,7 +260,7 @@ impl MyFieldReceiver {
                         }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for #field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for #field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn sub(self, rhs: T) -> Self::Output {
@@ -251,7 +274,7 @@ impl MyFieldReceiver {
                     }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for #field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for #field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn mul(self, rhs: T) -> Self::Output {
@@ -265,7 +288,7 @@ impl MyFieldReceiver {
                     }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for #field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for #field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn div(self, rhs: T) -> Self::Output {
@@ -279,7 +302,7 @@ impl MyFieldReceiver {
                     }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for &#field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for &#field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn add(self, rhs: T) -> Self::Output {
@@ -293,7 +316,7 @@ impl MyFieldReceiver {
                         }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for &#field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for &#field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn sub(self, rhs: T) -> Self::Output {
@@ -307,7 +330,7 @@ impl MyFieldReceiver {
                     }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for &#field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for &#field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn mul(self, rhs: T) -> Self::Output {
@@ -321,7 +344,7 @@ impl MyFieldReceiver {
                     }
                 }
 
-                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for &#field_name_as_camel {
+                impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for &#field_name_pascalized {
                     type Output = #crate_name::Operation;
 
                     fn div(self, rhs: T) -> Self::Output {
