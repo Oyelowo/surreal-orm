@@ -8,7 +8,7 @@
 use std::{
     collections::{hash_map::Entry, HashMap, HashSet},
     fmt::Display,
-    ops::Deref,
+    ops::Deref, option,
 };
 
 use convert_case::{Case, Casing};
@@ -319,109 +319,6 @@ impl SchemaFieldsProperties {
                     .push(quote!(#field_ident_raw_to_underscore_suffix: #field_ident_serialized_fmt.into(),));
             };
 
-            let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
-                let field_name_as_camel = format_ident!(
-                    "{}_______________",
-                    field_ident_serialized_fmt.to_string().to_case(Case::Pascal)
-                );
-
-                let numeric_trait = field_receiver.numeric_trait_token();
-
-                // Only works for vectors
-                let array_trait = if field_receiver.is_list() {
-                    array_element
-                        .or_else(||field_receiver.rust_field_type().get_array_inner_type().map(|inner| inner.into_token_stream()))
-                        .or_else(|| {
-                                Some(field_receiver.get_fallback_array_item_concrete_db_type().map_err(|e| {
-                                    // errors.push("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>");
-                                    syn::Error::new_spanned(field_type, e)
-                                }).unwrap_or_default())
-                            })
-                        .map(|items|{
-                            quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
-                        })
-                        .expect("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>")
-                } else {
-                    quote!()
-                };
-
-                store.field_wrapper_type_custom_implementations
-                        .push(quote!(
-                            #[derive(Debug, Clone)]
-                            pub struct #field_name_as_camel(pub #crate_name::Field);
-
-                            impl ::std::convert::From<&str> for #field_name_as_camel {
-                                fn from(field_name: &str) -> Self {
-                                    Self(#crate_name::Field::new(field_name))
-                                }
-                            }
-
-                            impl ::std::convert::From<#crate_name::Field> for #field_name_as_camel {
-                                fn from(field_name: #crate_name::Field) -> Self {
-                                    Self(field_name)
-                                }
-                            }
-
-                            impl ::std::convert::From<&#field_name_as_camel> for #crate_name::ValueLike {
-                                fn from(value: &#field_name_as_camel) -> Self {
-                                    let field: #crate_name::Field = value.into();
-                                    field.into()
-                                }
-                            }
-
-                            impl ::std::convert::From<#field_name_as_camel> for #crate_name::ValueLike {
-                                fn from(value: #field_name_as_camel) -> Self {
-                                    let field: #crate_name::Field = value.into();
-                                    field.into()
-                                }
-                            }
-
-                            impl ::std::convert::From<&#field_name_as_camel> for #crate_name::Field {
-                                fn from(field_name:& #field_name_as_camel) -> Self {
-                                    field_name.0.clone()
-                                }
-                            }
-
-                            impl ::std::convert::From<#field_name_as_camel> for #crate_name::Field {
-                                fn from(field_name: #field_name_as_camel) -> Self {
-                                    field_name.0
-                                }
-                            }
-
-                            impl ::std::ops::Deref for #field_name_as_camel {
-                                type Target = #crate_name::Field;
-
-                                fn deref(&self) -> &Self::Target {
-                                    &self.0
-                                }
-                            }
-
-                            impl ::std::ops::DerefMut for #field_name_as_camel {
-                                fn deref_mut(&mut self) -> &mut Self::Target {
-                                    &mut self.0
-                                }
-                            }
-
-                            impl<T: #crate_name::serde::Serialize> ::std::convert::From<self::#field_name_as_camel> for #crate_name::SetterArg<T> {
-                                fn from(value: self::#field_name_as_camel) -> Self {
-                                    Self::Field(value.into())
-                                }
-                            }
-
-                            impl<T: #crate_name::serde::Serialize> ::std::convert::From<&self::#field_name_as_camel> for #crate_name::SetterArg<T> {
-                                fn from(value: &self::#field_name_as_camel) -> Self {
-                                    Self::Field(value.into())
-                                }
-                            }
-
-                            impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  #field_where_clause {}
-
-                            impl #field_impl_generics #crate_name::Patchable<#field_type> for self::#field_name_as_camel  #field_where_clause {}
-
-                            #numeric_trait
-
-                            #array_trait
-                        ));
 
                 store.schema_struct_fields_types_kv.push(
                     quote!(pub #field_ident_raw_to_underscore_suffix: #_____field_names::#field_name_as_camel, ),
@@ -539,6 +436,7 @@ impl SchemaFieldsProperties {
                     insert_non_null_updater_token(
                         quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
+                
 
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                     get_link_meta_with_defs(&node_object, true)
@@ -558,9 +456,7 @@ impl SchemaFieldsProperties {
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
 
-                RelationType::NestArray(node_object) => {
-                    let foreign_node = format_ident!("{node_object}");
-
+                RelationType::NestArray(foreign_object_item) => {
                     insert_non_null_updater_token(
                         quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
                     );
@@ -572,7 +468,7 @@ impl SchemaFieldsProperties {
                         #crate_name::validators::assert_type_eq_all!(#field_type, #nested_vec_type);
                     });
 
-                    update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
+                    update_field_names_fields_types_kv(Some(quote!(#foreign_object_item)));
                     get_nested_meta_with_defs(&node_object, true)
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
@@ -597,6 +493,7 @@ impl SchemaFieldsProperties {
                         )
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
+                RelationType::List(_) => todo!(),
             };
 
             if field_ident_serialized_fmt == "id" {
