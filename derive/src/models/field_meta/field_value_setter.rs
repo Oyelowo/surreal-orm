@@ -5,7 +5,10 @@ use quote::{format_ident, quote, ToTokens};
 
 use crate::{
     errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, MyFieldReceiver, RelationType},
+    models::{
+        derive_attributes::TableDeriveAttributes, FieldGenerics, FieldGenericsMeta,
+        MyFieldReceiver, RelationType,
+    },
 };
 
 pub struct FieldSetterNumericImpl(TokenStream);
@@ -17,14 +20,27 @@ impl ToTokens for FieldSetterNumericImpl {
 }
 
 pub struct ArrayElementFieldSetterToken(TokenStream);
-// let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
 
+/// Generated Field wrapper type implementations for each fiekd around `Field` type
+/// Example value:
+/// ```rust,ignore
+/// struct Email(pub(super) Field);
+///
+/// impl std::ops::Deref for Email {
+///     type Target = #crate_name::Field;
+///
+///     fn deref(&self) -> &Self::Target {
+///         &self.0
+///     }
+/// }
+/// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
+/// ```
 pub struct FieldSetterImplTokens(TokenStream);
 
 impl MyFieldReceiver {
     pub fn get_field_value_setter_impl(
         &self,
-        table_attributes: TableDeriveAttributes,
+        table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<FieldSetterImplTokens> {
         let crate_name = get_crate_name(false);
         let struct_level_casing = table_attributes.struct_level_casing();
@@ -33,18 +49,19 @@ impl MyFieldReceiver {
             .field_ident_serialized_fmt;
 
         let field_name_as_camel = format_ident!(
-            "{}x",
+            "{}",
             field_ident_serialized_fmt.to_string().to_case(Case::Pascal)
         );
 
         let numeric_trait = if self.is_numeric() {
-            Some(self.numeric_trait_token())
+            self.numeric_trait_token()
         } else {
-            None
+            quote!()
         };
 
         // Only works for vectors
-        let array_trait = if field_receiver.is_list() {
+        let array_trait = if self.is_list() {
+            self.array_trait_impl(&table_attributes)?
         } else {
             quote!()
         };
@@ -55,67 +72,67 @@ impl MyFieldReceiver {
             pub struct #field_name_as_camel(pub #crate_name::Field);
 
             impl ::std::convert::From<&str> for #field_name_as_camel {
-            fn from(field_name: &str) -> Self {
-            Self(#crate_name::Field::new(field_name))
-            }
+                fn from(field_name: &str) -> Self {
+                    Self(#crate_name::Field::new(field_name))
+                }
             }
 
             impl ::std::convert::From<#crate_name::Field> for #field_name_as_camel {
-            fn from(field_name: #crate_name::Field) -> Self {
-            Self(field_name)
-            }
+                fn from(field_name: #crate_name::Field) -> Self {
+                    Self(field_name)
+                }
             }
 
             impl ::std::convert::From<&#field_name_as_camel> for #crate_name::ValueLike {
-            fn from(value: &#field_name_as_camel) -> Self {
-            let field: #crate_name::Field = value.into();
-            field.into()
-            }
+                fn from(value: &#field_name_as_camel) -> Self {
+                    let field: #crate_name::Field = value.into();
+                    field.into()
+                }
             }
 
             impl ::std::convert::From<#field_name_as_camel> for #crate_name::ValueLike {
-            fn from(value: #field_name_as_camel) -> Self {
-            let field: #crate_name::Field = value.into();
-            field.into()
-            }
+                fn from(value: #field_name_as_camel) -> Self {
+                    let field: #crate_name::Field = value.into();
+                    field.into()
+                }
             }
 
             impl ::std::convert::From<&#field_name_as_camel> for #crate_name::Field {
-            fn from(field_name:& #field_name_as_camel) -> Self {
-            field_name.0.clone()
-            }
+                fn from(field_name:& #field_name_as_camel) -> Self {
+                    field_name.0.clone()
+                }
             }
 
             impl ::std::convert::From<#field_name_as_camel> for #crate_name::Field {
-            fn from(field_name: #field_name_as_camel) -> Self {
-            field_name.0
-            }
+                fn from(field_name: #field_name_as_camel) -> Self {
+                    field_name.0
+                }
             }
 
             impl ::std::ops::Deref for #field_name_as_camel {
-            type Target = #crate_name::Field;
+                type Target = #crate_name::Field;
 
-            fn deref(&self) -> &Self::Target {
-            &self.0
-            }
+                fn deref(&self) -> &Self::Target {
+                    &self.0
+                }
             }
 
             impl ::std::ops::DerefMut for #field_name_as_camel {
-            fn deref_mut(&mut self) -> &mut Self::Target {
-            &mut self.0
-            }
+                fn deref_mut(&mut self) -> &mut Self::Target {
+                    &mut self.0
+                }
             }
 
             impl<T: #crate_name::serde::Serialize> ::std::convert::From<self::#field_name_as_camel> for #crate_name::SetterArg<T> {
             fn from(value: self::#field_name_as_camel) -> Self {
-            Self::Field(value.into())
-            }
+                    Self::Field(value.into())
+                }
             }
 
             impl<T: #crate_name::serde::Serialize> ::std::convert::From<&self::#field_name_as_camel> for #crate_name::SetterArg<T> {
             fn from(value: &self::#field_name_as_camel) -> Self {
-            Self::Field(value.into())
-            }
+                    Self::Field(value.into())
+                }
             }
 
             impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  #field_where_clause {}
@@ -129,25 +146,11 @@ impl MyFieldReceiver {
         todo!()
     }
 
-    pub fn array_trait_impl(
+    fn array_trait_impl(
         &self,
         table_attributes: &TableDeriveAttributes,
-    ) -> ArrayElementFieldSetterToken {
+    ) -> ExtractorResult<ArrayElementFieldSetterToken> {
         let crate_name = get_crate_name(false);
-        // let field_name_as_camel = format_ident!(
-        //     "{}x",
-        //     self.normalize_ident(struct_level_casing)
-        //         .field_ident_serialized_fmt
-        //         .to_string()
-        //         .to_case(Case::Pascal)
-        // );
-        // let field_type = self.rust_field_type();
-        // let field_impl_generics = self.field_impl_generics();
-        // let field_where_clause = self.field_where_clause();
-        // let array_trait = quote!(
-        //     impl #field_impl_generics #crate_name::SetterArray<#field_type> for self::#field_name_as_camel
-        //     #field_where_clause {}
-        // );
         let (generics_meta, array_item_type) = match self.to_relation_type() {
             RelationType::LinkMany(foreign_node) => {
                 let generics_meta = foreign_node.get_generics_meta(table_attributes);
@@ -160,36 +163,49 @@ impl MyFieldReceiver {
                 let generics_meta = foreign_object.get_generics_meta(table_attributes);
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
-            _ => self
-                .ty
-                .get_array_inner_type()
-                .map(|item| {
-                    let generics_meta = item.get_generics_meta(table_attributes);
-                    (Some(generics_meta), Some(quote!(#item)))
-                })
-                .or_else(|| {
-                     self
-                        .type_
-                        .map(|t| t.get_array_item_type())
-                        .flatten()
-                        .map(|t| Some(None, Some(t.as_db_sql_value_tokenstream())))
-                        .ok_or(|e| {
-                            syn::Error::new_spanned(field_type, "Could not infer array type. Explicitly specify the type e.g ty = array<string>")
-                        })
-                })
-                .map(|item_type| quote!(#item_type)),
+            _ => {
+                let inferred_type = match self.ty.get_array_inner_type() {
+                    Some(ref ty) => {
+                        let generics_meta = ty.get_generics_meta(table_attributes);
+                        (Some(generics_meta), Some(quote!(#ty)))
+                    }
+                    None => match self.db_type {
+                        Some(ref db_ty) => (
+                            None,
+                            db_ty
+                                .get_array_item_type()
+                                .map(|ty| ty.as_db_sql_value_tokenstream().into()),
+                        ),
+                        None => {
+                            return Err(syn::Error::new_spanned(
+                                field_type,
+                                "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
+                            ))
+                        }
+                    },
+                };
+                inferred_type
+            }
         };
 
-        let array_setter_impl = array_item_type.map(|item_type| {
-            quote!(
-                impl #crate_name::SetterArray<#item_type> for self::#field_name_as_camel  {}
+        let array_setter_impl = array_item_type.map_or(quote!(), |item_type| {
+            generics_meta.map_or(
+                quote!(
+                    impl #crate_name::SetterArray<#item_type> for self::#field_name_as_camel {}
+                ),
+                |generics_meta| {
+                    quote!(
+                        impl #field_impl_generics #crate_name::SetterArray<#item_type> for
+                        self::#field_name_as_camel #field_ty_generics #field_where_clause {}
+                    )
+                },
             )
         });
 
-        ArrayElementFieldSetterToken(array_trait)
+        Ok(ArrayElementFieldSetterToken(array_setter_impl))
     }
 
-    pub fn numeric_trait_token(&self) -> FieldSetterNumericImpl {
+    fn numeric_trait_token(&self) -> FieldSetterNumericImpl {
         let numeric_trait = {
             quote!(
                 impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel

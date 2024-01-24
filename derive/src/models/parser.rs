@@ -89,7 +89,7 @@ pub struct SchemaFieldsProperties {
     /// }
     /// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
     /// ```
-    pub field_wrapper_type_custom_implementations: Vec<TokenStream>,
+    pub field_wrapper_type_custom_implementations: Vec<FieldSetterImplTokens>,
 
     /// Generated example: pub timeWritten: "timeWritten".into(),
     /// This is used to build the actual instance of the model during intialization e,g out:

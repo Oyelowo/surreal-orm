@@ -82,6 +82,12 @@ macro_rules! create_tokenstream_wrapper {
                 Self(tokenstream)
             }
         }
+
+        impl From<$name> for ::proc_macro2::TokenStream {
+            fn from(tokenstream: $name) -> Self {
+                tokenstream.0
+            }
+        }
     };
 }
 
