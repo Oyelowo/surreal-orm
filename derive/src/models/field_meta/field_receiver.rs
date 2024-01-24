@@ -63,7 +63,7 @@ pub struct MyFieldReceiver {
     pub(crate) skip: bool,
 
     #[darling(default, rename = "ty")]
-    pub(crate) type_: Option<DbFieldType>,
+    pub(crate) db_type: Option<DbFieldType>,
 
     #[darling(default)]
     pub(crate) assert: Option<AttributeAssert>,
@@ -101,7 +101,7 @@ impl MyFieldReceiver {
         table_attributes: &TableDeriveAttributes,
         model_type: &DataType,
     ) -> ExtractorResult<DbFieldType> {
-        let db_type = match self.type_ {
+        let db_type = match self.db_type {
             Some(ref db_type) => db_type.clone(),
             None => {
                 let struct_level_casing = table_attributes.struct_level_casing();
@@ -128,7 +128,7 @@ impl MyFieldReceiver {
 
     pub fn get_db_type(&self) -> ExtractorResult<DbFieldType> {
         // TODO: Handle error incase heuristics does not work and user does not specify
-        Ok(self.type_.clone())
+        Ok(self.db_type.clone())
     }
 
     pub fn get_db_type_with_assertion(
@@ -142,14 +142,14 @@ impl MyFieldReceiver {
         // Infer/use user specified or error out
         // TODO: Add the compile time assertion/validations/checks for the dbtype here
         Ok(DbFieldTypeAstMeta {
-            db_field_type: self.type_,
+            db_field_type: self.db_type,
             static_assertion: todo!(),
         })
     }
 
     pub fn is_numeric(&self) -> bool {
         let field_type = self
-            .type_
+            .db_type
             .clone()
             .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_numeric = matches!(
@@ -161,14 +161,17 @@ impl MyFieldReceiver {
 
     pub fn is_list(&self) -> bool {
         let field_type = self
-            .type_
+            .db_type
             .clone()
             .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_list =
             matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
             || self.rust_field_type().is_list()
-            || self.type_.as_ref().map_or(false, |t| t.deref().is_array())
+            || self
+                .db_type
+                .as_ref()
+                .map_or(false, |t| t.deref().is_array())
             || self.link_many.is_some()
     }
 
