@@ -25,11 +25,13 @@ pub struct ListSimple;
 
 macro_rules! create_link_wrapper {
     ($name:ident) => {
-        #[derive(Debug, Clone)]
-        pub struct $name(DestinationNodeTypeOriginal);
+        #[derive(Debug, Clone, FromMeta)]
+        pub struct $name(CustomType);
+
+        impl $name {}
 
         impl ::std::ops::Deref for $name {
-            type Target = DestinationNodeTypeOriginal;
+            type Target = CustomType;
 
             fn deref(&self) -> &Self::Target {
                 &self.0
@@ -39,56 +41,8 @@ macro_rules! create_link_wrapper {
 }
 
 create_link_wrapper!(LinkSelfAttrType);
+create_link_wrapper!(LinkSelfAttrTypeReplaceSelfWithCurrentStructIdent);
 create_link_wrapper!(LinkOneAttrType);
 create_link_wrapper!(LinkManyAttrType);
 create_link_wrapper!(NestObjectAttrType);
 create_link_wrapper!(NestArrayAttrType);
-
-#[derive(Debug, Clone)]
-pub struct DestinationNodeTypeOriginal(pub CustomType);
-
-impl DestinationNodeTypeOriginal {
-    pub fn replace_self_with_current_struct_ident(
-        &self,
-        table_def: &TableDeriveAttributes,
-    ) -> DestinationNodeTypeNoSelf {
-        DestinationNodeTypeNoSelf(self.0.replace_self_with_current_struct_ident(table_def))
-    }
-}
-
-impl FromMeta for DestinationNodeTypeOriginal {
-    fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
-        let ty = match item {
-            syn::Meta::Path(path) => {
-                let ty = path
-                    .segments
-                    .last()
-                    .ok_or_else(|| darling::Error::custom("Expected a type"))?;
-                syn::parse_str::<syn::Type>(&ty.to_string())?
-            }
-            _ => return Err(darling::Error::custom("Expected a type").with_span(&item.span())),
-        };
-        Ok(Self(CustomType::new(ty)))
-    }
-}
-
-impl ToTokens for DestinationNodeTypeOriginal {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.0.to_tokens(tokens)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct DestinationNodeTypeNoSelf(pub CustomTypeNoSelf);
-
-impl DestinationNodeTypeNoSelf {
-    pub fn to_basic_type(self) -> Type {
-        self.0.to_basic_type()
-    }
-}
-
-impl ToTokens for DestinationNodeTypeNoSelf {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.to_basic_type().to_tokens(tokens)
-    }
-}
