@@ -17,7 +17,10 @@ use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::Expr;
 
-use crate::models::{DataType, MainFieldTypeSelfAllowed, StaticAssertionToken};
+use crate::models::{
+    create_tokenstream_wrapper, CustomType, DataType, MainFieldTypeSelfAllowed,
+    StaticAssertionToken,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldTypeAstMeta {
@@ -28,6 +31,8 @@ pub struct DbFieldTypeAstMeta {
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldType(FieldType);
 
+create_tokenstream_wrapper!(SqlValueTokenStream);
+
 impl ToTokens for DbFieldType {
     fn to_tokens(&self, tokens: &mut TokenStream) {}
 }
@@ -36,14 +41,89 @@ impl DbFieldType {
     pub fn into_inner(self) -> FieldType {
         self.0
     }
-}
 
-impl DbFieldType {
+    pub fn get_array_item_type(&self) -> Option<Self> {
+        match self.0 {
+            FieldType::Array(ref ft, _) => Some(Self(ft.clone())),
+            _ => None,
+        }
+    }
+
+    pub fn as_db_sql_value_tokenstream(&self) -> SqlValueTokenStream {
+        let crate_name = get_crate_name(false);
+        let value = match self.into_inner() {
+            FieldType::Any => {
+                quote!(#crate_name::sql::Value)
+            }
+            FieldType::Null => {
+                quote!(#crate_name::sql::Value)
+            }
+            FieldType::Uuid => {
+                quote!(#crate_name::sql::Uuid)
+            }
+            FieldType::Bytes => {
+                quote!(#crate_name::sql::Bytes)
+            }
+            FieldType::Union(_) => {
+                quote!(#crate_name::sql::Value)
+            }
+            FieldType::Option(ft) => {
+                let val = Self(ft).as_db_sql_value_tokenstream();
+                quote!(::std::option::Option<#val>)
+            }
+            FieldType::String => {
+                quote!(::std::string::String)
+            }
+            FieldType::Int => {
+                // quote!(#crate_name::validators::Int)
+                quote!(#crate_name::sql::Number)
+            }
+            FieldType::Float => {
+                // quote!(#crate_name::validators::Float)
+                quote!(#crate_name::sql::Number)
+            }
+            FieldType::Bool => {
+                quote!(::std::convert::Into<::std::primitive::bool>)
+            }
+            FieldType::Array(_, _) => {
+                // quote!(::std::iter::IntoIterator)
+                // quote!(::std::convert::Into<#crate_name::sql::Array>)
+                quote!(::std::vec::Vec<#crate_name::sql::Value>)
+            }
+            FieldType::Set(_, _) => {
+                quote!(::std::collections::HashSet<#crate_name::sql::Value>)
+            }
+            FieldType::Datetime => {
+                quote!(#crate_name::sql::Datetime)
+            }
+            FieldType::Decimal => {
+                quote!(#crate_name::validators::Float)
+            }
+            FieldType::Duration => {
+                quote!(#crate_name::sql::Duration)
+            }
+            FieldType::Number => {
+                // quote!(#crate_name::validators::Num)
+                quote!(#crate_name::sql::Number)
+            }
+            FieldType::Object => {
+                quote!(#crate_name::sql::Object)
+            }
+            FieldType::Record(_) => {
+                quote!(#crate_name::sql::Thing)
+            }
+            FieldType::Geometry(_) => {
+                quote!(#crate_name::sql::Geometry)
+            }
+        };
+        value.into()
+    }
+
     // Even if db type provided, it is still checked against the rust type
     // to make sure it's compatible
     pub fn generate_static_assertions(
         &self,
-        rust_field_type: &MainFieldTypeSelfAllowed,
+        rust_field_type: &CustomType,
         model_type: &DataType,
     ) -> StaticAssertionToken {
         let rust_field_type = &mut rust_field_type.clone();

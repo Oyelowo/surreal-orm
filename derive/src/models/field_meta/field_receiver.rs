@@ -7,7 +7,7 @@
 
 use crate::{
     errors::ExtractorResult,
-    models::{CaseString, DataType},
+    models::{derive_attributes::TableDeriveAttributes, CaseString, DataType},
 };
 
 use super::*;
@@ -96,6 +96,36 @@ impl MyFieldReceiver {
         NormalisedFieldMeta::from_receiever(self, struct_level_casing)
     }
 
+    pub fn db_field_type(
+        &self,
+        table_attributes: &TableDeriveAttributes,
+        model_type: &DataType,
+    ) -> ExtractorResult<DbFieldType> {
+        let db_type = match self.type_ {
+            Some(ref db_type) => db_type.clone(),
+            None => {
+                let struct_level_casing = table_attributes.struct_level_casing();
+                let field_name = &self
+                    .normalize_ident(struct_level_casing)
+                    .field_ident_serialized_fmt;
+                let inferred = self
+                    .ty
+                    .infer_surreal_type_heuristically(
+                        field_name,
+                        &self.to_relation_type(),
+                        model_type,
+                    )
+                    .map(|db_type_ast| db_type_ast.db_field_type)?;
+                inferred
+            }
+        };
+        Ok(db_type)
+    }
+
+    pub fn to_relation_type(&self) -> RelationType {
+        self.into()
+    }
+
     pub fn get_db_type(&self) -> ExtractorResult<DbFieldType> {
         // TODO: Handle error incase heuristics does not work and user does not specify
         Ok(self.type_.clone())
@@ -115,87 +145,6 @@ impl MyFieldReceiver {
             db_field_type: self.type_,
             static_assertion: todo!(),
         })
-    }
-
-    pub fn get_fallback_array_item_concrete_db_type(&self) -> ExtractorResult<DbfieldTypeToken> {
-        let field_type = self
-            .type_
-            .clone()
-            .map_or(FieldType::Any, |t| t.into_inner());
-
-        let item_type = match field_type {
-            FieldType::Array(item_type, _) => item_type,
-            // TODO: Check if to error out here or just use Any
-            _ => return Err(syn::Error::new_spanned(&self.ty, "Not an array").into()),
-            // _ => Box::new(FieldType::Any),
-        };
-
-        let crate_name = get_crate_name(false);
-        let value = match item_type.deref() {
-            FieldType::Any => {
-                quote!(#crate_name::sql::Value)
-            }
-            FieldType::Null => {
-                quote!(#crate_name::sql::Value)
-            }
-            FieldType::Uuid => {
-                quote!(#crate_name::sql::Uuid)
-            }
-            FieldType::Bytes => {
-                quote!(#crate_name::sql::Bytes)
-            }
-            FieldType::Union(_) => {
-                quote!(#crate_name::sql::Value)
-            }
-            FieldType::Option(_) => {
-                quote!(::std::option::Option<#crate_name::sql::Value>)
-            }
-            FieldType::String => {
-                quote!(::std::string::String)
-            }
-            FieldType::Int => {
-                // quote!(#crate_name::validators::Int)
-                quote!(#crate_name::sql::Number)
-            }
-            FieldType::Float => {
-                // quote!(#crate_name::validators::Float)
-                quote!(#crate_name::sql::Number)
-            }
-            FieldType::Bool => {
-                quote!(::std::convert::Into<::std::primitive::bool>)
-            }
-            FieldType::Array(_, _) => {
-                // quote!(::std::iter::IntoIterator)
-                // quote!(::std::convert::Into<#crate_name::sql::Array>)
-                quote!(::std::vec::Vec<#crate_name::sql::Value>)
-            }
-            FieldType::Set(_, _) => {
-                quote!(::std::collections::HashSet<#crate_name::sql::Value>)
-            }
-            FieldType::Datetime => {
-                quote!(#crate_name::sql::Datetime)
-            }
-            FieldType::Decimal => {
-                quote!(#crate_name::validators::Float)
-            }
-            FieldType::Duration => {
-                quote!(#crate_name::sql::Duration)
-            }
-            FieldType::Number => {
-                // quote!(#crate_name::validators::Num)
-                quote!(#crate_name::sql::Number)
-            }
-            FieldType::Object => {
-                quote!(#crate_name::sql::Object)
-            }
-            FieldType::Record(_) => {
-                quote!(::std::convert::Option<#crate_name::sql::Thing>)
-            }
-            FieldType::Geometry(_) => {
-                quote!(#crate_name::sql::Geometry)
-            }
-        };
-        Ok(value.into())
     }
 
     pub fn is_numeric(&self) -> bool {
