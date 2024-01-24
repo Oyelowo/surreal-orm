@@ -449,7 +449,7 @@ impl CustomType {
         }
     }
 
-    pub fn get_array_inner_type(&self) -> Option<Type> {
+    pub fn get_array_inner_type(&self) -> Option<CustomType> {
         let ty = &self.into_inner();
 
         let item_ty = match ty {
@@ -471,9 +471,12 @@ impl CustomType {
                     _ => return None,
                 }
             }
+            // syn:Type::Array(array) => {
+            //     array.elem.as_ref()
+            // },
             _ => return None,
         };
-        Some(item_ty.clone())
+        Some(item_ty.clone().into())
     }
 
     pub fn get_option_item_type(&self) -> Option<Type> {
