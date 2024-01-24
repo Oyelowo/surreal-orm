@@ -5,8 +5,9 @@
  * Licensed under the MIT license
  */
 
+pub use proc_macro2::TokenStream;
 pub use proc_macros_helpers::get_crate_name;
-use quote::quote;
+pub use quote::{quote, ToTokens};
 
 pub fn generate_nested_vec_type(
     foreign_node: &syn::Ident,
@@ -49,3 +50,39 @@ pub fn count_vec_nesting(field_type: &syn::Type) -> usize {
         _ => 0, // Not a type path, so it can't be a Vec.
     }
 }
+
+#[macro_export]
+macro_rules! create_tokenstream_wrapper {
+    ($name:ident) => {
+        #[derive(Debug, Clone, Default)]
+        pub struct $name(::proc_macro2::TokenStream);
+
+        impl $name {
+            pub fn new(tokenstream: ::proc_macro2::TokenStream) -> Self {
+                Self(tokenstream)
+            }
+        }
+
+        impl ::quote::ToTokens for $name {
+            fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
+                tokens.extend(self.0.clone());
+            }
+        }
+
+        impl ::std::ops::Deref for $name {
+            type Target = ::proc_macro2::TokenStream;
+
+            fn deref(&self) -> &Self::Target {
+                &self.0
+            }
+        }
+
+        impl From<::proc_macro2::TokenStream> for $name {
+            fn from(tokenstream: ::proc_macro2::TokenStream) -> Self {
+                Self(tokenstream)
+            }
+        }
+    };
+}
+
+pub use create_tokenstream_wrapper;
