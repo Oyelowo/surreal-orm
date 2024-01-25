@@ -7,6 +7,8 @@ use crate::{
     models::{derive_attributes::TableDeriveAttributes, MyFieldReceiver, StaticAssertionToken},
 };
 
+use super::MyFieldReceiver;
+
 pub struct DefineFieldStatementToken(TokenStream);
 
 impl MyFieldReceiver {

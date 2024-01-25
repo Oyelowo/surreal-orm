@@ -5,7 +5,7 @@ use crate::models::{
 use quote::quote;
 use syn::{visit::Visit, *};
 
-use super::RelationType;
+use super::{MyFieldReceiver, RelationType};
 
 impl MyFieldReceiver {
     // This extracts generics metadata for field and from struct generics metadata.

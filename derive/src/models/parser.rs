@@ -36,11 +36,11 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper,
+    TypeStripper, FieldSetterImplTokens,
 };
 
 #[derive(Default, Clone)]
-pub struct SchemaFieldsProperties {
+pub struct FieldsMeta {
     /// list of fields names that are actually serialized and not skipped.
     pub serializable_fields: Vec<TokenStream>,
     /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
@@ -206,26 +206,39 @@ pub struct SchemaFieldsProperties {
     pub non_null_updater_fields: Vec<TokenStream>,
     pub renamed_serialized_fields: Vec<TokenStream>,
     pub table_id_type: TokenStream,
+
+    pub table_derive_attributes: Option< TableDeriveAttributes >,
+    pub data_type: Option< DataType >,
 }
 
-impl SchemaFieldsProperties {
+impl FieldsMeta {
+    fn new(table_derive_attributes: TableDeriveAttributes, data_type: DataType) -> Self {
+        let mut store = Self {
+            table_derive_attributes: Some(table_derive_attributes),
+            data_type: Some(data_type),
+            ..Default::default()
+        };
+       store 
+    }
+        
+    pub(crate) fn table_derive_attributes(&self) -> &TableDeriveAttributes {
+        self.table_derive_attributes.as_ref().expect("Table derive attribute has not been set. Make sure it has been set")
+    }
+    
+    pub(crate) fn data_type(&self) -> &DataType {
+        self.data_type.as_ref().expect("Table derive attribute has not been set. Make sure it has been set")
+    }
+    
     /// Derive the schema properties for a struct
-    pub(crate) fn from_receiver_data(
+    pub(crate) fn parse_fields(
         table_derive_attributes: &TableDeriveAttributes,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
         let struct_level_casing = table_derive_attributes.struct_level_casing()?;
         let struct_generics = &table_derive_attributes.generics;
-        let TableDeriveAttributes {
-            data,
-            ident: struct_name_ident,
-            table_name,
-            generics,
-            ..
-        } = table_derive_attributes;
+        let mut store = Self::new(table_derive_attributes, data_type);
 
-        let mut store = Self::default();
-        for field_receiver in data
+        for field_receiver in table_derive_attributes.data
             .as_ref()
             .take_struct()
             .ok_or_else(|| darling::Error::custom("Expected a struct"))?
@@ -268,6 +281,11 @@ impl SchemaFieldsProperties {
                 ..
             } = VariablesModelMacro::new();
 
+            field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
+            field_receiver.create_field_setter_impl(&mut store);
+            
+            store.field_wrapper_type_custom_implementations.push(field_receiver.get_field_value_setter_impl(table_derive_attributes));
+                
             let get_link_meta_with_defs =
                 |node_object: &DestinationNodeTypeOriginal, is_list: bool| {
                     ReferencedNodeMeta::from_record_link(

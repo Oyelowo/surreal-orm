@@ -11,6 +11,8 @@ use crate::{
     },
 };
 
+use super::MyFieldReceiver;
+
 pub struct FieldSetterNumericImpl(TokenStream);
 
 impl ToTokens for FieldSetterNumericImpl {

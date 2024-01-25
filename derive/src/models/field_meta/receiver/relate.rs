@@ -8,7 +8,9 @@ use crate::{
     models::{RelateAttribute, StaticAssertionToken},
 };
 
-use super::{variables::VariablesModelMacro, EdgeDirection, Relate};
+use super::{variables::VariablesModelMacro, EdgeDirection, MyFieldReceiver, Relate};
+
+impl MyFieldReceiver {}
 
 type EdgeNameWithDirectionIndicator = String;
 
