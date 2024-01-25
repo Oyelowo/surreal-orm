@@ -18,7 +18,7 @@ use syn::{self, parse_macro_input};
 use super::{
     attributes::{MyFieldReceiver, Rename},
     casing::CaseString,
-    parser::{DataType, SchemaFieldsProperties, SchemaPropertiesArgs},
+    parser::{DataType, FieldsMeta, SchemaPropertiesArgs},
     variables::VariablesModelMacro,
 };
 
@@ -72,7 +72,7 @@ impl ToTokens for ObjectToken {
             table_name: "".to_string(), // table_name_ident,
         };
 
-        let schema_props = match SchemaFieldsProperties::from_receiver_data(
+        let schema_props = match FieldsMeta::from_receiver_data(
             schema_props_args.clone(),
             generics,
             DataType::Object,
@@ -81,7 +81,7 @@ impl ToTokens for ObjectToken {
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let SchemaFieldsProperties {
+        let FieldsMeta {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,

@@ -9,8 +9,9 @@ use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 
-#[derive(Debug, Clone)]
-pub struct DbfieldTypeToken(TokenStream);
+use crate::models::create_tokenstream_wrapper;
+
+create_tokenstream_wrapper!(DbfieldTypeToken);
 
 impl Default for DbfieldTypeToken {
     fn default() -> Self {
@@ -18,27 +19,6 @@ impl Default for DbfieldTypeToken {
         Self(quote!(#crate_name::FieldType::Any))
     }
 }
+create_tokenstream_wrapper!(SqlValueTokenStream);
 
-impl From<TokenStream> for DbfieldTypeToken {
-    fn from(value: TokenStream) -> Self {
-        Self(value)
-    }
-}
-impl ToTokens for DbfieldTypeToken {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.0.to_tokens(tokens)
-    }
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct StaticAssertionToken(TokenStream);
-impl ToTokens for StaticAssertionToken {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.0.to_tokens(tokens)
-    }
-}
-impl From<TokenStream> for StaticAssertionToken {
-    fn from(value: TokenStream) -> Self {
-        Self(value)
-    }
-}
+create_tokenstream_wrapper!(StaticAssertionToken);
