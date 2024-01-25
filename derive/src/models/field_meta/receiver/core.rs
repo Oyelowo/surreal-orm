@@ -5,11 +5,10 @@
  * Licensed under the MIT license
  */
 
-use super::MyFieldReceiver;
+use super::{field_name::NormalisedFieldMeta, MyFieldReceiver};
 
 impl MyFieldReceiver {
     pub fn normalize_ident(&self, struct_level_casing: CaseString) -> NormalisedFieldMeta {
-        // self.get_db_field_defintion();
         NormalisedFieldMeta::from_receiever(self, struct_level_casing)
     }
 

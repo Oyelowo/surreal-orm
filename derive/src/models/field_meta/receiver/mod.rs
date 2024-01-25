@@ -7,8 +7,7 @@
 
 mod core;
 mod define_statement;
-mod field_casing;
-mod field_name;
+mod field_ident;
 mod field_value_setter;
 mod generics;
 mod link_methods;
@@ -32,13 +31,13 @@ use syn::*;
 pub struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
-    pub(crate) ident: Option<syn::Ident>,
+    pub(crate) ident: Option<FieldIdentOriginal>,
     /// This magic field name pulls the type from the input.
     pub(crate) ty: CustomType,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
-    pub(crate) old_name: Option<Ident>,
+    pub(crate) old_name: Option<OldFieldName>,
 
     #[darling(default)]
     pub(crate) rename: Option<Rename>,
@@ -94,8 +93,10 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     with: ::darling::util::Ignored,
+
     #[darling(default)]
     deserialize_with: ::darling::util::Ignored,
+
     #[darling(default)]
     default: ::darling::util::Ignored,
 }
