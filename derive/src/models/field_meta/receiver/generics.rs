@@ -1,6 +1,5 @@
 use crate::models::{
     derive_attributes::TableDeriveAttributes, GenericTypeExtractor, MyFieldReceiver,
-    RustFieldTypeSelfAllowed,
 };
 use quote::quote;
 use syn::{visit::Visit, *};
@@ -45,7 +44,7 @@ impl MyFieldReceiver {
         }
     }
 
-    pub fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {
+    fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {
         let current_struct_generics = table_attributes.generics;
         match ty {
             Type::Path(TypePath { path, .. }) => {
