@@ -19,11 +19,7 @@ use crate::{
 use super::{field_ident::NormalisedFieldMeta, MyFieldReceiver};
 
 impl MyFieldReceiver {
-    pub fn normalize_ident(&self, struct_level_casing: CaseString) -> NormalisedFieldMeta {
-        NormalisedFieldMeta::from_receiever(self, struct_level_casing)
-    }
-
-    pub fn db_field_type(
+    pub fn field_type_db(
         &self,
         table_attributes: &TableDeriveAttributes,
         model_type: &DataType,
@@ -31,10 +27,11 @@ impl MyFieldReceiver {
         let db_type = match self.db_type {
             Some(ref db_type) => db_type.clone(),
             None => {
-                let struct_level_casing = table_attributes.struct_level_casing();
+                let struct_level_casing = table_attributes.struct_casing();
                 let field_name = &self
                     .normalize_ident(struct_level_casing)
                     .field_ident_serialized_fmt;
+                let field_name = &self.field_name_serialized(table_attributes)?;
                 let inferred = self
                     .ty
                     .infer_surreal_type_heuristically(

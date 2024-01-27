@@ -15,7 +15,7 @@ use strum_macros::EnumString;
 pub enum CaseString {
     #[default]
     None,
-    
+
     #[strum(serialize = "camelCase")]
     Camel,
     #[strum(serialize = "snake_case")]
@@ -38,4 +38,20 @@ pub enum CaseString {
 
     #[strum(serialize = "SCREAMING-KEBAB-CASE")]
     ScreamingKebab,
+}
+
+pub struct StuctLevelCasing(CaseString);
+
+impl From<CaseString> for StuctLevelCasing {
+    fn from(value: CaseString) -> Self {
+        Self(value)
+    }
+}
+
+impl std::ops::Deref for StuctLevelCasing {
+    type Target = CaseString;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
