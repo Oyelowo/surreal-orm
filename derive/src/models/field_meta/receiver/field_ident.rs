@@ -40,7 +40,7 @@ impl MyFieldReceiver {
         &self,
         table_attr: &TableDeriveAttributes,
     ) -> ExtractorResult<(FieldIdentNormalized, FieldNameSerialized)> {
-        let struct_level_casing = table_attr.struct_level_casing();
+        let struct_level_casing = table_attr.struct_level_casing()?;
         let field_ident_original = self.ident.as_ref().expect("Field ident is required");
         let field_ident_cased = || {
             Self::convert_case(field_ident_original.to_string(), struct_level_casing).to_string()
@@ -65,7 +65,7 @@ impl MyFieldReceiver {
         Ok((field_ident_normalized.into(), field_ident_normalized.into()))
     }
 
-    fn convert_case(ident: impl Into<String>, casing: CaseString) -> IdentCased {
+    fn convert_case(ident: impl Into<String>, casing: StructLevelCasing) -> IdentCased {
         let ident: String = ident.into();
         match casing {
             CaseString::None => ident,

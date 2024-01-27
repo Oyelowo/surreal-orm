@@ -17,7 +17,7 @@ use crate::{
     errors::ExtractorResult,
     models::{
         AttributeAs, AttributeDefine, CaseString, MyFieldReceiver, Permissions, PermissionsFn,
-        Rename, RustFieldTypeSelfAllowed, StructGenerics,
+        Rename, RustFieldTypeSelfAllowed, StructGenerics, StructLevelCasing,
     },
 };
 
@@ -67,7 +67,7 @@ impl TableDeriveAttributes {
     pub fn table_name(&self) -> ExtractorResult<Ident> {
         Ok(self.table_name)
     }
-    pub fn struct_level_casing(&self) -> ExtractorResult<CaseString> {
+    pub fn struct_level_casing(&self) -> ExtractorResult<StructLevelCasing> {
         let struct_level_casing = self
             .rename_all
             .as_ref()
@@ -78,7 +78,7 @@ impl TableDeriveAttributes {
             Some(Err(e)) => return Err(darling::Error::custom(e.to_string()).into()),
             None => CaseString::None,
         };
-        Ok(casing)
+        Ok(casing.into())
     }
 
     pub fn struct_as_path(&self) -> Path {
