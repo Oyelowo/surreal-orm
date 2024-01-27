@@ -20,9 +20,8 @@ impl MyFieldReceiver {
         let field_receiver = self;
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
-        let field_ident_normalized = self
-            .normalized_ident(table_derive_attrs.struct_level_casing()?)
-            .field_ident_serialized_fmt;
+        let struct_casing = table_derive_attrs.struct_casing();
+        let field_name_serialized = self.field_name_serialized(struct_casing)?;
         let mut all_field_defintions = vec![];
 
         self.validate_field_attributes()?;
@@ -56,7 +55,7 @@ impl MyFieldReceiver {
         all_field_defintions.push(main_field_def);
 
         if !define_array_field_item_methods.is_empty() {
-            let array_field_item_str = format!("{field_ident_normalized}.*");
+            let array_field_item_str = format!("{field_name_serialized}.*");
             let array_item_definition = quote!(
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_item_str))
                                         .on_table(#crate_name::Table::from(Self::table_name()))
