@@ -21,20 +21,20 @@ use crate::models::{create_tokenstream_wrapper, CustomType, DataType, StaticAsse
 
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldTypeAstMeta {
-    pub(crate) db_field_type: DbFieldType,
+    pub(crate) field_type_db: FieldTypeDb,
     pub(crate) static_assertion: StaticAssertionToken,
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct DbFieldType(FieldType);
+pub struct FieldTypeDb(FieldType);
 
 create_tokenstream_wrapper!(SqlValueTokenStream);
 
-impl ToTokens for DbFieldType {
+impl ToTokens for FieldTypeDb {
     fn to_tokens(&self, tokens: &mut TokenStream) {}
 }
 
-impl DbFieldType {
+impl FieldTypeDb {
     pub fn into_inner(self) -> FieldType {
         self.0
     }
@@ -210,13 +210,13 @@ impl DbFieldType {
     }
 }
 
-impl Display for DbFieldType {
+impl Display for FieldTypeDb {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl Deref for DbFieldType {
+impl Deref for FieldTypeDb {
     type Target = FieldType;
 
     fn deref(&self) -> &Self::Target {
@@ -224,7 +224,7 @@ impl Deref for DbFieldType {
     }
 }
 
-impl FromMeta for DbFieldType {
+impl FromMeta for FieldTypeDb {
     fn from_value(value: &syn::Lit) -> darling::Result<Self> {
         let field_type = match value {
             syn::Lit::Str(lit_str) => lit_str.value(),

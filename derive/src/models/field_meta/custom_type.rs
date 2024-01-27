@@ -22,7 +22,7 @@ use crate::{
     models::{derive_attributes::TableDeriveAttributes, DataType},
 };
 
-use super::*;
+use super::{field_name_serialized::FieldNameSerialized, *};
 
 #[derive(Debug, Clone)]
 pub struct CustomTypeNoSelf(CustomType);
@@ -302,12 +302,59 @@ impl CustomType {
     }
 
     pub fn is_list(&self) -> bool {
-        self.raw_type_is_list()
+        self.is_list()
         // || self.into_inner()pe_.as_ref().map_or(false, |t| t.deref().is_array())
         // || self.link_many.is_some()
     }
 
-    pub fn raw_type_is_list(&self) -> bool {
+    pub fn is_set(&self) -> bool {
+        let ty = &self.into_inner();
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
+                    {
+                        return false;
+                    }
+                    last_seg.ident.to_string().to_lowercase() == "hashset"
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        }
+    }
+
+    pub fn is_array(&self) -> bool {
+        let ty = &self.into_inner();
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
+                    {
+                        return false;
+                    }
+                    last_seg.ident == "Vec"
+                } else {
+                    false
+                }
+            }
+            syn::Type::Array(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_list(&self) -> bool {
         let ty = &self.into_inner();
         match ty {
             syn::Type::Path(path) => {
@@ -515,7 +562,7 @@ impl CustomType {
 
     pub fn infer_surreal_type_heuristically(
         &self,
-        field_name: &FieldIdentSerialized,
+        field_name: &FieldNameSerialized,
         relation_type: &RelationType,
         model_type: &DataType,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
@@ -524,22 +571,22 @@ impl CustomType {
 
         let meta = if self.raw_type_is_bool() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Bool),
+                field_type_db: quote!(#crate_name::FieldType::Bool),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
             }
         } else if self.raw_type_is_float() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Float),
+                field_type_db: quote!(#crate_name::FieldType::Float),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_integer() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Int),
+                field_type_db: quote!(#crate_name::FieldType::Int),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_string() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::String),
+                field_type_db: quote!(#crate_name::FieldType::String),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
         } else if self.raw_type_is_optional() {
@@ -558,17 +605,17 @@ impl CustomType {
                     "Could not infer type for the field",
                 ))??;
 
-            let inner_type = item.db_field_type;
+            let inner_type = item.field_type_db;
             let item_static_assertion = item.static_assertion;
 
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
+                field_type_db: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
                 static_assertion: quote!(
                     #crate_name::validators::assert_option::<#ty>();
                     #item_static_assertion
                 ),
             }
-        } else if self.raw_type_is_list() {
+        } else if self.is_list() {
             let inner_type = self.get_array_inner_type();
             let inner_item = inner_type
                 .map(|ct| {
@@ -583,10 +630,10 @@ impl CustomType {
                     "Could not infer type for the field",
                 ))??;
 
-            let inner_type = inner_item.db_field_type;
+            let inner_type = inner_item.field_type_db;
             let inner_static_assertion = inner_item.static_assertion;
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
+                field_type_db: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
                 static_assertion: quote!(
                             #crate_name::validators::assert_is_vec::<#ty>();
                             #inner_static_assertion
@@ -594,41 +641,41 @@ impl CustomType {
             }
         } else if self.raw_type_is_hash_set() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
+                field_type_db: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
             }
         } else if self.raw_type_is_object() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Object),
+                field_type_db: quote!(#crate_name::FieldType::Object),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
             }
         } else if self.raw_type_is_duration() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Duration),
+                field_type_db: quote!(#crate_name::FieldType::Duration),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
             }
         } else if self.raw_type_is_datetime() {
             DbFieldTypeAstMeta {
-                db_field_type: quote!(#crate_name::FieldType::Datetime),
+                field_type_db: quote!(#crate_name::FieldType::Datetime),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
             }
         } else if self.raw_type_is_geometry() {
             DbFieldTypeAstMeta {
                 // TODO: check if to auto-infer more speicific geometry type?
-                db_field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
+                field_type_db: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else {
             if field_name.is_id() {
                 DbFieldTypeAstMeta {
-                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
+                    field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                     static_assertion: quote!(),
                 }
             } else if field_name.is_orig_or_dest_edge_node(model_type) {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
                 DbFieldTypeAstMeta {
-                    db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
+                    field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![])),
                     static_assertion: quote!(),
                 }
             } else if relation_type.is_some() {
@@ -638,32 +685,44 @@ impl CustomType {
                         // on edges. Just used on nodes for convenience
                         // during deserialization
                         DbFieldTypeAstMeta {
-                            db_field_type: quote!(),
+                            field_type_db: quote!(),
                             static_assertion: quote!(),
                         }
                     }
                     RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
-                        db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
+                        field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
                         static_assertion: quote!(),
                     },
                     RelationType::LinkSelf(self_node) => DbFieldTypeAstMeta {
-                        db_field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
+                        field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                         static_assertion: quote!(),
                     },
                     RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
-                        db_field_type: quote!(#crate_name::FieldType::Array(
+                        field_type_db: quote!(#crate_name::FieldType::Array(
                             ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
                             ::std::option::Option::None
                         )),
                         static_assertion: quote!(),
                     },
                     RelationType::NestObject(ref_object) => DbFieldTypeAstMeta {
-                        db_field_type: quote!(#crate_name::FieldType::Object),
+                        field_type_db: quote!(#crate_name::FieldType::Object),
                         static_assertion: quote!(),
                     },
                     RelationType::NestArray(ref_array) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
-                        db_field_type: quote!(#crate_name::FieldType::Object),
+                        field_type_db: quote!(#crate_name::FieldType::Object),
+                        // db_field_type: quote!(#crate_name::FieldType::Array(
+                        //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
+                        //     ::std::option::Option::None
+                        // )),
+                        static_assertion: quote!(),
+                    },
+                    RelationType::List(list_simple) => DbFieldTypeAstMeta {
+                        // provide the inner type for when the array part start recursing
+                        field_type_db: quote!(#crate_name::FieldType::Array(
+                            ::std::boxed::Box::new(#crate_name::FieldType::Any),
+                            ::std::option::Option::None
+                        )),
                         // db_field_type: quote!(#crate_name::FieldType::Array(
                         //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
                         //     ::std::option::Option::None
@@ -699,7 +758,7 @@ impl CustomType {
             || self.raw_type_is_integer()
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
-            || self.raw_type_is_list()
+            || self.is_list()
             || self.raw_type_is_hash_set()
             || self.raw_type_is_object()
             || self.raw_type_is_optional()

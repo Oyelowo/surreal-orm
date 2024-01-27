@@ -11,10 +11,10 @@ use std::fmt::Display;
 use syn::Ident;
 
 use crate::errors::ExtractorResult;
-use crate::models::derive_attributes::TableDeriveAttributes;
-use crate::models::field_name_serialized::FieldNameSerialized;
-use crate::models::CaseString;
-use crate::models::{casing::*, create_ident_wrapper};
+use crate::models::{
+    casing::*, create_ident_wrapper, derive_attributes::TableDeriveAttributes,
+    field_name_serialized::FieldNameSerialized, CaseString, StructLevelCasing,
+};
 
 use super::MyFieldReceiver;
 
@@ -24,27 +24,28 @@ create_ident_wrapper!(FieldIdentNormalized);
 impl MyFieldReceiver {
     pub(crate) fn field_ident_normalized(
         &self,
-        table_attr: &TableDeriveAttributes,
+        struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<FieldIdentNormalized> {
-        Ok(self.ident_meta(table_attr)?.0)
+        Ok(self.ident_meta(struct_casing)?.0)
     }
 
     pub(crate) fn field_name_serialized(
         &self,
-        table_attr: &TableDeriveAttributes,
+        struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<FieldNameSerialized> {
-        Ok(self.ident_meta(table_attr)?.1)
+        Ok(self.ident_meta(struct_casing)?.1)
     }
 
     fn ident_meta(
         &self,
-        table_attr: &TableDeriveAttributes,
+        struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<(FieldIdentNormalized, FieldNameSerialized)> {
-        let struct_level_casing = table_attr.struct_level_casing()?;
-        let field_ident_original = self.ident.as_ref().expect("Field ident is required");
-        let field_ident_cased = || {
-            Self::convert_case(field_ident_original.to_string(), struct_level_casing).to_string()
-        };
+        let field_ident_original = self
+            .ident
+            .as_ref()
+            .ok_or(darling::Error::custom("Field must have an identifier]"))?;
+        let field_ident_cased =
+            || Self::convert_case(field_ident_original.to_string(), struct_casing).to_string();
 
         let original_field_name_normalised = &self
             .rename
