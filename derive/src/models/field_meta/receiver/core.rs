@@ -1,11 +1,22 @@
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2024 Oyelowo Oyedayo
+ * Copyright (c) 2024 Oyelowo Oyeiayo
  * Licensed under the MIT license
  */
 
-use super::{field_name::NormalisedFieldMeta, MyFieldReceiver};
+use surreal_query_builder::FieldType;
+use syn::Ident;
+
+use crate::{
+    errors::ExtractorResult,
+    models::{
+        derive_attributes::TableDeriveAttributes, field_name_serialized::FieldNameSerialized,
+        CaseString, CustomType, DataType, DbFieldType, DbFieldTypeAstMeta, RelationType,
+    },
+};
+
+use super::{field_ident::NormalisedFieldMeta, MyFieldReceiver};
 
 impl MyFieldReceiver {
     pub fn normalize_ident(&self, struct_level_casing: CaseString) -> NormalisedFieldMeta {
@@ -49,11 +60,9 @@ impl MyFieldReceiver {
 
     pub fn get_db_type_with_assertion(
         &self,
-        field_name: &FieldIdentSerialized,
+        field_name: &FieldNameSerialized,
         model_type: &DataType,
         table: &Ident,
-        // field_impl_generics: &syn::Generics,
-        // field_ty_generics: &syn::Generics,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         // Infer/use user specified or error out
         // TODO: Add the compile time assertion/validations/checks for the dbtype here
@@ -64,34 +73,25 @@ impl MyFieldReceiver {
     }
 
     pub fn is_numeric(&self) -> bool {
-        let field_type = self
-            .db_type
-            .clone()
-            .map_or(FieldType::Any, |t| t.into_inner());
-        let explicit_ty_is_numeric = matches!(
+        let field_type = self.db_type.map_or(FieldType::Any, |t| t.into_inner());
+        let explicit_db_ty_is_numeric = matches!(
             field_type,
             FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
         );
-        explicit_ty_is_numeric || self.rust_field_type().is_numeric()
+        explicit_db_ty_is_numeric || self.rust_field_type().is_numeric()
     }
 
     pub fn is_list(&self) -> bool {
-        let field_type = self
-            .db_type
-            .clone()
-            .map_or(FieldType::Any, |t| t.into_inner());
+        let field_type = self.db_type.map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_list =
             matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
             || self.rust_field_type().is_list()
-            || self
-                .db_type
-                .as_ref()
-                .map_or(false, |t| t.deref().is_array())
+            || self.db_type.map_or(false, |t| t.is_array())
             || self.link_many.is_some()
     }
 
-    pub fn rust_field_type(&self) -> RustFieldTypeSelfAllowed {
+    pub fn rust_field_type(&self) -> CustomType {
         self.ty
     }
 }

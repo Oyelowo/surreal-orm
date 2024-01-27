@@ -21,7 +21,7 @@ impl MyFieldReceiver {
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
         let field_ident_normalized = self
-            .normalize_ident(table_derive_attrs.struct_level_casing()?)
+            .normalized_ident(table_derive_attrs.struct_level_casing()?)
             .field_ident_serialized_fmt;
         let mut all_field_defintions = vec![];
 
