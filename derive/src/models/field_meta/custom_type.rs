@@ -39,6 +39,13 @@ impl CustomTypeNoSelf {
     pub fn to_basic_type(self) -> Type {
         self.0.to_basic_type()
     }
+
+    pub fn get_generics_meta<'a>(
+        &self,
+        table_attributes: TableDeriveAttributes,
+    ) -> FieldGenericsMeta<'a> {
+        self.0.get_generics_meta(table_attributes)
+    }
 }
 
 #[derive(Debug, Clone, FromMeta)]

@@ -17,7 +17,7 @@ use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::Expr;
 
-use crate::models::{create_tokenstream_wrapper, CustomType, DataType};
+use crate::models::{create_tokenstream_wrapper, CustomType, DataType, StaticAssertionToken};
 
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldTypeAstMeta {

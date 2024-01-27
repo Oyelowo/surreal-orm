@@ -22,16 +22,8 @@ impl MyFieldReceiver {
     ) -> FieldGenericsMeta<'a> {
         let field_type = self
             .ty
-            .replace_self_with_struct_concrete_type(&table_attributes);
-        // let x = match RelationType::from(&self) {
-        //     RelationType::Relate(relat) => todo!(),
-        //     RelationType::LinkOne(_) => todo!(),
-        //     RelationType::LinkSelf(_) => todo!(),
-        //     RelationType::LinkMany(_) => todo!(),
-        //     RelationType::NestObject(_) => todo!(),
-        //     RelationType::NestArray(_) => todo!(),
-        //     RelationType::None => todo!(),
-        // };
+            .replace_self_with_current_struct_ident(&table_attributes)
+            .get_generics_meta(table_attributes);
 
         let (field_impl_generics, field_ty_generics, field_where_clause) =
             GenericTypeExtractor::new(&table_attributes.generics)
