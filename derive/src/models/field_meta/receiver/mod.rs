@@ -71,7 +71,7 @@ pub struct MyFieldReceiver {
     pub(crate) skip: bool,
 
     #[darling(default, rename = "ty")]
-    pub(crate) db_type: Option<DbFieldType>,
+    pub(crate) field_type_db: Option<FieldTypeDb>,
 
     #[darling(default)]
     pub(crate) assert: Option<AttributeAssert>,

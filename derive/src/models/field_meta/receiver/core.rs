@@ -12,25 +12,22 @@ use crate::{
     errors::ExtractorResult,
     models::{
         derive_attributes::TableDeriveAttributes, field_name_serialized::FieldNameSerialized,
-        CaseString, CustomType, DataType, DbFieldType, DbFieldTypeAstMeta, RelationType,
+        CaseString, CustomType, DataType, DbFieldTypeAstMeta, FieldTypeDb, RelationType,
     },
 };
 
-use super::{field_ident::NormalisedFieldMeta, MyFieldReceiver};
+use super::MyFieldReceiver;
 
 impl MyFieldReceiver {
     pub fn field_type_db(
         &self,
         table_attributes: &TableDeriveAttributes,
         model_type: &DataType,
-    ) -> ExtractorResult<DbFieldType> {
-        let db_type = match self.db_type {
+    ) -> ExtractorResult<FieldTypeDb> {
+        let db_type = match self.field_type_db {
             Some(ref db_type) => db_type.clone(),
             None => {
                 let struct_level_casing = table_attributes.struct_casing();
-                let field_name = &self
-                    .normalize_ident(struct_level_casing)
-                    .field_ident_serialized_fmt;
                 let field_name = &self.field_name_serialized(table_attributes)?;
                 let inferred = self
                     .ty
@@ -39,7 +36,7 @@ impl MyFieldReceiver {
                         &self.to_relation_type(),
                         model_type,
                     )
-                    .map(|db_type_ast| db_type_ast.db_field_type)?;
+                    .map(|ft_db| ft_db.field_type_db)?;
                 inferred
             }
         };
@@ -50,12 +47,7 @@ impl MyFieldReceiver {
         self.into()
     }
 
-    pub fn get_db_type(&self) -> ExtractorResult<DbFieldType> {
-        // TODO: Handle error incase heuristics does not work and user does not specify
-        Ok(self.db_type.clone())
-    }
-
-    pub fn get_db_type_with_assertion(
+    pub fn field_type_and_assertion(
         &self,
         field_name: &FieldNameSerialized,
         model_type: &DataType,
@@ -64,31 +56,58 @@ impl MyFieldReceiver {
         // Infer/use user specified or error out
         // TODO: Add the compile time assertion/validations/checks for the dbtype here
         Ok(DbFieldTypeAstMeta {
-            db_field_type: self.db_type,
+            field_type_db: self.field_type_db,
             static_assertion: todo!(),
         })
     }
 
     pub fn is_numeric(&self) -> bool {
-        let field_type = self.db_type.map_or(FieldType::Any, |t| t.into_inner());
+        let field_type = self
+            .field_type_db
+            .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_db_ty_is_numeric = matches!(
             field_type,
             FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
         );
-        explicit_db_ty_is_numeric || self.rust_field_type().is_numeric()
+        explicit_db_ty_is_numeric || self.field_type_rust().is_numeric()
     }
 
-    pub fn is_list(&self) -> bool {
-        let field_type = self.db_type.map_or(FieldType::Any, |t| t.into_inner());
-        let explicit_ty_is_list =
-            matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
+    pub fn is_array(&self) -> bool {
+        let field_type = self
+            .field_type_db
+            .map_or(FieldType::Any, |t| t.into_inner());
+        let explicit_ty_is_list = matches!(field_type, FieldType::Array(item_ty, _));
         explicit_ty_is_list
-            || self.rust_field_type().is_list()
-            || self.db_type.map_or(false, |t| t.is_array())
+            || self.field_type_rust().is_list()
+            || self.field_type_db.map_or(false, |t| t.is_array())
             || self.link_many.is_some()
     }
 
-    pub fn rust_field_type(&self) -> CustomType {
+    pub fn is_set(&self) -> bool {
+        let field_type = self
+            .field_type_db
+            .map_or(FieldType::Any, |t| t.into_inner());
+        let explicit_ty_is_list = matches!(field_type, FieldType::Set(item_ty, _));
+        explicit_ty_is_list
+            || self.field_type_rust().is_set()
+            || self.field_type_db.map_or(false, |t| t.is_set())
+    }
+
+    pub fn is_list(&self) -> bool {
+        let field_type = self
+            .field_type_db
+            .map_or(FieldType::Any, |t| t.into_inner());
+        let explicit_ty_is_list = matches!(
+            field_type,
+            fieldtype::array(item_ty, _) | fieldtype::set(_, _)
+        );
+        explicit_ty_is_list
+            || self.field_type_rust().is_list()
+            || self.field_type_db.map_or(false, |t| t.is_array())
+            || self.link_many.is_some()
+    }
+
+    pub fn field_type_rust(&self) -> CustomType {
         self.ty
     }
 }

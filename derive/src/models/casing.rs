@@ -40,15 +40,15 @@ pub enum CaseString {
     ScreamingKebab,
 }
 
-pub struct StuctLevelCasing(CaseString);
+pub struct StructLevelCasing(CaseString);
 
-impl From<CaseString> for StuctLevelCasing {
+impl From<CaseString> for StructLevelCasing {
     fn from(value: CaseString) -> Self {
         Self(value)
     }
 }
 
-impl std::ops::Deref for StuctLevelCasing {
+impl std::ops::Deref for StructLevelCasing {
     type Target = CaseString;
 
     fn deref(&self) -> &Self::Target {
