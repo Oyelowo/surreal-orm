@@ -27,8 +27,8 @@ impl MyFieldReceiver {
         let db_type = match self.field_type_db {
             Some(ref db_type) => db_type.clone(),
             None => {
-                let struct_level_casing = table_attributes.struct_casing();
-                let field_name = &self.field_name_serialized(table_attributes)?;
+                let casing = table_attributes.casing()?;
+                let field_name = &self.field_name_serialized(&casing)?;
                 let inferred = self
                     .ty
                     .infer_surreal_type_heuristically(
@@ -78,7 +78,7 @@ impl MyFieldReceiver {
             .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_list = matches!(field_type, FieldType::Array(item_ty, _));
         explicit_ty_is_list
-            || self.field_type_rust().is_list()
+            || self.field_type_rust().is_array()
             || self.field_type_db.map_or(false, |t| t.is_array())
             || self.link_many.is_some()
     }
@@ -99,11 +99,11 @@ impl MyFieldReceiver {
             .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_list = matches!(
             field_type,
-            fieldtype::array(item_ty, _) | fieldtype::set(_, _)
+            FieldType::Array(item_ty, _) | FieldType::Set(_, _)
         );
         explicit_ty_is_list
             || self.field_type_rust().is_list()
-            || self.field_type_db.map_or(false, |t| t.is_array())
+            || self.field_type_db.map_or(false, |t| t.is_list())
             || self.link_many.is_some()
     }
 

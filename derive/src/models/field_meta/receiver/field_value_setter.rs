@@ -146,16 +146,14 @@ impl MyFieldReceiver {
         table_attributes: &TableDeriveAttributes,
     ) -> FieldNamePascalized {
         let struct_level_casing = table_attributes.struct_level_casing();
-        let field_ident_serialized_fmt = self
-            .normalize_ident(struct_level_casing)
-            .field_ident_serialized_fmt;
+        let field_name_normalized = self.field_ident_normalized(struct_level_casing)?;
 
-        let field_name_as_camel = format_ident!(
+        let field_name_pascalized = format_ident!(
             "{}",
-            field_ident_serialized_fmt.to_string().to_case(Case::Pascal)
+            field_name_normalized.to_string().to_case(Case::Pascal)
         );
 
-        field_name_as_camel.to_token_stream().into()
+        field_name_pascalized.to_token_stream().into()
     }
 
     fn array_trait_impl(
@@ -185,14 +183,14 @@ impl MyFieldReceiver {
                         let generics_meta = ty.get_generics_meta(table_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
-                    None => match self.db_type.map(|db_ty| db_ty.get_array_item_type()).flatten() {
+                    None => match self.field_type_db.map(|db_ty| db_ty.get_array_item_type()).flatten() {
                         Some(ref db_array_item_ty) => (
                             None,
                             db_array_item_ty.as_db_sql_value_tokenstream().into(),
                         ),
                         None => {
                             return Err(syn::Error::new_spanned(
-                                self.db_type,
+                                self.field_type_db,
                                 "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
                             ))
                         }

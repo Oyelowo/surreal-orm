@@ -67,7 +67,8 @@ impl TableDeriveAttributes {
     pub fn table_name(&self) -> ExtractorResult<Ident> {
         Ok(self.table_name)
     }
-    pub fn struct_level_casing(&self) -> ExtractorResult<StructLevelCasing> {
+
+    pub fn casing(&self) -> ExtractorResult<StructLevelCasing> {
         let struct_level_casing = self
             .rename_all
             .as_ref()
