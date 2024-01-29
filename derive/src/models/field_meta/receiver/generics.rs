@@ -26,8 +26,7 @@ impl MyFieldReceiver {
             .get_generics_meta(table_attributes);
 
         let (field_impl_generics, field_ty_generics, field_where_clause) =
-            GenericTypeExtractor::new(&table_attributes.generics)
-                .extract_generics_for_complex_type(&field_type)
+            GenericTypeExtractor::extract_generics_for_complex_type(&table_attributes, &field_type)
                 .split_for_impl();
         FieldGenericsMeta {
             field_impl_generics,
@@ -36,51 +35,32 @@ impl MyFieldReceiver {
         }
     }
 
-    fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {
-        let current_struct_generics = table_attributes.generics;
-        match ty {
-            Type::Path(TypePath { path, .. }) => {
-                path.segments.iter().any(|segment| {
-                if current_struct_generics.params.iter().any(|param| matches!(param, syn::GenericParam::Type(type_param) if segment.ident == type_param.ident)) {
-                    return true;
-                }
-
-                if let syn::PathArguments::AngleBracketed(args) = &segment.arguments {
-                    args.args.iter().any(|arg| {
-                        if let syn::GenericArgument::Type(ty) = arg {
-                            is_generic_type(ty, current_struct_generics)
-                        } else {
-                            false
-                        }
-                    })
-                } else {
-                    false
-                }
-            })
-            }
-            _ => false,
-        }
-    }
-
-    // Get generics for a field type
-    // 'a, T, T: Clone
-    pub fn get_type_generics_meta<'a>(
-        &self,
-        table_derive_attributes: &TableDeriveAttributes,
-    ) -> FieldGenericsMeta<'a> {
-        let struct_name_ident = table_derive_attributes.ident;
-        let struct_generics = table_derive_attributes.generics;
-        let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-        let mut field_extractor = GenericTypeExtractor::new(&struct_generics);
-        let (field_impl_generics, field_ty_generics, field_where_clause) = field_extractor
-            .extract_generics_for_complex_type(&self.into_inner())
-            .split_for_impl();
-        FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        }
-    }
+    // fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {
+    //     let current_struct_generics = table_attributes.generics;
+    //     match ty {
+    //         Type::Path(TypePath { path, .. }) => {
+    //             path.segments.iter().any(|segment| {
+    //             if current_struct_generics.params.iter().any(|param| matches!(param, syn::GenericParam::Type(type_param) if segment.ident == type_param.ident)) {
+    //                 return true;
+    //             }
+    //
+    //             if let syn::PathArguments::AngleBracketed(args) = &segment.arguments {
+    //                 args.args.iter().any(|arg| {
+    //                     if let syn::GenericArgument::Type(ty) = arg {
+    //                         is_generic_type(ty, current_struct_generics)
+    //                     } else {
+    //                         false
+    //                     }
+    //                 })
+    //             } else {
+    //                 false
+    //             }
+    //         })
+    //         }
+    //         _ => false,
+    //     }
+    // }
+    //
 }
 
 pub struct FieldGenericsMeta<'a> {
