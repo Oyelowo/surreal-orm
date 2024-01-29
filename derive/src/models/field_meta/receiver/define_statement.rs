@@ -5,7 +5,8 @@ use quote::{quote, ToTokens};
 use crate::{
     errors::ExtractorResult,
     models::{
-        derive_attributes::TableDeriveAttributes, DataType, MyFieldReceiver, StaticAssertionToken,
+        derive_attributes::TableDeriveAttributes, DataType, FieldsMeta, MyFieldReceiver,
+        StaticAssertionToken,
     },
 };
 
@@ -14,6 +15,17 @@ use super::MyFieldReceiver;
 pub struct DefineFieldStatementToken(TokenStream);
 
 impl MyFieldReceiver {
+    pub fn create_field_definitions(
+        &self,
+        store: &mut FieldsMeta,
+        table_derive_attrs: &TableDeriveAttributes,
+    ) -> ExtractorResult<()> {
+        store
+            .field_definitions
+            .push(self.field_defintion_db(table_derive_attrs)?);
+        Ok(())
+    }
+
     pub fn field_defintion_db(
         &self,
         table_derive_attrs: &TableDeriveAttributes,

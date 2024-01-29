@@ -36,7 +36,7 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens,
+    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken,
 };
 
 #[derive(Default, Clone)]
@@ -185,7 +185,7 @@ pub struct FieldsMeta {
     /// }
     /// ```
     pub record_link_fields_methods: Vec<TokenStream>,
-    pub field_definitions: Vec<TokenStream>,
+    pub field_definitions: Vec<Vec<DefineFieldStatementToken>>,
     pub field_metadata: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataStore,
     pub fields_relations_aliased: Vec<TokenStream>,
@@ -230,6 +230,11 @@ impl FieldsMeta {
             .ok_or_else(|| darling::Error::custom("Expected a struct"))?
             .fields
         {
+            field_receiver.create_field_definitions(&mut store, table_derive_attrs);
+            field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
+                
+
+                
             let crate_name = get_crate_name(false);
             let field_name_original = field_receiver
                 .ident
@@ -267,9 +272,7 @@ impl FieldsMeta {
                 ..
             } = VariablesModelMacro::new();
 
-            field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
 
-            field_receiver.get_field_value_setter_impl(&table_derive_attributes);
             
                 
             let get_link_meta_with_defs =

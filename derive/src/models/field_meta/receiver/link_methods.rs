@@ -4,17 +4,18 @@ use quote::quote;
 use crate::{
     errors::ExtractorResult,
     models::{
-        derive_attributes::TableDeriveAttributes, variables::VariablesModelMacro,
-        FieldIdentSerialized, LinkManyAttrType, LinkOneAttrType, LinkSelfAttrType, ListSimple,
-        MyFieldReceiver, NestArrayAttrType, NestObjectAttrType, NormalisedFieldMeta,
+        create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes,
+        variables::VariablesModelMacro, FieldIdentSerialized, LinkManyAttrType, LinkOneAttrType,
+        LinkSelfAttrType, ListSimple, MyFieldReceiver, NestArrayAttrType, NestObjectAttrType,
+        NormalisedFieldMeta,
     },
 };
 
 use super::{field_receiver, RelationType};
 
-struct LinkerMethodToken(TokenStream);
-impl RelationType {
-    pub fn get_field_link_method(&self) -> LinkerMethodToken {
+impl MyFieldReceiver {
+    pub fn create_link_methods(&self) {
+        let relation_type = self.to_relation_type();
         match self {
             RelationType::LinkSelf(link_self) => {
                 let method = link_self.get_field_link_method();
@@ -50,11 +51,82 @@ impl RelationType {
             }
         }
     }
+
+    pub fn list_simple_traversal_method(
+        &self,
+        list_simple: &ListSimple,
+        table_derive_attrs: &TableDeriveAttributes,
+    ) -> ExtractorResult<TokenStream> {
+        let crate_name = get_crate_name(false);
+        let struct_casing = table_derive_attrs.casing()?;
+        let field_ident_normalized = self.field_ident_normalized(&struct_casing);
+        let field_name_serialized = self.field_name_serialized(&struct_casing);
+
+        let record_link_default_alias_as_method = quote!(
+            pub fn #field_ident_normalized(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
+                let clause: #crate_name::NodeAliasClause = clause.into();
+                let clause: #crate_name::NodeClause = clause.into_inner();
+
+                let normalized_field_name_str = if self.build().is_empty(){
+                    #field_name_serialized.to_string()
+                }else {
+                    format!(".{}", #field_name_serialized)
+                };
+
+                let clause: #crate_name::NodeClause = clause.into();
+                let bindings = self.get_bindings().into_iter().chain(clause.get_bindings().into_iter()).collect::<Vec<_>>();
+
+                let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<Vec<_>>();
+
+                let field = #crate_name::Field::new(format!("{field_name_serialized}{}", clause.build()))
+                            .with_bindings(bindings)
+                            .with_errors(errors);
+                field
+
+            }
+        );
+
+        // Self {
+        //     foreign_node_schema_import: quote!(),
+        //
+        //     foreign_node_type_validator: quote!(),
+        //
+        //     record_link_default_alias_as_method,
+        //     foreign_node_type: quote!(schema_type_ident),
+        //     field_definition: quote!(),
+        //     field_type_validation_asserts: vec![],
+        // }
+    }
 }
 
-struct ForeignNodeSchemaImport(TokenStream);
-struct ForeignNodeTypeValidator(TokenStream);
-struct RecordLinkDefaultAliasAsMethod(TokenStream);
+struct LinkerMethodToken(TokenStream);
+
+create_tokenstream_wrapper!(
+/// imports for specific schema from the trait Generic Associated types e.g
+/// Example:
+///
+/// ```rust, ignore
+/// type Book = <super::Book as SchemaGetter>::Schema;
+/// ```
+=>
+ForeignNodeSchemaImport
+);
+create_tokenstream_wrapper!(
+/// Contains static assertions for foreign node type
+=>
+ForeignNodeTypeValidator
+);
+
+create_tokenstream_wrapper!(
+/// TODO: Complete later if you decide to document the token generated on the type or on
+/// the struct gatherer FieldsMeta fields
+/// Contains the default alias method for the foreign node type
+/// Example:
+/// ```rust, ignore
+///
+=>
+RecordLinkDefaultAliasAsMethod
+);
 
 struct LinkMethodMeta {
     foreign_node_schema_import: ForeignNodeSchemaImport,
@@ -65,7 +137,6 @@ struct LinkMethodMeta {
 impl ListSimple {
     pub fn get_field_link_method(
         &self,
-        // db_field_serialized_name: &NormalisedFieldMeta,
         field_receiver: &MyFieldReceiver,
         table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<TokenStream> {
@@ -117,7 +188,7 @@ impl LinkOneAttrType {
         &self,
         field_receiver: &MyFieldReceiver,
         table_derive_attrs: &TableDeriveAttributes,
-    ) -> Self {
+    ) -> LinkMethodMeta {
         let linked_node_type = &self.replace_self_with_current_struct_ident(table_def);
         let normalized_field_name =
             &field_receiver.normalize_ident(table_derive_attrs.struct_level_casing()?);
@@ -157,17 +228,17 @@ impl LinkOneAttrType {
             }
         );
 
-        Self {
+        LinkMethodMeta {
             // imports for specific schema from the trait Generic Associated types e.g
             // type Book = <super::Book as SchemaGetter>::Schema;
-            foreign_node_schema_import,
+            foreign_node_schema_import: foreign_node_schema_import.into(),
 
             foreign_node_type_validator: quote!(
                 #crate_name::validators::assert_impl_one!(#schema_type: #crate_name::Node);
             ),
 
             record_link_default_alias_as_method,
-            foreign_node_type: quote!(schema_type_ident),
+            foreign_node_type: quote!(#linked_node_type),
             field_definition: quote!(),
             field_type_validation_asserts: vec![],
         }
