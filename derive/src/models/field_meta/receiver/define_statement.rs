@@ -1,10 +1,12 @@
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::quote;
+use quote::{quote, ToTokens};
 
 use crate::{
     errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, MyFieldReceiver, StaticAssertionToken},
+    models::{
+        derive_attributes::TableDeriveAttributes, DataType, MyFieldReceiver, StaticAssertionToken,
+    },
 };
 
 use super::MyFieldReceiver;
@@ -12,38 +14,37 @@ use super::MyFieldReceiver;
 pub struct DefineFieldStatementToken(TokenStream);
 
 impl MyFieldReceiver {
-    pub fn get_db_field_defintion(
+    pub fn field_defintion_db(
         &self,
         table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<Vec<DefineFieldStatementToken>> {
         let crate_name = get_crate_name(false);
-        let field_receiver = self;
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
-        let struct_casing = table_derive_attrs.struct_casing();
-        let field_name_serialized = self.field_name_serialized(struct_casing)?;
+        let struct_casing = table_derive_attrs.casing();
+        let field_name_serialized = casing.field_ident_normalized(struct_casing)?;
         let mut all_field_defintions = vec![];
 
         self.validate_field_attributes()?;
 
-        if let Some(define) = field_receiver.define {
+        if let Some(define) = self.define {
             quote!(#define.to_raw());
         }
 
-        if let Some(assert) = field_receiver.assert {
+        if let Some(assert) = self.assert {
             define_field_methods.push(quote!(.assert(#assert)));
         }
 
-        if let Some(item_assert) = field_receiver.item_assert {
+        if let Some(item_assert) = self.item_assert {
             define_array_field_item_methods.push(quote!(.assert(#item_assert)));
         }
 
-        if let Some(value) = field_receiver.value {
+        if let Some(value) = self.value {
             define_field_methods.push(quote!(.value(#value)));
         }
 
-        if let Some(permissions) = field_receiver.permissions {
-            define_field_methods.push(permissions);
+        if let Some(permissions) = self.permissions {
+            define_field_methods.push(permissions.into_token_stream());
         }
 
         let main_field_def = quote!(
@@ -69,13 +70,23 @@ impl MyFieldReceiver {
         Ok(DefineFieldStatementToken(all_field_defintions))
     }
 
-    pub fn get_value_static_assertion(&self) -> StaticAssertionToken {
-        self.value.map_or(StaticAssertionToken::default(), |v| {
-            v.get_static_assrtion(self.get_db_type().into_inner())
-        })
+    pub fn static_assertion_field_value(
+        &self,
+        table_derive_attrs: &TableDeriveAttributes,
+        model_type: &DataType,
+    ) -> ExtractorResult<StaticAssertionToken> {
+        let field_type = self
+            .field_type_db(table_derive_attrs, model_type)?
+            .into_inner();
+
+        let static_assertion = self.value.map_or(StaticAssertionToken::default(), |v| {
+            v.get_static_assertion(field_type)
+        });
+
+        Ok(static_assertion)
     }
 
-    fn validate_field_attributes(&self) -> ExtractorResult<ReferencedNodeMeta> {
+    fn validate_field_attributes(&self) -> ExtractorResult<()> {
         MyFieldReceiver {
             define,
             assert: assert_,
@@ -86,11 +97,11 @@ impl MyFieldReceiver {
             ..
         } = &self;
 
-        if (define.is_some()
+        if define.is_some()
             && (assert_.is_some()
                 || value.is_some()
                 || permissions.is_some()
-                || item_assert.is_some()))
+                || item_assert.is_some())
         {
             return Err(
                 syn::Error::new_spanned(
@@ -102,12 +113,12 @@ impl MyFieldReceiver {
     item_assert"#).into());
         }
 
-        if (relate.is_some()
+        if relate.is_some()
             && (define.is_some()
                 || assert_.is_some()
                 || value.is_some()
                 || permissions.is_some()
-                || item_assert.is_some()))
+                || item_assert.is_some())
         {
             return (Err(syn::Error::new_spanned(
                 ident,
