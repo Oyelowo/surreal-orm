@@ -57,7 +57,7 @@ impl MyFieldReceiver {
         Ok(())
     }
 
-    pub fn get_field_value_setter_impl(
+    fn get_field_value_setter_impl(
         &self,
         table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<FieldSetterImplTokens> {
