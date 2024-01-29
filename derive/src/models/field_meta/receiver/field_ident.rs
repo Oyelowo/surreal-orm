@@ -8,9 +8,11 @@
 use convert_case::{Case, Casing};
 use quote::format_ident;
 use std::fmt::Display;
+use std::ops::Deref;
 use syn::Ident;
 
 use crate::errors::ExtractorResult;
+use crate::models::field_name_serialized;
 use crate::models::{
     casing::*, create_ident_wrapper, derive_attributes::TableDeriveAttributes,
     field_name_serialized::FieldNameSerialized, CaseString, StructLevelCasing,
@@ -47,15 +49,18 @@ impl MyFieldReceiver {
         let field_ident_cased =
             || Self::convert_case(field_ident_original.to_string(), struct_casing).to_string();
 
-        let original_field_name_normalised = &self
+        let field_ident_normalised = &self
             .rename
             .as_ref()
             .map_or_else(field_ident_cased, |renamed| renamed.serialize);
-        let field_ident_normalised = &format_ident!("{original_field_name_normalised}");
 
         let (field_ident_normalized, field_name_serialized) =
-            if original_field_name_normalised.trim_start_matches("r#") == "in" {
-                (format_ident!("in_"), "in".to_string())
+            if field_name_normalised.starts_with("r#") {
+                let field_ident_normalized = field_ident_normalised.trim_start_matches("r#");
+                (
+                    format_ident!("{field_ident_normalised}_"),
+                    field_ident_normalized.to_string(),
+                )
             } else {
                 (
                     field_ident_normalised.to_owned(),
@@ -66,9 +71,9 @@ impl MyFieldReceiver {
         Ok((field_ident_normalized.into(), field_ident_normalized.into()))
     }
 
-    fn convert_case(ident: impl Into<String>, casing: StructLevelCasing) -> IdentCased {
+    fn convert_case(ident: impl Into<String>, casing: &StructLevelCasing) -> IdentCased {
         let ident: String = ident.into();
-        match casing {
+        match casing.deref() {
             CaseString::None => ident,
             CaseString::Camel => ident.to_case(Case::Camel),
             CaseString::Snake => ident.to_case(Case::Snake),
