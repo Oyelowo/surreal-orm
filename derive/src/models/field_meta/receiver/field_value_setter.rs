@@ -7,7 +7,7 @@ use crate::{
     errors::ExtractorResult,
     models::{
         create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes, FieldGenerics,
-        FieldGenericsMeta, MyFieldReceiver, RelationType,
+        FieldGenericsMeta, FieldsMeta, MyFieldReceiver, RelationType,
     },
 };
 
@@ -23,25 +23,40 @@ impl ToTokens for FieldSetterNumericImpl {
 
 pub struct ArrayElementFieldSetterToken(TokenStream);
 
-/// Generated Field wrapper type implementations for each fiekd around `Field` type
-/// Example value:
-/// ```rust,ignore
-/// struct Email(pub(super) Field);
-///
-/// impl std::ops::Deref for Email {
-///     type Target = #crate_name::Field;
-///
-///     fn deref(&self) -> &Self::Target {
-///         &self.0
-///     }
-/// }
-/// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
-/// ```
-pub struct FieldSetterImplTokens(TokenStream);
+create_tokenstream_wrapper!(
+    /// Generated Field wrapper type implementations for each fiekd around `Field` type
+    /// Example value:
+    /// ```rust,ignore
+    /// struct Email(pub(super) Field);
+    ///
+    /// impl std::ops::Deref for Email {
+    ///     type Target = #crate_name::Field;
+    ///
+    ///     fn deref(&self) -> &Self::Target {
+    ///         &self.0
+    ///     }
+    /// }
+    /// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
+    /// ```
+=>
+FieldSetterImplTokens);
 
-create_tokenstream_wrapper!(FieldNamePascalized);
+create_tokenstream_wrapper!(
+/// Fieldname in pascal case
+=>FieldNamePascalized);
 
 impl MyFieldReceiver {
+    pub fn create_field_setter_impl(
+        &self,
+        store: &mut FieldsMeta,
+        table_attributes: &TableDeriveAttributes,
+    ) -> ExtractorResult<()> {
+        store
+            .field_wrapper_type_custom_implementations
+            .push(self.get_field_value_setter_impl(table_attributes)?);
+        Ok(())
+    }
+
     pub fn get_field_value_setter_impl(
         &self,
         table_attributes: &TableDeriveAttributes,
@@ -61,8 +76,7 @@ impl MyFieldReceiver {
             quote!()
         };
 
-        store.field_wrapper_type_custom_implementations
-            .push(quote!(
+        let field_setter_impls = quote!(
             #[derive(Debug, Clone)]
             pub struct #field_name_pascalized(pub #crate_name::Field);
 
@@ -137,15 +151,15 @@ impl MyFieldReceiver {
             #numeric_trait
 
             #array_trait
-        ));
-        todo!()
+        );
+        FieldSetterImplTokens(field_setter_impls).into()
     }
 
     fn field_name_pascalized(
         &self,
         table_attributes: &TableDeriveAttributes,
     ) -> FieldNamePascalized {
-        let struct_level_casing = table_attributes.struct_level_casing();
+        let struct_level_casing = table_attributes.casing();
         let field_name_normalized = self.field_ident_normalized(struct_level_casing)?;
 
         let field_name_pascalized = format_ident!(
@@ -183,10 +197,16 @@ impl MyFieldReceiver {
                         let generics_meta = ty.get_generics_meta(table_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
-                    None => match self.field_type_db.map(|db_ty| db_ty.get_array_item_type()).flatten() {
+                    None => {
+                        let array_inner_field_ty = self
+                            .field_type_db
+                            .map(|db_ty| db_ty.get_array_item_type())
+                            .flatten();
+
+                        let array_inner_ty_db_concrete =  match array_inner_field_ty{
                         Some(ref db_array_item_ty) => (
                             None,
-                            db_array_item_ty.as_db_sql_value_tokenstream().into(),
+                            Some(db_array_item_ty.as_db_sql_value_tokenstream().to_token_stream()),
                         ),
                         None => {
                             return Err(syn::Error::new_spanned(
@@ -194,7 +214,9 @@ impl MyFieldReceiver {
                                 "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
                             ))
                         }
-                    },
+                    };
+                        array_inner_ty_db_concrete
+                    }
                 };
                 inferred_type
             }
@@ -228,10 +250,16 @@ impl MyFieldReceiver {
         table_attributes: &TableDeriveAttributes,
     ) -> FieldSetterNumericImpl {
         let field_name_pascalized = self.field_name_pascalized(table_attributes);
+        let field_type = self.ty;
+        let FieldGenericsMeta {
+            field_impl_generics,
+            field_ty_generics,
+            field_where_clause,
+        } = field_type.get_generics_meta(table_attributes);
 
         let numeric_trait = {
             quote!(
-                impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_pascalized
+                impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_pascalized #field_ty_generics
                 #field_where_clause {}
 
                 impl ::std::convert::From<self::#field_name_pascalized> for #crate_name::NumberLike {

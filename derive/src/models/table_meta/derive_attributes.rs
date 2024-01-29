@@ -21,6 +21,7 @@ use crate::{
     },
 };
 
+// Struct name
 #[derive(Debug, Clone, FromMeta)]
 struct StructIdent(Ident);
 

@@ -53,7 +53,8 @@ pub fn count_vec_nesting(field_type: &syn::Type) -> usize {
 
 #[macro_export]
 macro_rules! create_tokenstream_wrapper {
-    ($name:ident) => {
+    ($(#[$attr:meta])* => $name:ident) => {
+        $(#[$attr])*
         #[derive(Debug, Clone, Default)]
         pub struct $name(::proc_macro2::TokenStream);
 

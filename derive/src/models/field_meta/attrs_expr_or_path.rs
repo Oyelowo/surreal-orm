@@ -74,7 +74,7 @@ impl_from_expr_or_path!(AttributeAs);
 impl_from_expr_or_path!(AttributeDefine);
 
 impl AttributeValue {
-    pub fn get_static_assrtion(&self, db_field_type: FieldType) -> StaticAssertionToken {
+    pub fn get_static_assertion(&self, db_field_type: FieldType) -> StaticAssertionToken {
         let value_expr = &self;
         let convertible_values_to_db_type = match db_field_type {
             FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value_expr)),
