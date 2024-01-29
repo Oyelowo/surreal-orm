@@ -79,7 +79,7 @@ impl ToTokens for EdgeToken {
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let struct_level_casing = table_derive_attributes.struct_level_casing();
+        let struct_level_casing = table_derive_attributes.casing();
 
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
