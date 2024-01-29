@@ -75,20 +75,6 @@ pub struct FieldsMeta {
     /// ```
     pub schema_struct_fields_types_kv: Vec<TokenStream>,
 
-    /// Generated Field wrapper type implementations for each fiekd around `Field` type
-    /// Example value:
-    /// ```rust,ignore
-    /// struct Email(pub(super) Field);
-    ///
-    /// impl std::ops::Deref for Email {
-    ///     type Target = #crate_name::Field;
-    ///
-    ///     fn deref(&self) -> &Self::Target {
-    ///         &self.0
-    ///     }
-    /// }
-    /// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
-    /// ```
     pub field_wrapper_type_custom_implementations: Vec<FieldSetterImplTokens>,
 
     /// Generated example: pub timeWritten: "timeWritten".into(),
@@ -282,9 +268,9 @@ impl FieldsMeta {
             } = VariablesModelMacro::new();
 
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
-            field_receiver.create_field_setter_impl(&mut store);
+
+            field_receiver.get_field_value_setter_impl(&table_derive_attributes);
             
-            store.field_wrapper_type_custom_implementations.push(field_receiver.get_field_value_setter_impl(table_derive_attributes));
                 
             let get_link_meta_with_defs =
                 |node_object: &DestinationNodeTypeOriginal, is_list: bool| {

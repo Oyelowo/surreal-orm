@@ -13,6 +13,7 @@ mod generics;
 mod link_methods;
 mod relate;
 
+pub use field_value_setter::FieldSetterImplTokens;
 pub use generics::FieldGenericsMeta;
 
 use crate::{
