@@ -36,7 +36,7 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken,
+    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken,
 };
 
 #[derive(Default, Clone)]
@@ -155,7 +155,7 @@ pub struct FieldsMeta {
     /// #crate_name::validators::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
     /// ```
     /// Perform all necessary static checks
-    pub static_assertions: Vec<TokenStream>,
+    pub static_assertions: Vec<StaticAssertionToken>,
 
     /// Generated example:
     /// ```rust,ignore
@@ -164,7 +164,7 @@ pub struct FieldsMeta {
     /// We need imports to be unique, hence the hashset
     /// Used when you use a Node in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as Node>::Schema;
-    pub imports_referenced_node_schema: HashSet<TokenStreamHashable>,
+    pub imports_referenced_node_schema: HashSet<ForeignNodeSchemaImport>,
 
     /// This generates a function that is usually called by other Nodes/Structs
     /// self_instance.drunk_water
@@ -184,7 +184,7 @@ pub struct FieldsMeta {
     ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, filter)
     /// }
     /// ```
-    pub record_link_fields_methods: Vec<TokenStream>,
+    pub record_link_fields_methods: Vec<LinkFieldTraversalMethodToken>,
     pub field_definitions: Vec<Vec<DefineFieldStatementToken>>,
     pub field_metadata: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataStore,

@@ -11,7 +11,7 @@ use quote::{quote, ToTokens};
 
 use crate::models::create_tokenstream_wrapper;
 
-create_tokenstream_wrapper!(DbfieldTypeToken);
+create_tokenstream_wrapper!(=> DbfieldTypeToken);
 
 impl Default for DbfieldTypeToken {
     fn default() -> Self {
@@ -19,6 +19,6 @@ impl Default for DbfieldTypeToken {
         Self(quote!(#crate_name::FieldType::Any))
     }
 }
-create_tokenstream_wrapper!(SqlValueTokenStream);
+create_tokenstream_wrapper!(=> SqlValueTokenStream);
 
-create_tokenstream_wrapper!(StaticAssertionToken);
+create_tokenstream_wrapper!(=> StaticAssertionToken);
