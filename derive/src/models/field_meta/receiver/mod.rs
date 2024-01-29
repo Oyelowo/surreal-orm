@@ -13,6 +13,8 @@ mod generics;
 mod link_methods;
 mod relate;
 
+pub use generics::FieldGenericsMeta;
+
 use crate::{
     errors::ExtractorResult,
     models::{derive_attributes::TableDeriveAttributes, CaseString, DataType},
