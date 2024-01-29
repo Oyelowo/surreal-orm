@@ -5,29 +5,53 @@ use crate::{
     errors::ExtractorResult,
     models::{
         create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes,
-        variables::VariablesModelMacro, FieldIdentSerialized, LinkManyAttrType, LinkOneAttrType,
-        LinkSelfAttrType, ListSimple, MyFieldReceiver, NestArrayAttrType, NestObjectAttrType,
-        NormalisedFieldMeta,
+        variables::VariablesModelMacro, FieldIdentSerialized, FieldsMeta, LinkManyAttrType,
+        LinkOneAttrType, LinkSelfAttrType, ListSimple, MyFieldReceiver, NestArrayAttrType,
+        NestObjectAttrType, NormalisedFieldMeta, StaticAssertionToken,
     },
 };
 
 use super::{field_receiver, RelationType};
 
+create_tokenstream_wrapper!(
+/// Genera
+=>
+ListSimpleTraversalMethod
+);
+
 impl MyFieldReceiver {
-    pub fn create_link_methods(&self) {
+    pub fn create_link_methods(
+        &self,
+        store: &mut FieldsMeta,
+        table_derive_attrs: &TableDeriveAttributes,
+    ) {
         let relation_type = self.to_relation_type();
+        let push_to_link = |link_method_meta: LinkMethodMeta| {
+            store
+                .imports_referenced_node_schema
+                .push(meta.foreign_node_schema_import);
+
+            store
+                .record_link_fields_methods
+                .push(meta.link_field_method);
+
+            store
+                .static_assertions
+                .push(meta.foreign_node_type_validator.to_static_assertion());
+        };
+
         match self {
             RelationType::LinkSelf(link_self) => {
                 let method = link_self.get_field_link_method();
                 LinkerMethodToken(method)
             }
             RelationType::LinkOne(link_one) => {
-                let method = link_one.get_field_link_method();
-                LinkerMethodToken(method)
+                let meta = self.link_one(link_one, table_derive_attrs);
+                push_to_link(meta);
             }
             RelationType::LinkMany(link_many) => {
-                let method = link_many.get_field_link_method();
-                LinkerMethodToken(method)
+                let meta = self.link_many(link_one, table_derive_attrs);
+                push_to_link(meta);
             }
             RelationType::NestArray(nest_array) => {
                 let method = nest_array.get_field_link_method();
@@ -38,8 +62,8 @@ impl MyFieldReceiver {
                 LinkerMethodToken(method)
             }
             RelationType::List(list) => {
-                let method = list.get_field_link_method();
-                LinkerMethodToken(method)
+                let method_token = self.list_simple_traversal_method(list, table_derive_attrs)?;
+                store.record_link_fields_methods.push(method_token);
             }
             RelationType::Relate(relate) => {
                 let method = relate.get_field_link_method();
@@ -56,7 +80,7 @@ impl MyFieldReceiver {
         &self,
         list_simple: &ListSimple,
         table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<TokenStream> {
+    ) -> ExtractorResult<LinkFieldTraversalMethodToken> {
         let crate_name = get_crate_name(false);
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing);
@@ -86,144 +110,47 @@ impl MyFieldReceiver {
             }
         );
 
-        // Self {
-        //     foreign_node_schema_import: quote!(),
-        //
-        //     foreign_node_type_validator: quote!(),
-        //
-        //     record_link_default_alias_as_method,
-        //     foreign_node_type: quote!(schema_type_ident),
-        //     field_definition: quote!(),
-        //     field_type_validation_asserts: vec![],
-        // }
+        Ok(record_link_default_alias_as_method.into())
     }
-}
 
-struct LinkerMethodToken(TokenStream);
-
-create_tokenstream_wrapper!(
-/// imports for specific schema from the trait Generic Associated types e.g
-/// Example:
-///
-/// ```rust, ignore
-/// type Book = <super::Book as SchemaGetter>::Schema;
-/// ```
-=>
-ForeignNodeSchemaImport
-);
-create_tokenstream_wrapper!(
-/// Contains static assertions for foreign node type
-=>
-ForeignNodeTypeValidator
-);
-
-create_tokenstream_wrapper!(
-/// TODO: Complete later if you decide to document the token generated on the type or on
-/// the struct gatherer FieldsMeta fields
-/// Contains the default alias method for the foreign node type
-/// Example:
-/// ```rust, ignore
-///
-=>
-RecordLinkDefaultAliasAsMethod
-);
-
-struct LinkMethodMeta {
-    foreign_node_schema_import: ForeignNodeSchemaImport,
-    foreign_node_type_validator: ForeignNodeTypeValidator,
-    record_link_default_alias_as_method: RecordLinkDefaultAliasAsMethod,
-}
-
-impl ListSimple {
-    pub fn get_field_link_method(
+    fn link_one(
         &self,
-        field_receiver: &MyFieldReceiver,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<TokenStream> {
-        let NormalisedFieldMeta {
-            field_ident_raw_to_underscore_suffix: normalized_field_name,
-            field_ident_serialized_fmt: normalized_field_name_str,
-        } = field_receiver.normalize_ident(table_derive_attrs.struct_level_casing()?);
-        let crate_name = get_crate_name(false);
-
-        let record_link_default_alias_as_method = quote!(
-            pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
-                let clause: #crate_name::NodeAliasClause = clause.into();
-                let clause: #crate_name::NodeClause = clause.into_inner();
-
-                let normalized_field_name_str = if self.build().is_empty(){
-                    #normalized_field_name_str.to_string()
-                }else {
-                    format!(".{}", #normalized_field_name_str)
-                };
-
-                let clause: #crate_name::NodeClause = clause.into();
-                let bindings = self.get_bindings().into_iter().chain(clause.get_bindings().into_iter()).collect::<Vec<_>>();
-
-                let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<Vec<_>>();
-
-                let field = #crate_name::Field::new(format!("{normalized_field_name_str}{}", clause.build()))
-                            .with_bindings(bindings)
-                            .with_errors(errors);
-                field
-
-            }
-        );
-
-        // Self {
-        //     foreign_node_schema_import: quote!(),
-        //
-        //     foreign_node_type_validator: quote!(),
-        //
-        //     record_link_default_alias_as_method,
-        //     foreign_node_type: quote!(schema_type_ident),
-        //     field_definition: quote!(),
-        //     field_type_validation_asserts: vec![],
-        // }
-    }
-}
-
-impl LinkOneAttrType {
-    pub(crate) fn from_record_link(
-        &self,
-        field_receiver: &MyFieldReceiver,
+        link_one: LinkOneAttrType,
         table_derive_attrs: &TableDeriveAttributes,
     ) -> LinkMethodMeta {
-        let linked_node_type = &self.replace_self_with_current_struct_ident(table_def);
-        let normalized_field_name =
-            &field_receiver.normalize_ident(table_derive_attrs.struct_level_casing()?);
-        let struct_name_ident = &table_derive_attrs.ident;
-        let normalized_field_name_str = normalized_field_name.field_ident_serialized_fmt;
-        let normalized_field_name = normalized_field_name.field_ident_raw_to_underscore_suffix;
+        let crate_name = get_crate_name(false);
+        let linked_node_type = &link_one.replace_self_with_current_struct_ident(table_def);
+        let crate_name = get_crate_name(false);
+        let struct_name_ident = table_derive_attrs.ident;
+        let struct_casing = table_derive_attrs.casing()?;
+        let field_ident_normalized = self.field_ident_normalized(&struct_casing);
+        let field_name_serialized = self.field_name_serialized(&struct_casing);
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
 
-        let schema_type = linked_node_type;
-        let crate_name = get_crate_name(false);
-
-        let foreign_node_schema_import = if *struct_name_ident == linked_node_type.to_string() {
+        let foreign_node_schema_import = if *struct_name_ident.is_same(linked_node_type) {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
-            quote!(type #schema_type = <super::#schema_type as #crate_name::SchemaGetter>::Schema;)
+            quote!(type #linked_node_type = <super::#linked_node_type as #crate_name::SchemaGetter>::Schema;)
         };
 
         let record_link_default_alias_as_method = quote!(
-            pub fn #normalized_field_name(&self) -> #schema_type {
-                let clause = #crate_name::Clause::from(#crate_name::Empty);
+            pub fn #normalized_field_name(&self) -> #linked_node_type {
+            let clause = #crate_name::Clause::from(#crate_name::Empty);
 
-                let normalized_field_name_str = if self.build().is_empty(){
-                    #normalized_field_name_str.to_string()
-                }else {
-                    format!(".{}", #normalized_field_name_str)
-                };
+            let normalized_field_name_str = if self.build().is_empty(){
+                #normalized_field_name_str.to_string()
+            }else {
+                format!(".{}", #normalized_field_name_str)
+            };
 
-                #schema_type::#__________connect_node_to_graph_traversal_string(
-                    self,
-                    clause.with_field(normalized_field_name_str)
+            #linked_node_type::#__________connect_node_to_graph_traversal_string(
+                self,
+                clause.with_field(normalized_field_name_str)
                 )
             }
         );
@@ -234,16 +161,114 @@ impl LinkOneAttrType {
             foreign_node_schema_import: foreign_node_schema_import.into(),
 
             foreign_node_type_validator: quote!(
-                #crate_name::validators::assert_impl_one!(#schema_type: #crate_name::Node);
+                #crate_name::validators::assert_impl_one!(#linked_node_type: #crate_name::Node);
             ),
 
-            record_link_default_alias_as_method,
-            foreign_node_type: quote!(#linked_node_type),
-            field_definition: quote!(),
-            field_type_validation_asserts: vec![],
+            link_field_method: record_link_default_alias_as_method.into(),
+        }
+    }
+
+    fn link_many(
+        &self,
+        link_many_node_type: &LinkManyAttrType,
+        table_derive_attrs: &TableDeriveAttributes,
+    ) -> LinkMethodMeta {
+        let normalized_field_name_str = normalized_field_name.field_ident_serialized_fmt;
+        let normalized_field_name = normalized_field_name.field_ident_raw_to_underscore_suffix;
+        let VariablesModelMacro {
+            ___________graph_traversal_string,
+            __________connect_node_to_graph_traversal_string,
+            ..
+        } = VariablesModelMacro::new();
+
+        let crate_name = get_crate_name(false);
+
+        let foreign_node_schema_import = if *struct_name_ident == link_many_node_type.to_string() {
+            // Dont import for current struct since that already exists in scope
+            quote!()
+        } else {
+            quote!(type #link_many_node_type = <super::#link_many_node_type as #crate_name::SchemaGetter>::Schema;)
+        };
+
+        let link_field_method = quote!(
+            pub fn #normalized_field_name(&self, clause: impl ::std::convert::Into<#crate_name::NodeAliasClause>) -> #link_many_node_type {
+            let clause: #crate_name::NodeAliasClause = clause.into();
+            let clause: #crate_name::NodeClause = clause.into_inner();
+
+            let normalized_field_name_str = if self.build().is_empty(){
+                #normalized_field_name_str.to_string()
+            }else {
+                format!(".{}", #normalized_field_name_str)
+            };
+
+            #link_many_node_type::#__________connect_node_to_graph_traversal_string(
+                    self,
+                    clause.with_field(normalized_field_name_str)
+                )
+            }
+        );
+
+        LinkMethodMeta {
+            // imports for specific schema from the trait Generic Associated types e.g
+            // type Book = <super::Book as SchemaGetter>::Schema;
+            foreign_node_schema_import: foreign_node_schema_import.into(),
+            link_field_method: link_field_method.into(),
+            foreign_node_type_validator: quote!(
+                #crate_name::validators::assert_impl_one!(#link_many_node_type: #crate_name::Node);
+            )
+            .into(),
         }
     }
 }
+
+struct LinkerMethodToken(TokenStream);
+
+create_tokenstream_wrapper!(
+    /// imports for specific schema from the trait Generic Associated types e.g
+    /// Example:
+    ///
+    /// ```rust, ignore
+    /// Generated example:
+    /// ```rust,ignore
+    /// type Book = <super::Book as Node>::Schema;
+    /// ```
+    /// We need imports to be unique, hence the hashset
+    /// Used when you use a Node in field e.g: favourite_book: LinkOne<Book>,
+    /// e.g: type Book = <super::Book as Node>::Schema;
+    /// ```
+    =>
+    ForeignNodeSchemaImport
+);
+create_tokenstream_wrapper!(
+/// Contains static assertions for foreign node type
+=>
+ForeignNodeTypeValidator
+);
+
+impl ForeignNodeTypeValidator {
+    pub fn to_static_assertion(self) -> StaticAssertionToken {
+        self.0.into()
+    }
+}
+
+create_tokenstream_wrapper!(
+/// TODO: Complete later if you decide to document the token generated on the type or on
+/// the struct gatherer FieldsMeta fields
+/// Contains the default alias method for the foreign node type
+/// Example:
+/// ```rust, ignore
+///
+=>
+LinkFieldTraversalMethodToken
+);
+
+struct LinkMethodMeta {
+    foreign_node_schema_import: ForeignNodeSchemaImport,
+    foreign_node_type_validator: ForeignNodeTypeValidator,
+    link_field_method: LinkFieldTraversalMethodToken,
+}
+
+impl LinkOneAttrType {}
 
 impl LinkSelfAttrType {
     pub(crate) fn to_linkone_attr_type(self) -> LinkOneAttrType {
@@ -261,68 +286,7 @@ impl LinkSelfAttrType {
     }
 }
 
-impl LinkManyAttrType {
-    pub(crate) fn from_record_link(
-        linked_node_type: &DestinationNodeTypeOriginal,
-        normalized_field_name: &NormalisedFieldMeta,
-        // normalized_field_name: &::syn::Ident,
-        struct_name_ident: &::syn::Ident,
-        is_list: bool,
-    ) -> Self {
-        let normalized_field_name_str = normalized_field_name.field_ident_serialized_fmt;
-        let normalized_field_name = normalized_field_name.field_ident_raw_to_underscore_suffix;
-        let VariablesModelMacro {
-            ___________graph_traversal_string,
-            __________connect_node_to_graph_traversal_string,
-            ..
-        } = VariablesModelMacro::new();
-
-        let schema_type = linked_node_type;
-        let crate_name = get_crate_name(false);
-
-        let foreign_node_schema_import = if *struct_name_ident == linked_node_type.to_string() {
-            // Dont import for current struct since that already exists in scope
-            quote!()
-        } else {
-            quote!(type #schema_type = <super::#schema_type as #crate_name::SchemaGetter>::Schema;)
-        };
-
-        let record_link_default_alias_as_method = quote!(
-            pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #schema_type {
-            let clause: #crate_name::NodeAliasClause = clause.into();
-            let clause: #crate_name::NodeClause = clause.into_inner();
-
-            let normalized_field_name_str = if self.build().is_empty(){
-            #normalized_field_name_str.to_string()
-            }else {
-            format!(".{}", #normalized_field_name_str)
-            };
-
-
-            #schema_type::#__________connect_node_to_graph_traversal_string(
-            self,
-            clause.with_field(normalized_field_name_str)
-            )
-
-            }
-        );
-
-        Self {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SchemaGetter>::Schema;
-            foreign_node_schema_import,
-
-            foreign_node_type_validator: quote!(
-                #crate_name::validators::assert_impl_one!(#schema_type: #crate_name::Node);
-            ),
-
-            record_link_default_alias_as_method,
-            foreign_node_type: quote!(schema_type_ident),
-            field_definition: quote!(),
-            field_type_validation_asserts: vec![],
-        }
-    }
-}
+impl LinkManyAttrType {}
 
 impl NestObjectAttrType {
     pub(crate) fn from_nested(

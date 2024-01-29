@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use darling::{ast::Data, util, FromDeriveInput, FromMeta};
 use proc_macro2::TokenStream;
@@ -16,14 +16,20 @@ use syn::{parse_quote, GenericArgument, Ident, Path, PathArguments, Type};
 use crate::{
     errors::ExtractorResult,
     models::{
-        AttributeAs, AttributeDefine, CaseString, MyFieldReceiver, Permissions, PermissionsFn,
-        Rename, RustFieldTypeSelfAllowed, StructGenerics, StructLevelCasing,
+        create_ident_wrapper, AttributeAs, AttributeDefine, CaseString, MyFieldReceiver,
+        Permissions, PermissionsFn, Rename, RustFieldTypeSelfAllowed, StructGenerics,
+        StructLevelCasing,
     },
 };
 
 // Struct name
-#[derive(Debug, Clone, FromMeta)]
-struct StructIdent(Ident);
+create_ident_wrapper!(StructIdent);
+
+impl StructIdent {
+    pub fn is_same(&self, other: impl Display) -> bool {
+        self.to_string() == other.to_string()
+    }
+}
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]

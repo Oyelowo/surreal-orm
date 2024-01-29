@@ -89,6 +89,20 @@ macro_rules! create_tokenstream_wrapper {
                 tokenstream.0
             }
         }
+
+        impl Eq for $name {}
+
+        impl PartialEq for $name {
+            fn eq(&self, other: &Self) -> bool {
+                self.0.to_string() == other.0.to_string()
+            }
+        }
+
+        impl std::hash::Hash for $name {
+            fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+                self.0.to_string().hash(state);
+            }
+        }
     };
 }
 
