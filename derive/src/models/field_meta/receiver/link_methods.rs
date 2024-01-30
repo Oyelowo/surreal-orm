@@ -61,10 +61,7 @@ impl MyFieldReceiver {
                 let method_token = self.list_simple(list, table_derive_attrs)?;
                 store.record_link_fields_methods.push(method_token);
             }
-            RelationType::Relate(relate) => {
-                let method = relate.get_field_link_method();
-                LinkerMethodToken(method)
-            }
+            RelationType::Relate(relate) => {}
             RelationType::None => {}
         }
     }
@@ -321,8 +318,6 @@ impl MyFieldReceiver {
         })
     }
 }
-
-struct LinkerMethodToken(TokenStream);
 
 create_tokenstream_wrapper!(
     /// imports for specific schema from the trait Generic Associated types e.g
