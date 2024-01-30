@@ -26,7 +26,7 @@ pub struct ListSimple;
 macro_rules! create_link_wrapper {
     ($name:ident) => {
         #[derive(Debug, Clone, FromMeta)]
-        pub struct $name(CustomType);
+        pub struct $name(pub CustomType);
 
         impl $name {}
 
