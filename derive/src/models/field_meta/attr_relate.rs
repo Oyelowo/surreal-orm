@@ -8,7 +8,9 @@
 use darling::FromMeta;
 use syn::Type;
 
-use crate::models::{CustomType, DestinationNodeTypeOriginal, RustFieldTypeSelfAllowed};
+use crate::models::{
+    create_custom_type_wrapper, CustomType, DestinationNodeTypeOriginal, RustFieldTypeSelfAllowed,
+};
 
 #[derive(Debug, Clone)]
 pub struct Relate {
@@ -20,14 +22,10 @@ pub struct Relate {
     /// e.g2
     /// StudentWritesBook<'a, 'b: 'a, T, U>,
     /// derived from: type StudentWritesBook<'a, 'b: 'a, T, U> = Writes<'a, 'b: 'a, T, U><Student<'a, 'b, T, Book<U>>;
-    pub edge_model: CustomType,
-    /// e.g Book, ->writes->book
-    /// derived from: type StudentWritesBook = Writes<Student, Book>;
-    /// e.g2 Book<'a, 'b: 'a, T, U>,
-    /// StudentWritesBook<'a, 'b: 'a, T, U>,
-    /// derived from: type StudentWritesBook<'a, 'b: 'a, T, U> = Writes<'a, 'b: 'a, T, U><Student<'a, 'b, T, Book<U>>;
-    pub destination_model: RustFieldTypeSelfAllowed,
+    pub edge_type: EdgeModel,
 }
+
+create_custom_type_wrapper!(EdgeModel);
 
 impl FromMeta for Relate {
     // // TODO: Revisit this whether we can and should allow only the
@@ -56,7 +54,7 @@ impl FromMeta for Relate {
                 } = v;
                 Self {
                     connection,
-                    edge_model: model,
+                    edge_type: model,
                 }
             }
         }

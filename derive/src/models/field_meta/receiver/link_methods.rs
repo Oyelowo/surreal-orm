@@ -2,6 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 
 use super::{field_receiver, RelationType};
+use crate::models::field_meta::receiver::relate;
 use crate::{
     errors::ExtractorResult,
     models::{variables::VariablesModelMacro, *},

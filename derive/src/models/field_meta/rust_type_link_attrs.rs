@@ -23,7 +23,8 @@ use super::*;
 #[derive(Debug, Clone)]
 pub struct ListSimple;
 
-macro_rules! create_link_wrapper {
+#[macro_export]
+macro_rules! create_custom_type_wrapper {
     ($name:ident) => {
         #[derive(Debug, Clone, FromMeta)]
         pub struct $name(pub CustomType);
@@ -44,9 +45,11 @@ macro_rules! create_link_wrapper {
     };
 }
 
-create_link_wrapper!(LinkSelfAttrType);
-create_link_wrapper!(LinkSelfAttrTypeReplaceSelfWithCurrentStructIdent);
-create_link_wrapper!(LinkOneAttrType);
-create_link_wrapper!(LinkManyAttrType);
-create_link_wrapper!(NestObjectAttrType);
-create_link_wrapper!(NestArrayAttrType);
+pub use create_custom_type_wrapper;
+
+create_custom_type_wrapper!(LinkSelfAttrType);
+create_custom_type_wrapper!(LinkSelfAttrTypeReplaceSelfWithCurrentStructIdent);
+create_custom_type_wrapper!(LinkOneAttrType);
+create_custom_type_wrapper!(LinkManyAttrType);
+create_custom_type_wrapper!(NestObjectAttrType);
+create_custom_type_wrapper!(NestArrayAttrType);
