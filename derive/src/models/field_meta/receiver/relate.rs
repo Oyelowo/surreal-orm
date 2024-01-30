@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Display};
 
-use convert_case::Case;
+use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote};
@@ -30,6 +30,10 @@ create_ident_wrapper!(EdgeRelationModelSelectedIdent);
 create_tokenstream_wrapper!(=>DestinationNodeSchema);
 create_tokenstream_wrapper!(=>ForeignNodeConnectionMethod);
 create_tokenstream_wrapper!(=>RelationImports);
+create_tokenstream_wrapper!(=>DestinationNodeTypeAlias);
+create_tokenstream_wrapper!(=>EdgeToDestinationNodeMethod);
+create_tokenstream_wrapper!(=>DestinationNodeSchemaOne);
+create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
 
 struct DestinationNodeName(String);
 
@@ -210,32 +214,30 @@ impl NodeEdgeMetadataStore {
         field_receriver: &MyFieldReceiver,
         table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<()> {
+        let crate_name = get_crate_name(false);
         let origin_struct_ident = &table_derive_attrs.ident;
         let field_type = &field_receriver.ty;
-        let crate_name = get_crate_name(false);
         let edge_type = relation.edge_type;
-        let relation_attributes = RelateAttribute::from(relation);
-        let edge_table_name = &relation_attributes.edge_table_name;
-        let destination_node_table_name = &relation_attributes.node_table_name;
+        let RelateAttribute {
+            edge_direction,
+            edge_table_name,
+            node_table_name: destination_node_table_name,
+        } = &RelateAttribute::from(relation);
+        let arrow = format!("{}", &edge_direction);
         let destination_node_table_name_str = &destination_node_table_name.to_string();
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
-
-        let edge_direction = &relation_attributes.edge_direction;
-        let arrow = format!("{}", &edge_direction);
-
         let edge_name_as_method_ident =
             &(|| self.add_direction_indication_to_ident(edge_table_name, edge_direction));
-
-        // represents the schema but aliased as the pascal case of the destination table name
         let FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,
             field_where_clause,
         } = &edge_type.get_generics_meta(table_derive_attrs);
+        // represents the schema but aliased as the pascal case of the destination table name
         let destination_node_schema_ident = format_ident!(
             "{}",
             destination_node_table_name
@@ -243,28 +245,30 @@ impl NodeEdgeMetadataStore {
                 .to_case(Case::Pascal)
         );
         let destination_node_schema_type_alias =
-            quote!(#destination_node_schema_ident #field_ty_generics);
-        // Meant to represent the variable of struct model(node) itself.
+            DestinationNodeTypeAlias(quote!(#destination_node_schema_ident #field_ty_generics));
+        // let dest_node_as_type =
+        //     syn::parse_str::<syn::Type>(&destination_node_schema_type_alias.to_string())?;
 
-        // Within edge generics, there is usually In and Out associated types, this is used to access
-        // those
-        let foreign_node_in_or_out = match edge_direction {
+        // Meant to represent the variable of struct model(node) itself.
+        // Within edge generics, there is usually In and Out associated types, this is used to
+        // access those
+        let foreign_node_in_or_out = ForeignNodeAssociatedTypeInOrOut(match edge_direction {
             EdgeDirection::OutArrowRight => format_ident!("Out"),
             EdgeDirection::InArrowLeft => format_ident!("In"),
-        };
+        });
         // We use super twice because we're trying to access the relation model struct name from
         // the outer outer module because all edge related functionalities are nested
         let destination_node_schema_one = || {
-            quote!(
-            type #destination_node_schema_type_alias #field_ty_generics =
-                        <<super::super::#edge_type as #crate_name::Edge>::#foreign_node_in_or_out
-                    as #crate_name::SchemaGetter>::Schema;
-            )
+            DestinationNodeSchema(quote!(
+                type #destination_node_schema_type_alias #field_ty_generics =
+                            <<super::super::#edge_type as #crate_name::Edge>::#foreign_node_in_or_out
+                        as #crate_name::SchemaGetter>::Schema;
+            ))
         };
 
         // i.e Edge to destination Node
-        let ForeignNodeConnectionMethod = || {
-            quote!(
+        let foreign_node_connection_method = || {
+            EdgeToDestinationNodeMethod(quote!(
                 pub fn #destination_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #destination_node_schema_type_alias {
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_name_str);
@@ -274,7 +278,7 @@ impl NodeEdgeMetadataStore {
                                 clause,
                     )
                 }
-            )
+            ))
         };
         let static_assertions =
             || Self::create_static_assertions(relation, origin_struct_ident, field_type);
@@ -289,7 +293,7 @@ impl NodeEdgeMetadataStore {
             ),
             direction: *edge_direction,
             destination_node_schema: vec![destination_node_schema_one()],
-            foreign_node_connection_method: vec![ForeignNodeConnectionMethod()],
+            foreign_node_connection_method: vec![foreign_node_connection_method()],
             origin_struct_ident: origin_struct_ident.to_owned(),
             static_assertions: vec![static_assertions()],
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
