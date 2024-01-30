@@ -1,27 +1,46 @@
 use std::{collections::HashMap, fmt::Display};
 
+use convert_case::Case;
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
+use quote::{format_ident, quote};
 
 use crate::{
     errors::ExtractorResult,
-    models::{RelateAttribute, StaticAssertionToken},
+    models::{
+        create_ident_wrapper, create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes,
+        variables::VariablesModelMacro, RelateAttribute, StaticAssertionToken,
+    },
 };
 
-use super::{variables::VariablesModelMacro, EdgeDirection, MyFieldReceiver, Relate};
+use super::{
+    variables::VariablesModelMacro, EdgeDirection, FieldGenericsMeta, MyFieldReceiver, Relate,
+};
 
 impl MyFieldReceiver {}
 
 type EdgeNameWithDirectionIndicator = String;
 
+// struct EdgeTableName(syn::Ident);
+create_ident_wrapper!(EdgeTableName);
+create_ident_wrapper!(OriginNodeStructIdent);
+create_ident_wrapper!(EdgeNameAsMethodIdent);
+create_ident_wrapper!(EdgeRelationModelSelectedIdent);
+
+create_tokenstream_wrapper!(=>DestinationNodeSchema);
+create_tokenstream_wrapper!(=>ForeignNodeConnectionMethod);
+create_tokenstream_wrapper!(=>RelationImports);
+
+struct DestinationNodeName(String);
+
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 struct NodeEdgeMetadata {
     /// Example value: writes
-    edge_table_name: syn::Ident,
+    edge_table_name: EdgeTableName,
     /// The current struct name ident.
     /// e.g given: struct Student {  }, value = Student
-    origin_struct_ident: syn::Ident,
+    origin_struct_ident: OriginNodeStructIdent,
     /// The database table name of the edge. Used for generating other tokens
     /// e.g "writes"
     direction: EdgeDirection,
@@ -34,7 +53,7 @@ struct NodeEdgeMetadata {
     /// for a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book")
     /// So we can do
     /// type Writes = <StudentWritesBook as Edge>::Schema;
-    edge_relation_model_selected_ident: syn::Ident,
+    edge_relation_model_selected_ident: EdgeRelationModelSelectedIdent,
     /// Example Generated:
     /// ```rust, ignore
     ///   type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
@@ -57,8 +76,8 @@ struct NodeEdgeMetadata {
     ///     ),
     /// ],
     /// ```
-    destination_node_schema: Vec<TokenStream>,
-    destination_node_name: String,
+    destination_node_schema: Vec<DestinationNodeSchema>,
+    destination_node_name: DestinationNodeSchema,
     /// Example Generated:
     ///
     /// ```rust, ignore
@@ -100,14 +119,15 @@ struct NodeEdgeMetadata {
     ///     ),
     ///    ]
     /// ```
-    foreign_node_connection_method: Vec<TokenStream>,
-    static_assertions: Vec<TokenStream>,
-    imports: Vec<TokenStream>,
-    edge_name_as_method_ident: syn::Ident,
+    foreign_node_connection_method: Vec<ForeignNodeConnectionMethod>,
+    static_assertions: Vec<StaticAssertionToken>,
+    imports: Vec<RelationImports>,
+    edge_name_as_method_ident: EdgeNameAsMethodIdent,
 }
 
 #[derive(Default, Clone)]
 pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
+create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
 
 impl NodeEdgeMetadataStore {
     /// e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
@@ -115,11 +135,12 @@ impl NodeEdgeMetadataStore {
         &self,
         ident: &impl Display,
         edge_direction: &EdgeDirection,
-    ) -> String {
-        match edge_direction {
-            EdgeDirection::OutArrowRight => format!("{ident}__"),
-            EdgeDirection::InArrowLeft => format!("__{ident}"),
-        }
+    ) -> EdgeWithDunderDirectionIndicator {
+        let edge = match edge_direction {
+            EdgeDirection::OutArrowRight => format_ident!("{ident}__"),
+            EdgeDirection::InArrowLeft => format_ident!("__{ident}"),
+        };
+        edge.into()
     }
 
     fn create_static_assertions(
@@ -128,7 +149,7 @@ impl NodeEdgeMetadataStore {
         field_type: &syn::Type,
     ) -> StaticAssertionToken {
         let crate_name = get_crate_name(false);
-        let relation_model = relation.edge_model;
+        let relation_model = relation.edge_type;
         let relation_attributes = RelateAttribute::from(relation);
         let RelateAttribute {
             edge_table_name,
@@ -186,22 +207,22 @@ impl NodeEdgeMetadataStore {
     fn update(
         &mut self,
         relation: &Relate,
-        origin_struct_ident: &syn::Ident,
-        field_type: &syn::Type,
-    ) -> &Self {
+        field_receriver: &MyFieldReceiver,
+        table_derive_attrs: &TableDeriveAttributes,
+    ) -> ExtractorResult<()> {
+        let origin_struct_ident = &table_derive_attrs.ident;
+        let field_type = &field_receriver.ty;
         let crate_name = get_crate_name(false);
-        let relation_model = &format_ident!(
-            "{}",
-            relation
-                .model
-                .as_ref()
-                .expect("relation model does not exist")
-        );
+        let edge_type = relation.edge_type;
         let relation_attributes = RelateAttribute::from(relation);
-        let edge_table_name = &TokenStream::from(&relation_attributes.edge_table_name);
-
-        let destination_node_table_name = &TokenStream::from(&relation_attributes.node_table_name);
+        let edge_table_name = &relation_attributes.edge_table_name;
+        let destination_node_table_name = &relation_attributes.node_table_name;
         let destination_node_table_name_str = &destination_node_table_name.to_string();
+        let VariablesModelMacro {
+            __________connect_node_to_graph_traversal_string,
+            ___________graph_traversal_string,
+            ..
+        } = VariablesModelMacro::new();
 
         let edge_direction = &relation_attributes.edge_direction;
         let arrow = format!("{}", &edge_direction);
@@ -210,21 +231,21 @@ impl NodeEdgeMetadataStore {
             &(|| self.add_direction_indication_to_ident(edge_table_name, edge_direction));
 
         // represents the schema but aliased as the pascal case of the destination table name
+        let FieldGenericsMeta {
+            field_impl_generics,
+            field_ty_generics,
+            field_where_clause,
+        } = &edge_type.get_generics_meta(table_derive_attrs);
         let destination_node_schema_ident = format_ident!(
             "{}",
             destination_node_table_name
                 .to_string()
                 .to_case(Case::Pascal)
         );
+        let destination_node_schema_type_alias =
+            quote!(#destination_node_schema_ident #field_ty_generics);
         // Meant to represent the variable of struct model(node) itself.
-        let destination_node_model_ident =
-            format_ident!("______________{destination_node_schema_ident}Model");
 
-        let VariablesModelMacro {
-            __________connect_node_to_graph_traversal_string,
-            ___________graph_traversal_string,
-            ..
-        } = VariablesModelMacro::new();
         // Within edge generics, there is usually In and Out associated types, this is used to access
         // those
         let foreign_node_in_or_out = match edge_direction {
@@ -235,19 +256,20 @@ impl NodeEdgeMetadataStore {
         // the outer outer module because all edge related functionalities are nested
         let destination_node_schema_one = || {
             quote!(
-            type #destination_node_model_ident = <super::super::#relation_model as #crate_name::Edge>::#foreign_node_in_or_out;
-            type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SchemaGetter>::Schema;
+            type #destination_node_schema_type_alias #field_ty_generics =
+                        <<super::super::#edge_type as #crate_name::Edge>::#foreign_node_in_or_out
+                    as #crate_name::SchemaGetter>::Schema;
             )
         };
 
         // i.e Edge to destination Node
-        let foreign_node_connection_method = || {
+        let ForeignNodeConnectionMethod = || {
             quote!(
-                pub fn #destination_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
+                pub fn #destination_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #destination_node_schema_type_alias {
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_name_str);
 
-                    #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
+                    #destination_node_schema_type_alias::#__________connect_node_to_graph_traversal_string(
                                 self,
                                 clause,
                     )
@@ -258,7 +280,7 @@ impl NodeEdgeMetadataStore {
             || Self::create_static_assertions(relation, origin_struct_ident, field_type);
 
         // let imports =|| quote!(use super::StudentWritesBook;);
-        let imports = || quote!(use super::#relation_model;);
+        let imports = || quote!(use super::#edge_type;);
 
         let node_edge_meta = NodeEdgeMetadata {
             edge_table_name: format_ident!(
@@ -267,12 +289,12 @@ impl NodeEdgeMetadataStore {
             ),
             direction: *edge_direction,
             destination_node_schema: vec![destination_node_schema_one()],
-            foreign_node_connection_method: vec![foreign_node_connection_method()],
+            foreign_node_connection_method: vec![ForeignNodeConnectionMethod()],
             origin_struct_ident: origin_struct_ident.to_owned(),
             static_assertions: vec![static_assertions()],
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
             imports: vec![imports()],
-            edge_relation_model_selected_ident: relation_model.to_owned(),
+            edge_relation_model_selected_ident: relation.edge_type.type_name()?,
             destination_node_name: destination_node_table_name.to_string(),
         };
 
@@ -284,7 +306,7 @@ impl NodeEdgeMetadataStore {
                     .push(destination_node_schema_one());
                 node_edge_meta
                     .foreign_node_connection_method
-                    .push(foreign_node_connection_method());
+                    .push(ForeignNodeConnectionMethod());
                 node_edge_meta.static_assertions.push(static_assertions());
                 node_edge_meta.imports.push(imports());
             }
@@ -292,7 +314,7 @@ impl NodeEdgeMetadataStore {
                 v.insert(node_edge_meta);
             }
         };
-        self
+        Ok(())
     }
 
     pub(crate) fn generate_static_assertions(&self) -> TokenStream {
@@ -316,9 +338,9 @@ impl NodeEdgeMetadataStore {
             let NodeEdgeMetadata {
                     origin_struct_ident,
                     direction,
-                    edge_relation_model_selected_ident,
+                    EdgeRelationModelSelectedIdent: edge_relation_model_selected_ident,
                     destination_node_schema,
-                    foreign_node_connection_method,
+                    ForeignNodeConnectionMethod: foreign_node_connection_method,
                     imports,
                     edge_name_as_method_ident,
                     edge_table_name,
