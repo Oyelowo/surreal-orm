@@ -1,17 +1,12 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
+use super::{field_receiver, RelationType};
 use crate::{
     errors::ExtractorResult,
-    models::{
-        create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes,
-        variables::VariablesModelMacro, FieldIdentSerialized, FieldsMeta, LinkManyAttrType,
-        LinkOneAttrType, LinkSelfAttrType, ListSimple, MyFieldReceiver, NestArrayAttrType,
-        NestObjectAttrType, NormalisedFieldMeta, StaticAssertionToken,
-    },
+    models::{variables::VariablesModelMacro, *},
 };
-
-use super::{field_receiver, RelationType};
+use table_meta::derive_attributes::TableDeriveAttributes;
 
 create_tokenstream_wrapper!(
 /// Genera
@@ -55,8 +50,8 @@ impl MyFieldReceiver {
                 push_to_link(meta);
             }
             RelationType::NestArray(nest_array) => {
-                let method = nest_array.get_field_link_method();
-                LinkerMethodToken(method)
+                let meta = self.nest_array(nest_array, table_derive_attrs)?;
+                push_to_link(meta);
             }
             RelationType::NestObject(nest_object) => {
                 let meta = self.nest_object(nest_object, table_derive_attrs)?;
@@ -270,6 +265,61 @@ impl MyFieldReceiver {
             link_field_method: connect_object_field_method.into(),
         })
     }
+
+    pub(crate) fn nest_array(
+        &self,
+        nested_array: &NestArrayAttrType,
+        table_derive_attrs: &TableDeriveAttributes,
+    ) -> ExtractorResult<LinkMethodMeta> {
+        let crate_name = get_crate_name(false);
+        let current_struct_ident = &table_derive_attrs.ident;
+        let struct_casing = table_derive_attrs.casing()?;
+        let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
+        let field_name_serialized = self.field_name_serialized(&struct_casing)?;
+        let VariablesModelMacro {
+            __________connect_object_to_graph_traversal_string,
+            ___________graph_traversal_string,
+            ..
+        } = VariablesModelMacro::new();
+
+        let foreign_node_schema_import = if *current_struct_ident.is_same_name(nested_array)? {
+            // Dont import for current struct since that already exists in scope
+            quote!()
+        } else {
+            // e.g type Book = <super::Book as SchemaGetter>::Schema;
+            // type Book<'a, 'b, T, U: Clone + Default, V: Node> = <super::Book<'a, 'b, T, U, V> as SchemaGetter>::Schema;
+            quote!(type #nested_array = <super::#nested_array as #crate_name::SchemaGetter>::Schema;)
+        };
+
+        let record_link_default_alias_as_method = quote!(
+            pub fn #field_ident_normalized(
+                &self,
+                clause: impl ::std::convert::Into<#crate_name::ObjectClause>
+            ) -> #nested_array {
+                let clause: #crate_name::ObjectClause = clause.into();
+                let normalized_field_name_str = if self.build().is_empty(){
+                    #field_name_serialized.to_string()
+                }else {
+                    format!(".{}", #field_name_serialized)
+                };
+
+                #nested_array::#__________connect_object_to_graph_traversal_string(
+                    self,
+                    clause.with_field(normalized_field_name_str)
+                )
+
+            }
+        );
+
+        Ok(LinkMethodMeta {
+            foreign_node_schema_import: foreign_node_schema_import.into(),
+            foreign_node_type_validator: quote!(
+                #crate_name::validators::assert_impl_one!(#schema_type_ident: #crate_name::Object);
+            )
+            .into(),
+            link_field_method: record_link_default_alias_as_method.into(),
+        })
+    }
 }
 
 struct LinkerMethodToken(TokenStream);
@@ -320,8 +370,6 @@ struct LinkMethodMeta {
     link_field_method: LinkFieldTraversalMethodToken,
 }
 
-impl LinkOneAttrType {}
-
 impl LinkSelfAttrType {
     pub(crate) fn to_linkone_attr_type(
         self,
@@ -341,77 +389,5 @@ impl LinkSelfAttrType {
         let link_self_type =
             LinkOneAttrType(self.replace_self_with_current_struct_ident(table_derive_attrs));
         LinkOneAttrType::from_record_link(&link_self_type, field_receiver, table_derive_attrs)
-    }
-}
-
-impl LinkManyAttrType {}
-
-impl NestObjectAttrType {}
-
-impl NestArrayAttrType {
-    pub(crate) fn from_nested(
-        &self,
-        field_receiver: &MyFieldReceiver,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<Self> {
-        let node_type = &self;
-        let normalized_field_name = &field_receiver
-            .normalize_ident(table_derive_attrs.struct_level_casing()?)
-            .field_ident_raw_to_underscore_suffix;
-        let struct_name_ident = &table_derive_attrs.ident;
-
-        let VariablesModelMacro {
-            __________connect_object_to_graph_traversal_string,
-            ___________graph_traversal_string,
-            ..
-        } = VariablesModelMacro::new();
-
-        let normalized_field_name_str = normalized_field_name.to_string();
-        let crate_name = get_crate_name(false);
-        let node_type_alias_with_trait_bounds = node_type;
-
-        let foreign_node_schema_import = if *struct_name_ident == node_type.struct_type_name()? {
-            // Dont import for current struct since that already exists in scope
-            quote!()
-        } else {
-            // e.g type Book = <super::Book as SchemaGetter>::Schema;
-            // type Book<'a, 'b, T, U: Clone + Default, V: Node> = <super::Book<'a, 'b, T, U, V> as SchemaGetter>::Schema;
-            quote!(type #node_type = <super::#node_type as #crate_name::SchemaGetter>::Schema;)
-        };
-
-        let record_link_default_alias_as_method = quote!(
-            pub fn #normalized_field_name(
-                &self,
-                clause: impl Into<#crate_name::ObjectClause>
-            ) -> #schema_type_ident {
-                let clause: #crate_name::ObjectClause = clause.into();
-                let normalized_field_name_str = if self.build().is_empty(){
-                    #normalized_field_name_str.to_string()
-                }else {
-                    format!(".{}", #normalized_field_name_str)
-                };
-
-                #schema_type_ident::#__________connect_object_to_graph_traversal_string(
-                    self,
-                    clause.with_field(normalized_field_name_str)
-                )
-
-            }
-        );
-
-        Self {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SchemaGetter>::Schema;
-            foreign_node_schema_import,
-
-            foreign_node_type_validator: quote!(
-                #crate_name::validators::assert_impl_one!(#schema_type_ident: #crate_name::Object);
-            ),
-
-            record_link_default_alias_as_method,
-            foreign_node_type: quote!(schema_type_ident),
-            field_definition: quote!(),
-            field_type_validation_asserts: vec![],
-        }
     }
 }
