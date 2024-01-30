@@ -22,10 +22,10 @@ pub struct Relate {
     /// e.g2
     /// StudentWritesBook<'a, 'b: 'a, T, U>,
     /// derived from: type StudentWritesBook<'a, 'b: 'a, T, U> = Writes<'a, 'b: 'a, T, U><Student<'a, 'b, T, Book<U>>;
-    pub edge_type: EdgeModel,
+    pub edge_type: EdgeType,
 }
 
-create_custom_type_wrapper!(EdgeModel);
+create_custom_type_wrapper!(EdgeType);
 
 impl FromMeta for Relate {
     // // TODO: Revisit this whether we can and should allow only the
