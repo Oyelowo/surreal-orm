@@ -380,14 +380,4 @@ impl LinkSelfAttrType {
                 .replace_self_with_current_struct_ident(table_derive_attrs),
         )
     }
-
-    pub(crate) fn from_record_link(
-        &self,
-        field_receiver: &MyFieldReceiver,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> Self {
-        let link_self_type =
-            LinkOneAttrType(self.replace_self_with_current_struct_ident(table_derive_attrs));
-        LinkOneAttrType::from_record_link(&link_self_type, field_receiver, table_derive_attrs)
-    }
 }
