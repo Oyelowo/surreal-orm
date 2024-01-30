@@ -16,9 +16,8 @@ use syn::{parse_quote, GenericArgument, Ident, Path, PathArguments, Type};
 use crate::{
     errors::ExtractorResult,
     models::{
-        create_ident_wrapper, AttributeAs, AttributeDefine, CaseString, MyFieldReceiver,
-        Permissions, PermissionsFn, Rename, RustFieldTypeSelfAllowed, StructGenerics,
-        StructLevelCasing,
+        create_ident_wrapper, AttributeAs, AttributeDefine, CaseString, CustomType,
+        MyFieldReceiver, Permissions, Rename, StructGenerics, StructLevelCasing,
     },
 };
 
@@ -26,8 +25,9 @@ use crate::{
 create_ident_wrapper!(StructIdent);
 
 impl StructIdent {
-    pub fn is_same(&self, other: impl Display) -> bool {
-        self.to_string() == other.to_string()
+    pub fn is_same_name(&self, other: impl Into<CustomType>) -> ExtractorResult<bool> {
+        let other: CustomType = other.into();
+        Ok(self.to_string() == other.type_name()?.to_string())
     }
 }
 

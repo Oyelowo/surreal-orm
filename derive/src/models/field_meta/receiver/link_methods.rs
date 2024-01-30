@@ -43,15 +43,15 @@ impl MyFieldReceiver {
         match self {
             RelationType::LinkSelf(link_self) => {
                 let link_one = link_self.to_linkone_attr_type(table_derive_attrs);
-                let meta = self.link_one(link_one, table_derive_attrs);
+                let meta = self.link_one(link_one, table_derive_attrs)?;
                 push_to_link(meta);
             }
             RelationType::LinkOne(link_one) => {
-                let meta = self.link_one(link_one, table_derive_attrs);
+                let meta = self.link_one(link_one, table_derive_attrs)?;
                 push_to_link(meta);
             }
             RelationType::LinkMany(link_many) => {
-                let meta = self.link_many(link_many, table_derive_attrs);
+                let meta = self.link_many(link_many, table_derive_attrs)?;
                 push_to_link(meta);
             }
             RelationType::NestArray(nest_array) => {
@@ -70,10 +70,7 @@ impl MyFieldReceiver {
                 let method = relate.get_field_link_method();
                 LinkerMethodToken(method)
             }
-            RelationType::None => {
-                let method = quote!();
-                LinkerMethodToken(method)
-            }
+            RelationType::None => {}
         }
     }
 
@@ -118,9 +115,10 @@ impl MyFieldReceiver {
         &self,
         link_one: LinkOneAttrType,
         table_derive_attrs: &TableDeriveAttributes,
-    ) -> LinkMethodMeta {
+    ) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
-        let linked_node_type = &link_one.replace_self_with_current_struct_ident(table_def);
+        // TODO: Cross-check if not replacing self here is more ergonomic/correct
+        // let link_one = &link_one.replace_self_with_current_struct_ident(table_def);
         let crate_name = get_crate_name(false);
         let struct_name_ident = table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
@@ -132,15 +130,15 @@ impl MyFieldReceiver {
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if *struct_name_ident.is_same(linked_node_type) {
+        let foreign_node_schema_import = if *struct_name_ident.is_same_name(link_one)? {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
-            quote!(type #linked_node_type = <super::#linked_node_type as #crate_name::SchemaGetter>::Schema;)
+            quote!(type #link_one = <super::#link_one as #crate_name::SchemaGetter>::Schema;)
         };
 
         let record_link_default_alias_as_method = quote!(
-            pub fn #normalized_field_name(&self) -> #linked_node_type {
+            pub fn #normalized_field_name(&self) -> #link_one {
             let clause = #crate_name::Clause::from(#crate_name::Empty);
 
             let normalized_field_name_str = if self.build().is_empty(){
@@ -149,42 +147,42 @@ impl MyFieldReceiver {
                 format!(".{}", #normalized_field_name_str)
             };
 
-            #linked_node_type::#__________connect_node_to_graph_traversal_string(
+            #link_one::#__________connect_node_to_graph_traversal_string(
                 self,
                 clause.with_field(normalized_field_name_str)
                 )
             }
         );
 
-        LinkMethodMeta {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SchemaGetter>::Schema;
+        Ok(LinkMethodMeta {
             foreign_node_schema_import: foreign_node_schema_import.into(),
-
             foreign_node_type_validator: quote!(
-                #crate_name::validators::assert_impl_one!(#linked_node_type: #crate_name::Node);
-            ),
-
+                #crate_name::validators::assert_impl_one!(#link_one: #crate_name::Node);
+            )
+            .into(),
             link_field_method: record_link_default_alias_as_method.into(),
-        }
+        })
     }
 
     fn link_many(
         &self,
         link_many_node_type: &LinkManyAttrType,
         table_derive_attrs: &TableDeriveAttributes,
-    ) -> LinkMethodMeta {
-        let normalized_field_name_str = normalized_field_name.field_ident_serialized_fmt;
-        let normalized_field_name = normalized_field_name.field_ident_raw_to_underscore_suffix;
+    ) -> ExtractorResult<LinkMethodMeta> {
+        let crate_name = get_crate_name(false);
+        let current_struct_ident = &table_derive_attrs.ident;
+        let struct_casing = table_derive_attrs.casing()?;
+        let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
+        let field_name_serialized = self.field_name_serialized(&struct_casing)?;
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
 
-        let crate_name = get_crate_name(false);
-
-        let foreign_node_schema_import = if *struct_name_ident == link_many_node_type.to_string() {
+        let foreign_node_schema_import = if *current_struct_ident
+            .is_same_name(link_many_node_type)?
+        {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
@@ -192,7 +190,7 @@ impl MyFieldReceiver {
         };
 
         let link_field_method = quote!(
-            pub fn #normalized_field_name(&self, clause: impl ::std::convert::Into<#crate_name::NodeAliasClause>) -> #link_many_node_type {
+            pub fn #field_ident_normalized(&self, clause: impl ::std::convert::Into<#crate_name::NodeAliasClause>) -> #link_many_node_type {
             let clause: #crate_name::NodeAliasClause = clause.into();
             let clause: #crate_name::NodeClause = clause.into_inner();
 
@@ -209,16 +207,14 @@ impl MyFieldReceiver {
             }
         );
 
-        LinkMethodMeta {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SchemaGetter>::Schema;
+        Ok(LinkMethodMeta {
             foreign_node_schema_import: foreign_node_schema_import.into(),
             link_field_method: link_field_method.into(),
             foreign_node_type_validator: quote!(
                 #crate_name::validators::assert_impl_one!(#link_many_node_type: #crate_name::Node);
             )
             .into(),
-        }
+        })
     }
 
     pub(crate) fn nest_object(
@@ -238,9 +234,7 @@ impl MyFieldReceiver {
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if *current_struct_ident
-            .is_same(embedded_object.type_name()?)
-        {
+        let foreign_node_schema_import = if *current_struct_ident.is_same_name(embedded_object)? {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
