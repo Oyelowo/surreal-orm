@@ -28,7 +28,11 @@ macro_rules! create_link_wrapper {
         #[derive(Debug, Clone, FromMeta)]
         pub struct $name(pub CustomType);
 
-        impl $name {}
+        impl Into<CustomType> for $name {
+            fn into(self) -> CustomType {
+                self.0
+            }
+        }
 
         impl ::std::ops::Deref for $name {
             type Target = CustomType;
