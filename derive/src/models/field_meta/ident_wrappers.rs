@@ -3,6 +3,12 @@ macro_rules! create_ident_wrapper {
     ($ident:ident) => {
         pub struct $ident(::syn::Ident);
 
+        impl $ident {
+            pub fn into_inner(self) -> ::syn::Ident {
+                self.0
+            }
+        }
+
         impl ::std::ops::Deref for $ident {
             type Target = ::syn::Ident;
 

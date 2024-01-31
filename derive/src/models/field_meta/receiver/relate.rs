@@ -1,15 +1,20 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    fmt::Display,
+};
 
 use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
+use surreal_query_builder::NodeAliasClause;
 
 use crate::{
     errors::ExtractorResult,
     models::{
         create_ident_wrapper, create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes,
-        variables::VariablesModelMacro, RelateAttribute, StaticAssertionToken,
+        variables::VariablesModelMacro, EdgeTableName, FieldsMeta, NodeTableName, RelateAttribute,
+        StaticAssertionToken,
     },
 };
 
@@ -19,23 +24,32 @@ use super::{
 
 impl MyFieldReceiver {}
 
-type EdgeNameWithDirectionIndicator = String;
-
 // struct EdgeTableName(syn::Ident);
 create_ident_wrapper!(EdgeTableName);
 create_ident_wrapper!(OriginNodeStructIdent);
+impl From<StructIdent> for OriginNodeStructIdent {
+    fn from(ident: StructIdent) -> Self {
+        Self(ident.into_inner())
+    }
+}
+
 create_ident_wrapper!(EdgeNameAsMethodIdent);
 create_ident_wrapper!(EdgeRelationModelSelectedIdent);
 
 create_tokenstream_wrapper!(=>DestinationNodeSchema);
-create_tokenstream_wrapper!(=>ForeignNodeConnectionMethod);
-create_tokenstream_wrapper!(=>RelationImports);
+create_tokenstream_wrapper!(=>EdgeImport);
 create_tokenstream_wrapper!(=>DestinationNodeTypeAlias);
 create_tokenstream_wrapper!(=>EdgeToDestinationNodeMethod);
 create_tokenstream_wrapper!(=>DestinationNodeSchemaOne);
 create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
 
 struct DestinationNodeName(String);
+
+impl From<NodeTableName> for DestinationNodeName {
+    fn from(name: NodeTableName) -> Self {
+        Self(name.to_string())
+    }
+}
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
@@ -81,7 +95,7 @@ struct NodeEdgeMetadata {
     /// ],
     /// ```
     destination_node_schema: Vec<DestinationNodeSchema>,
-    destination_node_name: DestinationNodeSchema,
+    destination_node_name: DestinationNodeName,
     /// Example Generated:
     ///
     /// ```rust, ignore
@@ -123,44 +137,49 @@ struct NodeEdgeMetadata {
     ///     ),
     ///    ]
     /// ```
-    foreign_node_connection_method: Vec<ForeignNodeConnectionMethod>,
-    static_assertions: Vec<StaticAssertionToken>,
-    imports: Vec<RelationImports>,
+    edge_to_destination_node_connection_method: Vec<EdgeToDestinationNodeMethod>,
+    // static_assertions: Vec<StaticAssertionToken>,
+    imports: Vec<EdgeImport>,
     edge_name_as_method_ident: EdgeNameAsMethodIdent,
 }
 
+type EdgeNameWithDirectionIndicator = String;
 #[derive(Default, Clone)]
 pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
+
+impl NodeEdgeMetadataStore {
+    pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata> {
+        self.0
+    }
+}
 create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
 
 impl NodeEdgeMetadataStore {
     /// e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
     fn add_direction_indication_to_ident(
-        &self,
-        ident: &impl Display,
+        edge_table_name: &EdgeTableName,
         edge_direction: &EdgeDirection,
     ) -> EdgeWithDunderDirectionIndicator {
+        let edge_table_name = edge_table_name.to_string();
         let edge = match edge_direction {
-            EdgeDirection::OutArrowRight => format_ident!("{ident}__"),
-            EdgeDirection::InArrowLeft => format_ident!("__{ident}"),
+            EdgeDirection::OutArrowRight => format_ident!("{edge_table_name}__"),
+            EdgeDirection::InArrowLeft => format_ident!("__{edge_table_name}"),
         };
         edge.into()
     }
 
     fn create_static_assertions(
         relation: &Relate,
-        origin_struct_ident: &syn::Ident,
+        origin_struct_ident: &OriginNodeStructIdent,
         field_type: &syn::Type,
     ) -> StaticAssertionToken {
         let crate_name = get_crate_name(false);
-        let relation_model = relation.edge_type;
-        let relation_attributes = RelateAttribute::from(relation);
+        let edge_type = relation.edge_type;
         let RelateAttribute {
             edge_table_name,
-            node_table_name: foreign_node_table_name,
+            node_table_name: destination_node_table_name,
             edge_direction,
-        } = relation_attributes;
-
+        } = RelateAttribute::from(relation);
         let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
             match &relation_attributes.edge_direction {
                 EdgeDirection::OutArrowRight => (format_ident!("In"), format_ident!("Out")),
@@ -171,6 +190,12 @@ impl NodeEdgeMetadataStore {
         //                   #[surreal_orm(relate(mode="StudentWritesBook", connection="->writes->book"))]
         //                   fav_books: Relate<Book>
         //              }
+        let home_node_type =
+            quote!(<#edge_type as #crate_name::Edge>::#home_node_associated_type_ident);
+
+        let foreign_node_type =
+            quote!(<#edge_type as #crate_name::Edge>::#foreign_node_associated_type_ident);
+
         let static_assertions = &[
             // type HomeIdent = <StudentWritesBook  as surreal_macros::Edge>::In;
             // type HomeNodeTableChecker = <HomeIdent as
@@ -179,43 +204,40 @@ impl NodeEdgeMetadataStore {
             // #crate_name::validators::assert_impl_one!(HomeIdent, surreal_macros::Node);
             quote!(
             {
-            type #home_node_ident = <#relation_model as #crate_name::Edge>::#home_node_associated_type_ident;
-             type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::Node>::TableNameChecker;
-             #crate_name::validators::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
+            type #home_node_ident = <#edge_type as #crate_name::Edge>::#home_node_associated_type_ident;
+             // #crate_name::validators::assert_fields!(<#home_node_type as #crate_name::Node>::TableNameChecker: #origin_node_table_name);
+             #crate_name::validators::assert_type_eq_all!(#home_node_type, #origin_struct_ident);
              #crate_name::validators::assert_impl_one!(#home_node_ident: #crate_name::Node);
 
             }
             ),
             quote!(
-             type #foreign_node_ident = <#relation_model as #crate_name::Edge>::#foreign_node_associated_type_ident;
-             type #foreign_node_table_name_checker_ident = <#foreign_node_ident as #crate_name::Node>::TableNameChecker;
-             #crate_name::validators::assert_fields!(#foreign_node_table_name_checker_ident: #foreign_node_table_name);
-             #crate_name::validators::assert_impl_one!(#foreign_node_ident: #crate_name::Node);
+             #crate_name::validators::assert_fields!(<#foreign_node_type as #crate_name::Node>::TableNameChecker: #destination_node_table_name);
+             #crate_name::validators::assert_impl_one!(#foreign_node_type: #crate_name::Node);
             ),
             quote!(
-             type #edge_table_name_checker_ident = <#relation_model as #crate_name::Edge>::TableNameChecker;
-             #crate_name::validators::assert_fields!(#edge_table_name_checker_ident: #edge_table_name);
+             #crate_name::validators::assert_fields!(<#edge_type as #crate_name::Edge>::TableNameChecker: #edge_table_name);
             ),
             // assert field type and attribute reference match
             // e.g Relate<Book> should match from attribute link = "->Writes->Book"
             quote!(
-             #crate_name::validators::assert_impl_one!(#relation_model: #crate_name::Edge);
-             #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_ident>);
+             #crate_name::validators::assert_impl_one!(#edge_type: #crate_name::Edge);
+             #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_type>);
             ),
         ];
-        quote!(
+        StaticAssertionToken(quote!(
                 #( #static_assertions) *
-        )
+        ))
     }
 
     fn update(
-        &mut self,
+        store: &mut FieldsMeta,
         relation: &Relate,
         field_receriver: &MyFieldReceiver,
         table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
-        let origin_struct_ident = &table_derive_attrs.ident;
+        let origin_struct_ident = OriginNodeStructIdent::from(table_derive_attrs.ident);
         let field_type = &field_receriver.ty;
         let edge_type = relation.edge_type;
         let RelateAttribute {
@@ -231,7 +253,7 @@ impl NodeEdgeMetadataStore {
             ..
         } = VariablesModelMacro::new();
         let edge_name_as_method_ident =
-            &(|| self.add_direction_indication_to_ident(edge_table_name, edge_direction));
+            &(|| Self::add_direction_indication_to_ident(edge_table_name, edge_direction));
         let FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,
@@ -267,7 +289,7 @@ impl NodeEdgeMetadataStore {
         };
 
         // i.e Edge to destination Node
-        let foreign_node_connection_method = || {
+        let edge_to_destination_node_connection_method = || {
             EdgeToDestinationNodeMethod(quote!(
                 pub fn #destination_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #destination_node_schema_type_alias {
                     let clause: #crate_name::NodeClause = clause.into();
@@ -280,39 +302,46 @@ impl NodeEdgeMetadataStore {
                 }
             ))
         };
-        let static_assertions =
-            || Self::create_static_assertions(relation, origin_struct_ident, field_type);
+
+        store.static_assertions.push(Self::create_static_assertions(
+            relation,
+            &origin_struct_ident,
+            field_type,
+        ));
 
         // let imports =|| quote!(use super::StudentWritesBook;);
-        let imports = || quote!(use super::#edge_type;);
+        let import = || EdgeImport(quote!(use super::#edge_type;));
 
         let node_edge_meta = NodeEdgeMetadata {
-            edge_table_name: format_ident!(
-                "{}",
-                &relation_attributes.edge_table_name.clone().to_string()
-            ),
+            edge_table_name: edge_table_name.to_owned(),
             direction: *edge_direction,
             destination_node_schema: vec![destination_node_schema_one()],
-            foreign_node_connection_method: vec![foreign_node_connection_method()],
+            edge_to_destination_node_connection_method: vec![
+                edge_to_destination_node_connection_method(),
+            ],
             origin_struct_ident: origin_struct_ident.to_owned(),
-            static_assertions: vec![static_assertions()],
+            // static_assertions: vec![static_assertions()],
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
-            imports: vec![imports()],
+            imports: vec![import()],
             edge_relation_model_selected_ident: relation.edge_type.type_name()?,
-            destination_node_name: destination_node_table_name.to_string(),
+            destination_node_name: destination_node_table_name.into(),
         };
 
-        match self.0.entry(edge_name_as_method_ident()) {
+        match store
+            .node_edge_metadata
+            .into_inner()
+            .entry(edge_name_as_method_ident())
+        {
             Entry::Occupied(o) => {
                 let node_edge_meta = o.into_mut();
                 node_edge_meta
                     .destination_node_schema
                     .push(destination_node_schema_one());
                 node_edge_meta
-                    .foreign_node_connection_method
-                    .push(ForeignNodeConnectionMethod());
+                    .edge_to_destination_node_connection_method
+                    .push(edge_to_destination_node_connection_method());
                 node_edge_meta.static_assertions.push(static_assertions());
-                node_edge_meta.imports.push(imports());
+                node_edge_meta.imports.push(import());
             }
             Entry::Vacant(v) => {
                 v.insert(node_edge_meta);
@@ -321,30 +350,18 @@ impl NodeEdgeMetadataStore {
         Ok(())
     }
 
-    pub(crate) fn generate_static_assertions(&self) -> TokenStream {
-        let static_assertions = self
-            .0
-            .values()
-            .map(|value| {
-                let static_assertions = &value.static_assertions;
+    pub(crate) fn generate_token_stream(&self) -> TokenStream {}
+}
 
-                quote!(
-                    #( #static_assertions) *
-                )
-            })
-            .collect::<Vec<_>>();
-
-        quote!(#( #static_assertions) *)
-    }
-
-    pub(crate) fn generate_token_stream(&self) -> TokenStream {
+impl ToTokens for NodeEdgeMetadataStore {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
         let node_edge_token_streams = self.0.values().map(|value| {
             let NodeEdgeMetadata {
                     origin_struct_ident,
                     direction,
-                    EdgeRelationModelSelectedIdent: edge_relation_model_selected_ident,
+                    edge_relation_model_selected_ident,
                     destination_node_schema,
-                    ForeignNodeConnectionMethod: foreign_node_connection_method,
+                    edge_to_destination_node_connection_method: foreign_node_connection_method,
                     imports,
                     edge_name_as_method_ident,
                     edge_table_name,
@@ -352,14 +369,13 @@ impl NodeEdgeMetadataStore {
             }: &NodeEdgeMetadata = value;
 
             let crate_name = get_crate_name(false);
-            let arrow = format!("{}", direction);
-            let edge_table_name_str = format!("{}", &edge_table_name);
-            let  edge_name_as_struct_original_ident = format_ident!("{}", &edge_table_name.to_string().to_case(Case::Pascal));
+            let arrow = direction.to_string();
+            let edge_table_name_str = edge_table_name.to_string();
+            let  edge_name_as_struct_original_ident = format_ident!("{}", &edge_table_name_str.to_case(Case::Pascal));
             let  edge_name_as_struct_with_direction_ident = format_ident!("{}",
-                                                                          self.add_direction_indication_to_ident(
-                                                                                  &edge_table_name
-                                                                                  .to_string()
-                                                                                  .to_case(Case::Pascal),
+                                                                          NodeEdgeMetadataStore::add_direction_indication_to_ident(
+                                                                                  &edge_name_as_struct_original_ident
+                                                                                  .into(),
                                                                               direction,
                                                                               )
                                                                           );
@@ -385,6 +401,7 @@ impl NodeEdgeMetadataStore {
                         let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);
 
                         // i.e Edge to Node
+             // TODO: Use type over mere ident. include potential generics
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                             self,
                             clause,
@@ -480,6 +497,8 @@ impl NodeEdgeMetadataStore {
             )
         }).collect::<Vec<_>>();
 
-        quote!(#( #node_edge_token_streams) *)
+        token = quote!(#( #node_edge_token_streams) *);
+
+        tokens.extend(self.generate_token_stream());
     }
 }
