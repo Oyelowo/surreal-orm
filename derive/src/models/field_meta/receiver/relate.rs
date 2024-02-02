@@ -1,6 +1,7 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
     fmt::Display,
+    ops::Deref,
 };
 
 use convert_case::{Case, Casing};
@@ -37,6 +38,9 @@ create_tokenstream_wrapper!(=>DestinationNodeTypeAlias);
 create_tokenstream_wrapper!(=>EdgeToDestinationNodeMethod);
 create_tokenstream_wrapper!(=>DestinationNodeSchemaOne);
 create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
+create_ident_wrapper!(EdgeNameAsStructOriginalIdent);
+create_ident_wrapper!(EdgeNameAsStructWithDirectionIdent);
+create_ident_wrapper!(EdgeInnerModuleName);
 
 struct DestinationNodeName(String);
 
@@ -48,12 +52,13 @@ impl From<NodeTableName> for DestinationNodeName {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-struct NodeEdgeMetadata {
+struct NodeEdgeMetadata<'a> {
     /// Example value: writes
     edge_table_name: EdgeTableName,
-    /// The current struct name ident.
-    /// e.g given: struct Student {  }, value = Student
-    current_struct_ident: StructIdent,
+    // /// The current struct name ident.
+    // /// e.g given: struct Student {  }, value = Student
+    // current_struct_ident: StructIdent,
+    table_derive_attributes: &'a TableDeriveAttributes,
     /// The database table name of the edge. Used for generating other tokens
     /// e.g "writes"
     direction: EdgeDirection,
@@ -141,6 +146,13 @@ struct NodeEdgeMetadata {
 type EdgeNameWithDirectionIndicator = String;
 #[derive(Default, Clone)]
 pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
+impl Deref for NodeEdgeMetadataStore {
+    type Target = HashMap<EdgeNameAsStructWithDirectionIdent, NodeEdgeMetadata>;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
 
 impl NodeEdgeMetadataStore {
     pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata> {
@@ -168,10 +180,10 @@ impl MyFieldReceiver {
         &self,
         store: &mut FieldsMeta,
         relation: &Relate,
-        table_derive_attrs: &TableDeriveAttributes,
+        table_derive_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
-        let current_struct_ident = table_derive_attrs.ident;
+        let current_struct_ident = table_derive_attributes.ident;
         let field_type = &self.ty;
         let edge_type = relation.edge_type;
         let RelateAttribute {
@@ -192,7 +204,7 @@ impl MyFieldReceiver {
             field_impl_generics,
             field_ty_generics,
             field_where_clause,
-        } = &edge_type.get_generics_meta(table_derive_attrs);
+        } = &edge_type.get_generics_meta(table_derive_attributes);
         // represents the schema but aliased as the pascal case of the destination table name
         let destination_node_schema_ident = format_ident!(
             "{}",
@@ -239,7 +251,7 @@ impl MyFieldReceiver {
 
         store
             .static_assertions
-            .push(self.create_static_assertions(relation, &table_derive_attrs.ident));
+            .push(self.create_static_assertions(relation, &table_derive_attributes.ident));
 
         // let imports =|| quote!(use super::StudentWritesBook;);
         let import = || EdgeImport(quote!(use super::#edge_type;));
@@ -251,7 +263,8 @@ impl MyFieldReceiver {
             edge_to_destination_node_connection_method: vec![
                 edge_to_destination_node_connection_method(),
             ],
-            current_struct_ident: current_struct_ident.to_owned(),
+            // current_struct_ident: current_struct_ident.to_owned(),
+            table_derive_attributes,
             // static_assertions: vec![static_assertions()],
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
             imports: vec![import()],
@@ -363,7 +376,7 @@ impl ToTokens for NodeEdgeMetadataStore {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let node_edge_token_streams = self.into_inner().values().map(|value| {
             let NodeEdgeMetadata {
-                    current_struct_ident,
+                    // current_struct_ident,
                     direction,
                     edge_relation_model_selected_ident,
                     destination_node_schema,
@@ -373,19 +386,21 @@ impl ToTokens for NodeEdgeMetadataStore {
                     edge_table_name,
                     ..
             }: &NodeEdgeMetadata = value;
+            let current_struct_ident = value.table_derive_attributes.ident;
+            let (struct_impl_generics, struct_ty_generics, struct_where_clause) = value.table_derive_attributes.generics.split_for_impl();
 
             let crate_name = get_crate_name(false);
             let arrow = ArrowTokenStream::from(direction);
             let edge_table_name_str = edge_table_name.to_string();
-            let  edge_name_as_struct_original_ident = format_ident!("{}", &edge_table_name_str.to_case(Case::Pascal));
-            let  edge_name_as_struct_with_direction_ident = format_ident!("{}",
-                                                                          NodeEdgeMetadataStore::add_direction_indication_to_ident(
+            let  edge_name_as_struct_original_ident = EdgeNameAsStructOriginalIdent(format_ident!("{}", &edge_table_name_str.to_case(Case::Pascal)));
+            let  edge_name_as_struct_with_direction_ident = EdgeNameAsStructWithDirectionIdent(format_ident!("{}",
+                                                                          MyFieldReceiver::add_direction_indication_to_ident(
                                                                                   &edge_name_as_struct_original_ident
                                                                                   .into(),
                                                                               direction,
                                                                               )
-                                                                          );
-            let edge_inner_module_name = format_ident!("{}_schema________________", edge_name_as_struct_with_direction_ident.to_string().to_lowercase());
+                                                                          ));
+            let edge_inner_module_name = EdgeInnerModuleName(format_ident!("{}_schema________________", edge_name_as_struct_with_direction_ident.to_string().to_lowercase()));
 
             let VariablesModelMacro {
                 __________connect_edge_to_graph_traversal_string,
@@ -397,7 +412,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                 #( #imports) *
 
                 // Edge to Node
-                impl #current_struct_ident {
+                impl #struct_impl_generics #current_struct_ident #struct_ty_generics #struct_where_clause {
                     pub fn #edge_name_as_method_ident(
                         &self,
                         clause: impl ::std::convert::Into<#crate_name::EdgeClause>,
