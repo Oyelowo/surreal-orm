@@ -48,9 +48,20 @@ impl CustomGenerics {
             ..*original_generics
         })
     }
+
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+        self.0.split_for_impl()
+    }
 }
 
 pub struct StructGenerics(pub CustomGenerics);
+
+impl StructGenerics {
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+        self.0.split_for_impl()
+    }
+}
+
 pub struct FieldGenerics(pub CustomGenerics);
 
 pub(crate) struct GenericTypeExtractor<'a> {
