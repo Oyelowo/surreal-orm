@@ -12,9 +12,10 @@ use surreal_query_builder::NodeAliasClause;
 use crate::{
     errors::ExtractorResult,
     models::{
-        create_ident_wrapper, create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes,
-        variables::VariablesModelMacro, EdgeTableName, FieldsMeta, NodeTableName, RelateAttribute,
-        StaticAssertionToken,
+        create_ident_wrapper, create_tokenstream_wrapper,
+        derive_attributes::{StructIdent, TableDeriveAttributes},
+        variables::VariablesModelMacro,
+        EdgeTableName, FieldsMeta, NodeTableName, RelateAttribute, StaticAssertionToken,
     },
 };
 
@@ -26,12 +27,6 @@ impl MyFieldReceiver {}
 
 // struct EdgeTableName(syn::Ident);
 create_ident_wrapper!(EdgeTableName);
-create_ident_wrapper!(OriginNodeStructIdent);
-impl From<StructIdent> for OriginNodeStructIdent {
-    fn from(ident: StructIdent) -> Self {
-        Self(ident.into_inner())
-    }
-}
 
 create_ident_wrapper!(EdgeNameAsMethodIdent);
 create_ident_wrapper!(EdgeRelationModelSelectedIdent);
@@ -58,7 +53,7 @@ struct NodeEdgeMetadata {
     edge_table_name: EdgeTableName,
     /// The current struct name ident.
     /// e.g given: struct Student {  }, value = Student
-    origin_struct_ident: OriginNodeStructIdent,
+    current_struct_ident: StructIdent,
     /// The database table name of the edge. Used for generating other tokens
     /// e.g "writes"
     direction: EdgeDirection,
@@ -154,91 +149,18 @@ impl NodeEdgeMetadataStore {
 }
 create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
 
-impl NodeEdgeMetadataStore {
-    /// e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
-    fn add_direction_indication_to_ident(
-        edge_table_name: &EdgeTableName,
-        edge_direction: &EdgeDirection,
-    ) -> EdgeWithDunderDirectionIndicator {
-        let edge_table_name = edge_table_name.to_string();
-        let edge = match edge_direction {
-            EdgeDirection::OutArrowRight => format_ident!("{edge_table_name}__"),
-            EdgeDirection::InArrowLeft => format_ident!("__{edge_table_name}"),
-        };
-        edge.into()
-    }
+impl NodeEdgeMetadataStore {}
 
-    fn create_static_assertions(
-        relation: &Relate,
-        origin_struct_ident: &OriginNodeStructIdent,
-        field_type: &syn::Type,
-    ) -> StaticAssertionToken {
-        let crate_name = get_crate_name(false);
-        let edge_type = relation.edge_type;
-        let RelateAttribute {
-            edge_table_name,
-            node_table_name: destination_node_table_name,
-            edge_direction,
-        } = RelateAttribute::from(relation);
-        let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
-            match &relation_attributes.edge_direction {
-                EdgeDirection::OutArrowRight => (format_ident!("In"), format_ident!("Out")),
-                EdgeDirection::InArrowLeft => (format_ident!("Out"), format_ident!("In")),
-            };
-
-        // e.g for struct Student {
-        //                   #[surreal_orm(relate(mode="StudentWritesBook", connection="->writes->book"))]
-        //                   fav_books: Relate<Book>
-        //              }
-        let home_node_type =
-            quote!(<#edge_type as #crate_name::Edge>::#home_node_associated_type_ident);
-
-        let foreign_node_type =
-            quote!(<#edge_type as #crate_name::Edge>::#foreign_node_associated_type_ident);
-
-        let static_assertions = &[
-            // type HomeIdent = <StudentWritesBook  as surreal_macros::Edge>::In;
-            // type HomeNodeTableChecker = <HomeIdent as
-            // surreal_macros::Node>::TableNameChecker;
-            // #crate_name::validators::assert_type_eq_all!(HomeIdent, Student);
-            // #crate_name::validators::assert_impl_one!(HomeIdent, surreal_macros::Node);
-            quote!(
-            {
-            type #home_node_ident = <#edge_type as #crate_name::Edge>::#home_node_associated_type_ident;
-             // #crate_name::validators::assert_fields!(<#home_node_type as #crate_name::Node>::TableNameChecker: #origin_node_table_name);
-             #crate_name::validators::assert_type_eq_all!(#home_node_type, #origin_struct_ident);
-             #crate_name::validators::assert_impl_one!(#home_node_ident: #crate_name::Node);
-
-            }
-            ),
-            quote!(
-             #crate_name::validators::assert_fields!(<#foreign_node_type as #crate_name::Node>::TableNameChecker: #destination_node_table_name);
-             #crate_name::validators::assert_impl_one!(#foreign_node_type: #crate_name::Node);
-            ),
-            quote!(
-             #crate_name::validators::assert_fields!(<#edge_type as #crate_name::Edge>::TableNameChecker: #edge_table_name);
-            ),
-            // assert field type and attribute reference match
-            // e.g Relate<Book> should match from attribute link = "->Writes->Book"
-            quote!(
-             #crate_name::validators::assert_impl_one!(#edge_type: #crate_name::Edge);
-             #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_type>);
-            ),
-        ];
-        StaticAssertionToken(quote!(
-                #( #static_assertions) *
-        ))
-    }
-
-    fn update(
+impl MyFieldReceiver {
+    fn create_relation_connection_tokenstream(
+        &self,
         store: &mut FieldsMeta,
         relation: &Relate,
-        field_receriver: &MyFieldReceiver,
         table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
-        let origin_struct_ident = OriginNodeStructIdent::from(table_derive_attrs.ident);
-        let field_type = &field_receriver.ty;
+        let current_struct_ident = table_derive_attrs.ident;
+        let field_type = &self.ty;
         let edge_type = relation.edge_type;
         let RelateAttribute {
             edge_direction,
@@ -303,11 +225,9 @@ impl NodeEdgeMetadataStore {
             ))
         };
 
-        store.static_assertions.push(Self::create_static_assertions(
-            relation,
-            &origin_struct_ident,
-            field_type,
-        ));
+        store
+            .static_assertions
+            .push(self.create_static_assertions(relation, &table_derive_attrs.ident));
 
         // let imports =|| quote!(use super::StudentWritesBook;);
         let import = || EdgeImport(quote!(use super::#edge_type;));
@@ -319,7 +239,7 @@ impl NodeEdgeMetadataStore {
             edge_to_destination_node_connection_method: vec![
                 edge_to_destination_node_connection_method(),
             ],
-            origin_struct_ident: origin_struct_ident.to_owned(),
+            current_struct_ident: current_struct_ident.to_owned(),
             // static_assertions: vec![static_assertions()],
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
             imports: vec![import()],
@@ -350,14 +270,88 @@ impl NodeEdgeMetadataStore {
         Ok(())
     }
 
-    pub(crate) fn generate_token_stream(&self) -> TokenStream {}
+    /// e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
+    fn add_direction_indication_to_ident(
+        edge_table_name: &EdgeTableName,
+        edge_direction: &EdgeDirection,
+    ) -> EdgeWithDunderDirectionIndicator {
+        let edge_table_name = edge_table_name.to_string();
+        let edge = match edge_direction {
+            EdgeDirection::OutArrowRight => format_ident!("{edge_table_name}__"),
+            EdgeDirection::InArrowLeft => format_ident!("__{edge_table_name}"),
+        };
+        edge.into()
+    }
+
+    fn create_static_assertions(
+        &self,
+        relation: &Relate,
+        current_struct: &StructIdent,
+    ) -> StaticAssertionToken {
+        let field_type = &self.ty;
+        let crate_name = get_crate_name(false);
+        let edge_type = relation.edge_type;
+        let RelateAttribute {
+            edge_table_name,
+            node_table_name: destination_node_table_name,
+            edge_direction,
+        } = RelateAttribute::from(relation);
+        let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
+            match &relation_attributes.edge_direction {
+                EdgeDirection::OutArrowRight => (format_ident!("In"), format_ident!("Out")),
+                EdgeDirection::InArrowLeft => (format_ident!("Out"), format_ident!("In")),
+            };
+
+        // e.g for struct Student {
+        //                   #[surreal_orm(relate(mode="StudentWritesBook", connection="->writes->book"))]
+        //                   fav_books: Relate<Book>
+        //              }
+        let home_node_type =
+            quote!(<#edge_type as #crate_name::Edge>::#home_node_associated_type_ident);
+
+        let foreign_node_type =
+            quote!(<#edge_type as #crate_name::Edge>::#foreign_node_associated_type_ident);
+
+        let static_assertions = &[
+            // type HomeIdent = <StudentWritesBook  as surreal_macros::Edge>::In;
+            // type HomeNodeTableChecker = <HomeIdent as
+            // surreal_macros::Node>::TableNameChecker;
+            // #crate_name::validators::assert_type_eq_all!(HomeIdent, Student);
+            // #crate_name::validators::assert_impl_one!(HomeIdent, surreal_macros::Node);
+            quote!(
+            {
+            type #home_node_ident = <#edge_type as #crate_name::Edge>::#home_node_associated_type_ident;
+             // #crate_name::validators::assert_fields!(<#home_node_type as #crate_name::Node>::TableNameChecker: #origin_node_table_name);
+             #crate_name::validators::assert_type_eq_all!(#home_node_type, #current_struct);
+             #crate_name::validators::assert_impl_one!(#home_node_ident: #crate_name::Node);
+
+            }
+            ),
+            quote!(
+             #crate_name::validators::assert_fields!(<#foreign_node_type as #crate_name::Node>::TableNameChecker: #destination_node_table_name);
+             #crate_name::validators::assert_impl_one!(#foreign_node_type: #crate_name::Node);
+            ),
+            quote!(
+             #crate_name::validators::assert_fields!(<#edge_type as #crate_name::Edge>::TableNameChecker: #edge_table_name);
+            ),
+            // assert field type and attribute reference match
+            // e.g Relate<Book> should match from attribute link = "->Writes->Book"
+            quote!(
+             #crate_name::validators::assert_impl_one!(#edge_type: #crate_name::Edge);
+             #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_type>);
+            ),
+        ];
+        StaticAssertionToken(quote!(
+                #( #static_assertions) *
+        ))
+    }
 }
 
 impl ToTokens for NodeEdgeMetadataStore {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let node_edge_token_streams = self.0.values().map(|value| {
             let NodeEdgeMetadata {
-                    origin_struct_ident,
+                    current_struct_ident,
                     direction,
                     edge_relation_model_selected_ident,
                     destination_node_schema,
@@ -392,7 +386,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                 #( #imports) *
 
                 // Edge to Node
-                impl #origin_struct_ident {
+                impl #current_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
                         clause: impl Into<#crate_name::EdgeClause>,
@@ -401,7 +395,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                         let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);
 
                         // i.e Edge to Node
-             // TODO: Use type over mere ident. include potential generics
+                         // TODO: Use type over mere ident. include potential generics
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                             self,
                             clause,
