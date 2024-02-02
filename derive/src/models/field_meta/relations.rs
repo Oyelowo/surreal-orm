@@ -5,8 +5,11 @@
  * Licensed under the MIT license
  */
 
+use std::fmt::Display;
+
 use proc_macro::Span;
 use quote::ToTokens;
+use surreal_query_builder::EdgeDirection;
 use syn::{spanned::Spanned, Type};
 
 use crate::{
@@ -101,64 +104,6 @@ impl From<&MyFieldReceiver> for RelationType {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub(crate) enum EdgeDirection {
-    OutArrowRight,
-    InArrowLeft,
-}
-
-impl EdgeDirection {
-    pub fn as_arrow_symbol(&self) -> &'static str {
-        let arrow = match self {
-            EdgeDirection::OutArrowRight => "->",
-            EdgeDirection::InArrowLeft => "<-",
-        };
-        arrow
-    }
-}
-
-impl ToTokens for EdgeDirection {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let arrow = self.as_arrow_symbol();
-        tokens.extend(arrow.parse::<proc_macro2::TokenStream>().unwrap());
-    }
-}
-
-impl From<EdgeDirection> for ::proc_macro2::TokenStream {
-    fn from(direction: EdgeDirection) -> Self {
-        match direction {
-            EdgeDirection::OutArrowRight => quote::quote!(->),
-            EdgeDirection::InArrowLeft => quote::quote!(<-),
-        }
-    }
-}
-
-impl From<EdgeDirection> for &str {
-    fn from(direction: EdgeDirection) -> Self {
-        direction.as_arrow_symbol()
-    }
-}
-
-impl From<&EdgeDirection> for String {
-    fn from(direction: &EdgeDirection) -> Self {
-        direction.as_arrow_symbol().into()
-    }
-}
-
-impl From<EdgeDirection> for String {
-    fn from(direction: EdgeDirection) -> Self {
-        direction.as_arrow_symbol().into()
-    }
-}
-
-impl ::std::fmt::Display for EdgeDirection {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let arrow = direction.as_arrow_symbol().into();
-        write!(f, "{arrow}")
-        // f.write_fmt(format_args!("{arrow}"))
-    }
-}
-
 macro_rules! wrapper_struct_to_ident {
     ($simple_wrapper_struct:ty) => {
         impl From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {
@@ -234,12 +179,12 @@ pub(crate) struct RelateAttribute {
 impl TryFrom<&Relate> for RelateAttribute {
     type Error = ExtractorError;
 
-    fn try_from(value: &Relate) -> Result<Self, Self::Error> {
+    fn try_from(relation: &Relate) -> Result<Self, Self::Error> {
         let right_arrow_count = relation.connection.matches("->").count();
         let left_arrow_count = relation.connection.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
-            (2, 0) => EdgeDirection::InArrowLeft,
-            (0, 2) => EdgeDirection::OutArrowRight,
+            (2, 0) => EdgeDirection::Incoming,
+            (0, 2) => EdgeDirection::Outgoing,
             _ => {
                 return Err(syn::Error::new(
                     Span::call_site(),
@@ -253,7 +198,7 @@ impl TryFrom<&Relate> for RelateAttribute {
         let mut substrings = relation
             .connection
             .split(edge_direction_str.as_str())
-            .filter(|x| !x.is_empty());
+            .filter(|this| !this.is_empty());
 
         let (edge_action, node_object) =
             match (substrings.next(), substrings.next(), substrings.next()) {

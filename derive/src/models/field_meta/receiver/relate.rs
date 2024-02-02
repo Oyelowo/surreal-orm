@@ -7,7 +7,7 @@ use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
-use surreal_query_builder::NodeAliasClause;
+use surreal_query_builder::{Arrow, EdgeDirection, NodeAliasClause};
 
 use crate::{
     errors::ExtractorResult,
@@ -149,7 +149,19 @@ impl NodeEdgeMetadataStore {
 }
 create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
 
-impl NodeEdgeMetadataStore {}
+create_tokenstream_wrapper!(=>ArrowTokenStream);
+
+impl From<EdgeDirection> for ArrowTokenStream {
+    fn from(value: EdgeDirection) -> Self {
+        let crate_name = get_crate_name(false);
+
+        let arrow = match value {
+            EdgeDirection::Outgoing => quote!(#crate_name::Arrow::Right),
+            EdgeDirection::Incoming => quote!(#crate_name::Arrow::Left),
+        };
+        Self(arrow)
+    }
+}
 
 impl MyFieldReceiver {
     fn create_relation_connection_tokenstream(
@@ -167,7 +179,7 @@ impl MyFieldReceiver {
             edge_table_name,
             node_table_name: destination_node_table_name,
         } = &RelateAttribute::from(relation);
-        let arrow = format!("{}", &edge_direction);
+        let arrow = &ArrowTokenStream::from(edge_direction);
         let destination_node_table_name_str = &destination_node_table_name.to_string();
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
@@ -197,8 +209,8 @@ impl MyFieldReceiver {
         // Within edge generics, there is usually In and Out associated types, this is used to
         // access those
         let foreign_node_in_or_out = ForeignNodeAssociatedTypeInOrOut(match edge_direction {
-            EdgeDirection::OutArrowRight => format_ident!("Out"),
-            EdgeDirection::InArrowLeft => format_ident!("In"),
+            EdgeDirection::Out => format_ident!("Out"),
+            EdgeDirection::In => format_ident!("In"),
         });
         // We use super twice because we're trying to access the relation model struct name from
         // the outer outer module because all edge related functionalities are nested
@@ -277,8 +289,8 @@ impl MyFieldReceiver {
     ) -> EdgeWithDunderDirectionIndicator {
         let edge_table_name = edge_table_name.to_string();
         let edge = match edge_direction {
-            EdgeDirection::OutArrowRight => format_ident!("{edge_table_name}__"),
-            EdgeDirection::InArrowLeft => format_ident!("__{edge_table_name}"),
+            EdgeDirection::Out => format_ident!("{edge_table_name}__"),
+            EdgeDirection::In => format_ident!("__{edge_table_name}"),
         };
         edge.into()
     }
@@ -298,8 +310,8 @@ impl MyFieldReceiver {
         } = RelateAttribute::from(relation);
         let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
             match &relation_attributes.edge_direction {
-                EdgeDirection::OutArrowRight => (format_ident!("In"), format_ident!("Out")),
-                EdgeDirection::InArrowLeft => (format_ident!("Out"), format_ident!("In")),
+                EdgeDirection::Out => (format_ident!("In"), format_ident!("Out")),
+                EdgeDirection::In => (format_ident!("Out"), format_ident!("In")),
             };
 
         // e.g for struct Student {
@@ -363,7 +375,7 @@ impl ToTokens for NodeEdgeMetadataStore {
             }: &NodeEdgeMetadata = value;
 
             let crate_name = get_crate_name(false);
-            let arrow = direction.as_arrow_symbol();
+            let arrow = ArrowTokenStream::from(direction);
             let edge_table_name_str = edge_table_name.to_string();
             let  edge_name_as_struct_original_ident = format_ident!("{}", &edge_table_name_str.to_case(Case::Pascal));
             let  edge_name_as_struct_with_direction_ident = format_ident!("{}",
@@ -473,7 +485,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                         // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
                         pub fn #edge_name_as_method_ident(
                             &self,
-                            clause: impl Into<#crate_name::EdgeClause>,
+                            clause: impl ::std::convert::Into<#crate_name::EdgeClause>,
                         ) -> #edge_name_as_struct_with_direction_ident {
                             let clause: #crate_name::EdgeClause = clause.into();
                             let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);

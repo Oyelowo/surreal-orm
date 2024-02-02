@@ -9,7 +9,7 @@ use std::ops::Deref;
 
 use crate::{
     statements::{LetStatement, Subquery},
-    Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Model, Operatable,
+    Arrow, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Model, Operatable,
     Operation, Param, Parametric, Setter, Table,
 };
 
@@ -57,7 +57,7 @@ enum ModelOrFieldName {
 #[derive(Debug, Clone)]
 pub struct Clause {
     kind: ClauseType,
-    arrow: Option<String>,
+    arrow: Option<Arrow>,
     model_or_field_name: Option<ModelOrFieldName>,
     query_string: String,
     bindings: BindingsList,
@@ -144,7 +144,7 @@ impl Erroneous for NodeClause {
 impl NodeClause {
     /// Create a new NodeClause with arrow. This is used in the macro for building a graph query.
     /// Sometimes, nodes need to be appended with arrow if buinding e.g node->edge->node
-    pub fn with_arrow(self, arrow: impl Into<String>) -> Self {
+    pub fn with_arrow(self, arrow: impl Into<Arrow>) -> Self {
         Self(self.0.with_arrow(arrow))
     }
 
@@ -247,7 +247,7 @@ impl Erroneous for EdgeClause {
 
 impl EdgeClause {
     /// Create a new EdgeClause with arrow. This is used in the macro for building a graph query.
-    pub fn with_arrow(self, arrow: impl Into<String>) -> Self {
+    pub fn with_arrow(self, arrow: impl Into<Arrow>) -> Self {
         Self(self.0.with_arrow(arrow))
     }
 
@@ -274,7 +274,7 @@ pub struct ObjectClause(Clause);
 impl ObjectClause {
     /// Create a new ObjectClause with arrow. This is used in the macro for building a graph
     /// query.
-    pub fn with_arrow(self, arrow: String) -> Self {
+    pub fn with_arrow(self, arrow: impl Into<Arrow>) -> Self {
         Self(self.0.with_arrow(arrow))
     }
 
@@ -407,7 +407,7 @@ impl Clause {
     }
 
     /// Create a new Clause with arrow. This is used in the macro for building a graph query.
-    pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
+    pub fn with_arrow(mut self, arrow: impl Into<Arrow>) -> Self {
         self.arrow = Some(arrow.into());
         self
     }
