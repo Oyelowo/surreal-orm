@@ -107,12 +107,19 @@ pub(crate) enum EdgeDirection {
     InArrowLeft,
 }
 
-impl ToTokens for EdgeDirection {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+impl EdgeDirection {
+    pub fn as_arrow_symbol(&self) -> &'static str {
         let arrow = match self {
             EdgeDirection::OutArrowRight => "->",
             EdgeDirection::InArrowLeft => "<-",
         };
+        arrow
+    }
+}
+
+impl ToTokens for EdgeDirection {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let arrow = self.as_arrow_symbol();
         tokens.extend(arrow.parse::<proc_macro2::TokenStream>().unwrap());
     }
 }
@@ -128,38 +135,27 @@ impl From<EdgeDirection> for ::proc_macro2::TokenStream {
 
 impl From<EdgeDirection> for &str {
     fn from(direction: EdgeDirection) -> Self {
-        match direction {
-            EdgeDirection::OutArrowRight => "->",
-            EdgeDirection::InArrowLeft => "<-",
-        }
+        direction.as_arrow_symbol()
     }
 }
 
 impl From<&EdgeDirection> for String {
     fn from(direction: &EdgeDirection) -> Self {
-        match direction {
-            EdgeDirection::OutArrowRight => "->".into(),
-            EdgeDirection::InArrowLeft => "<-".into(),
-        }
+        direction.as_arrow_symbol().into()
     }
 }
 
 impl From<EdgeDirection> for String {
     fn from(direction: EdgeDirection) -> Self {
-        match direction {
-            EdgeDirection::OutArrowRight => "->".into(),
-            EdgeDirection::InArrowLeft => "<-".into(),
-        }
+        direction.as_arrow_symbol().into()
     }
 }
 
 impl ::std::fmt::Display for EdgeDirection {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let arrow = match self {
-            EdgeDirection::OutArrowRight => "->",
-            EdgeDirection::InArrowLeft => "<-",
-        };
-        f.write_fmt(format_args!("{}", arrow))
+        let arrow = direction.as_arrow_symbol().into();
+        write!(f, "{arrow}")
+        // f.write_fmt(format_args!("{arrow}"))
     }
 }
 
