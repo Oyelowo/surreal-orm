@@ -349,7 +349,7 @@ impl MyFieldReceiver {
 
 impl ToTokens for NodeEdgeMetadataStore {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let node_edge_token_streams = self.0.values().map(|value| {
+        let node_edge_token_streams = self.into_inner().values().map(|value| {
             let NodeEdgeMetadata {
                     current_struct_ident,
                     direction,
@@ -363,7 +363,7 @@ impl ToTokens for NodeEdgeMetadataStore {
             }: &NodeEdgeMetadata = value;
 
             let crate_name = get_crate_name(false);
-            let arrow = direction.to_string();
+            let arrow = direction.as_arrow_symbol();
             let edge_table_name_str = edge_table_name.to_string();
             let  edge_name_as_struct_original_ident = format_ident!("{}", &edge_table_name_str.to_case(Case::Pascal));
             let  edge_name_as_struct_with_direction_ident = format_ident!("{}",
@@ -381,7 +381,6 @@ impl ToTokens for NodeEdgeMetadataStore {
                 ..
             } = VariablesModelMacro::new();
 
-
              quote!(
                 #( #imports) *
 
@@ -389,7 +388,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                 impl #current_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
-                        clause: impl Into<#crate_name::EdgeClause>,
+                        clause: impl ::std::convert::Into<#crate_name::EdgeClause>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
                         let clause: #crate_name::EdgeClause = clause.into();
                         let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);
