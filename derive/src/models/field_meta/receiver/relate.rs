@@ -16,7 +16,8 @@ use crate::{
         create_ident_wrapper, create_tokenstream_wrapper,
         derive_attributes::{StructIdent, TableDeriveAttributes},
         variables::VariablesModelMacro,
-        EdgeTableName, FieldsMeta, NodeTableName, RelateAttribute, StaticAssertionToken,
+        EdgeTableName, EdgeType, FieldsMeta, NodeTableName, RelateAttribute, RelationType,
+        StaticAssertionToken,
     },
 };
 
@@ -55,6 +56,7 @@ impl From<NodeTableName> for DestinationNodeName {
 struct NodeEdgeMetadata<'a> {
     /// Example value: writes
     edge_table_name: EdgeTableName,
+    edge_type: EdgeType,
     // /// The current struct name ident.
     // /// e.g given: struct Student {  }, value = Student
     // current_struct_ident: StructIdent,
@@ -176,11 +178,26 @@ impl From<EdgeDirection> for ArrowTokenStream {
 }
 
 impl MyFieldReceiver {
-    fn create_relation_connection_tokenstream(
+    pub fn create_relation_connection_tokenstream(
         &self,
         store: &mut FieldsMeta,
-        relation: &Relate,
         table_derive_attributes: &TableDeriveAttributes,
+        edge_type: &Relate,
+    ) {
+        match RelationType::from(self) {
+            RelationType::Relate(relate) => {
+                todo!()
+            }
+            _ => {}
+        }
+        todo!()
+    }
+
+    fn relate(
+        &self,
+        store: &mut FieldsMeta,
+        table_derive_attributes: &TableDeriveAttributes,
+        edge_type: &Relate,
     ) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let current_struct_ident = table_derive_attributes.ident;
@@ -258,6 +275,7 @@ impl MyFieldReceiver {
 
         let node_edge_meta = NodeEdgeMetadata {
             edge_table_name: edge_table_name.to_owned(),
+            edge_type: self.relate.unwrap().edge_type,
             direction: *edge_direction,
             destination_node_schema: vec![destination_node_schema_one()],
             edge_to_destination_node_connection_method: vec![
@@ -393,6 +411,8 @@ impl ToTokens for NodeEdgeMetadataStore {
             let arrow = ArrowTokenStream::from(direction);
             let edge_table_name_str = edge_table_name.to_string();
             let  edge_name_as_struct_original_ident = EdgeNameAsStructOriginalIdent(format_ident!("{}", &edge_table_name_str.to_case(Case::Pascal)));
+            // let relate_model_type = value.
+            let edge_name_as_struct_original_type_alias = quote!(#edge_name_as_struct_original_ident #);
             let  edge_name_as_struct_with_direction_ident = EdgeNameAsStructWithDirectionIdent(format_ident!("{}",
                                                                           MyFieldReceiver::add_direction_indication_to_ident(
                                                                                   &edge_name_as_struct_original_ident
@@ -437,6 +457,7 @@ impl ToTokens for NodeEdgeMetadataStore {
 
                     #( #destination_node_schema) *
 
+             // Add generics here and use in the ___connect edge method above
                     pub type #edge_name_as_struct_original_ident = <super::super::#edge_relation_model_selected_ident as #crate_name::SchemaGetter>::Schema;
 
                     pub struct #edge_name_as_struct_with_direction_ident(#edge_name_as_struct_original_ident);
