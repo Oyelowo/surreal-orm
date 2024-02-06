@@ -36,7 +36,7 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore,
+    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable,
 };
 
 #[derive(Default, Clone)]
@@ -187,7 +187,7 @@ pub struct FieldsMeta {
     pub record_link_fields_methods: Vec<LinkFieldTraversalMethodToken>,
     pub field_definitions: Vec<Vec<DefineFieldStatementToken>>,
     pub field_metadata: Vec<TokenStream>,
-    pub node_edge_metadata: NodeEdgeMetadataStore,
+    pub node_edge_metadata: NodeEdgeMetadataLookupTable,
     pub fields_relations_aliased: Vec<TokenStream>,
     pub non_null_updater_fields: Vec<TokenStream>,
     pub renamed_serialized_fields: Vec<TokenStream>,
