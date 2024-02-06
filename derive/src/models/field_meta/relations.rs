@@ -160,7 +160,9 @@ wrapper_struct_to_ident!(NodeTableName);
 pub(crate) struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
     pub(crate) edge_table_name: EdgeTableName,
-    pub(crate) node_table_name: NodeTableName,
+    /// user->writes->book // here, user is current struct, book is the foreign node
+    /// book<-writes<-user // here, book is current struct, user is the foreign node
+    pub(crate) foreign_node_table_name: NodeTableName,
 }
 
 // TODO: Remove
@@ -214,7 +216,7 @@ impl TryFrom<&Relate> for RelateAttribute {
             };
 
         Ok(Self {
-            node_table_name: node_object,
+            foreign_node_table_name: node_object,
             edge_table_name: edge_action,
             edge_direction,
         })
