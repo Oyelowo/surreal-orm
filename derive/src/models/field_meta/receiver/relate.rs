@@ -35,7 +35,7 @@ create_ident_wrapper!(EdgeRelationModelSelectedIdent);
 
 create_tokenstream_wrapper!(=>ForeignNodeSchema);
 create_tokenstream_wrapper!(=>EdgeImport);
-create_tokenstream_wrapper!(=>ForeignNodeTypeAlias);
+create_tokenstream_wrapper!(=>ForeignNodeTypeAliasWithGenerics);
 create_tokenstream_wrapper!(=>EdgeToForeignNodeMethod);
 create_tokenstream_wrapper!(=>DestinationNodeSchemaOne);
 create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
@@ -57,7 +57,7 @@ struct NodeEdgeMetadata<'a> {
     /// Example value: writes
     edge_table_name: EdgeTableName,
     // edge_type: EdgeType,
-    edge_types: Vec<EdgeType>,
+    pub edge_types: Vec<EdgeType>,
     // /// The current struct name ident.
     // /// e.g given: struct Student {  }, value = Student
     // current_struct_ident: StructIdent,
@@ -146,6 +146,7 @@ struct NodeEdgeMetadata<'a> {
     edge_name_as_method_ident: EdgeNameAsMethodIdent,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 struct EdgeNameWithDirectionIndicator(String);
 
 #[derive(Default, Clone)]
@@ -222,53 +223,22 @@ impl MyFieldReceiver {
         let edge_name_with_direction_as_method_ident =
             &(|| Self::add_direction_indication_to_ident(edge_table_name, edge_direction));
         let FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
+            field_impl_generics: edge_impl_generics,
+            field_ty_generics: edge_ty_generics,
+            field_where_clause: edge_where_clause,
         } = &edge_type.get_generics_meta(table_derive_attributes);
         // represents the schema but aliased as the pascal case of the destination table name
         let foreign_node_schema_ident = format_ident!(
             "{}",
             foreign_node_table_name.to_string().to_case(Case::Pascal)
         );
-        // edge = writes, direction = ->, foreign_nodes = [book, blog]
-        // impl<'a, 'b, T> Writes__<'a, 'b, T> {
-        //    fn book(&self, filter: Filter) -> Book {}
-        //    fn blog(&self, filter: Filter) -> Blog {}
-        // }
-        // StudentWritesBook<'a, 'b>  ===> Generics for Book
-        // StudentWritesBlog<'a, 'b, T> ===> Generics for Blog
-        // 'a, 'b, T
-        //
-        //
-        //
-        //
-        // impl<'a, 'b, T> Writes__<'a, 'b, T> {
-        //    fn book(&self, filter: Filter) -> <StudentWritesBook<'a, 'b> as Edge>::Out {}
-        //    fn book(&self, filter: Filter) -> Book<'a> {}
-        //
-        //    fn blog(&self, filter: Filter) -> <StudentWritesBlog<'a, 'b, T> as Edge>::Out {}
-        //    fn blog(&self, filter: Filter) -> Blog<T> {}
-        // }
-        //
-        //
-        // -> <'a, 'b, T> rather than just <'a, 'b>
-        //
-        //  #[derive(Node) // this implements Model trait automatically for the struct
-        //  struct Student<T: Clone, U:  Default> {id.., name.., age..}
-        //  #[derive(Node) // this implements Model trait automatically for the struct
-        //  struct Book<'a, T: SpecialTrait> {id.., name.., age..}
-        //
-        // struct Writes<'a, 'b: 'a, T, U,  V, In: Model, Out: Model> {id.., in: In.., out: Out..}
-        /// type StudentWritesBook<'a, T> = Writes<'a, 'b, T, U, V, Student<T, U>, Book<'a, T>>;
-        /// user->writes->book // here, user is current struct, book is the foreign node
-        /// book<-writes<-user // here, book is current struct, user is the foreign node
-        // #[surreal_orm(relate(mode=StudentWritesBook<'a, T>, connection="->writes->book"))]
-        // fav_books: Relate<Book<'a, T>
-        // Book
-        // book -> Book
-        let foreign_node_schema_type_alias =
-            ForeignNodeTypeAlias(quote!(#foreign_node_schema_ident #field_ty_generics));
+        // TODO: Recreate foreign node type from edge associated type in or out
+        // rather than trying to parse it from the field concrete type which might
+        // be problematic if a user aliases the field type except we want to restrict
+        // users from not doing that
+        // type ForeignNode<'a, 'b, T> = <EdgeStructAliasWithOrigDest<'a, 'b, T> as Edge>::Out;
+        let foreign_node_schema_type_alias_with_generics =
+            ForeignNodeTypeAliasWithGenerics(quote!(#foreign_node_schema_ident #edge_ty_generics));
         // let dest_node_as_type =
         //     syn::parse_str::<syn::Type>(&destination_node_schema_type_alias.to_string())?;
 
@@ -283,20 +253,20 @@ impl MyFieldReceiver {
         // the outer outer module because all edge related functionalities are nested
         let foreign_node_schema_one = || {
             ForeignNodeSchema(quote!(
-                type #foreign_node_schema_type_alias #field_ty_generics =
+                type #foreign_node_schema_type_alias_with_generics =
                             <<super::super::#edge_type as #crate_name::Edge>::#foreign_node_in_or_out
                         as #crate_name::SchemaGetter>::Schema;
             ))
         };
 
         // i.e Edge to destination Node
-        let edge_to_destination_node_connection_method = || {
+        let edge_to_foreign_node_connection_method = || {
             EdgeToForeignNodeMethod(quote!(
-                pub fn #foreign_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #foreign_node_schema_type_alias {
+                pub fn #foreign_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #foreign_node_schema_type_alias_with_generics {
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_name_str);
 
-                    #foreign_node_schema_type_alias::#__________connect_node_to_graph_traversal_string(
+                    #foreign_node_schema_type_alias_with_generics::#__________connect_node_to_graph_traversal_string(
                                 self,
                                 clause,
                     )
@@ -316,9 +286,7 @@ impl MyFieldReceiver {
             edge_types: vec![edge_type.to_owned()],
             direction: *edge_direction,
             foreign_node_schema: vec![foreign_node_schema_one()],
-            edge_to_foreign_node_connection_method: vec![
-                edge_to_destination_node_connection_method(),
-            ],
+            edge_to_foreign_node_connection_method: vec![edge_to_foreign_node_connection_method()],
             // current_struct_ident: current_struct_ident.to_owned(),
             table_derive_attributes,
             // static_assertions: vec![static_assertions()],
@@ -338,13 +306,15 @@ impl MyFieldReceiver {
         {
             Entry::Occupied(o) => {
                 let node_edge_meta = o.into_mut();
-                node_edge_meta.edge_types;
+                // Get all the Edge types(with direction) aliased types, so
+                // we can find a common denomator types between them all.
+                node_edge_meta.edge_types.push(edge_type.to_owned());
                 node_edge_meta
                     .foreign_node_schema
                     .push(foreign_node_schema_one());
                 node_edge_meta
-                    .edge_to_destination_node_connection_method
-                    .push(edge_to_destination_node_connection_method());
+                    .edge_to_foreign_node_connection_method
+                    .push(edge_to_foreign_node_connection_method());
                 node_edge_meta.static_assertions.push(static_assertions());
                 node_edge_meta.imports.push(import());
             }
