@@ -25,6 +25,7 @@ pub struct Relate {
     pub edge_type: EdgeType,
 }
 
+// edge model rust type with generics
 create_custom_type_wrapper!(EdgeType);
 
 impl FromMeta for Relate {

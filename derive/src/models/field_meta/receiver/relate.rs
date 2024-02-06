@@ -33,10 +33,10 @@ create_ident_wrapper!(EdgeTableName);
 create_ident_wrapper!(EdgeNameAsMethodIdent);
 create_ident_wrapper!(EdgeRelationModelSelectedIdent);
 
-create_tokenstream_wrapper!(=>DestinationNodeSchema);
+create_tokenstream_wrapper!(=>ForeignNodeSchema);
 create_tokenstream_wrapper!(=>EdgeImport);
-create_tokenstream_wrapper!(=>DestinationNodeTypeAlias);
-create_tokenstream_wrapper!(=>EdgeToDestinationNodeMethod);
+create_tokenstream_wrapper!(=>ForeignNodeTypeAlias);
+create_tokenstream_wrapper!(=>EdgeToForeignNodeMethod);
 create_tokenstream_wrapper!(=>DestinationNodeSchemaOne);
 create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
 create_ident_wrapper!(EdgeNameAsStructOriginalIdent);
@@ -56,7 +56,8 @@ impl From<NodeTableName> for DestinationNodeName {
 struct NodeEdgeMetadata<'a> {
     /// Example value: writes
     edge_table_name: EdgeTableName,
-    edge_type: EdgeType,
+    // edge_type: EdgeType,
+    edge_types: Vec<EdgeType>,
     // /// The current struct name ident.
     // /// e.g given: struct Student {  }, value = Student
     // current_struct_ident: StructIdent,
@@ -96,8 +97,8 @@ struct NodeEdgeMetadata<'a> {
     ///     ),
     /// ],
     /// ```
-    destination_node_schema: Vec<DestinationNodeSchema>,
-    destination_node_name: DestinationNodeName,
+    foreign_node_schema: Vec<ForeignNodeSchema>,
+    foreign_node_name: DestinationNodeName,
     /// Example Generated:
     ///
     /// ```rust, ignore
@@ -139,16 +140,17 @@ struct NodeEdgeMetadata<'a> {
     ///     ),
     ///    ]
     /// ```
-    edge_to_destination_node_connection_method: Vec<EdgeToDestinationNodeMethod>,
+    edge_to_foreign_node_connection_method: Vec<EdgeToForeignNodeMethod>,
     // static_assertions: Vec<StaticAssertionToken>,
     imports: Vec<EdgeImport>,
     edge_name_as_method_ident: EdgeNameAsMethodIdent,
 }
 
-type EdgeNameWithDirectionIndicator = String;
+struct EdgeNameWithDirectionIndicator(String);
+
 #[derive(Default, Clone)]
-pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
-impl Deref for NodeEdgeMetadataStore {
+pub struct NodeEdgeMetadataLookupTable(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
+impl Deref for NodeEdgeMetadataLookupTable {
     type Target = HashMap<EdgeNameAsStructWithDirectionIdent, NodeEdgeMetadata>;
 
     fn deref(&self) -> &Self::Target {
@@ -156,7 +158,7 @@ impl Deref for NodeEdgeMetadataStore {
     }
 }
 
-impl NodeEdgeMetadataStore {
+impl NodeEdgeMetadataLookupTable {
     pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata> {
         self.0
     }
@@ -170,8 +172,8 @@ impl From<EdgeDirection> for ArrowTokenStream {
         let crate_name = get_crate_name(false);
 
         let arrow = match value {
-            EdgeDirection::Outgoing => quote!(#crate_name::Arrow::Right),
-            EdgeDirection::Incoming => quote!(#crate_name::Arrow::Left),
+            EdgeDirection::Out => quote!(#crate_name::Arrow::Right),
+            EdgeDirection::In => quote!(#crate_name::Arrow::Left),
         };
         Self(arrow)
     }
@@ -183,12 +185,14 @@ impl MyFieldReceiver {
         store: &mut FieldsMeta,
         table_derive_attributes: &TableDeriveAttributes,
         edge_type: &Relate,
-    ) {
+    ) -> ExtractorResult<()> {
         match RelationType::from(self) {
             RelationType::Relate(relate) => {
+                self.relate(store, table_derive_attributes, edge_type)?
+            }
+            _ => {
                 todo!()
             }
-            _ => {}
         }
         todo!()
     }
@@ -197,25 +201,25 @@ impl MyFieldReceiver {
         &self,
         store: &mut FieldsMeta,
         table_derive_attributes: &TableDeriveAttributes,
-        edge_type: &Relate,
+        relate: &Relate,
     ) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let current_struct_ident = table_derive_attributes.ident;
         let field_type = &self.ty;
-        let edge_type = relation.edge_type;
+        let edge_type = relate.edge_type;
         let RelateAttribute {
             edge_direction,
             edge_table_name,
-            node_table_name: destination_node_table_name,
+            foreign_node_table_name,
         } = &RelateAttribute::from(relation);
         let arrow = &ArrowTokenStream::from(edge_direction);
-        let destination_node_table_name_str = &destination_node_table_name.to_string();
+        let destination_node_table_name_str = &foreign_node_table_name.to_string();
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
-        let edge_name_as_method_ident =
+        let edge_name_with_direction_as_method_ident =
             &(|| Self::add_direction_indication_to_ident(edge_table_name, edge_direction));
         let FieldGenericsMeta {
             field_impl_generics,
@@ -223,14 +227,48 @@ impl MyFieldReceiver {
             field_where_clause,
         } = &edge_type.get_generics_meta(table_derive_attributes);
         // represents the schema but aliased as the pascal case of the destination table name
-        let destination_node_schema_ident = format_ident!(
+        let foreign_node_schema_ident = format_ident!(
             "{}",
-            destination_node_table_name
-                .to_string()
-                .to_case(Case::Pascal)
+            foreign_node_table_name.to_string().to_case(Case::Pascal)
         );
-        let destination_node_schema_type_alias =
-            DestinationNodeTypeAlias(quote!(#destination_node_schema_ident #field_ty_generics));
+        // edge = writes, direction = ->, foreign_nodes = [book, blog]
+        // impl<'a, 'b, T> Writes__<'a, 'b, T> {
+        //    fn book(&self, filter: Filter) -> Book {}
+        //    fn blog(&self, filter: Filter) -> Blog {}
+        // }
+        // StudentWritesBook<'a, 'b>  ===> Generics for Book
+        // StudentWritesBlog<'a, 'b, T> ===> Generics for Blog
+        // 'a, 'b, T
+        //
+        //
+        //
+        //
+        // impl<'a, 'b, T> Writes__<'a, 'b, T> {
+        //    fn book(&self, filter: Filter) -> <StudentWritesBook<'a, 'b> as Edge>::Out {}
+        //    fn book(&self, filter: Filter) -> Book<'a> {}
+        //
+        //    fn blog(&self, filter: Filter) -> <StudentWritesBlog<'a, 'b, T> as Edge>::Out {}
+        //    fn blog(&self, filter: Filter) -> Blog<T> {}
+        // }
+        //
+        //
+        // -> <'a, 'b, T> rather than just <'a, 'b>
+        //
+        //  #[derive(Node) // this implements Model trait automatically for the struct
+        //  struct Student<T: Clone, U:  Default> {id.., name.., age..}
+        //  #[derive(Node) // this implements Model trait automatically for the struct
+        //  struct Book<'a, T: SpecialTrait> {id.., name.., age..}
+        //
+        // struct Writes<'a, 'b: 'a, T, U,  V, In: Model, Out: Model> {id.., in: In.., out: Out..}
+        /// type StudentWritesBook<'a, T> = Writes<'a, 'b, T, U, V, Student<T, U>, Book<'a, T>>;
+        /// user->writes->book // here, user is current struct, book is the foreign node
+        /// book<-writes<-user // here, book is current struct, user is the foreign node
+        // #[surreal_orm(relate(mode=StudentWritesBook<'a, T>, connection="->writes->book"))]
+        // fav_books: Relate<Book<'a, T>
+        // Book
+        // book -> Book
+        let foreign_node_schema_type_alias =
+            ForeignNodeTypeAlias(quote!(#foreign_node_schema_ident #field_ty_generics));
         // let dest_node_as_type =
         //     syn::parse_str::<syn::Type>(&destination_node_schema_type_alias.to_string())?;
 
@@ -243,9 +281,9 @@ impl MyFieldReceiver {
         });
         // We use super twice because we're trying to access the relation model struct name from
         // the outer outer module because all edge related functionalities are nested
-        let destination_node_schema_one = || {
-            DestinationNodeSchema(quote!(
-                type #destination_node_schema_type_alias #field_ty_generics =
+        let foreign_node_schema_one = || {
+            ForeignNodeSchema(quote!(
+                type #foreign_node_schema_type_alias #field_ty_generics =
                             <<super::super::#edge_type as #crate_name::Edge>::#foreign_node_in_or_out
                         as #crate_name::SchemaGetter>::Schema;
             ))
@@ -253,12 +291,12 @@ impl MyFieldReceiver {
 
         // i.e Edge to destination Node
         let edge_to_destination_node_connection_method = || {
-            EdgeToDestinationNodeMethod(quote!(
-                pub fn #destination_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #destination_node_schema_type_alias {
+            EdgeToForeignNodeMethod(quote!(
+                pub fn #foreign_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #foreign_node_schema_type_alias {
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_name_str);
 
-                    #destination_node_schema_type_alias::#__________connect_node_to_graph_traversal_string(
+                    #foreign_node_schema_type_alias::#__________connect_node_to_graph_traversal_string(
                                 self,
                                 clause,
                     )
@@ -275,31 +313,35 @@ impl MyFieldReceiver {
 
         let node_edge_meta = NodeEdgeMetadata {
             edge_table_name: edge_table_name.to_owned(),
-            edge_type: self.relate.unwrap().edge_type,
+            edge_types: vec![edge_type.to_owned()],
             direction: *edge_direction,
-            destination_node_schema: vec![destination_node_schema_one()],
-            edge_to_destination_node_connection_method: vec![
+            foreign_node_schema: vec![foreign_node_schema_one()],
+            edge_to_foreign_node_connection_method: vec![
                 edge_to_destination_node_connection_method(),
             ],
             // current_struct_ident: current_struct_ident.to_owned(),
             table_derive_attributes,
             // static_assertions: vec![static_assertions()],
-            edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
+            edge_name_as_method_ident: format_ident!(
+                "{}",
+                edge_name_with_direction_as_method_ident()
+            ),
             imports: vec![import()],
             edge_relation_model_selected_ident: relation.edge_type.type_name()?,
-            destination_node_name: destination_node_table_name.into(),
+            foreign_node_name: foreign_node_table_name.into(),
         };
 
         match store
             .node_edge_metadata
             .into_inner()
-            .entry(edge_name_as_method_ident())
+            .entry(edge_name_with_direction_as_method_ident())
         {
             Entry::Occupied(o) => {
                 let node_edge_meta = o.into_mut();
+                node_edge_meta.edge_types;
                 node_edge_meta
-                    .destination_node_schema
-                    .push(destination_node_schema_one());
+                    .foreign_node_schema
+                    .push(foreign_node_schema_one());
                 node_edge_meta
                     .edge_to_destination_node_connection_method
                     .push(edge_to_destination_node_connection_method());
@@ -336,7 +378,7 @@ impl MyFieldReceiver {
         let edge_type = relation.edge_type;
         let RelateAttribute {
             edge_table_name,
-            node_table_name: destination_node_table_name,
+            foreign_node_table_name: destination_node_table_name,
             edge_direction,
         } = RelateAttribute::from(relation);
         let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
@@ -390,15 +432,15 @@ impl MyFieldReceiver {
     }
 }
 
-impl ToTokens for NodeEdgeMetadataStore {
+impl ToTokens for NodeEdgeMetadataLookupTable {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let node_edge_token_streams = self.into_inner().values().map(|value| {
             let NodeEdgeMetadata {
                     // current_struct_ident,
                     direction,
                     edge_relation_model_selected_ident,
-                    destination_node_schema,
-                    edge_to_destination_node_connection_method: foreign_node_connection_method,
+                    foreign_node_schema,
+                    edge_to_foreign_node_connection_method,
                     imports,
                     edge_name_as_method_ident,
                     edge_table_name,
@@ -455,7 +497,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                     use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;
 
-                    #( #destination_node_schema) *
+                    #( #foreign_node_schema) *
 
              // Add generics here and use in the ___connect edge method above
                     pub type #edge_name_as_struct_original_ident = <super::super::#edge_relation_model_selected_ident as #crate_name::SchemaGetter>::Schema;
@@ -500,7 +542,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                     }
 
                     impl #crate_name::Erroneous for &#edge_name_as_struct_with_direction_ident {
-                        fn get_errors(&self) -> Vec<::std::string::String> {
+                        fn get_errors(&self) -> ::std::vec:Vec<::std::string::String> {
                             self.0.get_errors()
                         }
                     }
@@ -514,7 +556,7 @@ impl ToTokens for NodeEdgeMetadataStore {
                     }
 
                     impl #edge_name_as_struct_with_direction_ident {
-                        #( #foreign_node_connection_method) *
+                        #( #edge_to_foreign_node_connection_method) *
 
                          // This is for recurive edge traversal which is supported by surrealdb: e.g ->knows(..)->knows(..)->knows(..)
                         // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
