@@ -112,7 +112,6 @@ impl MyFieldReceiver {
         let crate_name = get_crate_name(false);
         // TODO: Cross-check if not replacing self here is more ergonomic/correct
         // let link_one = &link_one.replace_self_with_current_struct_ident(table_def);
-        let crate_name = get_crate_name(false);
         let struct_name_ident = table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing);
