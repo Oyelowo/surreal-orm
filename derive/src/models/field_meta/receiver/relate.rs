@@ -42,6 +42,16 @@ create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
 create_ident_wrapper!(EdgeNameAsStructOriginalIdent);
 create_ident_wrapper!(EdgeNameAsStructWithDirectionIdent);
 create_ident_wrapper!(EdgeInnerModuleName);
+create_ident_wrapper!(ForeignNodeSchemaIdent);
+
+impl ForeignNodeSchemaIdent {
+    /// represents the schema but aliased as the pascal case of the destination table name
+    pub fn from_node_table_name(node_table_name: &NodeTableName) -> Self {
+        let node_table_name = node_table_name.to_string();
+        let node_table_name = format_ident!("{}", node_table_name.to_case(Case::Pascal));
+        Self(node_table_name)
+    }
+}
 
 struct DestinationNodeName(String);
 
@@ -189,6 +199,9 @@ impl MyFieldReceiver {
     ) -> ExtractorResult<()> {
         match RelationType::from(self) {
             RelationType::Relate(relate) => {
+                store
+                    .static_assertions
+                    .push(self.create_static_assertions(&relate, &table_derive_attributes.ident));
                 self.relate(store, table_derive_attributes, edge_type)?
             }
             _ => {
@@ -227,20 +240,10 @@ impl MyFieldReceiver {
             field_ty_generics: edge_ty_generics,
             field_where_clause: edge_where_clause,
         } = &edge_type.get_generics_meta(table_derive_attributes);
-        // represents the schema but aliased as the pascal case of the destination table name
-        let foreign_node_schema_ident = format_ident!(
-            "{}",
-            foreign_node_table_name.to_string().to_case(Case::Pascal)
-        );
-        // TODO: Recreate foreign node type from edge associated type in or out
-        // rather than trying to parse it from the field concrete type which might
-        // be problematic if a user aliases the field type except we want to restrict
-        // users from not doing that
-        // type ForeignNode<'a, 'b, T> = <EdgeStructAliasWithOrigDest<'a, 'b, T> as Edge>::Out;
+        let foreign_node_schema_ident =
+            ForeignNodeSchemaIdent::from_node_table_name(foreign_node_table_name);
         let foreign_node_schema_type_alias_with_generics =
             ForeignNodeTypeAliasWithGenerics(quote!(#foreign_node_schema_ident #edge_ty_generics));
-        // let dest_node_as_type =
-        //     syn::parse_str::<syn::Type>(&destination_node_schema_type_alias.to_string())?;
 
         // Meant to represent the variable of struct model(node) itself.
         // Within edge generics, there is usually In and Out associated types, this is used to
@@ -259,7 +262,7 @@ impl MyFieldReceiver {
             ))
         };
 
-        // i.e Edge to destination Node
+        // i.e Edge to foreign Node
         let edge_to_foreign_node_connection_method = || {
             EdgeToForeignNodeMethod(quote!(
                 pub fn #foreign_node_table_name(self, clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> #foreign_node_schema_type_alias_with_generics {
@@ -274,22 +277,18 @@ impl MyFieldReceiver {
             ))
         };
 
-        store
-            .static_assertions
-            .push(self.create_static_assertions(relation, &table_derive_attributes.ident));
-
         // let imports =|| quote!(use super::StudentWritesBook;);
         let import = || EdgeImport(quote!(use super::#edge_type;));
 
         let node_edge_meta = NodeEdgeMetadata {
             edge_table_name: edge_table_name.to_owned(),
+            // We want to take all edge concrete types even for each edge type(with direction)
+            // because we want to allow the use of generics in edge.
             edge_types: vec![edge_type.to_owned()],
             direction: *edge_direction,
             foreign_node_schema: vec![foreign_node_schema_one()],
             edge_to_foreign_node_connection_method: vec![edge_to_foreign_node_connection_method()],
-            // current_struct_ident: current_struct_ident.to_owned(),
             table_derive_attributes,
-            // static_assertions: vec![static_assertions()],
             edge_name_as_method_ident: format_ident!(
                 "{}",
                 edge_name_with_direction_as_method_ident()
@@ -315,7 +314,6 @@ impl MyFieldReceiver {
                 node_edge_meta
                     .edge_to_foreign_node_connection_method
                     .push(edge_to_foreign_node_connection_method());
-                node_edge_meta.static_assertions.push(static_assertions());
                 node_edge_meta.imports.push(import());
             }
             Entry::Vacant(v) => {
@@ -325,6 +323,9 @@ impl MyFieldReceiver {
         Ok(())
     }
 
+    /// add direction indication to the edge name. This is non-functional
+    /// semantics, it's just a way to differentiate same edge but with different
+    /// direction
     /// e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
     fn add_direction_indication_to_ident(
         edge_table_name: &EdgeTableName,
