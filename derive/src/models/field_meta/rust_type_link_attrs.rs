@@ -29,7 +29,7 @@ macro_rules! create_custom_type_wrapper {
         #[derive(Debug, Clone, FromMeta)]
         pub struct $name(pub CustomType);
 
-        impl Into<CustomType> for $name {
+        impl ::std::converter::Into<CustomType> for $name {
             fn into(self) -> CustomType {
                 self.0
             }
@@ -40,6 +40,12 @@ macro_rules! create_custom_type_wrapper {
 
             fn deref(&self) -> &Self::Target {
                 &self.0
+            }
+        }
+
+        impl ::std::convert::From<::syn::Type> for $name {
+            fn from(ty: ::syn::Type) -> Self {
+                Self(CustomType::new(ty))
             }
         }
     };

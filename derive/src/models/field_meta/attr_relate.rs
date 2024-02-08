@@ -5,11 +5,19 @@
  * Licensed under the MIT license
  */
 
-use darling::FromMeta;
-use syn::Type;
-
 use crate::models::{
     create_custom_type_wrapper, CustomType, DestinationNodeTypeOriginal, RustFieldTypeSelfAllowed,
+};
+use darling::FromMeta;
+use proc_macro2::TokenStream;
+use quote::{format_ident, quote};
+use std::{
+    collections::{HashMap, HashSet},
+    ops::Deref,
+};
+use syn::{
+    visit::{self, Visit},
+    GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type, WhereClause,
 };
 
 #[derive(Debug, Clone)]
@@ -27,6 +35,126 @@ pub struct Relate {
 
 // edge model rust type with generics
 create_custom_type_wrapper!(EdgeType);
+
+create_custom_type_wrapper!(EdgeTypeWithAggregatedGenerics);
+
+impl EdgeType {
+    fn extract_unique_types_from_edges(
+        edge_type_ident: &Ident,
+        edge_types: &[Self],
+    ) -> EdgeTypeWithAggregatedGenerics {
+        let mut lifetimes = HashSet::new();
+        let mut generics = HashSet::new();
+
+        for edge_type in edge_types {
+            let edge_type = &edge_type.to_basic_type();
+            let mut visitor = UniqueTypeVisitor::default();
+            visitor.visit_type(edge_type);
+
+            for lt in visitor.lifetimes.iter() {
+                lifetimes.insert(lt.to_string());
+            }
+            for gen in visitor.generics.iter() {
+                generics.insert(gen.to_string());
+            }
+        }
+
+        let lifetimes: Vec<Lifetime> = common_lifetimes
+            .iter()
+            .map(|lt| Lifetime::new(&format!("'{}", lt), proc_macro2::Span::call_site()))
+            .collect();
+
+        let generics: Vec<Ident> = common_generics
+            .iter()
+            .map(|gen| Ident::new(gen, proc_macro2::Span::call_site()))
+            .collect();
+
+        let quoted_type: TokenStream = if !lifetimes.is_empty() || !generics.is_empty() {
+            let generics_list = quote! { <#(#lifetimes,)* #(#generics,)*> };
+            quote! { #edge_type_ident #generics_list }
+        } else {
+            quote! { #edge_type_ident }
+        };
+
+        let edge_type = syn::parse2::<Type>(quoted_type).expect("Failed to parse edge type");
+
+        edge_type.into()
+    }
+}
+
+#[derive(Default)]
+struct UniqueTypeVisitor {
+    lifetimes: HashSet<String>,
+    generics: HashSet<String>,
+}
+
+impl<'ast> Visit<'ast> for UniqueTypeVisitor {
+    fn visit_lifetime(&mut self, i: &'ast syn::Lifetime) {
+        self.lifetimes.insert(i.ident.to_string());
+        visit::visit_lifetime(self, i);
+    }
+
+    fn visit_type_param(&mut self, i: &'ast syn::TypeParam) {
+        self.generics.insert(i.ident.to_string());
+        visit::visit_type_param(self, i);
+    }
+
+    fn visit_type(&mut self, i: &'ast Type) {
+        // Handle nested types by recursively visiting them
+        visit::visit_type(self, i);
+    }
+
+    // Visit path arguments to handle generics in paths, e.g., `Vec<T>`
+    fn visit_path_arguments(&mut self, path_arguments: &'ast PathArguments) {
+        if let PathArguments::AngleBracketed(ref args) = path_arguments {
+            for arg in &args.args {
+                match arg {
+                    GenericArgument::Type(Type::Path(type_path)) => {
+                        self.visit_type_path(type_path);
+                    }
+                    GenericArgument::Lifetime(lt) => {
+                        self.visit_lifetime(lt);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        visit::visit_path_arguments(self, path_arguments);
+    }
+
+    // Visit paths, useful for extracting generics from qualified types
+    fn visit_path(&mut self, i: &'ast Path) {
+        for segment in &i.segments {
+            self.visit_path_segment(segment);
+        }
+        visit::visit_path(self, i);
+    }
+
+    // Visit path segments, which are parts of a path, to handle nested generics
+    fn visit_path_segment(&mut self, segment: &'ast PathSegment) {
+        if let PathArguments::AngleBracketed(ref args) = segment.arguments {
+            for arg in &args.args {
+                match arg {
+                    GenericArgument::Type(ty) => {
+                        self.visit_type(ty);
+                    }
+                    GenericArgument::Lifetime(lt) => {
+                        self.visit_lifetime(lt);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        visit::visit_path_segment(self, segment);
+    }
+
+    // Optionally handle `WhereClause` for capturing lifetimes and generics in trait bounds and where clauses
+    fn visit_where_clause(&mut self, i: &'ast WhereClause) {
+        visit::visit_where_clause(self, i);
+    }
+}
 
 impl FromMeta for Relate {
     // // TODO: Revisit this whether we can and should allow only the
