@@ -218,6 +218,12 @@ impl MyFieldReceiver {
         relate: &Relate,
     ) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
+        let vars = VariablesModelMacro::new();
+        let VariablesModelMacro {
+            __________connect_edge_to_graph_traversal_string,
+            ___________graph_traversal_string,
+            ..
+        } = VariablesModelMacro::new();
         let current_struct_ident = table_derive_attributes.ident;
         let field_type = &self.ty;
         let edge_type = relate.edge_type;
@@ -435,11 +441,6 @@ impl ToTokens for NodeEdgeMetadataLookupTable {
                                                                           ));
             let edge_inner_module_name = EdgeInnerModuleName(format_ident!("{}_schema________________", edge_name_as_struct_with_direction_ident.to_string().to_lowercase()));
 
-            let VariablesModelMacro {
-                __________connect_edge_to_graph_traversal_string,
-                ___________graph_traversal_string,
-                ..
-            } = VariablesModelMacro::new();
 
              quote!(
                 #( #imports) *

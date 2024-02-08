@@ -44,7 +44,7 @@ impl CustomTypeNoSelf {
         &self,
         table_attributes: TableDeriveAttributes,
     ) -> FieldGenericsMeta<'a> {
-        self.0.get_generics_meta(table_attributes)
+        self.0.get_generics_meta(&table_attributes)
     }
 }
 
@@ -55,6 +55,12 @@ impl Parse for CustomType {
     // TODO: Handle type parsing if frommeta does not work or manually implement fromMeta
     fn parse(input: ParseStream) -> syn::Result<Self> {
         todo!()
+    }
+}
+
+impl From<Type> for CustomType {
+    fn from(ty: Type) -> Self {
+        Self(ty)
     }
 }
 
