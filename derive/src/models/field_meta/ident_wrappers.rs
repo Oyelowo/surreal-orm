@@ -23,6 +23,12 @@ macro_rules! create_ident_wrapper {
             }
         }
 
+        impl From<$ident> for ::syn::Ident {
+            fn from(ident: $ident) -> Self {
+                ident.0
+            }
+        }
+
         impl ::quote::ToTokens for $ident {
             fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
                 self.0.to_tokens(tokens)
