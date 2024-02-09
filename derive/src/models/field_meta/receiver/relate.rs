@@ -236,11 +236,9 @@ impl MyFieldReceiver {
                     .push(self.create_static_assertions(&relate, &table_derive_attributes.ident));
                 self.relate(store, table_derive_attributes, edge_type)?
             }
-            _ => {
-                todo!()
-            }
+            _ => {}
         }
-        todo!()
+        Ok(())
     }
 
     fn relate(
@@ -616,8 +614,8 @@ impl ToTokens for NodeEdgeMetadataLookupTable {
             .map(|value| value.to_token_stream())
             .collect::<Vec<_>>();
 
-        token = quote!(#( #node_edge_token_streams) *);
+        let token = quote!(#( #node_edge_token_streams) *);
 
-        tokens.extend(self.generate_token_stream());
+        tokens.extend(token);
     }
 }
