@@ -232,7 +232,7 @@ impl FieldsMeta {
         {
             field_receiver.create_field_definitions(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
-                
+            field_receiver.create_relation_connection_tokenstream(&mut store, table_derive_attributes);
 
                 
             let crate_name = get_crate_name(false);

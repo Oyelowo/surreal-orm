@@ -227,14 +227,13 @@ impl MyFieldReceiver {
         &self,
         store: &mut FieldsMeta,
         table_derive_attributes: &TableDeriveAttributes,
-        edge_type: &Relate,
     ) -> ExtractorResult<()> {
         match RelationType::from(self) {
             RelationType::Relate(relate) => {
                 store
                     .static_assertions
                     .push(self.create_static_assertions(&relate, &table_derive_attributes.ident));
-                self.relate(store, table_derive_attributes, edge_type)?
+                self.relate(store, table_derive_attributes, relate)?
             }
             _ => {}
         }
