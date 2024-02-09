@@ -40,7 +40,7 @@ create_custom_type_wrapper!(EdgeType);
 create_custom_type_wrapper!(EdgeTypeWithAggregatedGenerics);
 
 impl EdgeType {
-    fn aggregate_lifetime_and_generics_from_variations_of_a_type(
+    pub fn aggregate_lifetime_and_generics_from_variations_of_a_type(
         edge_type_ident: &Ident,
         edge_types: &[Self],
     ) -> EdgeTypeWithAggregatedGenerics {
