@@ -19,7 +19,6 @@ use quote::{format_ident, quote};
 use crate::models::{
     attributes::FieldGenericsMeta, relations::NodeType, replace_lifetimes_with_underscore,
     replace_self_in_type_str, DestinationNodeTypeOriginal, FieldGenericsMeta, NormalisedFieldMeta,
-    ReferencedNodeMeta,
 };
 
 use super::{
@@ -230,38 +229,10 @@ impl FieldsMeta {
             .ok_or_else(|| darling::Error::custom("Expected a struct"))?
             .fields
         {
+            let crate_name = get_crate_name(false);
             field_receiver.create_field_definitions(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
             field_receiver.create_relation_connection_tokenstream(&mut store, table_derive_attributes);
-
-                
-            let crate_name = get_crate_name(false);
-            let field_name_original = field_receiver
-                .ident
-                .as_ref()
-                .expect("field identifier does not exist");
-            let old_field_name_ts = match field_receiver.old_name.as_ref() {
-                Some(old_name) => {
-                    let old_name = old_name.to_string();
-                    quote!(::std::option::Option::Some(#old_name.into()))
-                }
-                _ => quote!(::std::option::Option::None),
-            };
-            let relationship = RelationType::from(field_receiver);
-            let NormalisedFieldMeta {
-                field_ident_raw_to_underscore_suffix,
-                field_ident_serialized_fmt,
-            } = &field_receiver.normalize_ident(struct_level_casing);
-            let (_, struct_ty_generics, _) = struct_generics.split_for_impl();
-            let field_type = &field_receiver
-                .rust_field_type()
-                .to_type_no_self(table_derive_attributes);
-            let FieldGenericsMeta {
-                field_impl_generics,
-                field_ty_generics,
-                field_where_clause,
-                ..
-            } = field_receiver.get_field_generics_meta(table_derive_attributes);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -271,51 +242,12 @@ impl FieldsMeta {
                 bindings,
                 ..
             } = VariablesModelMacro::new();
-
-
-            
-                
-            let get_link_meta_with_defs =
-                |node_object: &DestinationNodeTypeOriginal, is_list: bool| {
-                    ReferencedNodeMeta::from_record_link(
-                        node_object,
-                        field_ident_raw_to_underscore_suffix,
-                        struct_name_ident,
-                        is_list,
-                    )
-                    .with_field_definition(
-                        field_receiver,
-                        struct_name_ident,
-                        field_ident_serialized_fmt,
-                        &data_type,
-                        &table_name,
-                    )
-                };
-
-            let get_nested_meta_with_defs =
-                |node_object: &DestinationNodeTypeOriginal, is_list: bool| {
-                    ReferencedNodeMeta::from_nested(
-                        node_object,
-                        field_ident_raw_to_underscore_suffix,
-                        struct_name_ident,
-                        is_list,
-                    )?
-                    .with_field_definition(
-                        field_receiver,
-                        struct_name_ident,
-                        field_ident_serialized_fmt,
-                        &data_type,
-                        &table_name,
-                    )
-                };
-
             let update_ser_field_type = |serializable_field_type: &mut Vec<TokenStream>| {
                 if !field_receiver.skip_serializing && !field_receiver.skip {
                     serializable_field_type
                         .push(quote!(#crate_name::Field::new(#field_ident_serialized_fmt)));
                 }
             };
-
             let mut update_aliases_struct_fields_types_kv = || {
                 store.aliases_struct_fields_types_kv.push(
                     quote!(pub #field_ident_raw_to_underscore_suffix: #crate_name::AliasName, ),
