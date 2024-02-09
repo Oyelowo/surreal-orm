@@ -17,7 +17,8 @@ use std::{
 };
 use syn::{
     visit::{self, Visit},
-    GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type, WhereClause,
+    Constraint, GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type,
+    TypeParamBound, WhereClause,
 };
 
 #[derive(Debug, Clone)]
@@ -39,12 +40,12 @@ create_custom_type_wrapper!(EdgeType);
 create_custom_type_wrapper!(EdgeTypeWithAggregatedGenerics);
 
 impl EdgeType {
-    fn extract_unique_types_from_edges(
+    fn aggregate_lifetime_and_generics_from_variations_of_a_type(
         edge_type_ident: &Ident,
         edge_types: &[Self],
     ) -> EdgeTypeWithAggregatedGenerics {
-        let mut lifetimes = HashSet::new();
-        let mut generics = HashSet::new();
+        let mut common_lifetimes = HashSet::new();
+        let mut common_generics = HashSet::new();
 
         for edge_type in edge_types {
             let edge_type = &edge_type.to_basic_type();
@@ -52,10 +53,10 @@ impl EdgeType {
             visitor.visit_type(edge_type);
 
             for lt in visitor.lifetimes.iter() {
-                lifetimes.insert(lt.to_string());
+                common_lifetimes.insert(lt.to_string());
             }
             for gen in visitor.generics.iter() {
-                generics.insert(gen.to_string());
+                common_generics.insert(gen.to_string());
             }
         }
 
@@ -131,7 +132,6 @@ impl<'ast> Visit<'ast> for UniqueTypeVisitor {
         visit::visit_path(self, i);
     }
 
-    // Visit path segments, which are parts of a path, to handle nested generics
     fn visit_path_segment(&mut self, segment: &'ast PathSegment) {
         if let PathArguments::AngleBracketed(ref args) = segment.arguments {
             for arg in &args.args {
@@ -142,12 +142,37 @@ impl<'ast> Visit<'ast> for UniqueTypeVisitor {
                     GenericArgument::Lifetime(lt) => {
                         self.visit_lifetime(lt);
                     }
+                    // e.g., `T: Display` in `Foo<T: Display>`
+                    GenericArgument::Constraint(constraint) => {
+                        self.visit_constraint(constraint);
+                    }
+                    GenericArgument::Const(expr) => {}
                     _ => {}
                 }
             }
         }
 
         visit::visit_path_segment(self, segment);
+    }
+
+    fn visit_constraint(&mut self, i: &'ast Constraint) {
+        self.generics.insert(i.ident);
+        for bound in i.bounds {
+            self.visit_type_param_bound(&bound)
+        }
+    }
+
+    // e.g: `T: Display` in generics
+    fn visit_type_param_bound(&mut self, bound: &'ast TypeParamBound) {
+        match &bound {
+            TypeParamBound::Lifetime(lt) => {
+                self.visit_lifetime(lt);
+            }
+            TypeParamBound::Trait(trait_bound) => {}
+            TypeParamBound::Verbatim(_) => {}
+        }
+
+        visit::visit_type_param_bound(self, bound);
     }
 
     // Optionally handle `WhereClause` for capturing lifetimes and generics in trait bounds and where clauses
