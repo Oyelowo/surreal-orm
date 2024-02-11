@@ -22,3 +22,10 @@ impl Default for DbfieldTypeToken {
 create_tokenstream_wrapper!(=> SqlValueTokenStream);
 
 create_tokenstream_wrapper!(=> StaticAssertionToken);
+
+create_tokenstream_wrapper!(=> LinkedFields);
+create_tokenstream_wrapper!(=> LinkOneFields);
+create_tokenstream_wrapper!(=> LinkSelfFields);
+create_tokenstream_wrapper!(=> LinkOneAndSelfFields);
+create_tokenstream_wrapper!(=> LinkManyFields);
+create_tokenstream_wrapper!(=> SerializableFields);
