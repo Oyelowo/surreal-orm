@@ -35,7 +35,7 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields,
+    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields, AliasesStructFieldsTypesKv, AliasesStructFieldsNamesKv,
 };
 
 #[derive(Default, Clone)]
@@ -114,7 +114,7 @@ pub struct FieldsMeta {
     ///                pub writtenBooks: AliasName,
     ///          }
     /// ```
-    pub aliases_struct_fields_types_kv: Vec<TokenStream>,
+    pub aliases_struct_fields_types_kv: Vec<AliasesStructFieldsTypesKv>,
 
     /// Generated example: pub writtenBooks: "writtenBooks".into(),
     /// This is used to build the actual instance of the struct with aliases
@@ -125,7 +125,7 @@ pub struct FieldsMeta {
     ///                pub writtenBooks: AliasName,
     /// }
     /// ```
-    pub aliases_struct_fields_names_kv: Vec<TokenStream>,
+    pub aliases_struct_fields_names_kv: Vec<AliasesStructFieldsNamesKv>,
 
     /// list of fields names that are actually serialized and not skipped.
     pub serialized_alias_name_no_skip: Vec<String>,
@@ -235,6 +235,7 @@ impl FieldsMeta {
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
             field_receiver.create_relation_connection_tokenstream(&mut store, table_derive_attributes);
             field_receiver.create_serialized_fields(&mut store);
+            field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -297,7 +298,6 @@ impl FieldsMeta {
                     store
                         .node_edge_metadata
                         .update(&relation, struct_name_ident, field_type);
-                    update_aliases_struct_fields_types_kv();
                     let connection = relation.connection;
                     store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_serialized_fmt))));
                     ReferencedNodeMeta::default()
