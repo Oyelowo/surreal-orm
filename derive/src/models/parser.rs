@@ -35,7 +35,7 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields, AliasesStructFieldsTypesKv, AliasesStructFieldsNamesKv,
+    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields, AliasesStructFieldsTypesKv, AliasesStructFieldsNamesKv, NonNullUpdaterFields, RenamedSerializedFields,
 };
 
 #[derive(Default, Clone)]
@@ -189,8 +189,8 @@ pub struct FieldsMeta {
     pub field_metadata: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataLookupTable,
     pub fields_relations_aliased: Vec<TokenStream>,
-    pub non_null_updater_fields: Vec<TokenStream>,
-    pub renamed_serialized_fields: Vec<TokenStream>,
+    pub non_null_updater_fields: Vec<NonNullUpdaterFields>,
+    pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TokenStream,
 
     pub table_derive_attributes: Option< TableDeriveAttributes >,
@@ -236,6 +236,7 @@ impl FieldsMeta {
             field_receiver.create_relation_connection_tokenstream(&mut store, table_derive_attributes);
             field_receiver.create_serialized_fields(&mut store);
             field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
+            field_receiver.create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -273,24 +274,6 @@ impl FieldsMeta {
                                 ));
             };
 
-            let mut insert_non_null_updater_token = |updater_field_token: TokenStream| {
-                // let is_invalid =
-                //     &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
-                // if !is_invalid {
-                //     store
-                //         .non_null_updater_fields
-                //         .push(updater_field_token.clone());
-                // }
-                store
-                    .non_null_updater_fields
-                    .push(updater_field_token.clone());
-                // We dont care about the field type. We just use this struct to check for
-                // renamed serialed field names at compile time by asserting that the a field
-                // exist.
-                store
-                    .renamed_serialized_fields
-                    .push(quote!(pub #field_ident_raw_to_underscore_suffix: &'static str, ));
-            };
 
 
             let referenced_node_meta = match relationship.clone() {
@@ -308,9 +291,6 @@ impl FieldsMeta {
                     let foreign_node = node_object.into_inner();
                     update_field_names_fields_types_kv(None);
 
-                    insert_non_null_updater_token(
-                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
-                    );
 
                     // let delifed_type = replace_lifetimes_with_underscore(&mut field_type.clone());
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
@@ -336,10 +316,6 @@ impl FieldsMeta {
                     // );
                     update_field_names_fields_types_kv(None);
 
-                    store.non_null_updater_fields.push(
-                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
-                    );
-
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
 
                     get_link_meta_with_defs(&node_object, false)
@@ -351,10 +327,6 @@ impl FieldsMeta {
                         quote!(<#foreign_node as #crate_name::Model>::Id),
                     ));
 
-                    insert_non_null_updater_token(
-                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
-                    );
-                
 
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                     get_link_meta_with_defs(&node_object, true)
@@ -366,18 +338,11 @@ impl FieldsMeta {
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_node);));
                     update_field_names_fields_types_kv(None);
 
-                    insert_non_null_updater_token(
-                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ),
-                    );
-
                     get_nested_meta_with_defs(&node_object, false)
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
 
                 RelationType::NestArray(foreign_object_item) => {
-                    insert_non_null_updater_token(
-                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
-                    );
 
                     let nesting_level = count_vec_nesting(field_type);
                     let nested_vec_type = generate_nested_vec_type(&foreign_node, nesting_level);
@@ -392,9 +357,6 @@ impl FieldsMeta {
                 }
                 RelationType::None => {
                     update_field_names_fields_types_kv(None);
-                    insert_non_null_updater_token(
-                        quote!(pub #field_ident_raw_to_underscore_suffix: ::std::option::Option<#field_type>, ),
-                    );
 
                     let ref_node_meta = if field_receiver.rust_field_type().is_list() {
                         ReferencedNodeMeta::from_simple_array(field_ident_raw_to_underscore_suffix)
