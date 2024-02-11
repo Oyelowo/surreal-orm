@@ -35,23 +35,23 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable,
+    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields,
 };
 
 #[derive(Default, Clone)]
 pub struct FieldsMeta {
     /// list of fields names that are actually serialized and not skipped.
-    pub serializable_fields: Vec<TokenStream>,
+    pub serializable_fields: Vec<SerializableFields>,
     /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
-    pub linked_fields: Vec<TokenStream>,
+    pub linked_fields: Vec<LinkedFields>,
     /// The names of link_one fields
-    pub link_one_fields: Vec<TokenStream>,
+    pub link_one_fields: Vec<LinkOneFields>,
     /// The names of link_self fields
-    pub link_self_fields: Vec<TokenStream>,
+    pub link_self_fields: Vec<LinkSelfFields>,
     /// The names of link_one and link_self fields
-    pub link_one_and_self_fields: Vec<TokenStream>,
+    pub link_one_and_self_fields: Vec<LinkOneAndSelfFields>,
     /// The names of link_many fields
-    pub link_many_fields: Vec<TokenStream>,
+    pub link_many_fields: Vec<LinkManyFields>,
     /// Generated example: pub timeWritten: Field,
     /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
     /// to build up struct for generating fields of a Schema of the Edge
@@ -165,6 +165,7 @@ pub struct FieldsMeta {
     /// e.g: type Book = <super::Book as Node>::Schema;
     pub imports_referenced_node_schema: HashSet<ForeignNodeSchemaImport>,
 
+
     /// This generates a function that is usually called by other Nodes/Structs
     /// self_instance.drunk_water
     /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
@@ -233,7 +234,7 @@ impl FieldsMeta {
             field_receiver.create_field_definitions(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
             field_receiver.create_relation_connection_tokenstream(&mut store, table_derive_attributes);
-            field_receiver.gather_serialized_fields(&mut store);
+            field_receiver.create_serialized_fields(&mut store);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -243,22 +244,7 @@ impl FieldsMeta {
                 bindings,
                 ..
             } = VariablesModelMacro::new();
-            let update_ser_field_type = |serializable_field_type: &mut Vec<TokenStream>| {
-                if !field_receiver.skip_serializing && !field_receiver.skip {
-                    serializable_field_type
-                        .push(quote!(#crate_name::Field::new(#field_ident_serialized_fmt)));
-                }
-            };
                 
-            let mut update_aliases_struct_fields_types_kv = || {
-                store.aliases_struct_fields_types_kv.push(
-                    quote!(pub #field_ident_raw_to_underscore_suffix: #crate_name::AliasName, ),
-                );
-
-                store
-                    .aliases_struct_fields_names_kv
-                    .push(quote!(#field_ident_raw_to_underscore_suffix: #field_ident_serialized_fmt.into(),));
-            };
 
 
                 store.schema_struct_fields_types_kv.push(
@@ -279,7 +265,7 @@ impl FieldsMeta {
                     .push(quote!(#field_ident_raw_to_underscore_suffix: "".into(),));
 
                 store.connection_with_field_appended
-                        .push(quote!(
+               .push(quote!(
                                     #schema_instance.#field_ident_raw_to_underscore_suffix = #schema_instance.#field_ident_raw_to_underscore_suffix
                                       .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_serialized_fmt))
                                             .#____________update_many_bindings(#bindings).into();
