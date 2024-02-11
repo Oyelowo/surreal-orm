@@ -233,6 +233,7 @@ impl FieldsMeta {
             field_receiver.create_field_definitions(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
             field_receiver.create_relation_connection_tokenstream(&mut store, table_derive_attributes);
+            field_receiver.gather_serialized_fields(&mut store);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -248,6 +249,7 @@ impl FieldsMeta {
                         .push(quote!(#crate_name::Field::new(#field_ident_serialized_fmt)));
                 }
             };
+                
             let mut update_aliases_struct_fields_types_kv = || {
                 store.aliases_struct_fields_types_kv.push(
                     quote!(pub #field_ident_raw_to_underscore_suffix: #crate_name::AliasName, ),
@@ -303,7 +305,6 @@ impl FieldsMeta {
                     .push(quote!(pub #field_ident_raw_to_underscore_suffix: &'static str, ));
             };
 
-            update_ser_field_type(&mut store.serializable_fields);
 
             let referenced_node_meta = match relationship.clone() {
                 RelationType::Relate(relation) => {
@@ -319,9 +320,6 @@ impl FieldsMeta {
                 RelationType::LinkOne(node_object) => {
                     // let foreign_node = format_ident!("{node_object}");
                     let foreign_node = node_object.into_inner();
-                    update_ser_field_type(&mut store.link_one_fields);
-                    update_ser_field_type(&mut store.link_one_and_self_fields);
-                    update_ser_field_type(&mut store.linked_fields);
                     update_field_names_fields_types_kv(None);
 
                     insert_non_null_updater_token(
@@ -350,9 +348,6 @@ impl FieldsMeta {
                     // insert_non_null_updater_token(
                     //     quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
                     // );
-                    update_ser_field_type(&mut store.link_self_fields);
-                    update_ser_field_type(&mut store.link_one_and_self_fields);
-                    update_ser_field_type(&mut store.linked_fields);
                     update_field_names_fields_types_kv(None);
 
                     store.non_null_updater_fields.push(
@@ -366,8 +361,6 @@ impl FieldsMeta {
                 }
 
                 RelationType::LinkMany(foreign_node) => {
-                    update_ser_field_type(&mut store.link_many_fields);
-                    update_ser_field_type(&mut store.linked_fields);
                     update_field_names_fields_types_kv(Some(
                         quote!(<#foreign_node as #crate_name::Model>::Id),
                     ));
