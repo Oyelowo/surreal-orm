@@ -12,6 +12,7 @@ mod field_value_setter;
 mod generics;
 mod link_methods;
 mod relate;
+mod serialized_field_fmts;
 
 pub use core::*;
 pub use define_statement::*;
@@ -19,6 +20,7 @@ pub use field_value_setter::*;
 pub use generics::*;
 pub use link_methods::*;
 pub use relate::*;
+pub use serialized_field_fmts::*;
 
 use crate::{
     errors::ExtractorResult,
