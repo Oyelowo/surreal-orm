@@ -35,7 +35,7 @@ use super::{
     DataType,
     GenericTypeExtractor,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields, AliasesStructFieldsTypesKv, AliasesStructFieldsNamesKv, NonNullUpdaterFields, RenamedSerializedFields,
+    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields, AliasesStructFieldsTypesKv, AliasesStructFieldsNamesKv, NonNullUpdaterFields, RenamedSerializedFields, FieldMetadataToken,
 };
 
 #[derive(Default, Clone)]
@@ -186,7 +186,7 @@ pub struct FieldsMeta {
     /// ```
     pub record_link_fields_methods: Vec<LinkFieldTraversalMethodToken>,
     pub field_definitions: Vec<Vec<DefineFieldStatementToken>>,
-    pub field_metadata: Vec<TokenStream>,
+    pub field_metadata: Vec<FieldMetadataToken>,
     pub node_edge_metadata: NodeEdgeMetadataLookupTable,
     pub fields_relations_aliased: Vec<TokenStream>,
     pub non_null_updater_fields: Vec<NonNullUpdaterFields>,

@@ -22,205 +22,7 @@ use crate::{
     },
 };
 
-use super::{
-    variables::VariablesModelMacro, EdgeDirection, FieldGenericsMeta, MyFieldReceiver, Relate,
-};
-
-impl MyFieldReceiver {}
-
-// struct EdgeTableName(syn::Ident);
-create_ident_wrapper!(EdgeTableName);
-
-impl EdgeTableName {
-    pub fn to_str_typed(&self) -> EdgeTableNameStr {
-        EdgeTableNameStr(self.to_string())
-    }
-}
-
-struct EdgeTableNameStr(String);
-
-impl EdgeTableNameStr {
-    pub fn to_pascal_case_ident(&self) -> EdgeNameAsStructOriginalIdent {
-        EdgeNameAsStructOriginalIdent(format_ident!("{}", self.as_pascal_case()))
-    }
-
-    fn as_pascal_case(&self) -> EdgeTableNameStr {
-        EdgeTableNameStr(self.to_string().to_case(Case::Pascal))
-    }
-}
-
-impl Display for EdgeTableNameStr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl ToTokens for EdgeTableNameStr {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let value = &self.0;
-        tokens.extend(quote!(#value));
-    }
-}
-
-create_ident_wrapper!(EdgeNameAsMethodIdent);
-create_ident_wrapper!(EdgeRelationModelSelectedIdent);
-
-create_tokenstream_wrapper!(=>ForeignNodeSchema);
-create_tokenstream_wrapper!(=>EdgeImport);
-create_tokenstream_wrapper!(=>ForeignNodeTypeAliasWithGenerics);
-create_tokenstream_wrapper!(=>EdgeToForeignNodeMethod);
-create_tokenstream_wrapper!(=>DestinationNodeSchemaOne);
-create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
-create_ident_wrapper!(EdgeNameAsStructOriginalIdent);
-create_ident_wrapper!(EdgeNameAsStructWithDirectionIdent);
-create_ident_wrapper!(EdgeInnerModuleName);
-create_ident_wrapper!(ForeignNodeSchemaIdent);
-
-impl ForeignNodeSchemaIdent {
-    /// represents the schema but aliased as the pascal case of the destination table name
-    pub fn from_node_table_name(node_table_name: &NodeTableName) -> Self {
-        let node_table_name = node_table_name.to_string();
-        let node_table_name = format_ident!("{}", node_table_name.to_case(Case::Pascal));
-        Self(node_table_name)
-    }
-}
-
-struct DestinationNodeName(String);
-
-impl From<NodeTableName> for DestinationNodeName {
-    fn from(name: NodeTableName) -> Self {
-        Self(name.to_string())
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Clone, Debug)]
-struct NodeEdgeMetadata<'a> {
-    /// Example value: writes
-    edge_table_name: EdgeTableName,
-    // edge_type: EdgeType,
-    pub edge_types: Vec<EdgeType>,
-    // /// The current struct name ident.
-    // /// e.g given: struct Student {  }, value = Student
-    // current_struct_ident: StructIdent,
-    table_derive_attributes: &'a TableDeriveAttributes,
-    /// The database table name of the edge. Used for generating other tokens
-    /// e.g "writes"
-    direction: EdgeDirection,
-    /// Example of value: `StudentWritesBook`
-    ///
-    /// For each edge table e.g writes, we usually can have many aliases reusing thesame edge
-    /// e.g for Writes<In, Out>, we could have  StudentWritesBook, StudentWritesBlog, for each direction(e.g ->),
-    /// we want to select one of these to use its schema which is aliased as the Cased table name
-    /// in the calling location e.g
-    /// for a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book")
-    /// So we can do
-    /// type Writes = <StudentWritesBook as Edge>::Schema;
-    edge_relation_model_selected_ident: EdgeRelationModelSelectedIdent,
-    /// Example Generated:
-    /// ```rust, ignore
-    ///   type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
-    ///   type Book = <BookModel as surreal_macros::Node>::Schema;
-    ///
-    ///   type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
-    ///   type Blog = <BlogModel as surreal_macros::Node>::Schema;
-    /// ```
-    ///
-    /// Example Value:
-    /// ```rust, ignore
-    /// vec![
-    ///    quote!(
-    ///       type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
-    ///       type Book = <BookModel as surreal_macros::Node>::Schema;
-    ///     ),
-    ///     quote!(
-    ///       type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
-    ///       type Blog = <BlogModel as surreal_macros::Node>::Schema;
-    ///     ),
-    /// ],
-    /// ```
-    foreign_node_schema: Vec<ForeignNodeSchema>,
-    foreign_node_name: DestinationNodeName,
-    /// Example Generated:
-    ///
-    /// ```rust, ignore
-    /// impl Writes__ {
-    ///     fn book(&self, filter: Filter) -> Book {
-    ///         Book::__________connect_to_graph_traversal_string(
-    ///             &self.___________graph_traversal_string,
-    ///             filter,
-    ///         )
-    ///     }
-    ///
-    ///     fn blog(&self, filter: Filter) -> Blog {
-    ///         Blog::__________connect_to_graph_traversal_string(
-    ///             &self.___________graph_traversal_string,
-    ///             filter,
-    ///         )
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Example Value:
-    /// ```rust, ignore
-    /// vec![
-    ///     quote!(
-    ///        fn book(&self, filter: Filter) -> Book {
-    ///            Book::__________connect_to_graph_traversal_string(
-    ///                &self.___________graph_traversal_string,
-    ///                filter,
-    ///            )
-    ///        }
-    ///     ),
-    ///     quote!(
-    ///        fn blog(&self, filter: Filter) -> Blog {
-    ///            Blog::__________connect_to_graph_traversal_string(
-    ///                &self.___________graph_traversal_string,
-    ///                filter,
-    ///            )
-    ///        }
-    ///     ),
-    ///    ]
-    /// ```
-    edge_to_foreign_node_connection_method: Vec<EdgeToForeignNodeMethod>,
-    // static_assertions: Vec<StaticAssertionToken>,
-    imports: Vec<EdgeImport>,
-    edge_name_as_method_ident: EdgeNameAsMethodIdent,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-struct EdgeNameWithDirectionIndicator(String);
-
-#[derive(Default, Clone)]
-pub struct NodeEdgeMetadataLookupTable(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
-impl Deref for NodeEdgeMetadataLookupTable {
-    type Target = HashMap<EdgeNameAsStructWithDirectionIdent, NodeEdgeMetadata>;
-
-    fn deref(&self) -> &Self::Target {
-        self.0
-    }
-}
-
-impl NodeEdgeMetadataLookupTable {
-    pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata> {
-        self.0
-    }
-}
-create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
-
-create_tokenstream_wrapper!(=>ArrowTokenStream);
-
-impl From<EdgeDirection> for ArrowTokenStream {
-    fn from(value: EdgeDirection) -> Self {
-        let crate_name = get_crate_name(false);
-
-        let arrow = match value {
-            EdgeDirection::Out => quote!(#crate_name::Arrow::Right),
-            EdgeDirection::In => quote!(#crate_name::Arrow::Left),
-        };
-        Self(arrow)
-    }
-}
+use super::{FieldGenericsMeta, MyFieldReceiver, Relate};
 
 impl MyFieldReceiver {
     pub fn create_relation_connection_tokenstream(
@@ -435,6 +237,199 @@ impl MyFieldReceiver {
         StaticAssertionToken(quote!(
                 #( #static_assertions) *
         ))
+    }
+}
+
+create_ident_wrapper!(EdgeTableName);
+
+impl EdgeTableName {
+    pub fn to_str_typed(&self) -> EdgeTableNameStr {
+        EdgeTableNameStr(self.to_string())
+    }
+}
+
+struct EdgeTableNameStr(String);
+
+impl EdgeTableNameStr {
+    pub fn to_pascal_case_ident(&self) -> EdgeNameAsStructOriginalIdent {
+        EdgeNameAsStructOriginalIdent(format_ident!("{}", self.as_pascal_case()))
+    }
+
+    fn as_pascal_case(&self) -> EdgeTableNameStr {
+        EdgeTableNameStr(self.to_string().to_case(Case::Pascal))
+    }
+}
+
+impl Display for EdgeTableNameStr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl ToTokens for EdgeTableNameStr {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let value = &self.0;
+        tokens.extend(quote!(#value));
+    }
+}
+
+create_ident_wrapper!(EdgeNameAsMethodIdent);
+create_ident_wrapper!(EdgeRelationModelSelectedIdent);
+
+create_tokenstream_wrapper!(=>ForeignNodeSchema);
+create_tokenstream_wrapper!(=>EdgeImport);
+create_tokenstream_wrapper!(=>ForeignNodeTypeAliasWithGenerics);
+create_tokenstream_wrapper!(=>EdgeToForeignNodeMethod);
+create_tokenstream_wrapper!(=>DestinationNodeSchemaOne);
+create_ident_wrapper!(ForeignNodeAssociatedTypeInOrOut);
+create_ident_wrapper!(EdgeNameAsStructOriginalIdent);
+create_ident_wrapper!(EdgeNameAsStructWithDirectionIdent);
+create_ident_wrapper!(EdgeInnerModuleName);
+create_ident_wrapper!(ForeignNodeSchemaIdent);
+
+impl ForeignNodeSchemaIdent {
+    /// represents the schema but aliased as the pascal case of the destination table name
+    pub fn from_node_table_name(node_table_name: &NodeTableName) -> Self {
+        let node_table_name = node_table_name.to_string();
+        let node_table_name = format_ident!("{}", node_table_name.to_case(Case::Pascal));
+        Self(node_table_name)
+    }
+}
+
+struct DestinationNodeName(String);
+
+impl From<NodeTableName> for DestinationNodeName {
+    fn from(name: NodeTableName) -> Self {
+        Self(name.to_string())
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+struct NodeEdgeMetadata<'a> {
+    /// Example value: writes
+    edge_table_name: EdgeTableName,
+    // edge_type: EdgeType,
+    pub edge_types: Vec<EdgeType>,
+    // /// The current struct name ident.
+    // /// e.g given: struct Student {  }, value = Student
+    // current_struct_ident: StructIdent,
+    table_derive_attributes: &'a TableDeriveAttributes,
+    /// The database table name of the edge. Used for generating other tokens
+    /// e.g "writes"
+    direction: EdgeDirection,
+    /// Example of value: `StudentWritesBook`
+    ///
+    /// For each edge table e.g writes, we usually can have many aliases reusing thesame edge
+    /// e.g for Writes<In, Out>, we could have  StudentWritesBook, StudentWritesBlog, for each direction(e.g ->),
+    /// we want to select one of these to use its schema which is aliased as the Cased table name
+    /// in the calling location e.g
+    /// for a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book")
+    /// So we can do
+    /// type Writes = <StudentWritesBook as Edge>::Schema;
+    edge_relation_model_selected_ident: EdgeRelationModelSelectedIdent,
+    /// Example Generated:
+    /// ```rust, ignore
+    ///   type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
+    ///   type Book = <BookModel as surreal_macros::Node>::Schema;
+    ///
+    ///   type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
+    ///   type Blog = <BlogModel as surreal_macros::Node>::Schema;
+    /// ```
+    ///
+    /// Example Value:
+    /// ```rust, ignore
+    /// vec![
+    ///    quote!(
+    ///       type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
+    ///       type Book = <BookModel as surreal_macros::Node>::Schema;
+    ///     ),
+    ///     quote!(
+    ///       type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
+    ///       type Blog = <BlogModel as surreal_macros::Node>::Schema;
+    ///     ),
+    /// ],
+    /// ```
+    foreign_node_schema: Vec<ForeignNodeSchema>,
+    foreign_node_name: DestinationNodeName,
+    /// Example Generated:
+    ///
+    /// ```rust, ignore
+    /// impl Writes__ {
+    ///     fn book(&self, filter: Filter) -> Book {
+    ///         Book::__________connect_to_graph_traversal_string(
+    ///             &self.___________graph_traversal_string,
+    ///             filter,
+    ///         )
+    ///     }
+    ///
+    ///     fn blog(&self, filter: Filter) -> Blog {
+    ///         Blog::__________connect_to_graph_traversal_string(
+    ///             &self.___________graph_traversal_string,
+    ///             filter,
+    ///         )
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Example Value:
+    /// ```rust, ignore
+    /// vec![
+    ///     quote!(
+    ///        fn book(&self, filter: Filter) -> Book {
+    ///            Book::__________connect_to_graph_traversal_string(
+    ///                &self.___________graph_traversal_string,
+    ///                filter,
+    ///            )
+    ///        }
+    ///     ),
+    ///     quote!(
+    ///        fn blog(&self, filter: Filter) -> Blog {
+    ///            Blog::__________connect_to_graph_traversal_string(
+    ///                &self.___________graph_traversal_string,
+    ///                filter,
+    ///            )
+    ///        }
+    ///     ),
+    ///    ]
+    /// ```
+    edge_to_foreign_node_connection_method: Vec<EdgeToForeignNodeMethod>,
+    // static_assertions: Vec<StaticAssertionToken>,
+    imports: Vec<EdgeImport>,
+    edge_name_as_method_ident: EdgeNameAsMethodIdent,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+struct EdgeNameWithDirectionIndicator(String);
+
+#[derive(Default, Clone)]
+pub struct NodeEdgeMetadataLookupTable(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
+impl Deref for NodeEdgeMetadataLookupTable {
+    type Target = HashMap<EdgeNameAsStructWithDirectionIdent, NodeEdgeMetadata>;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
+
+impl NodeEdgeMetadataLookupTable {
+    pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata> {
+        self.0
+    }
+}
+create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
+
+create_tokenstream_wrapper!(=>ArrowTokenStream);
+
+impl From<EdgeDirection> for ArrowTokenStream {
+    fn from(value: EdgeDirection) -> Self {
+        let crate_name = get_crate_name(false);
+
+        let arrow = match value {
+            EdgeDirection::Out => quote!(#crate_name::Arrow::Right),
+            EdgeDirection::In => quote!(#crate_name::Arrow::Left),
+        };
+        Self(arrow)
     }
 }
 
