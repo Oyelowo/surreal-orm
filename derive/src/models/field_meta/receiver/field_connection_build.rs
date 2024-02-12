@@ -22,7 +22,7 @@ impl MyFieldReceiver {
         // TODO: Decide if to use table_derive_attrs or store.table_derive_attributes()
         // let table_derive_attrs = store.table_derive_attributes();
         let field_ident_normalized = self.field_ident_normalized(&table_derive_attrs.casing()?)?;
-        let field_name_serialized = self.field_name_serialized(&table_derive_attrs.casing()?)?;
+        let field_name_serialized = self.db_field_name(&table_derive_attrs.casing()?)?;
         let field_name_pascalized = self.field_name_pascalized(table_derive_attrs);
         let VariablesModelMacro {
             _____field_names,

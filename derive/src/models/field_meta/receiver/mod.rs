@@ -5,10 +5,13 @@
  * Licensed under the MIT license
  */
 
+mod aliases;
 mod core;
 mod define_statement;
 mod field_connection_build;
 mod field_ident;
+mod field_metadata;
+mod field_type_assertions;
 mod field_value_setter;
 mod generics;
 mod link_methods;
@@ -20,6 +23,7 @@ mod updater_non_null;
 pub use core::*;
 pub use define_statement::*;
 pub use field_connection_build::*;
+pub use field_metadata::*;
 pub use field_value_setter::*;
 pub use generics::*;
 pub use link_methods::*;
