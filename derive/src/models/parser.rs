@@ -8,7 +8,8 @@
 use std::{
     collections::{hash_map::Entry, HashMap, HashSet},
     fmt::Display,
-    ops::Deref, option,
+    ops::Deref,
+    option,
 };
 
 use convert_case::{Case, Casing};
@@ -32,10 +33,32 @@ use super::{
     relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
     // replace_self_in_id,
     variables::VariablesModelMacro,
+    AliasesStructFieldsNamesKv,
+    AliasesStructFieldsTypesKv,
     DataType,
+    DefineFieldStatementToken,
+    FieldMetadataToken,
+    FieldSetterImplTokens,
+    ForeignNodeSchemaImport,
     GenericTypeExtractor,
+    LinkFieldTraversalMethodToken,
+    LinkManyFields,
+    LinkOneAndSelfFields,
+    LinkOneFields,
+    LinkSelfFields,
+    LinkedFields,
+    NodeEdgeMetadataLookupTable,
+    NodeEdgeMetadataStore,
+    NonNullUpdaterFields,
+    RenamedSerializedFields,
+    SchemaStructFieldsNamesKv,
+    SchemaStructFieldsNamesKvEmpty,
+    SchemaStructFieldsNamesKvPrefixed,
+    SchemaStructFieldsTypesKv,
+    SerializableFields,
+    StaticAssertionToken,
     TokenStreamHashable,
-    TypeStripper, FieldSetterImplTokens, DefineFieldStatementToken, LinkFieldTraversalMethodToken, ForeignNodeSchemaImport, StaticAssertionToken, NodeEdgeMetadataStore, NodeEdgeMetadataLookupTable, SerializableFields, LinkedFields, LinkOneFields, LinkSelfFields, LinkOneAndSelfFields, LinkManyFields, AliasesStructFieldsTypesKv, AliasesStructFieldsNamesKv, NonNullUpdaterFields, RenamedSerializedFields, FieldMetadataToken,
+    TypeStripper,
 };
 
 #[derive(Default, Clone)]
@@ -72,7 +95,7 @@ pub struct FieldsMeta {
     ///     pub timeWritten: #_____field_module::TimeWritten,
     /// }
     /// ```
-    pub schema_struct_fields_types_kv: Vec<TokenStream>,
+    pub schema_struct_fields_types_kv: Vec<SchemaStructFieldsTypesKv>,
 
     pub field_wrapper_type_custom_implementations: Vec<FieldSetterImplTokens>,
 
@@ -89,8 +112,8 @@ pub struct FieldsMeta {
     ///     timeWritten: "timeWritten".into(),
     /// }
     /// ```
-    pub schema_struct_fields_names_kv: Vec<TokenStream>,
-    pub schema_struct_fields_names_kv_prefixed: Vec<TokenStream>,
+    pub schema_struct_fields_names_kv: Vec<SchemaStructFieldsNamesKv>,
+    pub schema_struct_fields_names_kv_prefixed: Vec<SchemaStructFieldsNamesKvPrefixed>,
 
     /// Used to build up empty string values for all schema fields
     /// Example value: pub timeWritten: "".into(),
@@ -103,7 +126,7 @@ pub struct FieldsMeta {
     ///     timeWritten: "".into(),
     /// }
     /// ```
-    pub schema_struct_fields_names_kv_empty: Vec<TokenStream>,
+    pub schema_struct_fields_names_kv_empty: Vec<SchemaStructFieldsNamesKvEmpty>,
 
     /// Generated example: pub writtenBooks: AliasName,
     /// This is used when you have a relate attribute signaling a graph with e.g node->edge->node
@@ -165,7 +188,6 @@ pub struct FieldsMeta {
     /// e.g: type Book = <super::Book as Node>::Schema;
     pub imports_referenced_node_schema: HashSet<ForeignNodeSchemaImport>,
 
-
     /// This generates a function that is usually called by other Nodes/Structs
     /// self_instance.drunk_water
     /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
@@ -193,8 +215,8 @@ pub struct FieldsMeta {
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TokenStream,
 
-    pub table_derive_attributes: Option< TableDeriveAttributes >,
-    pub data_type: Option< DataType >,
+    pub table_derive_attributes: Option<TableDeriveAttributes>,
+    pub data_type: Option<DataType>,
 }
 
 impl FieldsMeta {
@@ -204,17 +226,21 @@ impl FieldsMeta {
             data_type: Some(data_type),
             ..Default::default()
         };
-       store 
+        store
     }
-        
+
     pub(crate) fn table_derive_attributes(&self) -> &TableDeriveAttributes {
-        self.table_derive_attributes.as_ref().expect("Table derive attribute has not been set. Make sure it has been set")
+        self.table_derive_attributes
+            .as_ref()
+            .expect("Table derive attribute has not been set. Make sure it has been set")
     }
-    
+
     pub(crate) fn data_type(&self) -> &DataType {
-        self.data_type.as_ref().expect("Table derive attribute has not been set. Make sure it has been set")
+        self.data_type
+            .as_ref()
+            .expect("Table derive attribute has not been set. Make sure it has been set")
     }
-    
+
     /// Derive the schema properties for a struct
     pub(crate) fn parse_fields(
         table_derive_attributes: &TableDeriveAttributes,
@@ -224,7 +250,8 @@ impl FieldsMeta {
         let struct_generics = &table_derive_attributes.generics;
         let mut store = Self::new(table_derive_attributes, data_type);
 
-        for field_receiver in table_derive_attributes.data
+        for field_receiver in table_derive_attributes
+            .data
             .as_ref()
             .take_struct()
             .ok_or_else(|| darling::Error::custom("Expected a struct"))?
@@ -233,11 +260,14 @@ impl FieldsMeta {
             let crate_name = get_crate_name(false);
             field_receiver.create_field_definitions(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
-            field_receiver.create_relation_connection_tokenstream(&mut store, table_derive_attributes);
+            field_receiver
+                .create_relation_connection_tokenstream(&mut store, table_derive_attributes);
             field_receiver.create_serialized_fields(&mut store);
             field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
-            field_receiver.create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
+            field_receiver
+                .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
             field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
+            field_receiver.create_simple_meta(&mut store, table_derive_attrs);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -247,35 +277,6 @@ impl FieldsMeta {
                 bindings,
                 ..
             } = VariablesModelMacro::new();
-                
-
-
-                store.schema_struct_fields_types_kv.push(
-                    quote!(pub #field_ident_raw_to_underscore_suffix: #_____field_names::#field_name_as_camel, ),
-                );
-
-                store
-                    .schema_struct_fields_names_kv
-                    .push(quote!(#field_ident_raw_to_underscore_suffix: #field_ident_serialized_fmt.into(),));
-
-                store.schema_struct_fields_names_kv_prefixed
-                            .push(quote!(#field_ident_raw_to_underscore_suffix:
-                                                #crate_name::Field::new(format!("{}.{}", prefix.build(), #field_ident_serialized_fmt))
-                                                .with_bindings(prefix.get_bindings()).into(),));
-
-                store
-                    .schema_struct_fields_names_kv_empty
-                    .push(quote!(#field_ident_raw_to_underscore_suffix: "".into(),));
-
-                store.connection_with_field_appended
-               .push(quote!(
-                                    #schema_instance.#field_ident_raw_to_underscore_suffix = #schema_instance.#field_ident_raw_to_underscore_suffix
-                                      .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_serialized_fmt))
-                                            .#____________update_many_bindings(#bindings).into();
-                                ));
-            };
-
-
 
             let referenced_node_meta = match relationship.clone() {
                 RelationType::Relate(relation) => {
@@ -291,7 +292,6 @@ impl FieldsMeta {
                     // let foreign_node = format_ident!("{node_object}");
                     let foreign_node = node_object.into_inner();
                     update_field_names_fields_types_kv(None);
-
 
                     // let delifed_type = replace_lifetimes_with_underscore(&mut field_type.clone());
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
@@ -328,7 +328,6 @@ impl FieldsMeta {
                         quote!(<#foreign_node as #crate_name::Model>::Id),
                     ));
 
-
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                     get_link_meta_with_defs(&node_object, true)
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
@@ -344,7 +343,6 @@ impl FieldsMeta {
                 }
 
                 RelationType::NestArray(foreign_object_item) => {
-
                     let nesting_level = count_vec_nesting(field_type);
                     let nested_vec_type = generate_nested_vec_type(&foreign_node, nesting_level);
 
@@ -381,7 +379,6 @@ impl FieldsMeta {
                 store.table_id_type = quote!(#field_type);
                 // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
             }
-
 
             store
                 .static_assertions

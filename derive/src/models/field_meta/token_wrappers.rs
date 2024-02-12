@@ -37,3 +37,8 @@ create_tokenstream_wrapper!(=> RenamedSerializedFields);
 create_tokenstream_wrapper!(=> NonNullUpdaterFields);
 
 create_tokenstream_wrapper!(=> FieldMetadataToken);
+
+create_tokenstream_wrapper!(=> SchemaStructFieldsTypesKv);
+create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKv);
+create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKvPrefixed);
+create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKvEmpty);

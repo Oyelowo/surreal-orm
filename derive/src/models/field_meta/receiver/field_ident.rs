@@ -12,16 +12,17 @@ use std::ops::Deref;
 use syn::Ident;
 
 use crate::errors::ExtractorResult;
-use crate::models::field_name_serialized;
 use crate::models::{
     casing::*, create_ident_wrapper, derive_attributes::TableDeriveAttributes,
     field_name_serialized::FieldNameSerialized, CaseString, StructLevelCasing,
 };
+use crate::models::{create_tokenstream_wrapper, field_name_serialized};
 
 use super::MyFieldReceiver;
 
 create_ident_wrapper!(IdentCased);
 create_ident_wrapper!(FieldIdentNormalized);
+create_ident_wrapper!(FieldNamePascalized);
 
 impl MyFieldReceiver {
     pub(crate) fn field_ident_normalized(
@@ -36,6 +37,21 @@ impl MyFieldReceiver {
         struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<FieldNameSerialized> {
         Ok(self.ident_meta(struct_casing)?.1)
+    }
+
+    pub fn field_name_pascalized(
+        &self,
+        table_attributes: &TableDeriveAttributes,
+    ) -> FieldNamePascalized {
+        let struct_level_casing = table_attributes.casing();
+        let field_name_normalized = self.field_ident_normalized(struct_level_casing)?;
+
+        let field_name_pascalized = format_ident!(
+            "{}",
+            field_name_normalized.to_string().to_case(Case::Pascal)
+        );
+
+        field_name_pascalized.into()
     }
 
     fn ident_meta(

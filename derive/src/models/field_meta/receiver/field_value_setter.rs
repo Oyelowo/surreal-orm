@@ -41,10 +41,6 @@ create_tokenstream_wrapper!(
 =>
 FieldSetterImplTokens);
 
-create_tokenstream_wrapper!(
-/// Fieldname in pascal case
-=>FieldNamePascalized);
-
 impl MyFieldReceiver {
     pub fn create_field_setter_impl(
         &self,
@@ -153,21 +149,6 @@ impl MyFieldReceiver {
             #array_trait
         );
         FieldSetterImplTokens(field_setter_impls).into()
-    }
-
-    fn field_name_pascalized(
-        &self,
-        table_attributes: &TableDeriveAttributes,
-    ) -> FieldNamePascalized {
-        let struct_level_casing = table_attributes.casing();
-        let field_name_normalized = self.field_ident_normalized(struct_level_casing)?;
-
-        let field_name_pascalized = format_ident!(
-            "{}",
-            field_name_normalized.to_string().to_case(Case::Pascal)
-        );
-
-        field_name_pascalized.to_token_stream().into()
     }
 
     fn array_trait_impl(
