@@ -237,6 +237,7 @@ impl FieldsMeta {
             field_receiver.create_serialized_fields(&mut store);
             field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
             field_receiver.create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
+            field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -381,20 +382,6 @@ impl FieldsMeta {
                 // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
             }
 
-            if !referenced_node_meta.field_definition.is_empty() {
-                store
-                    .field_definitions
-                    .push(referenced_node_meta.field_definition.clone());
-
-                let field_definition = referenced_node_meta.field_definition.clone();
-                store
-                    .field_metadata
-                    .push(quote!(#crate_name::FieldMetadata {
-                        name: #field_ident_serialized_fmt.into(),
-                        old_name: #old_field_name_ts,
-                        definition: ::std::vec![ #field_definition ]
-                    }));
-            }
 
             store
                 .static_assertions
