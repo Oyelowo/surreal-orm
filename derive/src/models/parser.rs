@@ -39,6 +39,7 @@ use super::{
     DefineFieldStatementToken,
     FieldMetadataToken,
     FieldSetterImplTokens,
+    FieldsRelationsAliased,
     ForeignNodeSchemaImport,
     GenericTypeExtractor,
     LinkFieldTraversalMethodToken,
@@ -210,7 +211,7 @@ pub struct FieldsMeta {
     pub field_definitions: Vec<Vec<DefineFieldStatementToken>>,
     pub field_metadata: Vec<FieldMetadataToken>,
     pub node_edge_metadata: NodeEdgeMetadataLookupTable,
-    pub fields_relations_aliased: Vec<TokenStream>,
+    pub fields_relations_aliased: Vec<FieldsRelationsAliased>,
     pub non_null_updater_fields: Vec<NonNullUpdaterFields>,
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TokenStream,
@@ -279,15 +280,6 @@ impl FieldsMeta {
             } = VariablesModelMacro::new();
 
             let referenced_node_meta = match relationship.clone() {
-                RelationType::Relate(relation) => {
-                    store
-                        .node_edge_metadata
-                        .update(&relation, struct_name_ident, field_type);
-                    let connection = relation.connection;
-                    store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_serialized_fmt))));
-                    ReferencedNodeMeta::default()
-                }
-
                 RelationType::LinkOne(node_object) => {
                     // let foreign_node = format_ident!("{node_object}");
                     let foreign_node = node_object.into_inner();

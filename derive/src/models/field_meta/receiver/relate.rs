@@ -30,12 +30,16 @@ impl MyFieldReceiver {
         store: &mut FieldsMeta,
         table_derive_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<()> {
+        let field_name_serialized =
+            self.field_name_serialized(&table_derive_attributes.casing()?)?;
         match self.to_relation_type() {
             RelationType::Relate(relate) => {
                 store
                     .static_assertions
                     .push(self.create_static_assertions(&relate, &table_derive_attributes.ident));
-                self.relate(store, table_derive_attributes, edge_type)?
+                self.relate(store, table_derive_attributes, edge_type)?;
+                let connection = relate.connection;
+                store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_name_serialized))).into());
             }
             _ => {}
         }
