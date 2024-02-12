@@ -37,6 +37,7 @@ use super::{
     AliasesStructFieldsTypesKv,
     ConnectionWithFieldAppended,
     DataType,
+    DbFieldNames,
     DefineFieldStatementToken,
     FieldMetadataToken,
     FieldSetterImplTokens,
@@ -58,7 +59,6 @@ use super::{
     SchemaStructFieldsNamesKvPrefixed,
     SchemaStructFieldsTypesKv,
     SerializableFields,
-    SerializedFieldNamesNormalised,
     StaticAssertionToken,
     TableIdType,
     TokenStreamHashable,
@@ -68,7 +68,7 @@ use super::{
 #[derive(Default, Clone)]
 pub struct FieldsMeta {
     /// list of fields names that are actually serialized and not skipped.
-    pub serializable_fields: Vec<SerializableFields>,
+    pub serialized_fmt_db_field_names_instance: Vec<SerializableFields>,
     /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
     pub linked_fields: Vec<LinkedFields>,
     /// The names of link_one fields
@@ -160,7 +160,7 @@ pub struct FieldsMeta {
     /// Field names after taking into consideration
     /// serde serialized renaming or casings
     /// i.e time_written => timeWritten if serde camelizes
-    pub serialized_field_names_normalised: Vec<SerializedFieldNamesNormalised>,
+    pub serialized_field_names_normalised: Vec<DbFieldNames>,
 
     /// Generated example:
     /// ```rust,ignore
@@ -261,20 +261,20 @@ impl FieldsMeta {
             .ok_or_else(|| darling::Error::custom("Expected a struct"))?
             .fields
         {
-            let crate_name = get_crate_name(false);
+            field_receiver.create_table_id_type_token(&mut store, table_derive_attrs);
             field_receiver.create_field_definitions(&mut store, table_derive_attrs);
+            field_receiver.create_db_field_names_token(&mut store, table_derive_attrs);
+            field_receiver.create_field_type_static_assertion_token(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
+            field_receiver.create_field_metadata_token(&mut store, table_derive_attrs);
+            field_receiver.create_field_connection_builder_token(&mut store, table_derive_attrs);
+            field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
             field_receiver
                 .create_relation_connection_tokenstream(&mut store, table_derive_attributes);
-            field_receiver.create_serialized_fields(&mut store);
+            field_receiver.create_db_fields_for_links_and_loaders(&mut store);
             field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
             field_receiver
                 .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
-            field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
-            field_receiver.create_field_connection_builder_token(&mut store, table_derive_attrs);
-            field_receiver.create_simple_tokens(&mut store, table_derive_attrs);
-            field_receiver.create_field_type_static_assertion_token(&mut store, table_derive_attrs);
-
             Ok(store)
         }
     }

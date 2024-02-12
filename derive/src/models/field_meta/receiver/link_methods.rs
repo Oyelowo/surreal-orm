@@ -75,7 +75,7 @@ impl MyFieldReceiver {
         let crate_name = get_crate_name(false);
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing);
-        let field_name_serialized = self.field_name_serialized(&struct_casing);
+        let field_name_serialized = self.db_field_name(&struct_casing);
 
         let record_link_default_alias_as_method = quote!(
             pub fn #field_ident_normalized(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
@@ -115,7 +115,7 @@ impl MyFieldReceiver {
         let struct_name_ident = table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing);
-        let field_name_serialized = self.field_name_serialized(&struct_casing);
+        let field_name_serialized = self.db_field_name(&struct_casing);
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
@@ -165,7 +165,7 @@ impl MyFieldReceiver {
         let current_struct_ident = &table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = self.field_name_serialized(&struct_casing)?;
+        let field_name_serialized = self.db_field_name(&struct_casing)?;
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
@@ -218,7 +218,7 @@ impl MyFieldReceiver {
         let current_struct_ident = &table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = self.field_name_serialized(&struct_casing)?;
+        let field_name_serialized = self.db_field_name(&struct_casing)?;
         let node_type_alias_with_trait_bounds = embedded_object;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
@@ -272,7 +272,7 @@ impl MyFieldReceiver {
         let current_struct_ident = &table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = self.field_name_serialized(&struct_casing)?;
+        let field_name_serialized = self.db_field_name(&struct_casing)?;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,

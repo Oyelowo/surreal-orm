@@ -32,7 +32,7 @@ impl MyFieldReceiver {
         Ok(self.ident_meta(struct_casing)?.0)
     }
 
-    pub(crate) fn field_name_serialized(
+    pub(crate) fn db_field_name(
         &self,
         struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<FieldNameSerialized> {
