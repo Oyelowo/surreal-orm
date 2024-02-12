@@ -58,7 +58,9 @@ use super::{
     SchemaStructFieldsNamesKvPrefixed,
     SchemaStructFieldsTypesKv,
     SerializableFields,
+    SerializedFieldNamesNormalised,
     StaticAssertionToken,
+    TableIdType,
     TokenStreamHashable,
     TypeStripper,
 };
@@ -158,7 +160,7 @@ pub struct FieldsMeta {
     /// Field names after taking into consideration
     /// serde serialized renaming or casings
     /// i.e time_written => timeWritten if serde camelizes
-    pub serialized_field_names_normalised: Vec<String>,
+    pub serialized_field_names_normalised: Vec<SerializedFieldNamesNormalised>,
 
     /// Generated example:
     /// ```rust,ignore
@@ -215,7 +217,7 @@ pub struct FieldsMeta {
     pub fields_relations_aliased: Vec<FieldsRelationsAliased>,
     pub non_null_updater_fields: Vec<NonNullUpdaterFields>,
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
-    pub table_id_type: TokenStream,
+    pub table_id_type: TableIdType,
 
     pub table_derive_attributes: Option<TableDeriveAttributes>,
     pub data_type: Option<DataType>,
@@ -270,6 +272,7 @@ impl FieldsMeta {
                 .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
             field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
             field_receiver.create_field_connection_builder_token(&mut store, table_derive_attrs);
+            field_receiver.create_simple_tokens(&mut store, table_derive_attrs);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -357,30 +360,6 @@ impl FieldsMeta {
                 }
                 RelationType::List(_) => todo!(),
             };
-
-            if field_ident_serialized_fmt == "id" {
-                store.table_id_type = quote!(#field_type);
-                // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
-            }
-
-            store
-                .static_assertions
-                .push(referenced_node_meta.foreign_node_type_validator);
-            store
-                .static_assertions
-                .extend(referenced_node_meta.field_type_validation_asserts);
-
-            store
-                .imports_referenced_node_schema
-                .insert(referenced_node_meta.foreign_node_schema_import.into());
-
-            store
-                .record_link_fields_methods
-                .push(referenced_node_meta.record_link_default_alias_as_method);
-
-            store
-                .serialized_field_names_normalised
-                .push(field_ident_serialized_fmt.to_owned());
         }
 
         Ok(store)
