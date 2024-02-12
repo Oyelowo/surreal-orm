@@ -30,6 +30,8 @@ create_tokenstream_wrapper!(=> LinkOneAndSelfFields);
 create_tokenstream_wrapper!(=> LinkManyFields);
 create_tokenstream_wrapper!(=> SerializableFields);
 
+create_tokenstream_wrapper!(=> ConnectionWithFieldAppended);
+
 create_tokenstream_wrapper!(=> AliasesStructFieldsTypesKv);
 create_tokenstream_wrapper!(=> AliasesStructFieldsNamesKv);
 
