@@ -40,6 +40,8 @@ create_tokenstream_wrapper!(=> FieldsRelationsAliased);
 create_tokenstream_wrapper!(=> RenamedSerializedFields);
 create_tokenstream_wrapper!(=> NonNullUpdaterFields);
 
+create_tokenstream_wrapper!(=> TableIdType);
+
 create_tokenstream_wrapper!(=> FieldMetadataToken);
 
 create_tokenstream_wrapper!(=> SchemaStructFieldsTypesKv);
