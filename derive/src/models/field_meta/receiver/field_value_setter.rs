@@ -47,9 +47,16 @@ impl MyFieldReceiver {
         store: &mut FieldsMeta,
         table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<()> {
-        store
-            .field_wrapper_type_custom_implementations
-            .push(self.get_field_value_setter_impl(table_attributes)?);
+        match self.to_relation_type() {
+            // Relate fields are readonly and mainly for aliasing connections in select statements
+            // To create a relation, we typically use a separate relation statement
+            RelationType::Relate(_) => {}
+            _ => {
+                store
+                    .field_wrapper_type_custom_implementations
+                    .push(self.get_field_value_setter_impl(table_attributes)?);
+            }
+        };
         Ok(())
     }
 
