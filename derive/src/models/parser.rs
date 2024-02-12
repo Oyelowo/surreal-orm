@@ -35,6 +35,7 @@ use super::{
     variables::VariablesModelMacro,
     AliasesStructFieldsNamesKv,
     AliasesStructFieldsTypesKv,
+    ConnectionWithFieldAppended,
     DataType,
     DefineFieldStatementToken,
     FieldMetadataToken,
@@ -197,7 +198,7 @@ pub struct FieldsMeta {
     /// ```rust,ignore
     /// Student.field_name
     /// ```
-    pub connection_with_field_appended: Vec<TokenStream>,
+    pub connection_with_field_appended: Vec<ConnectionWithFieldAppended>,
 
     /// When a field references another model as Link, we want to generate a method for that
     /// to be able to access the foreign fields
@@ -268,7 +269,7 @@ impl FieldsMeta {
             field_receiver
                 .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
             field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
-            field_receiver.create_simple_meta(&mut store, table_derive_attrs);
+            field_receiver.create_field_connection_builder_token(&mut store, table_derive_attrs);
 
             let VariablesModelMacro {
                 ___________graph_traversal_string,
@@ -283,7 +284,6 @@ impl FieldsMeta {
                 RelationType::LinkOne(node_object) => {
                     // let foreign_node = format_ident!("{node_object}");
                     let foreign_node = node_object.into_inner();
-                    update_field_names_fields_types_kv(None);
 
                     // let delifed_type = replace_lifetimes_with_underscore(&mut field_type.clone());
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
@@ -307,7 +307,6 @@ impl FieldsMeta {
                     // insert_non_null_updater_token(
                     //     quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
                     // );
-                    update_field_names_fields_types_kv(None);
 
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
 
@@ -316,10 +315,6 @@ impl FieldsMeta {
                 }
 
                 RelationType::LinkMany(foreign_node) => {
-                    update_field_names_fields_types_kv(Some(
-                        quote!(<#foreign_node as #crate_name::Model>::Id),
-                    ));
-
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                     get_link_meta_with_defs(&node_object, true)
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
@@ -328,7 +323,6 @@ impl FieldsMeta {
                 RelationType::NestObject(node_object) => {
                     let foreign_node = format_ident!("{node_object}");
                     store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_node);));
-                    update_field_names_fields_types_kv(None);
 
                     get_nested_meta_with_defs(&node_object, false)
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
@@ -342,13 +336,10 @@ impl FieldsMeta {
                         #crate_name::validators::assert_type_eq_all!(#field_type, #nested_vec_type);
                     });
 
-                    update_field_names_fields_types_kv(Some(quote!(#foreign_object_item)));
                     get_nested_meta_with_defs(&node_object, true)
                         .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
                 RelationType::None => {
-                    update_field_names_fields_types_kv(None);
-
                     let ref_node_meta = if field_receiver.rust_field_type().is_list() {
                         ReferencedNodeMeta::from_simple_array(field_ident_raw_to_underscore_suffix)
                     } else {

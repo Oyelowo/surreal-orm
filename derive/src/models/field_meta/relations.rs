@@ -62,6 +62,10 @@ pub(crate) enum RelationType {
 }
 
 impl RelationType {
+    pub fn is_relate_graph(&self) -> bool {
+        matches!(self, RelationType::Relate(_))
+    }
+
     pub fn is_none_relational(&self) -> bool {
         matches!(self, RelationType::None)
     }
