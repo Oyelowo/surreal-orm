@@ -273,95 +273,9 @@ impl FieldsMeta {
             field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
             field_receiver.create_field_connection_builder_token(&mut store, table_derive_attrs);
             field_receiver.create_simple_tokens(&mut store, table_derive_attrs);
+            field_receiver.create_field_type_static_assertion_token(&mut store, table_derive_attrs);
 
-            let VariablesModelMacro {
-                ___________graph_traversal_string,
-                ____________update_many_bindings,
-                _____field_names,
-                schema_instance,
-                bindings,
-                ..
-            } = VariablesModelMacro::new();
-
-            let referenced_node_meta = match relationship.clone() {
-                RelationType::LinkOne(node_object) => {
-                    // let foreign_node = format_ident!("{node_object}");
-                    let foreign_node = node_object.into_inner();
-
-                    // let delifed_type = replace_lifetimes_with_underscore(&mut field_type.clone());
-                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
-                    get_link_meta_with_defs(&node_object, false)
-                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
-                }
-
-                RelationType::LinkSelf(node_object) => {
-                    let foreign_node = format_ident!("{node_object}");
-                    if *struct_name_ident != node_object.to_string() {
-                        return Err(syn::Error::new_spanned(
-                            field_name_original,
-                            "The field - `{field_name_original}` - has a linkself \
-                                   attribute or type that is not pointing to the current struct. \
-                                   Make sure the field attribute is link_self=\"{struct_name_ident}\" \
-                                   and the type is LinkSelf<{struct_name_ident}>. ",
-                        )
-                        .into());
-                    }
-
-                    // insert_non_null_updater_token(
-                    //     quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
-                    // );
-
-                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
-
-                    get_link_meta_with_defs(&node_object, false)
-                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
-                }
-
-                RelationType::LinkMany(foreign_node) => {
-                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
-                    get_link_meta_with_defs(&node_object, true)
-                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
-                }
-
-                RelationType::NestObject(node_object) => {
-                    let foreign_node = format_ident!("{node_object}");
-                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_node);));
-
-                    get_nested_meta_with_defs(&node_object, false)
-                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
-                }
-
-                RelationType::NestArray(foreign_object_item) => {
-                    let nesting_level = count_vec_nesting(field_type);
-                    let nested_vec_type = generate_nested_vec_type(&foreign_node, nesting_level);
-
-                    store.static_assertions.push(quote! {
-                        #crate_name::validators::assert_type_eq_all!(#field_type, #nested_vec_type);
-                    });
-
-                    get_nested_meta_with_defs(&node_object, true)
-                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
-                }
-                RelationType::None => {
-                    let ref_node_meta = if field_receiver.rust_field_type().is_list() {
-                        ReferencedNodeMeta::from_simple_array(field_ident_raw_to_underscore_suffix)
-                    } else {
-                        ReferencedNodeMeta::default()
-                    };
-                    ref_node_meta
-                        .with_field_definition(
-                            field_receiver,
-                            struct_name_ident,
-                            field_ident_serialized_fmt,
-                            &data_type,
-                            &table_name,
-                        )
-                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
-                }
-                RelationType::List(_) => todo!(),
-            };
+            Ok(store)
         }
-
-        Ok(store)
     }
 }
