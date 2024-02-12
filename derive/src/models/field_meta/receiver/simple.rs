@@ -4,14 +4,14 @@ use crate::{
     errors::ExtractorResult,
     models::{
         derive_attributes::TableDeriveAttributes, field_name_serialized,
-        variables::VariablesModelMacro, FieldsMeta,
+        variables::VariablesModelMacro, FieldsMeta, RelationType,
     },
 };
 
 use super::MyFieldReceiver;
 
 impl MyFieldReceiver {
-    pub fn create_field_metada_token(
+    pub fn create_field_metadata_token(
         &self,
         store: &mut FieldsMeta,
         table_derive_attrs: &TableDeriveAttributes,
@@ -56,6 +56,45 @@ impl MyFieldReceiver {
         store
             .serialized_field_names_normalised
             .push(field_ident_serialized_fmt.to_owned().into());
+
+        Ok(())
+    }
+
+    pub fn create_field_type_static_assertion_token(
+        &self,
+        store: &mut FieldsMeta,
+        table_derive_attrs: &TableDeriveAttributes,
+    ) -> ExtractorResult<()> {
+        let field_type = &self.field_type_rust();
+
+        match self.to_relation_type() {
+            RelationType::Relate(relate) => {}
+            RelationType::LinkOne(foreign_node) => {
+                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);).into());
+            }
+            RelationType::LinkSelf(self_node) => {
+                let current_struct_type = table_derive_attrs.struct_as_path_no_bounds();
+                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#foreign_node>);).into());
+
+                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);).into());
+            }
+            RelationType::LinkMany(foreign_node) => {
+                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);).into());
+            }
+            RelationType::NestObject(foreign_object) => {
+                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_object);).into());
+            }
+            RelationType::NestArray(foreign_array_object) => {
+                let nesting_level = count_vec_nesting(field_type);
+                let nested_vec_type = generate_nested_vec_type(&foreign_node, nesting_level);
+
+                store.static_assertions.push(quote! {
+                        #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
+                    });
+            }
+            RelationType::List(_) => {}
+            RelationType::None => {}
+        }
 
         Ok(())
     }

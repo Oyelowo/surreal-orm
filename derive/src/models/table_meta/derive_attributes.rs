@@ -89,7 +89,7 @@ impl TableDeriveAttributes {
         Ok(casing.into())
     }
 
-    pub fn struct_as_path(&self) -> Path {
+    pub fn struct_as_path_no_bounds(&self) -> Path {
         // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
         self.construct_type_without_bounds()
             .replace_self_with_struct_concrete_type(self)
