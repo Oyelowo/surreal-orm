@@ -13,6 +13,8 @@ mod generics;
 mod link_methods;
 mod relate;
 mod serialized_field_fmts;
+mod simple;
+mod updater_non_null;
 
 pub use core::*;
 pub use define_statement::*;
@@ -21,6 +23,8 @@ pub use generics::*;
 pub use link_methods::*;
 pub use relate::*;
 pub use serialized_field_fmts::*;
+pub use simple::*;
+pub use updater_non_null::*;
 
 use crate::{
     errors::ExtractorResult,

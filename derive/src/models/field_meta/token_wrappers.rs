@@ -35,3 +35,5 @@ create_tokenstream_wrapper!(=> AliasesStructFieldsNamesKv);
 
 create_tokenstream_wrapper!(=> RenamedSerializedFields);
 create_tokenstream_wrapper!(=> NonNullUpdaterFields);
+
+create_tokenstream_wrapper!(=> FieldMetadataToken);
