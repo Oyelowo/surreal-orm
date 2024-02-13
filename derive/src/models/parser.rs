@@ -250,8 +250,6 @@ impl FieldsMeta {
         table_derive_attributes: &TableDeriveAttributes,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
-        let struct_level_casing = table_derive_attributes.struct_level_casing()?;
-        let struct_generics = &table_derive_attributes.generics;
         let mut store = Self::new(table_derive_attributes, data_type);
 
         for field_receiver in table_derive_attributes
@@ -271,7 +269,8 @@ impl FieldsMeta {
             field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
             field_receiver
                 .create_relation_connection_tokenstream(&mut store, table_derive_attributes);
-            field_receiver.create_db_fields_for_links_and_loaders(&mut store);
+            field_receiver
+                .create_db_fields_for_links_and_loaders(&mut store, table_derive_attributes);
             field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
             field_receiver
                 .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
