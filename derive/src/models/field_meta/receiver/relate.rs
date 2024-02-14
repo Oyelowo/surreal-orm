@@ -24,43 +24,38 @@ use crate::{
 
 use super::{FieldGenericsMeta, MyFieldReceiver, Relate};
 
-impl MyFieldReceiver {
-    pub fn create_relation_connection_tokenstream(
-        &self,
-        store: &mut FieldsMeta,
-        table_derive_attributes: &TableDeriveAttributes,
-    ) -> ExtractorResult<()> {
+impl FieldsMeta {
+    pub fn create_relation_connection_tokenstream(&mut self) -> ExtractorResult<()> {
+        let table_derive_attributes = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
+
         let field_name_serialized =
-            self.field_name_serialized(&table_derive_attributes.casing()?)?;
-        match self.to_relation_type() {
-            RelationType::Relate(relate) => {
-                store
-                    .static_assertions
-                    .push(self.create_static_assertions(&relate, &table_derive_attributes.ident));
-                self.relate(store, table_derive_attributes, edge_type)?;
+            field_receiver.field_name_serialized(&table_derive_attributes.casing()?)?;
+        match field_receiver.to_relation_type() {
+            RelationType::Relate(ref relate) => {
+                self.static_assertions
+                    .push(self.create_static_assertions(&relate));
+                self.relate(relate)?;
                 let connection = relate.connection;
-                store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_name_serialized))).into());
+                self.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_name_serialized))).into());
             }
             _ => {}
         }
         Ok(())
     }
 
-    fn relate(
-        &self,
-        store: &mut FieldsMeta,
-        table_derive_attributes: &TableDeriveAttributes,
-        relate: &Relate,
-    ) -> ExtractorResult<()> {
+    fn relate(&mut self, relate: &Relate) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
-        let vars = VariablesModelMacro::new();
+        let table_derive_attributes = &self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
+
         let VariablesModelMacro {
             __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
         let current_struct_ident = table_derive_attributes.ident;
-        let field_type = &self.ty;
+        let field_type = &field_receiver.ty;
         let edge_type = relate.edge_type;
         let RelateAttribute {
             edge_direction,
@@ -69,11 +64,7 @@ impl MyFieldReceiver {
         } = &RelateAttribute::from(relation);
         let arrow = &ArrowTokenStream::from(edge_direction);
         let destination_node_table_name_str = &foreign_node_table_name.to_string();
-        let VariablesModelMacro {
-            __________connect_node_to_graph_traversal_string,
-            ___________graph_traversal_string,
-            ..
-        } = VariablesModelMacro::new();
+
         let edge_name_with_direction_as_method_ident =
             &(|| Self::add_direction_indication_to_ident(edge_table_name, edge_direction));
         let FieldGenericsMeta {
@@ -81,6 +72,7 @@ impl MyFieldReceiver {
             field_ty_generics: edge_ty_generics,
             field_where_clause: edge_where_clause,
         } = &edge_type.get_generics_meta(table_derive_attributes);
+
         let foreign_node_schema_ident =
             ForeignNodeSchemaIdent::from_node_table_name(foreign_node_table_name);
         let foreign_node_schema_type_alias_with_generics =
@@ -135,11 +127,11 @@ impl MyFieldReceiver {
                 edge_name_with_direction_as_method_ident()
             ),
             imports: vec![import()],
-            edge_relation_model_selected_ident: relation.edge_type.type_name()?,
+            edge_relation_model_selected_ident: edge_type.type_name()?,
             foreign_node_name: foreign_node_table_name.into(),
         };
 
-        match store
+        match self
             .node_edge_metadata
             .into_inner()
             .entry(edge_name_with_direction_as_method_ident())
@@ -180,13 +172,12 @@ impl MyFieldReceiver {
         edge.into()
     }
 
-    fn create_static_assertions(
-        &self,
-        relation: &Relate,
-        current_struct: &StructIdent,
-    ) -> StaticAssertionToken {
-        let field_type = &self.ty;
+    fn create_static_assertions(&self, relation: &Relate) -> StaticAssertionToken {
         let crate_name = get_crate_name(false);
+        let current_struct = &self.table_derive_attributes().ident;
+        let field_receiver = self.field_receiver();
+
+        let field_type = &field_receiver.ty;
         let edge_type = relation.edge_type;
         let RelateAttribute {
             edge_table_name,
