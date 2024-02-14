@@ -281,10 +281,8 @@ impl FieldsMeta {
             store.create_field_setter_impl();
             store.create_field_metadata_token();
             store.create_field_connection_builder_token();
+            store.create_relation_connection_tokenstream();
 
-            field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
-            field_receiver
-                .create_relation_connection_tokenstream(&mut store, table_derive_attributes);
             field_receiver
                 .create_db_fields_for_links_and_loaders(&mut store, table_derive_attributes);
             field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
