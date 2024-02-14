@@ -14,7 +14,7 @@ use syn::Ident;
 use crate::errors::ExtractorResult;
 use crate::models::{
     casing::*, create_ident_wrapper, derive_attributes::TableDeriveAttributes,
-    field_name_serialized::FieldNameSerialized, CaseString, StructLevelCasing,
+    field_name_serialized::DbFieldName, CaseString, StructLevelCasing,
 };
 use crate::models::{create_tokenstream_wrapper, field_name_serialized};
 
@@ -35,7 +35,7 @@ impl MyFieldReceiver {
     pub(crate) fn db_field_name(
         &self,
         struct_casing: &StructLevelCasing,
-    ) -> ExtractorResult<FieldNameSerialized> {
+    ) -> ExtractorResult<DbFieldName> {
         Ok(self.ident_meta(struct_casing)?.1)
     }
 
@@ -57,7 +57,7 @@ impl MyFieldReceiver {
     fn ident_meta(
         &self,
         struct_casing: &StructLevelCasing,
-    ) -> ExtractorResult<(FieldIdentNormalized, FieldNameSerialized)> {
+    ) -> ExtractorResult<(FieldIdentNormalized, DbFieldName)> {
         let field_ident_original = self
             .ident
             .as_ref()

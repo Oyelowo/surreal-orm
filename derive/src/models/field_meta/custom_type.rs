@@ -22,7 +22,7 @@ use crate::{
     models::{derive_attributes::TableDeriveAttributes, DataType},
 };
 
-use super::{field_name_serialized::FieldNameSerialized, *};
+use super::{field_name_serialized::DbFieldName, *};
 
 #[derive(Debug, Clone)]
 pub struct CustomTypeNoSelf(CustomType);
@@ -568,7 +568,7 @@ impl CustomType {
 
     pub fn infer_surreal_type_heuristically(
         &self,
-        field_name: &FieldNameSerialized,
+        field_name: &DbFieldName,
         relation_type: &RelationType,
         model_type: &DataType,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {

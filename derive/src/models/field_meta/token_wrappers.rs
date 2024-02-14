@@ -48,3 +48,5 @@ create_tokenstream_wrapper!(=> SchemaStructFieldsTypesKv);
 create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKv);
 create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKvPrefixed);
 create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKvEmpty);
+
+create_tokenstream_wrapper!(=> DbFieldNamesToken);
