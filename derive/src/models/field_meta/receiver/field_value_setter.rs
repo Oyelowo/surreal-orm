@@ -51,19 +51,18 @@ impl FieldsMeta {
             // To create a relation, we typically use a separate relation statement
             RelationType::Relate(_) => {}
             _ => {
-                self.field_wrapper_type_custom_implementations.push(
-                    Self::get_field_value_setter_impl(field_receiver, table_attributes)?,
-                );
+                self.field_wrapper_type_custom_implementations
+                    .push(self.get_field_value_setter_impl()?);
             }
         };
         Ok(())
     }
 
-    fn get_field_value_setter_impl(
-        field_receiver: &MyFieldReceiver,
-        table_attributes: &TableDeriveAttributes,
-    ) -> ExtractorResult<FieldSetterImplTokens> {
+    fn get_field_value_setter_impl(&self) -> ExtractorResult<FieldSetterImplTokens> {
         let crate_name = get_crate_name(false);
+        let field_receiver = self.field_receiver();
+        let table_attributes = self.table_derive_attributes();
+
         let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
 
         let numeric_trait = if field_receiver.is_numeric() {
@@ -161,8 +160,6 @@ impl FieldsMeta {
         field_receiver: &MyFieldReceiver,
         table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<ArrayElementFieldSetterToken> {
-        struct ArrayItemTypeToken(TokenStream);
-
         let crate_name = get_crate_name(false);
         let field_name_as_pascalized = field_receiver.field_name_pascalized(table_attributes);
 
@@ -179,13 +176,13 @@ impl FieldsMeta {
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
             _ => {
-                let inferred_type = match self.ty.get_array_inner_type() {
+                let inferred_type = match field_receiver.ty.get_array_inner_type() {
                     Some(ref ty) => {
                         let generics_meta = ty.get_generics_meta(table_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
                     None => {
-                        let array_inner_field_ty = self
+                        let array_inner_field_ty = field_receiver
                             .field_type_db
                             .map(|db_ty| db_ty.get_array_item_type())
                             .flatten();
@@ -197,7 +194,7 @@ impl FieldsMeta {
                         ),
                         None => {
                             return Err(syn::Error::new_spanned(
-                                self.field_type_db,
+                                field_receiver.field_type_db,
                                 "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
                             ))
                         }
@@ -237,7 +234,7 @@ impl FieldsMeta {
         table_attributes: &TableDeriveAttributes,
     ) -> FieldSetterNumericImpl {
         let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
-        let field_type = self.ty;
+        let field_type = field_receiver.ty;
         let FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,
