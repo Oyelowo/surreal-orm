@@ -41,40 +41,39 @@ create_tokenstream_wrapper!(
 =>
 FieldSetterImplTokens);
 
-impl MyFieldReceiver {
-    pub fn create_field_setter_impl(
-        &self,
-        store: &mut FieldsMeta,
-        table_attributes: &TableDeriveAttributes,
-    ) -> ExtractorResult<()> {
-        match self.to_relation_type() {
+impl FieldsMeta {
+    pub fn create_field_setter_impl(&mut self) -> ExtractorResult<()> {
+        let table_attributes = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
+
+        match field_receiver.to_relation_type() {
             // Relate fields are readonly and mainly for aliasing connections in select statements
             // To create a relation, we typically use a separate relation statement
             RelationType::Relate(_) => {}
             _ => {
-                store
-                    .field_wrapper_type_custom_implementations
-                    .push(self.get_field_value_setter_impl(table_attributes)?);
+                self.field_wrapper_type_custom_implementations.push(
+                    Self::get_field_value_setter_impl(field_receiver, table_attributes)?,
+                );
             }
         };
         Ok(())
     }
 
     fn get_field_value_setter_impl(
-        &self,
+        field_receiver: &MyFieldReceiver,
         table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<FieldSetterImplTokens> {
         let crate_name = get_crate_name(false);
-        let field_name_pascalized = self.field_name_pascalized(table_attributes);
+        let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
 
-        let numeric_trait = if self.is_numeric() {
-            self.numeric_setter_impl(table_attributes)
+        let numeric_trait = if field_receiver.is_numeric() {
+            Self::numeric_setter_impl(field_receiver, table_attributes)
         } else {
             quote!()
         };
 
-        let array_trait = if self.is_list() {
-            self.array_trait_impl(&table_attributes)?
+        let array_trait = if field_receiver.is_list() {
+            Self::array_trait_impl(field_receiver, table_attributes)?
         } else {
             quote!()
         };
@@ -159,15 +158,15 @@ impl MyFieldReceiver {
     }
 
     fn array_trait_impl(
-        &self,
+        field_receiver: &MyFieldReceiver,
         table_attributes: &TableDeriveAttributes,
     ) -> ExtractorResult<ArrayElementFieldSetterToken> {
         struct ArrayItemTypeToken(TokenStream);
 
         let crate_name = get_crate_name(false);
-        let field_name_as_pascalized = self.field_name_pascalized(table_attributes);
+        let field_name_as_pascalized = field_receiver.field_name_pascalized(table_attributes);
 
-        let (generics_meta, array_item_type) = match self.to_relation_type() {
+        let (generics_meta, array_item_type) = match field_receiver.to_relation_type() {
             RelationType::LinkMany(foreign_node) => {
                 let generics_meta = foreign_node.get_generics_meta(table_attributes);
                 (
@@ -234,10 +233,10 @@ impl MyFieldReceiver {
     }
 
     fn numeric_setter_impl(
-        &self,
+        field_receiver: &MyFieldReceiver,
         table_attributes: &TableDeriveAttributes,
     ) -> FieldSetterNumericImpl {
-        let field_name_pascalized = self.field_name_pascalized(table_attributes);
+        let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
         let field_type = self.ty;
         let FieldGenericsMeta {
             field_impl_generics,

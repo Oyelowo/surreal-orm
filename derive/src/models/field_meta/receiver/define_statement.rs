@@ -14,27 +14,19 @@ use super::MyFieldReceiver;
 
 pub struct DefineFieldStatementToken(TokenStream);
 
-impl MyFieldReceiver {
-    pub fn create_field_definitions(
-        &self,
-        store: &mut FieldsMeta,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<()> {
-        store
-            .field_definitions
-            .push(self.field_defintion_db(table_derive_attrs)?);
+impl FieldsMeta {
+    pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
+        self.field_definitions.push(self.field_defintion_db()?);
         Ok(())
     }
 
-    pub fn field_defintion_db(
-        &self,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<Vec<DefineFieldStatementToken>> {
+    pub fn field_defintion_db(&self) -> ExtractorResult<Vec<DefineFieldStatementToken>> {
+        let table_derive_attrs = self.table_derive_attributes();
         let crate_name = get_crate_name(false);
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
-        let struct_casing = table_derive_attrs.casing();
-        let field_name_serialized = casing.field_ident_normalized(struct_casing)?;
+        let casing = table_derive_attrs.casing();
+        let field_name_serialized = self.field_receiver().field_ident_normalized(casing)?;
         let mut all_field_defintions = vec![];
 
         self.validate_field_attributes()?;
@@ -107,7 +99,7 @@ impl MyFieldReceiver {
             item_assert,
             ident,
             ..
-        } = &self;
+        } = &self.field_receiver();
 
         if define.is_some()
             && (assert_.is_some()
