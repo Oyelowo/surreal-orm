@@ -16,7 +16,7 @@ pub struct DefineFieldStatementToken(TokenStream);
 
 impl FieldsMeta {
     pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
-        self.field_definitions.push(self.field_defintion_db()?);
+        self.field_definitions.extend(self.field_defintion_db()?);
         Ok(())
     }
 
