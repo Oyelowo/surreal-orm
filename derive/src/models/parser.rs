@@ -38,6 +38,7 @@ use super::{
     ConnectionWithFieldAppended,
     DataType,
     DbFieldNames,
+    DbFieldNamesToken,
     DefineFieldStatementToken,
     FieldMetadataToken,
     FieldSetterImplTokens,
@@ -50,6 +51,7 @@ use super::{
     LinkOneFields,
     LinkSelfFields,
     LinkedFields,
+    MyFieldReceiver,
     NodeEdgeMetadataLookupTable,
     NodeEdgeMetadataStore,
     NonNullUpdaterFields,
@@ -160,7 +162,7 @@ pub struct FieldsMeta {
     /// Field names after taking into consideration
     /// serde serialized renaming or casings
     /// i.e time_written => timeWritten if serde camelizes
-    pub serialized_field_names_normalised: Vec<DbFieldNames>,
+    pub serialized_field_names_normalised: Vec<DbFieldNamesToken>,
 
     /// Generated example:
     /// ```rust,ignore
@@ -219,6 +221,7 @@ pub struct FieldsMeta {
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TableIdType,
 
+    pub field_receiver: Option<MyFieldReceiver>,
     pub table_derive_attributes: Option<TableDeriveAttributes>,
     pub data_type: Option<DataType>,
 }
@@ -231,6 +234,16 @@ impl FieldsMeta {
             ..Default::default()
         };
         store
+    }
+
+    fn set_field_receiver(&mut self, field_receiver: MyFieldReceiver) {
+        self.field_receiver = Some(field_receiver);
+    }
+
+    pub(crate) fn field_receiver(&self) -> &MyFieldReceiver {
+        self.field_receiver
+            .as_ref()
+            .expect("Field receiver has not been set. Make sure it has been set")
     }
 
     pub(crate) fn table_derive_attributes(&self) -> &TableDeriveAttributes {
@@ -259,9 +272,15 @@ impl FieldsMeta {
             .ok_or_else(|| darling::Error::custom("Expected a struct"))?
             .fields
         {
-            field_receiver.create_table_id_type_token(&mut store, table_derive_attrs);
+            store.set_field_receiver(field_receiver);
+
+            store.create_table_id_type_token();
+
             field_receiver.create_field_definitions(&mut store, table_derive_attrs);
+
+            store.create_db_field_names_token();
             field_receiver.create_db_field_names_token(&mut store, table_derive_attrs);
+
             field_receiver.create_field_type_static_assertion_token(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
             field_receiver.create_field_metadata_token(&mut store, table_derive_attrs);

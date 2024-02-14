@@ -1,19 +1,28 @@
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 
+use proc_macro::TokenStream;
+use quote::ToTokens;
 use syn::Ident;
 
 use crate::models::DataType;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct FieldNameSerialized(String);
+pub struct DbFieldName(String);
 
-impl Display for FieldNameSerialized {
+impl Display for DbFieldName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl FieldNameSerialized {
+impl ToTokens for DbFieldName {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let s = &self.to_string();
+        tokens.extend(quote!(#s));
+    }
+}
+
+impl DbFieldName {
     pub fn is_id(&self) -> bool {
         self.0 == "id"
     }
@@ -31,7 +40,7 @@ impl FieldNameSerialized {
     }
 }
 
-impl From<Ident> for FieldNameSerialized {
+impl From<Ident> for DbFieldName {
     fn from(s: Ident) -> Self {
         Self(s.to_string())
     }

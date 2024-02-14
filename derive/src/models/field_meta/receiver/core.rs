@@ -11,8 +11,8 @@ use syn::Ident;
 use crate::{
     errors::ExtractorResult,
     models::{
-        derive_attributes::TableDeriveAttributes, field_name_serialized::FieldNameSerialized,
-        CaseString, CustomType, DataType, DbFieldTypeAstMeta, FieldTypeDb, RelationType,
+        derive_attributes::TableDeriveAttributes, field_name_serialized::DbFieldName, CaseString,
+        CustomType, DataType, DbFieldTypeAstMeta, FieldTypeDb, RelationType,
     },
 };
 
@@ -49,7 +49,7 @@ impl MyFieldReceiver {
 
     pub fn field_type_and_assertion(
         &self,
-        field_name: &FieldNameSerialized,
+        field_name: &DbFieldName,
         model_type: &DataType,
         table: &Ident,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
