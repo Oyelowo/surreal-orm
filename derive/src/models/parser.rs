@@ -280,8 +280,8 @@ impl FieldsMeta {
             store.create_field_type_static_assertion_token();
             store.create_field_setter_impl();
             store.create_field_metadata_token();
+            store.create_field_connection_builder_token();
 
-            field_receiver.create_field_connection_builder_token(&mut store, table_derive_attrs);
             field_receiver.create_field_metada_token(&mut store, table_derive_attrs);
             field_receiver
                 .create_relation_connection_tokenstream(&mut store, table_derive_attributes);
