@@ -10,36 +10,34 @@ use crate::{
 
 use super::MyFieldReceiver;
 
-impl MyFieldReceiver {
-    pub fn create_field_type_static_assertion_token(
-        &self,
-        store: &mut FieldsMeta,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<()> {
-        let field_type = &self.field_type_rust();
+impl FieldsMeta {
+    pub fn create_field_type_static_assertion_token(&mut self) -> ExtractorResult<()> {
+        let table_derive_attrs = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
+        let field_type = &field_receiver.field_type_rust();
 
-        match self.to_relation_type() {
+        match field_receiver.to_relation_type() {
             RelationType::Relate(relate) => {}
             RelationType::LinkOne(foreign_node) => {
-                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);).into());
+                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);).into());
             }
             RelationType::LinkSelf(self_node) => {
                 let current_struct_type = table_derive_attrs.struct_as_path_no_bounds();
-                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#foreign_node>);).into());
+                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#foreign_node>);).into());
 
-                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);).into());
+                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);).into());
             }
             RelationType::LinkMany(foreign_node) => {
-                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);).into());
+                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);).into());
             }
             RelationType::NestObject(foreign_object) => {
-                store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_object);).into());
+                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_object);).into());
             }
             RelationType::NestArray(foreign_array_object) => {
                 let nesting_level = Self::count_vec_nesting(field_type);
                 let nested_vec_type = Self::generate_nested_vec_type(&foreign_node, nesting_level);
 
-                store.static_assertions.push(quote! {
+                self.static_assertions.push(quote! {
                         #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
                     });
             }

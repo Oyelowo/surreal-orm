@@ -275,13 +275,10 @@ impl FieldsMeta {
             store.set_field_receiver(field_receiver);
 
             store.create_table_id_type_token();
-
-            field_receiver.create_field_definitions(&mut store, table_derive_attrs);
-
+            store.create_field_definitions();
             store.create_db_field_names_token();
-            field_receiver.create_db_field_names_token(&mut store, table_derive_attrs);
+            store.create_field_type_static_assertion_token();
 
-            field_receiver.create_field_type_static_assertion_token(&mut store, table_derive_attrs);
             field_receiver.create_field_setter_impl(&mut store, table_derive_attributes);
             field_receiver.create_field_metadata_token(&mut store, table_derive_attrs);
             field_receiver.create_field_connection_builder_token(&mut store, table_derive_attrs);
