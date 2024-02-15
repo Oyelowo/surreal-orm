@@ -7,7 +7,7 @@ use crate::{
     errors::ExtractorResult,
     models::{
         create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes, FieldGenerics,
-        FieldsMeta, MyFieldReceiver, RelationType, FieldGenericsMeta,
+        FieldGenericsMeta, FieldsMeta, MyFieldReceiver, RelationType,
     },
 };
 

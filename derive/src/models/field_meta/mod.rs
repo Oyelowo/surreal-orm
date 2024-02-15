@@ -19,7 +19,6 @@ pub(crate) mod relations;
 pub(crate) mod rename;
 pub mod rust_type_link_attrs;
 pub mod string_wrapper;
-mod token_codegen;
 pub mod token_stream_hashable;
 pub(crate) mod token_wrappers;
 pub(crate) mod type_stripper;
