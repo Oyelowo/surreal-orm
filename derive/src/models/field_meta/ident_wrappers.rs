@@ -17,13 +17,13 @@ macro_rules! create_ident_wrapper {
             }
         }
 
-        impl From<::syn::Ident> for $ident {
+        impl ::std::convert::From<::syn::Ident> for $ident {
             fn from(ident: ::syn::Ident) -> Self {
                 Self(ident)
             }
         }
 
-        impl From<$ident> for ::syn::Ident {
+        impl ::std::convert::From<$ident> for ::syn::Ident {
             fn from(ident: $ident) -> Self {
                 ident.0
             }
@@ -37,6 +37,3 @@ macro_rules! create_ident_wrapper {
     };
 }
 pub use create_ident_wrapper;
-
-create_ident_wrapper!(FieldIdentOriginal);
-create_ident_wrapper!(OldFieldName);
