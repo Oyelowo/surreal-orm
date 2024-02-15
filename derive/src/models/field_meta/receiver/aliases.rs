@@ -1,21 +1,24 @@
-use crate::models::{FieldsMeta, RelationType};
+use crate::{
+    errors::ExtractorResult,
+    models::{FieldsMeta, RelationType},
+};
 
 use super::MyFieldReceiver;
 
-impl MyFieldReceiver {
+impl FieldsMeta {
     pub fn create_relation_aliases_struct_fields_types_kv(
-        &self,
-        store: &mut FieldsMeta,
-    ) -> Vec<String> {
-        if let RelationType::Relate(_) = self.to_relation_type() {
-            store.aliases_struct_fields_types_kv.push(
-                quote!(pub #field_ident_raw_to_underscore_suffix: #crate_name::AliasName, ).into(),
-            );
+        &mut self,
+    ) -> ExtractorResult<Vec<String>> {
+        let field_receiver = self.field_receiver();
+        let casing = self.table_derive_attributes().casing()?;
+        let field_ident_normalized = field_receiver.field_ident_normalized(&casing)?;
+        let db_field_name = field_receiver.db_field_name(&casing)?;
+        if let RelationType::Relate(_) = field_receiver.to_relation_type() {
+            self.aliases_struct_fields_types_kv
+                .push(quote!(pub #field_ident_normalized: #crate_name::AliasName, ).into());
 
-            store.aliases_struct_fields_names_kv.push(
-                quote!(#field_ident_raw_to_underscore_suffix: #field_ident_serialized_fmt.into(),)
-                    .into(),
-            );
+            self.aliases_struct_fields_names_kv
+                .push(quote!(pub #field_ident_normalized: #db_field_name.into(),).into());
         }
     }
 }
