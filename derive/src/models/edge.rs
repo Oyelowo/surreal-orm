@@ -15,7 +15,14 @@ use std::{ops::Deref, str::FromStr};
 
 use syn::{self, parse_macro_input};
 
-use super::{derive_attributes::TableDeriveAttributes, variables::VariablesModelMacro, *};
+use crate::errors::ExtractorError;
+
+use super::{
+    derive_attributes::TableDeriveAttributes,
+    token_codegen::{Codegen, CommonIdents},
+    variables::VariablesModelMacro,
+    *,
+};
 
 // #[derive(Debug, FromDeriveInput)]
 // #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
@@ -51,39 +58,16 @@ impl Deref for EdgeToken {
 
 impl ToTokens for EdgeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let table_derive_attributes = &self.0;
-        let TableDeriveAttributes {
-            ident: struct_name_ident,
-            generics,
-            table_name: table_name_ident,
-            data,
-            rename_all,
-            relax_table_name,
-            ..
-        } = &table_derive_attributes;
-        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-
-        let Ok(table_definitions) = self.get_table_definition_token() else {
-            return tokens.extend(
-                syn::Error::new_spanned(self, "Error in parsing table definition")
-                    .to_compile_error(),
-            );
-        };
-
-        let table_name_str = match errors::validate_table_name(
-            struct_name_ident,
-            &table_name_ident,
-            relax_table_name,
-        ) {
+        let crate_name = get_crate_name(false);
+        let table_derive_attributes = self.deref();
+        let struct_name_ident = &table_derive_attributes.ident;
+        let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
+            generics.split_for_impl();
+        let table_name_ident = match table_derive_attributes.table_name() {
             Ok(table_name) => table_name,
             Err(err) => return tokens.extend(err.write_errors()),
         };
-
-        let struct_level_casing = table_derive_attributes.casing();
-
-        let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
-        let crate_name = super::get_crate_name(false);
-
+        let table_name_str = table_name_ident.as_string();
         let VariablesModelMacro {
             __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -97,19 +81,16 @@ impl ToTokens for EdgeToken {
             ___________errors,
             ..
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {
-            data,
-            struct_level_casing,
-            struct_name_ident,
-            table_name: table_name_str.to_string(), // table_name_ident,
+        let table_definitions = match self.get_table_definition_token() {
+            Ok(table_definitions) => table_definitions,
+            Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let schema_props =
-            match FieldsMeta::parse_field(schema_props_args, generics, DataType::Edge) {
-                Ok(schema_props) => schema_props,
-                Err(err) => return tokens.extend(err.write_errors()),
-            };
-        let FieldsMeta {
+        let code_gen = match Codegen::parse_fields(&self.0, DataType::Edge) {
+            Ok(props) => props,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+        let Codegen {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -121,7 +102,7 @@ impl ToTokens for EdgeToken {
             record_link_fields_methods,
             schema_struct_fields_names_kv_empty,
             field_definitions,
-            serializable_fields,
+            serialized_fmt_db_field_names_instance: serializable_fields,
             linked_fields,
             link_one_fields,
             link_self_fields,
@@ -132,31 +113,26 @@ impl ToTokens for EdgeToken {
             table_id_type,
             field_metadata,
             ..
-        } = schema_props;
+        } = code_gen;
         // if serialized_field_names_normalised.conta("")
         if !serialized_field_names_normalised.contains(&"in".into())
             || !serialized_field_names_normalised.contains(&"out".into())
         {
-            panic!("Vector does not contain both 'in' and 'out'");
+            tokens.extend(ExtractorError::Darling(
+                darling::Error::custom("Edge struct must include 'in' and 'out'").write_errors(),
+            ));
         }
         let imports_referenced_node_schema = Vec::from_iter(imports_referenced_node_schema);
-        // imports_referenced_node_schema.dedup_by(|a,
-        //                                         b| a.to_string() == b.to_string());
-        // schema_struct_fields_names_kv.dedup_by(same_bucket)
+        let CommonIdents {
+            module_name_internal,
+            module_name_rexported,
+            aliases_struct_name,
+            test_function_name,
+            non_null_updater_struct_name,
+            struct_with_renamed_serialized_fields,
+            _____schema_def,
+        } = code_gen.common_idents();
 
-        let test_name = format_ident!("test_{schema_mod_name}_edge_name");
-
-        // let field_names_ident = format_ident!("{struct_name_ident}Fields");
-        let module_name_internal = format_ident!(
-            "________internal_{}_schema",
-            struct_name_ident.to_string().to_case(Case::Snake)
-        );
-        let module_name_rexported =
-            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
-        let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
-        let struct_with_renamed_serialized_fields =
-            format_ident!("{struct_name_ident}RenamedCreator");
-        let _____schema_def = format_ident!("_____schema_def");
         let serializable_fields_count = serializable_fields.len();
         let serializable_fields_as_str = serializable_fields
             .iter()
@@ -424,7 +400,7 @@ impl ToTokens for EdgeToken {
                 }
 
             #[allow(non_snake_case)]
-            fn #test_name() {
+            fn #test_function_name() {
                 #( #static_assertions) *
             }
         ));
