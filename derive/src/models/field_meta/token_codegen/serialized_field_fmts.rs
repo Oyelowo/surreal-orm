@@ -9,8 +9,6 @@ use crate::{
     },
 };
 
-use super::{EdgeRelationModelSelectedIdent, MyFieldReceiver};
-
 impl FieldsMeta {
     pub fn create_db_fields_for_links_and_loaders(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();

@@ -1,13 +1,3 @@
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2024 Oyelowo Oyeiayo
- * Licensed under the MIT license
- */
-
-use surreal_query_builder::FieldType;
-use syn::Ident;
-
 use crate::{
     errors::ExtractorResult,
     models::{
@@ -15,6 +5,8 @@ use crate::{
         CustomType, DataType, DbFieldTypeAstMeta, FieldTypeDb, RelationType,
     },
 };
+use surreal_query_builder::FieldType;
+use syn::Ident;
 
 use super::MyFieldReceiver;
 

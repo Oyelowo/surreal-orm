@@ -8,8 +8,6 @@ use crate::{
     },
 };
 
-use super::MyFieldReceiver;
-
 impl FieldsMeta {
     pub fn create_field_type_static_assertion_token(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();

@@ -1,28 +1,14 @@
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
- */
-
-use convert_case::{Case, Casing};
-use quote::format_ident;
-use std::fmt::Display;
-use std::ops::Deref;
-use syn::Ident;
-
-use crate::errors::ExtractorResult;
-use crate::models::{
-    casing::*, create_ident_wrapper, derive_attributes::TableDeriveAttributes,
-    field_name_serialized::DbFieldName, CaseString, StructLevelCasing,
+use crate::{
+    errors::ExtractorResult,
+    models::{
+        derive_attributes::TableDeriveAttributes, field_name_serialized::DbFieldName, CaseString,
+        StructLevelCasing,
+    },
 };
-use crate::models::{create_tokenstream_wrapper, field_name_serialized};
+use convert_case::Case;
+use quote::format_ident;
 
-use super::MyFieldReceiver;
-
-create_ident_wrapper!(IdentCased);
-create_ident_wrapper!(FieldIdentNormalized);
-create_ident_wrapper!(FieldNamePascalized);
+use super::{FieldIdentNormalized, FieldNamePascalized, IdentCased, MyFieldReceiver};
 
 impl MyFieldReceiver {
     pub(crate) fn field_ident_normalized(

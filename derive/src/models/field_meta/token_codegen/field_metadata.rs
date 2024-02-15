@@ -5,8 +5,6 @@ use crate::models::{
     variables::VariablesModelMacro, FieldsMeta,
 };
 
-use super::MyFieldReceiver;
-
 impl FieldsMeta {
     pub fn create_field_metadata_token(&mut self) -> ExtractorResult<()> {
         let field_receiver = self.field_receiver();
@@ -22,13 +20,11 @@ impl FieldsMeta {
         };
 
         if !field_definition.is_empty() {
-            store
-                .field_metadata
-                .push(quote!(#crate_name::FieldMetadata {
-                    name: #field_name_serialized.into(),
-                    old_name: #old_field_name,
-                    definition: ::std::vec![ #field_definition ]
-                }));
+            self.field_metadata.push(quote!(#crate_name::FieldMetadata {
+                name: #field_name_serialized.into(),
+                old_name: #old_field_name,
+                definition: ::std::vec![ #field_definition ]
+            }));
         }
 
         Ok(())

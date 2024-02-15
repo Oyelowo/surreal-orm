@@ -10,8 +10,6 @@ use crate::{
     },
 };
 
-use super::MyFieldReceiver;
-
 pub struct DefineFieldStatementToken(TokenStream);
 
 impl FieldsMeta {

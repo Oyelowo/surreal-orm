@@ -194,6 +194,10 @@ pub struct FieldsMeta {
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TableIdType,
 
+    struct_attributes_data: StructAttributesData,
+}
+
+struct StructAttributesData {
     field_receiver: Option<MyFieldReceiver>,
     table_derive_attributes: Option<TableDeriveAttributes>,
     data_type: Option<DataType>,
@@ -201,32 +205,38 @@ pub struct FieldsMeta {
 
 impl FieldsMeta {
     fn new(table_derive_attributes: TableDeriveAttributes, data_type: DataType) -> Self {
-        let mut store = Self {
+        let struct_attributes_data = StructAttributesData {
             table_derive_attributes: Some(table_derive_attributes),
             data_type: Some(data_type),
+            field_receiver: None,
+        };
+        let mut store = Self {
+            struct_attributes_data,
             ..Default::default()
         };
         store
     }
 
     fn set_field_receiver(&mut self, field_receiver: MyFieldReceiver) {
-        self.field_receiver = Some(field_receiver);
+        self.struct_attributes_data.field_receiver = Some(field_receiver);
     }
 
     pub(crate) fn field_receiver(&self) -> &MyFieldReceiver {
-        self.field_receiver
+        self.struct_attributes_data.field_receiver
             .as_ref()
             .expect("Field receiver has not been set. Make sure it has been set by calling set_field_receiver")
     }
 
     pub(crate) fn table_derive_attributes(&self) -> &TableDeriveAttributes {
-        self.table_derive_attributes
+        self.struct_attributes_data
+            .table_derive_attributes
             .as_ref()
             .expect("Table derive attribute has not been set. Make sure it has been set")
     }
 
     pub(crate) fn data_type(&self) -> &DataType {
-        self.data_type
+        self.struct_attributes_data
+            .data_type
             .as_ref()
             .expect("Table derive attribute has not been set. Make sure it has been set")
     }

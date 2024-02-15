@@ -5,8 +5,6 @@ use crate::models::{
     variables::VariablesModelMacro, FieldsMeta,
 };
 
-use super::MyFieldReceiver;
-
 impl FieldsMeta {
     pub fn create_field_connection_builder_token(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();
