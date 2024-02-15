@@ -11,6 +11,7 @@ use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;
+use surreal_query_builder::Object;
 
 use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
@@ -18,10 +19,11 @@ use syn::{self, parse_macro_input};
 use super::{
     attributes::{MyFieldReceiver, Rename},
     casing::CaseString,
+    derive_attributes::{ModelAttributes, StructIdent},
     parser::{DataType, FieldsMeta, SchemaPropertiesArgs},
     token_codegen::{Codegen, CommonIdents},
     variables::VariablesModelMacro,
-    DataType, MyFieldReceiver, Rename,
+    DataType, MyFieldReceiver, Rename, StructGenerics,
 };
 
 // #[derive(Debug, FromDeriveInput)]
@@ -30,15 +32,29 @@ use super::{
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct ObjectToken {
-    pub(crate) ident: syn::Ident,
+    pub(crate) ident: StructIdent,
     pub(crate) attrs: Vec<syn::Attribute>,
-    pub(crate) generics: syn::Generics,
+    pub(crate) generics: StructGenerics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
     pub data: ast::Data<util::Ignored, MyFieldReceiver>,
 
     #[darling(default)]
     pub(crate) rename_all: ::std::option::Option<Rename>,
+}
+
+impl ModelAttributes for ObjectToken {
+    fn rename_all(&self) -> Option<super::Rename> {
+        self.rename_all.clone()
+    }
+
+    fn ident(&self) -> super::derive_attributes::StructIdent {
+        self.ident.clone()
+    }
+
+    fn generics(&self) -> &super::StructGenerics {
+        &self.0.generics
+    }
 }
 
 impl ToTokens for ObjectToken {
@@ -62,7 +78,7 @@ impl ToTokens for ObjectToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let code_gen = match Codegen::parse_fields(&self.0, DataType::Object) {
+        let code_gen = match Codegen::parse_fields(self, DataType::Object) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
@@ -81,7 +97,6 @@ impl ToTokens for ObjectToken {
             ..
         } = code_gen;
 
-        // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()
             .collect::<Vec<_>>();

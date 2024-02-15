@@ -16,7 +16,7 @@ use syn::{self, parse_macro_input};
 
 use super::{
     casing::CaseString,
-    derive_attributes::TableDeriveAttributes,
+    derive_attributes::{ModelAttributes, TableDeriveAttributes},
     errors,
     token_codegen::{Codegen, CommonIdents},
     variables::VariablesModelMacro,
@@ -26,6 +26,20 @@ use super::{
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 struct NodeToken(TableDeriveAttributes);
+
+impl ModelAttributes for NodeToken {
+    fn rename_all(&self) -> Option<super::Rename> {
+        self.0.rename_all.clone()
+    }
+
+    fn ident(&self) -> super::derive_attributes::StructIdent {
+        self.0.ident.clone()
+    }
+
+    fn generics(&self) -> &super::StructGenerics {
+        &self.0.generics
+    }
+}
 
 impl Deref for NodeToken {
     type Target = TableDeriveAttributes;
@@ -56,7 +70,7 @@ impl ToTokens for NodeToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let code_gen = match Codegen::parse_fields(&self.0, DataType::Node) {
+        let code_gen = match Codegen::parse_fields(self, DataType::Node) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };

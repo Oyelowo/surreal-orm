@@ -5,18 +5,20 @@
  * Licensed under the MIT license
  */
 
-use crate::models::{
-    derive_attributes::TableDeriveAttributes, MyFieldReceiver, RustFieldTypeSelfAllowed,
-};
+use crate::models::{derive_attributes::TableDeriveAttributes, MyFieldReceiver};
 use darling::ast::GenericParam;
 use quote::quote;
-use syn::{visit::Visit, *};
+use syn::{punctuated::Punctuated, visit::Visit, *};
 
 use super::CustomType;
 
 struct CustomGenerics(pub Generics);
 struct StrippedBoundsGenerics(pub Generics);
 impl CustomGenerics {
+    pub fn params(&self) -> &Punctuated<GenericParam, Token![,]> {
+        &self.0.params
+    }
+
     fn strip_bounds_from_generics(original_generics: &Generics) -> StrippedBoundsGenerics {
         let stripped_params = original_generics
             .params
@@ -56,7 +58,19 @@ impl CustomGenerics {
 
 pub struct StructGenerics(pub CustomGenerics);
 
+impl std::ops::Deref for StructGenerics {
+    type Target = CustomGenerics;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl StructGenerics {
+    pub fn to_basic_generics(&self) -> &Generics {
+        &self.0 .0
+    }
+
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
         self.0.split_for_impl()
     }
@@ -73,24 +87,26 @@ impl<'a> GenericTypeExtractor<'a> {
     pub fn extract_generics_for_complex_type(
         table_attributes: &'a TableDeriveAttributes,
         field_ty: &'a CustomType,
-    ) -> &Generics {
+    ) -> &CustomGenerics {
         let generics = Self {
             struct_generics: &table_attributes.generics,
             field_generics: Generics::default(),
         };
         generics.visit_type(&field_ty.to_basic_type());
-        &self.field_generics
+        &generics.field_generics.0.into()
     }
 
     fn add_lifetime_if_not_exists(&mut self, lt: &Lifetime) {
         let lifetime_exists = self
             .field_generics
+            .0
             .params
             .iter()
             .any(|param| matches!(param, GenericParam::Lifetime(lifetime_def) if lifetime_def.lifetime == *lt));
 
         if !lifetime_exists {
             self.field_generics
+                .0
                 .params
                 .push(GenericParam::Lifetime(LifetimeParam {
                     attrs: Vec::new(),

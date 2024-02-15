@@ -58,7 +58,7 @@ use self::{
 use super::{
     casing::CaseString,
     create_ident_wrapper,
-    derive_attributes::TableDeriveAttributes,
+    derive_attributes::{ModelAttributes, TableDeriveAttributes},
     get_crate_name,
     relations::{RelateAttribute, RelationType},
     variables::VariablesModelMacro,
@@ -89,7 +89,7 @@ pub(crate) struct CommonIdents {
 }
 
 #[derive(Default, Clone)]
-pub struct Codegen {
+pub struct Codegen<'a> {
     /// list of fields names that are actually serialized and not skipped.
     pub serialized_fmt_db_field_names_instance: Vec<SerializableField>,
     /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
@@ -242,19 +242,20 @@ pub struct Codegen {
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TableIdType,
 
-    struct_attributes_data: StructAttributesData,
+    // struct_attributes_data: StructAttributesData<T>,
+    struct_attributes_data: StructAttributesData<'a>,
 }
 
-struct StructAttributesData {
+struct StructAttributesData<'a> {
     field_receiver: Option<MyFieldReceiver>,
-    table_derive_attributes: Option<TableDeriveAttributes>,
+    struct_basic_model_attributes: Option<&'a dyn ModelAttributes>,
     data_type: Option<DataType>,
 }
 
 impl Codegen {
-    fn new(table_derive_attributes: TableDeriveAttributes, data_type: DataType) -> Self {
+    fn new(table_derive_attributes: impl ModelAttributes, data_type: DataType) -> Self {
         let struct_attributes_data = StructAttributesData {
-            table_derive_attributes: Some(table_derive_attributes),
+            struct_basic_model_attributes: Some(&table_derive_attributes),
             data_type: Some(data_type),
             field_receiver: None,
         };
@@ -298,9 +299,9 @@ impl Codegen {
             .expect("Field receiver has not been set. Make sure it has been set by calling set_field_receiver")
     }
 
-    pub(crate) fn table_derive_attributes(&self) -> &TableDeriveAttributes {
+    pub(crate) fn table_derive_attributes(&self) -> &impl ModelAttributes {
         self.struct_attributes_data
-            .table_derive_attributes
+            .struct_basic_model_attributes
             .as_ref()
             .expect("Table derive attribute has not been set. Make sure it has been set")
     }
@@ -314,7 +315,7 @@ impl Codegen {
 
     /// Derive the schema properties for a struct
     pub(crate) fn parse_fields(
-        table_derive_attributes: &TableDeriveAttributes,
+        table_derive_attributes: &impl ModelAttributes,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
         let mut tokens_generator = Self::new(table_derive_attributes, data_type);
