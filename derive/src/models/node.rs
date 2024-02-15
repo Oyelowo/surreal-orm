@@ -38,24 +38,15 @@ impl Deref for NodeToken {
 impl ToTokens for NodeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let crate_name = get_crate_name(false);
-        let TableDeriveAttributes {
-            ident: struct_name_ident,
-            data,
-            generics,
-            rename_all,
-            relax_table_name,
-            ..
-        } = &self.0;
-        let tda = &self.0;
+        let table_derive_attributes = self.deref();
+        let struct_name_ident = &table_derive_attributes.ident;
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
             generics.split_for_impl();
-
-        let table_name_ident = match tda.table_name() {
+        let table_name_ident = match table_derive_attributes.table_name() {
             Ok(table_name) => table_name,
             Err(err) => return tokens.extend(err.write_errors()),
         };
         let table_name_str = table_name_ident.as_string();
-
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -118,7 +109,7 @@ impl ToTokens for NodeToken {
             .map(|f| f.to_string())
             .collect::<Vec<_>>();
 
-        let table_definitions = match tda.define_table() {
+        let table_definitions = match self.get_table_definition_token() {
             Ok(table_definitions) => table_definitions,
             Err(err) => return tokens.extend(err.write_errors()),
         };

@@ -17,7 +17,7 @@ use crate::{
     errors::ExtractorResult,
     models::{
         create_ident_wrapper, AttributeAs, AttributeDefine, CaseString, CustomType,
-        MyFieldReceiver, Permissions, Rename, StructGenerics, StructLevelCasing,
+        MyFieldReceiver, Permissions, Rename, StructGenerics, StructLevelCasing, TableDefinitions,
     },
 };
 
@@ -30,6 +30,17 @@ impl StructIdent {
         let other: CustomType = other.into();
         Ok(self.to_string() == other.type_name()?.to_string())
     }
+}
+
+#[derive(Debug, Clone, FromMeta)]
+pub struct RustFieldTypeSelfAllowed {
+    pub(crate) ty: Type,
+}
+
+struct StructGenericsComponents {
+    pub(crate) impl_generics: TokenStream,
+    pub(crate) type_generics: TokenStream,
+    pub(crate) where_clause: Option<TokenStream>,
 }
 
 #[derive(Debug, FromDeriveInput)]
@@ -61,7 +72,9 @@ pub struct TableDeriveAttributes {
     pub(crate) flexible: Option<bool>,
 
     // #[darling(default, rename = "as_")]
-    pub(crate) as_: Option<Permissions>,
+    pub(crate) as_: Option<AttributeAs>,
+
+    pub(crate) permissions: Option<Permissions>,
 
     #[darling(default)]
     pub(crate) define: Option<AttributeDefine>,
@@ -136,7 +149,7 @@ impl TableDeriveAttributes {
 
         Type::Path(syn::TypePath { qself: None, path }).into()
     }
-    pub fn get_table_definition_token(&self) -> ExtractorResult<TokenStream> {
+    pub fn get_table_definition_token(&self) -> ExtractorResult<TableDefinitions> {
         let TableDeriveAttributes {
             ref drop,
             ref flexible,
@@ -197,12 +210,14 @@ impl TableDeriveAttributes {
             define_table_methods.push(permissions.to_token_stream());
         }
 
-        Ok(define_table.unwrap_or_else(|| {
-            quote!(
-                #crate_name::statements::define_table(Self::table_name())
-                #( #define_table_methods) *
-                .to_raw()
-            )
-        }))
+        Ok(define_table
+            .unwrap_or_else(|| {
+                quote!(
+                    #crate_name::statements::define_table(Self::table_name())
+                    #( #define_table_methods) *
+                    .to_raw()
+                )
+            })
+            .into())
     }
 }

@@ -50,3 +50,5 @@ create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKvPrefixed);
 create_tokenstream_wrapper!(=> SchemaStructFieldsNamesKvEmpty);
 
 create_tokenstream_wrapper!(=> DbFieldNamesToken);
+
+create_tokenstream_wrapper!(=> TableDefinitions);
