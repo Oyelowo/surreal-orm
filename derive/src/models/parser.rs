@@ -221,9 +221,9 @@ pub struct FieldsMeta {
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TableIdType,
 
-    pub field_receiver: Option<MyFieldReceiver>,
-    pub table_derive_attributes: Option<TableDeriveAttributes>,
-    pub data_type: Option<DataType>,
+    field_receiver: Option<MyFieldReceiver>,
+    table_derive_attributes: Option<TableDeriveAttributes>,
+    data_type: Option<DataType>,
 }
 
 impl FieldsMeta {
@@ -283,8 +283,8 @@ impl FieldsMeta {
             store.create_field_connection_builder_token();
             store.create_relation_connection_tokenstream();
             store.create_db_fields_for_links_and_loaders();
+            store.create_relation_aliases_struct_fields_types_kv();
 
-            field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
             field_receiver
                 .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
             Ok(store)
