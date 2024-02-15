@@ -19,7 +19,9 @@ use super::{
     attributes::{MyFieldReceiver, Rename},
     casing::CaseString,
     parser::{DataType, FieldsMeta, SchemaPropertiesArgs},
+    token_codegen::{Codegen, CommonIdents},
     variables::VariablesModelMacro,
+    DataType, MyFieldReceiver, Rename,
 };
 
 // #[derive(Debug, FromDeriveInput)]
@@ -41,21 +43,16 @@ pub struct ObjectToken {
 
 impl ToTokens for ObjectToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let ObjectToken {
-            ident: struct_name_ident,
-            data,
-            generics,
-            rename_all,
-            ..
-        } = &self;
-        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-
-        let struct_level_casing = rename_all.as_ref().map(|case| {
-            CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
-        });
-
-        let crate_name = super::get_crate_name(false);
-
+        let crate_name = get_crate_name(false);
+        let table_derive_attributes = self.deref();
+        let struct_name_ident = &table_derive_attributes.ident;
+        let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
+            generics.split_for_impl();
+        let table_name_ident = match table_derive_attributes.table_name() {
+            Ok(table_name) => table_name,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+        let table_name_str = table_name_ident.as_string();
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -65,23 +62,12 @@ impl ToTokens for ObjectToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {
-            data,
-            struct_level_casing,
-            struct_name_ident,
-            table_name: "".to_string(), // table_name_ident,
-        };
-
-        let schema_props = match FieldsMeta::from_receiver_data(
-            schema_props_args.clone(),
-            generics,
-            DataType::Object,
-        ) {
+        let code_gen = match Codegen::parse_fields(&self.0, DataType::Object) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let FieldsMeta {
+        let Codegen {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -93,22 +79,20 @@ impl ToTokens for ObjectToken {
             schema_struct_fields_names_kv_empty,
             non_null_updater_fields,
             ..
-        } = schema_props;
+        } = code_gen;
 
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()
             .collect::<Vec<_>>();
-
-        let module_name_internal = format_ident!(
-            "________internal_{}_schema",
-            struct_name_ident.to_string().to_case(Case::Snake)
-        );
-        let module_name_rexported =
-            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
-        let test_function_name = format_ident!("test_{module_name_internal}_edge_name");
-        let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
-        let _____schema_def = format_ident!("_____schema_def");
+        let CommonIdents {
+            module_name_internal,
+            module_name_rexported,
+            test_function_name,
+            non_null_updater_struct_name,
+            _____schema_def,
+            ..
+        } = code_gen.common_idents();
 
         // #[derive(Object, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
