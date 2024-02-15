@@ -8,7 +8,7 @@ use super::derive_attributes::StructIdent;
 create_ident_wrapper!(TableName);
 
 impl TableName {
-    pub(crate) fn validate_table_name_and_return(
+    pub(crate) fn validate_and_return(
         &self,
         struct_name_ident: &StructIdent,
         relax_table_name: &Option<bool>,

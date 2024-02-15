@@ -46,7 +46,7 @@ pub struct TableDeriveAttributes {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 
     // #[darling(default)]
-    pub(crate) table_name: TableName,
+    pub(crate) table: TableName,
 
     #[darling(default)]
     pub(crate) relax_table_name: Option<bool>,
@@ -68,12 +68,12 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
-    pub fn table_name(&self) -> ExtractorResult<TableName> {
+    pub fn table_name(&self) -> ExtractorResult<&TableName> {
         // TODO: Ask during alpha release if specifying table name explicitly
         // should be optional since it can be inferred from the struct name
         // as the snake case version of the struct name.
-        self.table_name
-            .validate_table_name_and_return(&self.ident, &self.relax_table_name)
+        self.table
+            .validate_and_return(&self.ident, &self.relax_table_name)
     }
 
     pub fn casing(&self) -> ExtractorResult<StructLevelCasing> {
