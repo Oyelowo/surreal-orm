@@ -5,9 +5,9 @@ use crate::models::create_ident_wrapper;
 
 use super::derive_attributes::StructIdent;
 
-create_ident_wrapper!(TableName);
+create_ident_wrapper!(TableNameIdent);
 
-impl TableName {
+impl TableNameIdent {
     pub(crate) fn validate_and_return(
         &self,
         struct_name_ident: &StructIdent,
@@ -26,5 +26,18 @@ impl TableName {
         };
 
         Ok(self)
+    }
+
+    pub(crate) fn as_string(&self) -> TableNameAsString {
+        TableNameAsString(self.to_string())
+    }
+}
+
+struct TableNameAsString(String);
+
+impl ToTokens for TableNameAsString {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let table_name = format_ident!("{}", self.0);
+        table_name.to_tokens(tokens);
     }
 }

@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-use super::table_name::TableName;
+use super::table_name::TableNameIdent;
 
 create_ident_wrapper!(StructIdent);
 
@@ -46,7 +46,7 @@ pub struct TableDeriveAttributes {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 
     // #[darling(default)]
-    pub(crate) table: TableName,
+    pub(crate) table: TableNameIdent,
 
     #[darling(default)]
     pub(crate) relax_table_name: Option<bool>,
@@ -68,7 +68,7 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
-    pub fn table_name(&self) -> ExtractorResult<&TableName> {
+    pub fn table_name(&self) -> ExtractorResult<&TableNameIdent> {
         // TODO: Ask during alpha release if specifying table name explicitly
         // should be optional since it can be inferred from the struct name
         // as the snake case version of the struct name.
