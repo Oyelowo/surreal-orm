@@ -15,8 +15,12 @@ use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
 use super::{
-    casing::CaseString, derive_attributes::TableDeriveAttributes, errors, token_codegen::Codegen,
-    variables::VariablesModelMacro, DataType, FieldsMeta,
+    casing::CaseString,
+    derive_attributes::TableDeriveAttributes,
+    errors,
+    token_codegen::{Codegen, CommonIdents},
+    variables::VariablesModelMacro,
+    DataType, FieldsMeta,
 };
 
 #[derive(Debug, FromDeriveInput)]
@@ -50,7 +54,8 @@ impl ToTokens for NodeToken {
             Ok(table_name) => table_name,
             Err(err) => return tokens.extend(err.write_errors()),
         };
-        let table_name_str = table_name.to_string();
+        let table_name_str = table_name_ident.as_string();
+
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -93,36 +98,29 @@ impl ToTokens for NodeToken {
             ..
         } = code_gen;
 
-        // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()
             .collect::<Vec<_>>();
 
-        let module_name_internal = format_ident!(
-            "________internal_{}_schema",
-            struct_name_ident.to_string().to_case(Case::Snake)
-        );
-        let module_name_rexported =
-            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
+        let CommonIdents {
+            module_name_internal,
+            module_name_rexported,
+            aliases_struct_name,
+            test_function_name,
+            non_null_updater_struct_name,
+            struct_with_renamed_serialized_fields,
+            _____schema_def,
+        } = code_gen.common_idents();
 
-        let aliases_struct_name = format_ident!("{struct_name_ident}Aliases");
-        let test_function_name =
-            format_ident!("_________test_{module_name_internal}_edge_name__________");
-        let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");
-        let struct_with_renamed_serialized_fields =
-            format_ident!("{struct_name_ident}RenamedCreator");
-        let _____schema_def = format_ident!("_____schema_def");
         let serializable_fields_count = serializable_fields.len();
         let serializable_fields_as_str = serializable_fields
             .iter()
             .map(|f| f.to_string())
             .collect::<Vec<_>>();
 
-        let Ok(table_definitions) = self.get_table_definition_token() else {
-            return tokens.extend(
-                syn::Error::new_spanned(self, "Problem getting table definition.")
-                    .to_compile_error(),
-            );
+        let table_definitions = match tda.define_table() {
+            Ok(table_definitions) => table_definitions,
+            Err(err) => return tokens.extend(err.write_errors()),
         };
 
         // #[derive(#crate::Model, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]

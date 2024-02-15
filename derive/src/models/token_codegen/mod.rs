@@ -57,6 +57,7 @@ use self::{
 
 use super::{
     casing::CaseString,
+    create_ident_wrapper,
     derive_attributes::TableDeriveAttributes,
     get_crate_name,
     relations::{RelateAttribute, RelationType},
@@ -68,6 +69,24 @@ use super::{
     SchemaStructFieldsNamesKvEmpty, SchemaStructFieldsNamesKvPrefixed, SchemaStructFieldsTypesKv,
     SerializableField, StaticAssertionToken, TableIdType, TokenStreamHashable, TypeStripper,
 };
+
+create_ident_wrapper!(ModuleNameInternalIdent);
+create_ident_wrapper!(ModuleNameRexportedIdent);
+create_ident_wrapper!(AliasesStructNameIdent);
+create_ident_wrapper!(TestFunctionNameIdent);
+create_ident_wrapper!(NonNullUpdaterStructNameIdent);
+create_ident_wrapper!(SchemaDefIdent);
+create_ident_wrapper!(StructWithRenamedSerializedFields);
+
+pub(crate) struct CommonIdents {
+    pub module_name_internal: ModuleNameInternalIdent,
+    pub module_name_rexported: ModuleNameRexportedIdent,
+    pub aliases_struct_name: AliasesStructNameIdent,
+    pub test_function_name: TestFunctionNameIdent,
+    pub non_null_updater_struct_name: NonNullUpdaterStructNameIdent,
+    pub struct_with_renamed_serialized_fields: StructWithRenamedSerializedFields,
+    pub _____schema_def: SchemaDefIdent,
+}
 
 #[derive(Default, Clone)]
 pub struct Codegen {
@@ -244,6 +263,29 @@ impl Codegen {
             ..Default::default()
         };
         store
+    }
+
+    pub(crate) fn common_idents(&self) -> CommonIdents {
+        let struct_name_ident = self.table_derive_attributes().ident.to_string();
+        let struct_name_ident_snake = struct_name_ident.to_case(Case::Snake);
+        let module_name_internal =
+            format_ident!("________internal_{struct_name_ident_snake}_schema");
+
+        CommonIdents {
+            module_name_internal: module_name_internal.into(),
+            module_name_rexported: format_ident!("{struct_name_ident_snake}").into(),
+            aliases_struct_name: format_ident!("{struct_name_ident}Aliases").into(),
+            test_function_name: format_ident!(
+                "_________test_{module_name_internal}_static_funcs_name__________"
+            )
+            .into(),
+            non_null_updater_struct_name: format_ident!("{struct_name_ident}NonNullUpdater").into(),
+            struct_with_renamed_serialized_fields: format_ident!(
+                "{struct_name_ident}RenamedCreator"
+            )
+            .into(),
+            _____schema_def: format_ident!("_____schema_def").into(),
+        }
     }
 
     fn set_field_receiver(&mut self, field_receiver: MyFieldReceiver) {
