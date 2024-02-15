@@ -11,13 +11,14 @@ use darling::{ast::Data, util, FromDeriveInput, FromMeta};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_quote, GenericArgument, Ident, Path, PathArguments, Type};
+use syn::{parse_quote, GenericArgument, Generics, Ident, Path, PathArguments, Type};
 
 use crate::{
     errors::ExtractorResult,
     models::{
-        create_ident_wrapper, AttributeAs, AttributeDefine, CaseString, CustomType,
-        MyFieldReceiver, Permissions, Rename, StructGenerics, StructLevelCasing, TableDefinitions,
+        create_ident_wrapper, token_codegen::Codegen, AttributeAs, AttributeDefine, CaseString,
+        CustomType, MyFieldReceiver, Permissions, Rename, StructGenerics, StructLevelCasing,
+        TableDefinitions,
     },
 };
 
@@ -54,7 +55,7 @@ pub struct TableDeriveAttributes {
     pub data: Data<util::Ignored, MyFieldReceiver>,
 
     #[darling(default)]
-    pub(crate) rename_all: ::std::option::Option<Rename>,
+    pub(crate) rename_all: Option<Rename>,
 
     // #[darling(default)]
     pub(crate) table: TableNameIdent,
@@ -89,66 +90,6 @@ impl TableDeriveAttributes {
             .validate_and_return(&self.ident, &self.relax_table_name)
     }
 
-    pub fn casing(&self) -> ExtractorResult<StructLevelCasing> {
-        let struct_level_casing = self
-            .rename_all
-            .as_ref()
-            .map(|case| CaseString::from_str(case.serialize.as_str()));
-
-        let casing = match struct_level_casing {
-            Some(Ok(case)) => case,
-            Some(Err(e)) => return Err(darling::Error::custom(e.to_string()).into()),
-            None => CaseString::None,
-        };
-        Ok(casing.into())
-    }
-
-    pub fn struct_as_path_no_bounds(&self) -> Path {
-        // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
-        self.construct_type_without_bounds()
-            .replace_self_with_struct_concrete_type(self)
-            .to_path()
-    }
-
-    pub fn construct_type_without_bounds(&self) -> RustFieldTypeSelfAllowed {
-        let mut path = Path::from(self.ident.clone());
-        let generics = self.generics;
-
-        // Process generics, excluding bounds
-        if !generics.params.is_empty() {
-            let args = generics
-                .params
-                .iter()
-                .map(|param| match param {
-                    syn::GenericParam::Type(type_param) => {
-                        GenericArgument::Type(parse_quote!(#type_param))
-                    }
-                    syn::GenericParam::Lifetime(lifetime_def) => {
-                        GenericArgument::Lifetime(lifetime_def.lifetime.clone())
-                    }
-                    syn::GenericParam::Const(const_param) => {
-                        // TODO: Test this in struct
-                        GenericArgument::Const(
-                            const_param
-                                .default
-                                .clone()
-                                .expect("absent const expression"),
-                        )
-                    }
-                })
-                .collect();
-
-            path.segments.last_mut().unwrap().arguments =
-                PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
-                    colon2_token: None,
-                    lt_token: generics.lt_token.unwrap(),
-                    args,
-                    gt_token: generics.gt_token.unwrap(),
-                });
-        }
-
-        Type::Path(syn::TypePath { qself: None, path }).into()
-    }
     pub fn get_table_definition_token(&self) -> ExtractorResult<TableDefinitions> {
         let TableDeriveAttributes {
             ref drop,
@@ -219,5 +160,72 @@ impl TableDeriveAttributes {
                 )
             })
             .into())
+    }
+}
+
+pub trait ModelAttributes {
+    fn rename_all(&self) -> Option<Rename>;
+    fn ident(&self) -> StructIdent;
+    fn generics(&self) -> &StructGenerics;
+
+    fn casing(&self) -> ExtractorResult<StructLevelCasing> {
+        let struct_level_casing = self
+            .rename_all()
+            .as_ref()
+            .map(|case| CaseString::from_str(case.serialize.as_str()));
+
+        let casing = match struct_level_casing {
+            Some(Ok(case)) => case,
+            Some(Err(e)) => return Err(darling::Error::custom(e.to_string()).into()),
+            None => CaseString::None,
+        };
+        Ok(casing.into())
+    }
+
+    fn struct_as_path_no_bounds(&self) -> Path {
+        // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
+        self.construct_type_without_bounds()
+            .replace_self_with_struct_concrete_type(self)
+            .to_path()
+    }
+
+    fn construct_type_without_bounds(&self) -> RustFieldTypeSelfAllowed {
+        let mut path = Path::from(self.ident());
+        let generics = self.generics().to_basic_generics();
+
+        // Process generics, excluding bounds
+        if !generics.params.is_empty() {
+            let args = generics
+                .params
+                .iter()
+                .map(|param| match param {
+                    syn::GenericParam::Type(type_param) => {
+                        GenericArgument::Type(parse_quote!(#type_param))
+                    }
+                    syn::GenericParam::Lifetime(lifetime_def) => {
+                        GenericArgument::Lifetime(lifetime_def.lifetime.clone())
+                    }
+                    syn::GenericParam::Const(const_param) => {
+                        // TODO: Test this in struct
+                        GenericArgument::Const(
+                            const_param
+                                .default
+                                .clone()
+                                .expect("absent const expression"),
+                        )
+                    }
+                })
+                .collect();
+
+            path.segments.last_mut().unwrap().arguments =
+                PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+                    colon2_token: None,
+                    lt_token: generics.lt_token.unwrap(),
+                    args,
+                    gt_token: generics.gt_token.unwrap(),
+                });
+        }
+
+        Type::Path(syn::TypePath { qself: None, path }).into()
     }
 }
