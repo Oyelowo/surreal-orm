@@ -8,8 +8,6 @@ use crate::{
     },
 };
 
-
-
 impl FieldsMeta {
     pub fn create_table_id_type_token(&mut self) -> ExtractorResult<()> {
         let fr = self.field_receiver();
