@@ -23,12 +23,12 @@ create_tokenstream_wrapper!(=> SqlValueTokenStream);
 
 create_tokenstream_wrapper!(=> StaticAssertionToken);
 
-create_tokenstream_wrapper!(=> LinkedFields);
-create_tokenstream_wrapper!(=> LinkOneFields);
-create_tokenstream_wrapper!(=> LinkSelfFields);
-create_tokenstream_wrapper!(=> LinkOneAndSelfFields);
-create_tokenstream_wrapper!(=> LinkManyFields);
-create_tokenstream_wrapper!(=> SerializableFields);
+create_tokenstream_wrapper!(=> LinkedField);
+create_tokenstream_wrapper!(=> LinkOneField);
+create_tokenstream_wrapper!(=> LinkSelfField);
+create_tokenstream_wrapper!(=> LinkOneAndSelfField);
+create_tokenstream_wrapper!(=> LinkManyField);
+create_tokenstream_wrapper!(=> SerializableField);
 
 create_tokenstream_wrapper!(=> ConnectionWithFieldAppended);
 

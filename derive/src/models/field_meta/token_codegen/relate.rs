@@ -17,8 +17,8 @@ use crate::{
         create_ident_wrapper, create_tokenstream_wrapper,
         derive_attributes::{StructIdent, TableDeriveAttributes},
         variables::VariablesModelMacro,
-        CustomType, EdgeTableName, EdgeType, FieldGenericsMeta, FieldsMeta, NodeTableName,
-        RelateAttribute, RelationType, StaticAssertionToken, Relate,
+        CustomType, EdgeTableName, EdgeType, FieldGenericsMeta, FieldsMeta, MyFieldReceiver,
+        NodeTableName, RelateAttribute, RelationType, StaticAssertionToken,
     },
 };
 
