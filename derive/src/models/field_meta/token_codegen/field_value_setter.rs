@@ -7,11 +7,9 @@ use crate::{
     errors::ExtractorResult,
     models::{
         create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes, FieldGenerics,
-        FieldGenericsMeta, FieldsMeta, MyFieldReceiver, RelationType,
+        FieldsMeta, MyFieldReceiver, RelationType, FieldGenericsMeta,
     },
 };
-
-use super::MyFieldReceiver;
 
 pub struct FieldSetterNumericImpl(TokenStream);
 

@@ -1,10 +1,8 @@
-use crate::models::{
-    derive_attributes::TableDeriveAttributes, GenericTypeExtractor, MyFieldReceiver,
-};
+use crate::models::{derive_attributes::TableDeriveAttributes, GenericTypeExtractor};
 use quote::quote;
 use syn::{visit::Visit, *};
 
-use super::{MyFieldReceiver, RelationType};
+use super::MyFieldReceiver;
 
 impl MyFieldReceiver {
     // This extracts generics metadata for field and from struct generics metadata.

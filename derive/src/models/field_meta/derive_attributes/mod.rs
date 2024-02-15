@@ -1,49 +1,26 @@
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2024 Oyelowo Oyedayo
- * Licensed under the MIT license
- */
-
-mod aliases;
-mod core;
-mod define_statement;
-mod field_connection_build;
-mod field_ident;
-mod field_metadata;
-mod field_type_assertions;
-mod field_value_setter;
 mod generics;
-mod link_methods;
-mod relate;
-mod serialized_field_fmts;
-mod simple;
-mod updater_non_null;
+mod ident;
+mod types;
 
-pub use core::*;
-pub use define_statement::*;
-pub use field_connection_build::*;
-pub use field_metadata::*;
-pub use field_value_setter::*;
-pub use generics::*;
-pub use link_methods::*;
-pub use relate::*;
-pub use serialized_field_fmts::*;
-pub use simple::*;
-pub use updater_non_null::*;
+pub use generics::FieldGenericsMeta;
 
 use crate::{
     errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, CaseString, DataType},
+    models::{
+        create_ident_wrapper, derive_attributes::TableDeriveAttributes,
+        field_name_serialized::DbFieldName, CaseString, CustomType, DataType, DbFieldTypeAstMeta,
+        FieldIdentOriginal, FieldTypeDb, LinkManyAttrType, LinkOneAttrType, LinkSelfAttrType,
+        NestArrayAttrType, NestObjectAttrType, Relate, RelationType, Rename, StructLevelCasing,
+    },
 };
 
-use super::*;
-use darling::FromField;
-use proc_macro2::TokenStream;
-use proc_macros_helpers::get_crate_name;
-use quote::quote;
-use surreal_query_builder::FieldType;
-use syn::*;
+use super::{AttributeAssert, AttributeDefine, AttributeItemAssert, AttributeValue, Permissions};
+
+create_ident_wrapper!(IdentCased);
+create_ident_wrapper!(FieldIdentNormalized);
+create_ident_wrapper!(FieldNamePascalized);
+create_ident_wrapper!(FieldIdentOriginal);
+create_ident_wrapper!(OldFieldName);
 
 #[derive(Debug, FromField)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]

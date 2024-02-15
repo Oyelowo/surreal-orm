@@ -6,7 +6,7 @@ use crate::{
     models::{derive_attributes::TableDeriveAttributes, FieldsMeta, RelationType},
 };
 
-use super::MyFieldReceiver;
+
 
 impl FieldsMeta {
     pub fn create_non_null_updater_struct_fields(&mut self) -> ExtractorResult<()> {

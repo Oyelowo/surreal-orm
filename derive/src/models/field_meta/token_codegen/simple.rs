@@ -8,7 +8,7 @@ use crate::{
     },
 };
 
-use super::MyFieldReceiver;
+
 
 impl FieldsMeta {
     pub fn create_table_id_type_token(&mut self) -> ExtractorResult<()> {

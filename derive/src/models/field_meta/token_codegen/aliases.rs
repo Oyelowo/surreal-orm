@@ -3,8 +3,6 @@ use crate::{
     models::{FieldsMeta, RelationType},
 };
 
-use super::MyFieldReceiver;
-
 impl FieldsMeta {
     pub fn create_relation_aliases_struct_fields_types_kv(
         &mut self,
