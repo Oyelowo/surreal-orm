@@ -7,7 +7,7 @@ use crate::{
     errors::ExtractorResult,
     models::{
         create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes, FieldGenerics,
-        FieldGenericsMeta, FieldsMeta, MyFieldReceiver, RelationType,
+        FieldGenericsMeta, MyFieldReceiver, RelationType,
     },
 };
 
@@ -39,7 +39,9 @@ create_tokenstream_wrapper!(
 =>
 FieldSetterImplTokens);
 
-impl FieldsMeta {
+use super::Codegen;
+
+impl Codegen {
     pub fn create_field_setter_impl(&mut self) -> ExtractorResult<()> {
         let table_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();

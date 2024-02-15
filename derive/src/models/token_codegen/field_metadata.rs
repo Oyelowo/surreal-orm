@@ -1,11 +1,12 @@
 use quote::quote;
 
 use crate::models::{
-    derive_attributes::TableDeriveAttributes, field_name_serialized,
-    variables::VariablesModelMacro, FieldsMeta,
+    derive_attributes::TableDeriveAttributes, field_name_serialized, variables::VariablesModelMacro,
 };
 
-impl FieldsMeta {
+use super::Codegen;
+
+impl Codegen {
     pub fn create_field_metadata_token(&mut self) -> ExtractorResult<()> {
         let field_receiver = self.field_receiver();
         let table_derive_attrs = self.table_derive_attributes();

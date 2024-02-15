@@ -1,9 +1,8 @@
-use crate::{
-    errors::ExtractorResult,
-    models::{FieldsMeta, RelationType},
-};
+use crate::{errors::ExtractorResult, models::RelationType};
 
-impl FieldsMeta {
+use super::Codegen;
+
+impl Codegen {
     pub fn create_relation_aliases_struct_fields_types_kv(
         &mut self,
     ) -> ExtractorResult<Vec<String>> {

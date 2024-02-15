@@ -1,8 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use super::{field_receiver, RelationType};
-use crate::models::field_meta::receiver::relate;
 use crate::{
     errors::ExtractorResult,
     models::{variables::VariablesModelMacro, *},
@@ -15,10 +13,12 @@ create_tokenstream_wrapper!(
 ListSimpleTraversalMethod
 );
 
-impl MyFieldReceiver {
+use super::{Codegen, RelationType};
+
+impl Codegen {
     pub fn create_link_methods(
         &self,
-        store: &mut FieldsMeta,
+        store: &mut Codegen,
         table_derive_attrs: &TableDeriveAttributes,
     ) {
         let relation_type = self.to_relation_type();

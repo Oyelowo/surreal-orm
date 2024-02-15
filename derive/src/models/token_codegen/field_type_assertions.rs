@@ -4,11 +4,13 @@ use crate::{
     errors::ExtractorResult,
     models::{
         count_vec_nesting, derive_attributes::TableDeriveAttributes, field_name_serialized,
-        generate_nested_vec_type, variables::VariablesModelMacro, FieldsMeta, RelationType,
+        generate_nested_vec_type, variables::VariablesModelMacro, RelationType,
     },
 };
 
-impl FieldsMeta {
+use super::Codegen;
+
+impl Codegen {
     pub fn create_field_type_static_assertion_token(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();

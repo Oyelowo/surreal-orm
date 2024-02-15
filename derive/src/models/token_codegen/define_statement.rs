@@ -2,17 +2,17 @@ use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 
+use super::Codegen;
 use crate::{
     errors::ExtractorResult,
     models::{
-        derive_attributes::TableDeriveAttributes, DataType, FieldsMeta, MyFieldReceiver,
-        StaticAssertionToken,
+        derive_attributes::TableDeriveAttributes, DataType, MyFieldReceiver, StaticAssertionToken,
     },
 };
 
 pub struct DefineFieldStatementToken(TokenStream);
 
-impl FieldsMeta {
+impl Codegen {
     pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
         self.field_definitions.extend(self.field_defintion_db()?);
         Ok(())
