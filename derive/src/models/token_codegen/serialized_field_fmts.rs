@@ -3,13 +3,12 @@ use quote::quote;
 
 use crate::{
     errors::ExtractorResult,
-    models::{
-        derive_attributes::TableDeriveAttributes, FieldsMeta, Relate, RelationType,
-        SerializableField,
-    },
+    models::{derive_attributes::TableDeriveAttributes, Relate, RelationType, SerializableField},
 };
 
-impl FieldsMeta {
+use super::Codegen;
+
+impl Codegen {
     pub fn create_db_fields_for_links_and_loaders(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();

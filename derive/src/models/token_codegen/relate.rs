@@ -17,12 +17,14 @@ use crate::{
         create_ident_wrapper, create_tokenstream_wrapper,
         derive_attributes::{StructIdent, TableDeriveAttributes},
         variables::VariablesModelMacro,
-        CustomType, EdgeTableName, EdgeType, FieldGenericsMeta, FieldsMeta, MyFieldReceiver,
-        NodeTableName, RelateAttribute, RelationType, StaticAssertionToken,
+        CustomType, EdgeTableName, EdgeType, FieldGenericsMeta, MyFieldReceiver, NodeTableName,
+        RelateAttribute, RelationType, StaticAssertionToken,
     },
 };
 
-impl FieldsMeta {
+use super::Codegen;
+
+impl Codegen {
     pub fn create_relation_connection_tokenstream(&mut self) -> ExtractorResult<()> {
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();

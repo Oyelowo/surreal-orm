@@ -10,7 +10,6 @@ pub(crate) mod edge;
 pub(crate) mod field_meta;
 pub(crate) mod node;
 pub(crate) mod object;
-pub(crate) mod parser;
 pub(crate) mod table_meta;
 pub(crate) mod token_codegen;
 pub(crate) mod utils;
@@ -18,7 +17,6 @@ pub(crate) mod variables;
 
 pub use casing::*;
 pub use field_meta::*;
-pub use parser::*;
 pub use table_meta::*;
 pub(crate) use utils::*;
 

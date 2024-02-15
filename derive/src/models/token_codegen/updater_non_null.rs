@@ -3,10 +3,12 @@ use quote::quote;
 
 use crate::{
     errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, FieldsMeta, RelationType},
+    models::{derive_attributes::TableDeriveAttributes, RelationType},
 };
 
-impl FieldsMeta {
+use super::Codegen;
+
+impl Codegen {
     pub fn create_non_null_updater_struct_fields(&mut self) -> ExtractorResult<()> {
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
