@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2024 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 #[macro_export]
 macro_rules! create_ident_wrapper {
     ($ident:ident) => {

@@ -5,13 +5,6 @@
  * Licensed under the MIT license
  */
 
-use darling::FromField;
-use proc_macro2::TokenStream;
-use proc_macros_helpers::get_crate_name;
-use quote::quote;
-use surreal_query_builder::FieldType;
-use syn::*;
-
 mod aliases;
 mod define_statement;
 mod field_connection_build;
@@ -24,24 +17,19 @@ mod serialized_field_fmts;
 mod simple;
 mod updater_non_null;
 
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
- */
-
+use convert_case::{Case, Casing};
+use darling::{ast, util, FromField, ToTokens};
+use proc_macro2::{Ident, TokenStream};
+use proc_macros_helpers::get_crate_name;
+use quote::{format_ident, quote};
 use std::{
     collections::{hash_map::Entry, HashMap, HashSet},
     fmt::Display,
     ops::Deref,
     option,
 };
-
-use convert_case::{Case, Casing};
-use darling::{ast, util, ToTokens};
-use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote};
+use surreal_query_builder::FieldType;
+use syn::*;
 
 use crate::{
     errors::ExtractorResult,
