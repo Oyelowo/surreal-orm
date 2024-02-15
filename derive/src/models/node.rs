@@ -15,7 +15,7 @@ use syn::{self, parse_macro_input};
 
 use super::{
     casing::CaseString, derive_attributes::TableDeriveAttributes, errors,
-    variables::VariablesModelMacro,
+    variables::VariablesModelMacro, DataType, FieldsMeta,
 };
 
 #[derive(Debug, FromDeriveInput)]
@@ -37,26 +37,19 @@ impl ToTokens for NodeToken {
             data,
             generics,
             rename_all,
-            table_name,
             relax_table_name,
             ..
         } = &self.0;
         let tda = &self.0;
-        let table_name_ident = tda.table_name().;
 
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
             generics.split_for_impl();
-        let table_name_ident = &format_ident!(
-            "{}",
-            table_name
-                .as_ref()
-                .expect("table_name attribute must be provided")
-        );
-        let table_name =
-            match errors::validate_table_name(struct_name_ident, table_name, relax_table_name) {
-                Ok(table_name) => table_name,
-                Err(err) => return tokens.extend(err.write_errors()),
-            };
+
+        let table_name_ident = match tda.table_name() {
+            Ok(table_name) => table_name,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+        let table_name_str = table_name.to_string();
 
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -73,23 +66,12 @@ impl ToTokens for NodeToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {
-            data,
-            struct_level_casing,
-            struct_name_ident,
-            table_name,
-        };
-
-        let schema_props = match SchemaFieldsProperties::from_receiver_data(
-            schema_props_args,
-            generics,
-            DataType::Node,
-        ) {
+        let fields_meta = match FieldsMeta::parse_fields(&self.0, DataType::Node) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let SchemaFieldsProperties {
+        let FieldsMeta {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -102,7 +84,7 @@ impl ToTokens for NodeToken {
             record_link_fields_methods,
             node_edge_metadata,
             schema_struct_fields_names_kv_empty,
-            serializable_fields,
+            serialized_fmt_db_field_names_instance: serializable_fields,
             linked_fields,
             link_one_fields,
             link_self_fields,
@@ -115,7 +97,7 @@ impl ToTokens for NodeToken {
             table_id_type,
             field_metadata,
             ..
-        } = schema_props;
+        } = fields_meta;
 
         let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
@@ -200,7 +182,7 @@ impl ToTokens for NodeToken {
 
                     #module_name_internal::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
                                 #module_name_internal::#struct_name_ident::empty(),
-                                clause.with_table(#table_name),
+                                clause.with_table(#table_name_str),
                     )
                 }
                 //
@@ -218,7 +200,7 @@ impl ToTokens for NodeToken {
 
 
                 fn get_table_name() -> #crate_name::Table {
-                    #table_name.into()
+                    #table_name_str.into()
                 }
 
                 fn get_fields_relations_aliased() -> Vec<#crate_name::Alias> {
@@ -260,7 +242,7 @@ impl ToTokens for NodeToken {
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
                 fn table_name() -> #crate_name::Table {
-                    #table_name.into()
+                    #table_name_str.into()
                 }
 
                 fn get_id(self) -> Self::Id {
