@@ -46,11 +46,11 @@ use super::{
     ForeignNodeSchemaImport,
     GenericTypeExtractor,
     LinkFieldTraversalMethodToken,
-    LinkManyFields,
-    LinkOneAndSelfFields,
-    LinkOneFields,
-    LinkSelfFields,
-    LinkedFields,
+    LinkManyField,
+    LinkOneAndSelfField,
+    LinkOneField,
+    LinkSelfField,
+    LinkedField,
     MyFieldReceiver,
     NodeEdgeMetadataLookupTable,
     NodeEdgeMetadataStore,
@@ -60,7 +60,7 @@ use super::{
     SchemaStructFieldsNamesKvEmpty,
     SchemaStructFieldsNamesKvPrefixed,
     SchemaStructFieldsTypesKv,
-    SerializableFields,
+    SerializableField,
     StaticAssertionToken,
     TableIdType,
     TokenStreamHashable,
@@ -70,17 +70,17 @@ use super::{
 #[derive(Default, Clone)]
 pub struct FieldsMeta {
     /// list of fields names that are actually serialized and not skipped.
-    pub serialized_fmt_db_field_names_instance: Vec<SerializableFields>,
+    pub serialized_fmt_db_field_names_instance: Vec<SerializableField>,
     /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
-    pub linked_fields: Vec<LinkedFields>,
+    pub linked_fields: Vec<LinkedField>,
     /// The names of link_one fields
-    pub link_one_fields: Vec<LinkOneFields>,
+    pub link_one_fields: Vec<LinkOneField>,
     /// The names of link_self fields
-    pub link_self_fields: Vec<LinkSelfFields>,
+    pub link_self_fields: Vec<LinkSelfField>,
     /// The names of link_one and link_self fields
-    pub link_one_and_self_fields: Vec<LinkOneAndSelfFields>,
+    pub link_one_and_self_fields: Vec<LinkOneAndSelfField>,
     /// The names of link_many fields
-    pub link_many_fields: Vec<LinkManyFields>,
+    pub link_many_fields: Vec<LinkManyField>,
     /// Generated example: pub timeWritten: Field,
     /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
     /// to build up struct for generating fields of a Schema of the Edge
@@ -282,9 +282,8 @@ impl FieldsMeta {
             store.create_field_metadata_token();
             store.create_field_connection_builder_token();
             store.create_relation_connection_tokenstream();
+            store.create_db_fields_for_links_and_loaders();
 
-            field_receiver
-                .create_db_fields_for_links_and_loaders(&mut store, table_derive_attributes);
             field_receiver.create_relation_aliases_struct_fields_types_kv(&mut store);
             field_receiver
                 .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
