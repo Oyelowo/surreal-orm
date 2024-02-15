@@ -45,29 +45,28 @@ use quote::{format_ident, quote};
 
 use crate::{
     errors::ExtractorResult,
-    models::{
-        attributes::FieldGenericsMeta, derive_attributes::TableDeriveAttributes,
-        relations::NodeType, CaseString, DataType, DestinationNodeTypeOriginal, FieldGenericsMeta,
-        NormalisedFieldMeta,
-    },
+    models::{derive_attributes::TableDeriveAttributes, CaseString, DataType, FieldGenericsMeta},
+};
+
+use self::{
+    define_statement::DefineFieldStatementToken,
+    field_value_setter::FieldSetterImplTokens,
+    link_methods::{ForeignNodeSchemaImport, LinkFieldTraversalMethodToken},
+    relate::NodeEdgeMetadataLookupTable,
 };
 
 use super::{
-    attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
     casing::CaseString,
     derive_attributes::TableDeriveAttributes,
-    errors::ExtractorResult,
     get_crate_name,
-    relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
+    relations::{RelateAttribute, RelationType},
     variables::VariablesModelMacro,
     AliasesStructFieldsNamesKv, AliasesStructFieldsTypesKv, ConnectionWithFieldAppended, DataType,
-    DbFieldNamesToken, DefineFieldStatementToken, FieldMetadataToken, FieldSetterImplTokens,
-    FieldsRelationsAliased, ForeignNodeSchemaImport, GenericTypeExtractor,
-    LinkFieldTraversalMethodToken, LinkManyField, LinkOneAndSelfField, LinkOneField, LinkSelfField,
-    LinkedField, MyFieldReceiver, NodeEdgeMetadataLookupTable, NonNullUpdaterFields,
-    RenamedSerializedFields, SchemaStructFieldsNamesKv, SchemaStructFieldsNamesKvEmpty,
-    SchemaStructFieldsNamesKvPrefixed, SchemaStructFieldsTypesKv, SerializableField,
-    StaticAssertionToken, TableIdType, TokenStreamHashable, TypeStripper,
+    DbFieldNamesToken, FieldMetadataToken, FieldsRelationsAliased, GenericTypeExtractor,
+    LinkManyField, LinkOneAndSelfField, LinkOneField, LinkSelfField, LinkedField, MyFieldReceiver,
+    NonNullUpdaterFields, RenamedSerializedFields, SchemaStructFieldsNamesKv,
+    SchemaStructFieldsNamesKvEmpty, SchemaStructFieldsNamesKvPrefixed, SchemaStructFieldsTypesKv,
+    SerializableField, StaticAssertionToken, TableIdType, TokenStreamHashable, TypeStripper,
 };
 
 #[derive(Default, Clone)]
