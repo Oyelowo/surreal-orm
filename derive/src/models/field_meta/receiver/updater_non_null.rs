@@ -8,72 +8,54 @@ use crate::{
 
 use super::MyFieldReceiver;
 
-impl MyFieldReceiver {
-    pub fn create_non_null_updater_struct_fields(
-        &self,
-        store: &mut FieldsMeta,
-        table_derive_attributes: &TableDeriveAttributes,
-    ) -> ExtractorResult<()> {
-        let field_type = self.field_type_rust();
+impl FieldsMeta {
+    pub fn create_non_null_updater_struct_fields(&mut self) -> ExtractorResult<()> {
+        let table_derive_attributes = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
+        let field_type = field_receiver.field_type_rust();
         let field_ident_normalized =
-            self.field_ident_normalized(&table_derive_attributes.casing()?)?;
+            field_receiver.field_ident_normalized(&table_derive_attributes.casing()?)?;
 
-        match self.to_relation_type() {
-            RelationType::LinkOne(_) => {
-                store.non_null_updater_fields.push(
+        match field_receiver.to_relation_type() {
+            RelationType::None
+            | RelationType::NestArray(_)
+            | RelationType::LinkOne(_)
+            | RelationType::LinkSelf(_)
+            | RelationType::LinkMany(_)
+            | RelationType::List(_) => {
+                self.insert_non_null_updater_token(
                     quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, )
                         .into(),
                 );
             }
-            RelationType::LinkSelf(_) => {
-                store.non_null_updater_fields.push(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, )
-                        .into(),
-                );
-            }
-            RelationType::LinkMany(_) => {
-                store.non_null_updater_fields.push(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, )
-                        .into(),
-                );
-            }
-            RelationType::NestObject(_) => {
+            RelationType::NestObject(nested_object) => {
                 store.non_null_updater_fields(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ).into(),
+                    quote!(pub #field_ident_normalized: ::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>, ).into(),
                 );
             }
-            RelationType::None | RelationType::List(_) | RelationType::NestArray(_) => {
-                store.non_null_updater_fields.push(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, )
-                        .into(),
-                );
-            }
-            _ => {}
+            RelationType::Relate(_) => {}
         }
 
         Ok(())
     }
 
     fn insert_non_null_updater_token(
-        &self,
-        store: &mut FieldsMeta,
+        &mut self,
         updater_field_token: TokenStream,
-    ) {
-        // let is_invalid =
-        //     &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
-        // if !is_invalid {
-        //     store
-        //         .non_null_updater_fields
-        //         .push(updater_field_token.clone());
-        // }
-        store
-            .non_null_updater_fields
-            .push(updater_field_token.clone().into());
+    ) -> ExtractorResult<()> {
+        let table_derive_attributes = self.table_derive_attributes();
+        let db_field_name = self
+            .field_receiver()
+            .db_field_name(&table_derive_attributes.casing()?)?;
+        if db_field_name.is_updateable_by_default(self.data_type()) {
+            self.non_null_updater_fields
+                .push(updater_field_token.into());
+        }
         // We dont care about the field type. We just use this struct to check for
         // renamed serialized field names at compile time by asserting that the a field
         // exist.
-        store
-            .renamed_serialized_fields
+        self.renamed_serialized_fields
             .push(quote!(pub #field_ident_raw_to_underscore_suffix: &'static str, ).into());
+        Ok(())
     }
 }

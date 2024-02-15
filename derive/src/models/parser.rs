@@ -243,7 +243,7 @@ impl FieldsMeta {
     pub(crate) fn field_receiver(&self) -> &MyFieldReceiver {
         self.field_receiver
             .as_ref()
-            .expect("Field receiver has not been set. Make sure it has been set")
+            .expect("Field receiver has not been set. Make sure it has been set by calling set_field_receiver")
     }
 
     pub(crate) fn table_derive_attributes(&self) -> &TableDeriveAttributes {
@@ -263,7 +263,7 @@ impl FieldsMeta {
         table_derive_attributes: &TableDeriveAttributes,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
-        let mut store = Self::new(table_derive_attributes, data_type);
+        let mut tokens_generator = Self::new(table_derive_attributes, data_type);
 
         for field_receiver in table_derive_attributes
             .data
@@ -272,22 +272,21 @@ impl FieldsMeta {
             .ok_or_else(|| darling::Error::custom("Expected a struct"))?
             .fields
         {
-            store.set_field_receiver(field_receiver);
+            tokens_generator.set_field_receiver(field_receiver);
 
-            store.create_table_id_type_token();
-            store.create_field_definitions();
-            store.create_db_field_names_token();
-            store.create_field_type_static_assertion_token();
-            store.create_field_setter_impl();
-            store.create_field_metadata_token();
-            store.create_field_connection_builder_token();
-            store.create_relation_connection_tokenstream();
-            store.create_db_fields_for_links_and_loaders();
-            store.create_relation_aliases_struct_fields_types_kv();
+            tokens_generator.create_table_id_type_token();
+            tokens_generator.create_field_definitions();
+            tokens_generator.create_db_field_names_token();
+            tokens_generator.create_field_type_static_assertion_token();
+            tokens_generator.create_field_setter_impl();
+            tokens_generator.create_field_metadata_token();
+            tokens_generator.create_field_connection_builder_token();
+            tokens_generator.create_relation_connection_tokenstream();
+            tokens_generator.create_db_fields_for_links_and_loaders();
+            tokens_generator.create_relation_aliases_struct_fields_types_kv();
+            tokens_generator.create_non_null_updater_struct_fields();
 
-            field_receiver
-                .create_non_null_updater_struct_fields(&mut store, table_derive_attributes);
-            Ok(store)
+            Ok(tokens_generator)
         }
     }
 }
