@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2024 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use crate::models::{derive_attributes::TableDeriveAttributes, GenericTypeExtractor};
 use quote::quote;
 use syn::{visit::Visit, *};
