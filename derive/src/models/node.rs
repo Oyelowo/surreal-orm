@@ -7,6 +7,7 @@
 
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
+use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote};
 use std::{ops::Deref, str::FromStr};
 
@@ -14,7 +15,7 @@ use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
 use super::{
-    casing::CaseString, derive_attributes::TableDeriveAttributes, errors,
+    casing::CaseString, derive_attributes::TableDeriveAttributes, errors, token_codegen::Codegen,
     variables::VariablesModelMacro, DataType, FieldsMeta,
 };
 
@@ -32,6 +33,7 @@ impl Deref for NodeToken {
 
 impl ToTokens for NodeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
+        let crate_name = get_crate_name(false);
         let TableDeriveAttributes {
             ident: struct_name_ident,
             data,
@@ -41,7 +43,6 @@ impl ToTokens for NodeToken {
             ..
         } = &self.0;
         let tda = &self.0;
-
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
             generics.split_for_impl();
 
@@ -50,13 +51,6 @@ impl ToTokens for NodeToken {
             Err(err) => return tokens.extend(err.write_errors()),
         };
         let table_name_str = table_name.to_string();
-
-        let struct_level_casing = rename_all.as_ref().map(|case| {
-            CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
-        });
-
-        let crate_name = super::get_crate_name(false);
-
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -66,12 +60,12 @@ impl ToTokens for NodeToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let fields_meta = match FieldsMeta::parse_fields(&self.0, DataType::Node) {
+        let code_gen = match Codegen::parse_fields(&self.0, DataType::Node) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let FieldsMeta {
+        let Codegen {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -97,17 +91,12 @@ impl ToTokens for NodeToken {
             table_id_type,
             field_metadata,
             ..
-        } = fields_meta;
+        } = code_gen;
 
-        let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()
             .collect::<Vec<_>>();
-
-        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions();
-
-        // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let module_name_internal = format_ident!(
             "________internal_{}_schema",
@@ -456,7 +445,7 @@ impl ToTokens for NodeToken {
 
                 }
 
-                #node_edge_metadata_tokens
+                #node_edge_metadata
             }
 
 
