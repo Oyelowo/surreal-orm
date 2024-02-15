@@ -21,7 +21,8 @@ use crate::{
     },
 };
 
-// Struct name
+use super::table_name::TableName;
+
 create_ident_wrapper!(StructIdent);
 
 impl StructIdent {
@@ -34,7 +35,6 @@ impl StructIdent {
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
-    // pub(crate) ident: syn::Ident,
     pub(crate) ident: StructIdent,
     // pub(crate) attrs: Vec<syn::Attribute>,
     pub(crate) generics: StructGenerics,
@@ -46,33 +46,34 @@ pub struct TableDeriveAttributes {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 
     // #[darling(default)]
-    pub(crate) table_name: Ident,
+    pub(crate) table_name: TableName,
 
     #[darling(default)]
-    pub(crate) relax_table_name: ::std::option::Option<bool>,
+    pub(crate) relax_table_name: Option<bool>,
 
     #[darling(default)]
-    pub(crate) schemafull: ::std::option::Option<bool>,
+    pub(crate) schemafull: Option<bool>,
 
     #[darling(default)]
-    pub(crate) drop: ::std::option::Option<bool>,
+    pub(crate) drop: Option<bool>,
 
     #[darling(default)]
-    pub(crate) flexible: ::std::option::Option<bool>,
+    pub(crate) flexible: Option<bool>,
 
     // #[darling(default, rename = "as_")]
-    pub(crate) as_: ::std::option::Option<AttributeAs>,
+    pub(crate) as_: Option<Permissions>,
 
     #[darling(default)]
-    pub(crate) permissions: ::std::option::Option<Permissions>,
-
-    #[darling(default)]
-    pub(crate) define: ::std::option::Option<AttributeDefine>,
+    pub(crate) define: Option<AttributeDefine>,
 }
 
 impl TableDeriveAttributes {
-    pub fn table_name(&self) -> ExtractorResult<Ident> {
-        Ok(self.table_name)
+    pub fn table_name(&self) -> ExtractorResult<TableName> {
+        // TODO: Ask during alpha release if specifying table name explicitly
+        // should be optional since it can be inferred from the struct name
+        // as the snake case version of the struct name.
+        self.table_name
+            .validate_table_name_and_return(&self.ident, &self.relax_table_name)
     }
 
     pub fn casing(&self) -> ExtractorResult<StructLevelCasing> {

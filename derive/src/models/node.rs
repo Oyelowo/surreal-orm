@@ -5,8 +5,6 @@
 * Licensed under the MIT license
  */
 
-#![allow(dead_code)]
-
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -16,10 +14,7 @@ use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
 use super::{
-    attributes::TableDeriveAttributes,
-    casing::CaseString,
-    errors,
-    parser::{DataType, SchemaFieldsProperties, SchemaPropertiesArgs},
+    casing::CaseString, derive_attributes::TableDeriveAttributes, errors,
     variables::VariablesModelMacro,
 };
 
@@ -46,6 +41,8 @@ impl ToTokens for NodeToken {
             relax_table_name,
             ..
         } = &self.0;
+        let tda = &self.0;
+        let table_name_ident = tda.table_name().;
 
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
             generics.split_for_impl();
