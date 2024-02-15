@@ -11,15 +11,8 @@ use crate::{
     },
 };
 
-pub struct FieldSetterNumericImpl(TokenStream);
-
-impl ToTokens for FieldSetterNumericImpl {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.0.to_tokens(tokens);
-    }
-}
-
-pub struct ArrayElementFieldSetterToken(TokenStream);
+create_tokenstream_wrapper!(=>FieldSetterNumericImpl);
+create_tokenstream_wrapper!(=>ArrayElementFieldSetterToken);
 
 create_tokenstream_wrapper!(
     /// Generated Field wrapper type implementations for each fiekd around `Field` type
