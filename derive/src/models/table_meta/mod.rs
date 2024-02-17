@@ -4,5 +4,10 @@
  * Copyright (c) 2024 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-pub(crate) mod derive_attributes;
+mod derive_attributes;
+mod model_attributes;
 mod table_name;
+
+pub use derive_attributes::*;
+pub use model_attributes::*;
+pub use table_name::*;

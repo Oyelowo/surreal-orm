@@ -53,11 +53,11 @@ impl ModelAttributes for EdgeToken {
         self.0.rename_all.clone()
     }
 
-    fn ident(&self) -> super::derive_attributes::StructIdent {
+    fn ident(&self) -> StructIdent {
         self.0.ident.clone()
     }
 
-    fn generics(&self) -> &super::StructGenerics {
+    fn generics(&self) -> &StructGenerics {
         &self.0.generics
     }
 }

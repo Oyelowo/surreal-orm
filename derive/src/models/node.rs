@@ -16,11 +16,10 @@ use syn::{self, parse_macro_input};
 
 use super::{
     casing::CaseString,
-    derive_attributes::{ModelAttributes, TableDeriveAttributes},
     errors,
     token_codegen::{Codegen, CommonIdents},
     variables::VariablesModelMacro,
-    DataType, FieldsMeta,
+    DataType, ModelAttributes, StructIdent, TableDeriveAttributes,
 };
 
 #[derive(Debug, FromDeriveInput)]
@@ -32,11 +31,11 @@ impl ModelAttributes for NodeToken {
         self.0.rename_all.clone()
     }
 
-    fn ident(&self) -> super::derive_attributes::StructIdent {
+    fn ident(&self) -> StructIdent {
         self.0.ident.clone()
     }
 
-    fn generics(&self) -> &super::StructGenerics {
+    fn generics(&self) -> &StructGenerics {
         &self.0.generics
     }
 }
