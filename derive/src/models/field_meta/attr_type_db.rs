@@ -17,7 +17,9 @@ use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::Expr;
 
-use crate::models::{create_tokenstream_wrapper, CustomType, DataType, StaticAssertionToken};
+use crate::models::{
+    create_tokenstream_wrapper, CustomType, DataType, SqlValueTokenStream, StaticAssertionToken,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct DbFieldTypeAstMeta {
@@ -27,8 +29,6 @@ pub struct DbFieldTypeAstMeta {
 
 #[derive(Debug, Clone, Default)]
 pub struct FieldTypeDb(FieldType);
-
-create_tokenstream_wrapper!(SqlValueTokenStream);
 
 impl ToTokens for FieldTypeDb {
     fn to_tokens(&self, tokens: &mut TokenStream) {}
