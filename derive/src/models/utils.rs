@@ -36,13 +36,13 @@ macro_rules! create_tokenstream_wrapper {
             }
         }
 
-        impl From<::proc_macro2::TokenStream> for $name {
+        impl ::std::convert::From<::proc_macro2::TokenStream> for $name {
             fn from(tokenstream: ::proc_macro2::TokenStream) -> Self {
                 Self(tokenstream)
             }
         }
 
-        impl From<$name> for ::proc_macro2::TokenStream {
+        impl ::std::convert::From<$name> for ::proc_macro2::TokenStream {
             fn from(tokenstream: $name) -> Self {
                 tokenstream.0
             }
@@ -56,7 +56,7 @@ macro_rules! create_tokenstream_wrapper {
             }
         }
 
-        impl std::hash::Hash for $name {
+        impl ::std::hash::Hash for $name {
             fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
                 self.0.to_string().hash(state);
             }

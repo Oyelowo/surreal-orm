@@ -19,7 +19,7 @@ use super::{
     errors,
     token_codegen::{Codegen, CommonIdents},
     variables::VariablesModelMacro,
-    DataType, ModelAttributes, StructIdent, TableDeriveAttributes,
+    DataType, ModelAttributes, StructGenerics, StructIdent, TableDeriveAttributes,
 };
 
 #[derive(Debug, FromDeriveInput)]
@@ -189,12 +189,11 @@ impl ToTokens for NodeToken {
                     #module_name_internal::#aliases_struct_name::new()
                 }
 
-
                 fn get_table_name() -> #crate_name::Table {
                     #table_name_str.into()
                 }
 
-                fn get_fields_relations_aliased() -> Vec<#crate_name::Alias> {
+                fn get_fields_relations_aliased() -> ::std::vec::Vec<#crate_name::Alias> {
                     vec![
                        #( #fields_relations_aliased), *
                     ]
