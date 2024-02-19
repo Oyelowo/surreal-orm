@@ -12,7 +12,7 @@ use crate::{
     errors::ExtractorResult,
     models::{variables::VariablesModelMacro, *},
 };
-use table_meta::derive_attributes::TableDeriveAttributes;
+use table_meta::TableDeriveAttributes;
 
 create_tokenstream_wrapper!(
 /// Genera
