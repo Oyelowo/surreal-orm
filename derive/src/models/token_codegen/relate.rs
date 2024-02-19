@@ -15,23 +15,20 @@ use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
-use surreal_query_builder::{Arrow, EdgeDirection, NodeAliasClause};
-use syn::Type;
+use surreal_query_builder::EdgeDirection;
 
 use crate::{
     errors::ExtractorResult,
     models::{
-        create_ident_wrapper, create_tokenstream_wrapper,
-        derive_attributes::{StructIdent, TableDeriveAttributes},
-        variables::VariablesModelMacro,
-        CustomType, EdgeTableName, EdgeType, FieldGenericsMeta, MyFieldReceiver, NodeTableName,
-        RelateAttribute, RelationType, StaticAssertionToken,
+        create_ident_wrapper, create_tokenstream_wrapper, variables::VariablesModelMacro, EdgeType,
+        FieldGenericsMeta, MyFieldReceiver, NodeTableName, RelateAttribute, RelationType,
+        StaticAssertionToken, TableDeriveAttributes,
     },
 };
 
 use super::Codegen;
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_relation_connection_tokenstream(&mut self) -> ExtractorResult<()> {
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
