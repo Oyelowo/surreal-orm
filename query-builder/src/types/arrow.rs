@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum EdgeDirection {
+pub enum EdgeDirection {
     Out,
     In,
 }
