@@ -14,7 +14,7 @@ macro_rules! create_tokenstream_wrapper {
     ($(#[$attr:meta])* => $name:ident) => {
         $(#[$attr])*
         #[derive(Debug, Clone, Default)]
-        pub struct $name(::proc_macro2::TokenStream);
+        pub struct $name(pub ::proc_macro2::TokenStream);
 
         impl $name {
             pub fn new(tokenstream: ::proc_macro2::TokenStream) -> Self {
