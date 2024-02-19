@@ -6,17 +6,16 @@
  */
 
 use proc_macro::TokenStream;
+use proc_macros_helpers::get_crate_name;
 use quote::quote;
 
-use crate::{
-    errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, RelationType},
-};
+use crate::{errors::ExtractorResult, models::RelationType};
 
 use super::Codegen;
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_non_null_updater_struct_fields(&mut self) -> ExtractorResult<()> {
+        let crate_name = get_crate_name(false);
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let field_type = field_receiver.field_type_rust();
@@ -36,7 +35,7 @@ impl Codegen {
                 );
             }
             RelationType::NestObject(nested_object) => {
-                store.non_null_updater_fields(
+                self.non_null_updater_fields(
                     quote!(pub #field_ident_normalized: ::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>, ).into(),
                 );
             }
@@ -62,7 +61,7 @@ impl Codegen {
         // renamed serialized field names at compile time by asserting that the a field
         // exist.
         self.renamed_serialized_fields
-            .push(quote!(pub #field_ident_raw_to_underscore_suffix: &'static str, ).into());
+            .push(quote!(pub #db_field_name: &'static str, ).into());
         Ok(())
     }
 }

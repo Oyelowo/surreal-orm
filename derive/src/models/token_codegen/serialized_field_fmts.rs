@@ -6,17 +6,16 @@
  */
 
 use proc_macro2::TokenStream;
+use proc_macros_helpers::get_crate_name;
 use quote::quote;
 
-use crate::{
-    errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, Relate, RelationType, SerializableField},
-};
+use crate::{errors::ExtractorResult, models::RelationType};
 
 use super::Codegen;
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_db_fields_for_links_and_loaders(&mut self) -> ExtractorResult<()> {
+        let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;

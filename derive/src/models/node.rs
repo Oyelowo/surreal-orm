@@ -8,18 +8,14 @@
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote};
-use std::{ops::Deref, str::FromStr};
+use quote::quote;
 
-use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
 use super::{
     casing::CaseString,
-    errors,
     token_codegen::{Codegen, CommonIdents},
-    variables::VariablesModelMacro,
-    DataType, ModelAttributes, StructGenerics, StructIdent, TableDeriveAttributes,
+    *,
 };
 
 #[derive(Debug, FromDeriveInput)]

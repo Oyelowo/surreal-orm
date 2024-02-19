@@ -9,19 +9,14 @@
 
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use std::str::FromStr;
-use surreal_query_builder::Object;
+use quote::quote;
 
-use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
 use super::{
-    casing::CaseString,
     token_codegen::{Codegen, CommonIdents},
     variables::VariablesModelMacro,
-    DataType, DataType, ModelAttributes, MyFieldReceiver, MyFieldReceiver, Rename, Rename,
-    StructGenerics, StructIdent,
+    *,
 };
 
 // #[derive(Debug, FromDeriveInput)]
