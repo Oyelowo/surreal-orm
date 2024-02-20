@@ -35,8 +35,8 @@ struct CustomTypeRefLifetimeStripped(CustomType);
 
 impl CustomType {
     pub fn strip_references_and_lifetimes(&self) -> CustomTypeRefLifetimeStripped {
-        CustomTypeRefLifetimeStripped(TypeStripper::strip_references_and_lifetimes(
-            &self.to_basic_type(),
-        ))
+        CustomTypeRefLifetimeStripped(
+            TypeStripper::strip_references_and_lifetimes(&self.to_basic_type()).into(),
+        )
     }
 }

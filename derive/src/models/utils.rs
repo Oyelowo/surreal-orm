@@ -9,11 +9,10 @@ pub use proc_macro2::TokenStream;
 pub use proc_macros_helpers::get_crate_name;
 pub use quote::{quote, ToTokens};
 
-#[macro_export]
 macro_rules! create_tokenstream_wrapper {
     ($(#[$attr:meta])* => $name:ident) => {
         $(#[$attr])*
-        #[derive(Debug, Clone, Default)]
+        #[derive(Debug, Clone)]
         pub struct $name(pub ::proc_macro2::TokenStream);
 
         impl $name {
@@ -64,4 +63,4 @@ macro_rules! create_tokenstream_wrapper {
     };
 }
 
-pub use create_tokenstream_wrapper;
+pub(crate) use create_tokenstream_wrapper;

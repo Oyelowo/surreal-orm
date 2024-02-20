@@ -5,16 +5,11 @@
  * Licensed under the MIT license
  */
 
-use crate::models::{
-    create_custom_type_wrapper, CustomType, DestinationNodeTypeOriginal, RustFieldTypeSelfAllowed,
-};
+use crate::models::*;
 use darling::FromMeta;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use std::{
-    collections::{HashMap, HashSet},
-    ops::Deref,
-};
+use quote::quote;
+use std::collections::HashSet;
 use syn::{
     visit::{self, Visit},
     Constraint, GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type,

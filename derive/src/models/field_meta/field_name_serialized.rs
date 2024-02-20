@@ -7,7 +7,7 @@
 
 use std::fmt::{Display, Formatter};
 
-use proc_macro::TokenStream;
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
 

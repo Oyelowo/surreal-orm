@@ -7,9 +7,12 @@
 
 use darling::FromMeta;
 use proc_macro2::TokenStream;
-use quote::ToTokens;
+use proc_macros_helpers::get_crate_name;
+use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::Expr;
+
+use crate::models::*;
 
 pub enum ExprOrPath {
     Expr(Expr),
@@ -82,7 +85,9 @@ impl_from_expr_or_path!(AttributeDefine);
 
 impl AttributeValue {
     pub fn get_static_assertion(&self, db_field_type: FieldType) -> StaticAssertionToken {
+        let crate_name = &get_crate_name(false);
         let value_expr = &self;
+
         let convertible_values_to_db_type = match db_field_type {
             FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value_expr)),
             FieldType::Null => quote!(#crate_name::sql::Value::Null),

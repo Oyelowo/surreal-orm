@@ -5,17 +5,12 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::Display;
-
-use proc_macro::Span;
+use proc_macro2::Span;
 use quote::ToTokens;
 use surreal_query_builder::EdgeDirection;
-use syn::{spanned::Spanned, Type};
+use syn::spanned::Spanned;
 
-use crate::{
-    errors::{ExtractorError, ExtractorResult},
-    models::MyFieldReceiver,
-};
+use crate::{errors::ExtractorError, models::MyFieldReceiver};
 
 use super::*;
 // Tuple, Array (T, T), [T; N]
@@ -110,14 +105,14 @@ impl From<&MyFieldReceiver> for RelationType {
 
 macro_rules! wrapper_struct_to_ident {
     ($simple_wrapper_struct:ty) => {
-        impl From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {
+        impl ::std::convert::From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {
             fn from(simple_wrapper_struct: &$simple_wrapper_struct) -> Self {
                 let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
                 ::quote::quote!(#ident)
             }
         }
 
-        impl From<$simple_wrapper_struct> for ::proc_macro2::TokenStream {
+        impl ::std::convert::From<$simple_wrapper_struct> for ::proc_macro2::TokenStream {
             fn from(simple_wrapper_struct: $simple_wrapper_struct) -> Self {
                 let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
                 ::quote::quote!(#ident)
@@ -130,20 +125,20 @@ macro_rules! wrapper_struct_to_ident {
             }
         }
 
-        impl From<&String> for $simple_wrapper_struct {
+        impl ::std::convert::From<&String> for $simple_wrapper_struct {
             fn from(value: &String) -> Self {
                 Self(value.into())
             }
         }
 
-        impl From<$simple_wrapper_struct> for String {
+        impl ::std::convert::From<$simple_wrapper_struct> for String {
             fn from(value: $simple_wrapper_struct) -> Self {
                 value.0
             }
         }
 
 
-        impl ToTokens for $simple_wrapper_struct {
+        impl ::quote::ToTokens for $simple_wrapper_struct {
             fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
                 let ident = ::quote::format_ident!("{self}");
                 tokens.extend(ident.into_token_stream());
@@ -189,8 +184,8 @@ impl TryFrom<&Relate> for RelateAttribute {
         let right_arrow_count = relation.connection.matches("->").count();
         let left_arrow_count = relation.connection.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
-            (2, 0) => EdgeDirection::Incoming,
-            (0, 2) => EdgeDirection::Outgoing,
+            (2, 0) => EdgeDirection::In,
+            (0, 2) => EdgeDirection::Out,
             _ => {
                 return Err(syn::Error::new(
                     Span::call_site(),
