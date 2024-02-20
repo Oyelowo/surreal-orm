@@ -28,7 +28,6 @@ pub use attr_type_db::*;
 pub use attrs_expr_or_path::*;
 pub use custom_type::*;
 pub use derive_attributes::*;
-pub use derive_attributes::*;
 pub use field_name_serialized::*;
 pub use generics_extractor::*;
 pub use ident_wrappers::*;

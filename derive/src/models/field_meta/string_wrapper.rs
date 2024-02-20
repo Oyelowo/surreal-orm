@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-#[macro_export]
 macro_rules! string_wrapper {
     ($name:ident) => {
         #[derive(Debug, PartialEq, Eq, Clone)]
@@ -25,6 +24,6 @@ macro_rules! string_wrapper {
     };
 }
 
-pub use string_wrapper;
+pub(crate) use string_wrapper;
 
 string_wrapper!(SerializedFieldNamesNormalised);

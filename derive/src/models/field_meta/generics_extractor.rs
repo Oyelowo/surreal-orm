@@ -5,15 +5,16 @@
  * Licensed under the MIT license
  */
 
-use crate::models::{derive_attributes::TableDeriveAttributes, MyFieldReceiver};
+use crate::models::*;
 use darling::ast::GenericParam;
-use quote::quote;
 use syn::{punctuated::Punctuated, visit::Visit, *};
 
 use super::CustomType;
 
-struct CustomGenerics(pub Generics);
 struct StrippedBoundsGenerics(pub Generics);
+
+struct CustomGenerics(pub Generics);
+
 impl CustomGenerics {
     pub fn params(&self) -> &Punctuated<GenericParam, Token![,]> {
         &self.0.params
@@ -87,7 +88,7 @@ impl<'a> GenericTypeExtractor<'a> {
     pub fn extract_generics_for_complex_type(
         table_attributes: &'a TableDeriveAttributes,
         field_ty: &'a CustomType,
-    ) -> &CustomGenerics {
+    ) -> &'a CustomGenerics {
         let generics = Self {
             struct_generics: &table_attributes.generics,
             field_generics: Generics::default(),

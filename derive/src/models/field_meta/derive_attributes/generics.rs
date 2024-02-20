@@ -5,9 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::models::{derive_attributes::TableDeriveAttributes, GenericTypeExtractor};
-use quote::quote;
-use syn::{visit::Visit, *};
+use crate::models::*;
 
 use super::MyFieldReceiver;
 

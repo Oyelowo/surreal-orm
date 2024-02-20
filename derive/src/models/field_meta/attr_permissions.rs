@@ -7,11 +7,8 @@
 
 use darling::FromMeta;
 use proc_macro2::TokenStream;
-use proc_macros_helpers::parse_lit_to_tokenstream;
 use quote::{quote, ToTokens};
-use syn::{Expr, ExprLit, Lit, LitStr, Path};
-
-use crate::errors::ExtractorResult;
+use syn::{Expr, Lit, LitStr};
 
 #[derive(Debug, Clone)]
 pub enum Permissions {

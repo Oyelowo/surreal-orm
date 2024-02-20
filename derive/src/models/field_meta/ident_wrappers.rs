@@ -5,9 +5,9 @@
  * Licensed under the MIT license
  */
 
-#[macro_export]
 macro_rules! create_ident_wrapper {
     ($ident:ident) => {
+        #[derive(Debug, Clone)]
         pub struct $ident(::syn::Ident);
 
         impl $ident {
@@ -43,4 +43,4 @@ macro_rules! create_ident_wrapper {
         }
     };
 }
-pub use create_ident_wrapper;
+pub(crate) use create_ident_wrapper;

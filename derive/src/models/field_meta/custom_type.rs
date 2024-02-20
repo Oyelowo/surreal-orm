@@ -10,17 +10,14 @@ use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use syn::{
     self,
-    parse::{Parse, ParseStream, Parser},
+    parse::{Parse, ParseStream},
     parse_quote,
     spanned::Spanned,
     visit_mut::VisitMut,
     GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
 };
 
-use crate::{
-    errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, DataType},
-};
+use crate::{errors::ExtractorResult, models::*};
 
 use super::{field_name_serialized::DbFieldName, *};
 
@@ -305,12 +302,6 @@ impl CustomType {
             }
             _ => false,
         }
-    }
-
-    pub fn is_list(&self) -> bool {
-        self.is_list()
-        // || self.into_inner()pe_.as_ref().map_or(false, |t| t.deref().is_array())
-        // || self.link_many.is_some()
     }
 
     pub fn is_set(&self) -> bool {
@@ -754,7 +745,7 @@ impl CustomType {
 
     pub fn type_is_inferrable(
         &self,
-        field_name: &FieldIdentSerialized,
+        field_name: &FieldIdentNormalized,
         model_type: &DataType,
     ) -> bool {
         self.relation_type.is_some()

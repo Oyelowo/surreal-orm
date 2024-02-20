@@ -5,9 +5,8 @@
  * Licensed under the MIT license
  */
 
-use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{quote, ToTokens};
+use quote::quote;
 
 use crate::models::create_tokenstream_wrapper;
 
