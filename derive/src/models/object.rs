@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-#![allow(dead_code)]
-
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
