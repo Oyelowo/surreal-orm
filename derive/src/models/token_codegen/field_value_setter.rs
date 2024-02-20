@@ -5,18 +5,10 @@
  * Licensed under the MIT license
  */
 
-use convert_case::{Case, Casing};
-use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote, ToTokens};
+use quote::{quote, ToTokens};
 
-use crate::{
-    errors::ExtractorResult,
-    models::{
-        create_tokenstream_wrapper, derive_attributes::TableDeriveAttributes, FieldGenerics,
-        FieldGenericsMeta, MyFieldReceiver, RelationType,
-    },
-};
+use crate::{errors::ExtractorResult, models::*};
 
 create_tokenstream_wrapper!(=>FieldSetterNumericImpl);
 create_tokenstream_wrapper!(=>ArrayElementFieldSetterToken);
@@ -41,7 +33,7 @@ FieldSetterImplTokens);
 
 use super::Codegen;
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_field_setter_impl(&mut self) -> ExtractorResult<()> {
         let table_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
@@ -62,6 +54,12 @@ impl Codegen {
         let crate_name = get_crate_name(false);
         let field_receiver = self.field_receiver();
         let table_attributes = self.table_derive_attributes();
+        let field_type = field_receiver.ty;
+        let FieldGenericsMeta {
+            field_impl_generics,
+            field_ty_generics,
+            field_where_clause,
+        } = field_type.get_generics_meta(table_attributes);
 
         let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
 
@@ -233,6 +231,7 @@ impl Codegen {
         field_receiver: &MyFieldReceiver,
         table_attributes: &TableDeriveAttributes,
     ) -> FieldSetterNumericImpl {
+        let crate_name = get_crate_name(false);
         let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
         let field_type = field_receiver.ty;
         let FieldGenericsMeta {
