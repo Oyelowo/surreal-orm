@@ -7,16 +7,23 @@
 
 use quote::quote;
 
-use crate::models::{
-    derive_attributes::TableDeriveAttributes, field_name_serialized, variables::VariablesModelMacro,
-};
+use crate::{errors::ExtractorResult, models::*};
 
 use super::Codegen;
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_field_connection_builder_token(&mut self) -> ExtractorResult<()> {
+        let crate_name = &get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
+        let VariablesModelMacro {
+            _____field_names,
+            schema_instance,
+            ___________graph_traversal_string,
+            ____________update_many_bindings,
+            bindings,
+            ..
+        } = VariablesModelMacro::new();
 
         if field_receiver.to_relation_type().is_relate_graph() {
             // Relate graph fields are readonly and derived and only used in
@@ -28,11 +35,6 @@ impl Codegen {
             field_receiver.field_ident_normalized(&table_derive_attrs.casing()?)?;
         let field_name_serialized = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
         let field_name_pascalized = field_receiver.field_name_pascalized(table_derive_attrs);
-        let VariablesModelMacro {
-            _____field_names,
-            schema_instance,
-            ..
-        } = VariablesModelMacro::new();
 
         self.schema_struct_fields_types_kv.push(
             quote!(pub #field_ident_normalized: #_____field_names::#field_name_pascalized, ).into(),
