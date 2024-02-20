@@ -21,7 +21,7 @@ use crate::{
     errors::ExtractorResult,
     models::{
         create_ident_wrapper, create_tokenstream_wrapper, variables::VariablesModelMacro, EdgeType,
-        FieldGenericsMeta, MyFieldReceiver, NodeTableName, RelateAttribute, RelationType,
+        FieldGenericsMeta, MyFieldReceiver, NodeTableName, Relate, RelateAttribute, RelationType,
         StaticAssertionToken, TableDeriveAttributes,
     },
 };
@@ -176,20 +176,19 @@ impl<'a> Codegen<'a> {
         edge.into()
     }
 
-    fn create_static_assertions(&self, relation: &Relate) -> StaticAssertionToken {
+    fn create_static_assertions(&self, relate: &Relate) -> StaticAssertionToken {
         let crate_name = get_crate_name(false);
         let current_struct = &self.table_derive_attributes().ident;
         let field_receiver = self.field_receiver();
-
         let field_type = &field_receiver.ty;
-        let edge_type = relation.edge_type;
+        let edge_type = relate.edge_type;
         let RelateAttribute {
             edge_table_name,
             foreign_node_table_name: destination_node_table_name,
             edge_direction,
-        } = RelateAttribute::from(relation);
+        } = RelateAttribute::from(relate);
         let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
-            match &relation_attributes.edge_direction {
+            match &edge_direction {
                 EdgeDirection::Out => (format_ident!("In"), format_ident!("Out")),
                 EdgeDirection::In => (format_ident!("Out"), format_ident!("In")),
             };
@@ -212,10 +211,9 @@ impl<'a> Codegen<'a> {
             // #crate_name::validators::assert_impl_one!(HomeIdent, surreal_macros::Node);
             quote!(
             {
-            type #home_node_ident = <#edge_type as #crate_name::Edge>::#home_node_associated_type_ident;
              // #crate_name::validators::assert_fields!(<#home_node_type as #crate_name::Node>::TableNameChecker: #origin_node_table_name);
              #crate_name::validators::assert_type_eq_all!(#home_node_type, #current_struct);
-             #crate_name::validators::assert_impl_one!(#home_node_ident: #crate_name::Node);
+             #crate_name::validators::assert_impl_one!(<#edge_type as #crate_name::Edge>::#home_node_associated_type_ident: #crate_name::Node);
 
             }
             ),
@@ -432,9 +430,23 @@ impl From<EdgeDirection> for ArrowTokenStream {
     }
 }
 
-impl ToTokens for NodeEdgeMetadata {
+impl<'a> ToTokens for NodeEdgeMetadata<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let crate_name = get_crate_name(false);
+        let VariablesModelMacro {
+            __________connect_edge_to_graph_traversal_string,
+            ___________bindings,
+            ___________errors,
+            ___________graph_traversal_string,
+            ____________update_many_bindings,
+            bindings,
+            schema_instance,
+            ___________model,
+            ___________in_marker,
+            ___________out_marker,
+            _____field_names,
+            ..
+        } = VariablesModelMacro::new();
         let value = self;
         let Self {
             // current_struct_ident,
