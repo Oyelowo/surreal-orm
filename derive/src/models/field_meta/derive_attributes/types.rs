@@ -5,13 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{
-    errors::ExtractorResult,
-    models::{
-        derive_attributes::TableDeriveAttributes, field_name_serialized::DbFieldName, CaseString,
-        CustomType, DataType, DbFieldTypeAstMeta, FieldTypeDb, RelationType,
-    },
-};
+use crate::{errors::ExtractorResult, models::*};
 use surreal_query_builder::FieldType;
 use syn::Ident;
 
@@ -96,10 +90,8 @@ impl MyFieldReceiver {
         let field_type = self
             .field_type_db
             .map_or(FieldType::Any, |t| t.into_inner());
-        let explicit_ty_is_list = matches!(
-            field_type,
-            FieldType::Array(item_ty, _) | FieldType::Set(_, _)
-        );
+        let explicit_ty_is_list =
+            matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
             || self.field_type_rust().is_list()
             || self.field_type_db.map_or(false, |t| t.is_list())
