@@ -17,14 +17,7 @@ use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
 use surreal_query_builder::EdgeDirection;
 
-use crate::{
-    errors::ExtractorResult,
-    models::{
-        create_ident_wrapper, create_tokenstream_wrapper, variables::VariablesModelMacro, EdgeType,
-        FieldGenericsMeta, MyFieldReceiver, NodeTableName, Relate, RelateAttribute, RelationType,
-        StaticAssertionToken, TableDeriveAttributes,
-    },
-};
+use crate::{errors::ExtractorResult, models::*};
 
 use super::Codegen;
 
@@ -399,17 +392,19 @@ struct NodeEdgeMetadata<'a> {
 struct EdgeNameWithDirectionIndicator(String);
 
 #[derive(Default, Clone)]
-pub struct NodeEdgeMetadataLookupTable(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
-impl Deref for NodeEdgeMetadataLookupTable {
-    type Target = HashMap<EdgeNameAsStructWithDirectionIdent, NodeEdgeMetadata>;
+pub struct NodeEdgeMetadataLookupTable<'a>(
+    HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata<'a>>,
+);
+impl<'a> Deref for NodeEdgeMetadataLookupTable<'a> {
+    type Target = HashMap<EdgeNameAsStructWithDirectionIdent, NodeEdgeMetadata<'a>>;
 
     fn deref(&self) -> &Self::Target {
         self.0
     }
 }
 
-impl NodeEdgeMetadataLookupTable {
-    pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata> {
+impl<'a> NodeEdgeMetadataLookupTable<'a> {
+    pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata<'a>> {
         self.0
     }
 }
@@ -610,7 +605,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
     }
 }
 
-impl ToTokens for NodeEdgeMetadataLookupTable {
+impl<'a> ToTokens for NodeEdgeMetadataLookupTable<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let node_edge_token_streams = self
             .into_inner()
