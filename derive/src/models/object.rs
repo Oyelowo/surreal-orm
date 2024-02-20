@@ -13,7 +13,6 @@ use syn::{self, parse_macro_input};
 
 use super::{
     token_codegen::{Codegen, CommonIdents},
-    variables::VariablesModelMacro,
     *,
 };
 
@@ -51,15 +50,8 @@ impl ModelAttributes for ObjectToken {
 impl ToTokens for ObjectToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let crate_name = get_crate_name(false);
-        let table_derive_attributes = self.deref();
-        let struct_name_ident = &table_derive_attributes.ident;
-        let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
-            generics.split_for_impl();
-        let table_name_ident = match table_derive_attributes.table_name() {
-            Ok(table_name) => table_name,
-            Err(err) => return tokens.extend(err.write_errors()),
-        };
-        let table_name_str = table_name_ident.as_string();
+        let struct_name_ident = &self.ident();
+        let (impl_generics, ty_generics, where_clause) = self.generics().split_for_impl();
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -73,7 +65,6 @@ impl ToTokens for ObjectToken {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
-
         let Codegen {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,

@@ -5,6 +5,8 @@
 * Licensed under the MIT license
  */
 
+use std::ops::Deref;
+
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
@@ -13,7 +15,6 @@ use quote::quote;
 use syn::{self, parse_macro_input};
 
 use super::{
-    casing::CaseString,
     token_codegen::{Codegen, CommonIdents},
     *,
 };
@@ -50,7 +51,7 @@ impl ToTokens for NodeToken {
         let table_derive_attributes = self.deref();
         let struct_name_ident = &table_derive_attributes.ident;
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
-            generics.split_for_impl();
+            self.generics().split_for_impl();
         let table_name_ident = match table_derive_attributes.table_name() {
             Ok(table_name) => table_name,
             Err(err) => return tokens.extend(err.write_errors()),
@@ -450,8 +451,6 @@ impl ToTokens for NodeToken {
             #[allow(non_snake_case)]
             fn #test_function_name #struct_impl_generics() {
                 #( #static_assertions) *
-                #node_edge_metadata_static_assertions
-
             }
 ));
     }
