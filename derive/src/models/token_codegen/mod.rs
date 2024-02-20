@@ -52,8 +52,8 @@ use super::{
     variables::VariablesModelMacro,
     AliasesStructFieldsNamesKv, AliasesStructFieldsTypesKv, ConnectionWithFieldAppended, DataType,
     DbFieldNamesToken, FieldMetadataToken, FieldsRelationsAliased, GenericTypeExtractor,
-    LinkManyField, LinkOneAndSelfField, LinkOneField, LinkSelfField, LinkedField, MyFieldReceiver,
-    NonNullUpdaterFields, RenamedSerializedFields, SchemaStructFieldsNamesKv,
+    LinkManyField, LinkOneAndSelfField, LinkOneField, LinkSelfField, LinkedField, ModelAttributes,
+    MyFieldReceiver, NonNullUpdaterFields, RenamedSerializedFields, SchemaStructFieldsNamesKv,
     SchemaStructFieldsNamesKvEmpty, SchemaStructFieldsNamesKvPrefixed, SchemaStructFieldsTypesKv,
     SerializableField, StaticAssertionToken, TableIdType, TokenStreamHashable, TypeStripper,
 };
@@ -240,7 +240,7 @@ struct StructAttributesData<'a> {
     data_type: Option<DataType>,
 }
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     fn new(table_derive_attributes: impl ModelAttributes, data_type: DataType) -> Self {
         let struct_attributes_data = StructAttributesData {
             struct_basic_model_attributes: Some(&table_derive_attributes),
@@ -287,6 +287,7 @@ impl Codegen {
             .expect("Field receiver has not been set. Make sure it has been set by calling set_field_receiver")
     }
 
+    // pub(crate) fn table_derive_attributes(&self) -> &impl ModelAttributes {
     pub(crate) fn table_derive_attributes(&self) -> &impl ModelAttributes {
         self.struct_attributes_data
             .struct_basic_model_attributes

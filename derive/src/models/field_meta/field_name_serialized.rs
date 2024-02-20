@@ -8,13 +8,15 @@
 use std::fmt::{Display, Formatter};
 
 use proc_macro::TokenStream;
-use quote::ToTokens;
+use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
 
-use crate::models::DataType;
+use crate::models::{create_ident_wrapper, DataType};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct DbFieldName(String);
+
+create_ident_wrapper!(DbFieldNameAsIdent);
 
 impl Display for DbFieldName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -30,6 +32,10 @@ impl ToTokens for DbFieldName {
 }
 
 impl DbFieldName {
+    pub fn as_ident(&self) -> DbFieldNameAsIdent {
+        format_ident!("{self}").into()
+    }
+
     pub fn is_id(&self) -> bool {
         self.0 == "id"
     }
