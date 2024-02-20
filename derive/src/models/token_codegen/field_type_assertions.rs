@@ -7,18 +7,13 @@
 
 use quote::quote;
 
-use crate::{
-    errors::ExtractorResult,
-    models::{
-        count_vec_nesting, derive_attributes::TableDeriveAttributes, field_name_serialized,
-        generate_nested_vec_type, variables::VariablesModelMacro, RelationType,
-    },
-};
+use crate::{errors::ExtractorResult, models::*};
 
 use super::Codegen;
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_field_type_static_assertion_token(&mut self) -> ExtractorResult<()> {
+        let crate_name = &get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver.field_type_rust();
@@ -30,9 +25,9 @@ impl Codegen {
             }
             RelationType::LinkSelf(self_node) => {
                 let current_struct_type = table_derive_attrs.struct_as_path_no_bounds();
-                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#foreign_node>);).into());
+                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#self_node>);).into());
 
-                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);).into());
+                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#self_node>);).into());
             }
             RelationType::LinkMany(foreign_node) => {
                 self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);).into());
@@ -42,7 +37,8 @@ impl Codegen {
             }
             RelationType::NestArray(foreign_array_object) => {
                 let nesting_level = Self::count_vec_nesting(field_type);
-                let nested_vec_type = Self::generate_nested_vec_type(&foreign_node, nesting_level);
+                let nested_vec_type =
+                    Self::generate_nested_vec_type(&foreign_array_object, nesting_level);
 
                 self.static_assertions.push(quote! {
                         #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
