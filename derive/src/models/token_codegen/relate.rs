@@ -30,18 +30,18 @@ use super::Codegen;
 
 impl<'a> Codegen<'a> {
     pub fn create_relation_connection_tokenstream(&mut self) -> ExtractorResult<()> {
+        let crate_name = get_crate_name(false);
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
+        let db_field_name = field_receiver.db_field_name(&table_derive_attributes.casing()?)?;
 
-        let field_name_serialized =
-            field_receiver.field_name_serialized(&table_derive_attributes.casing()?)?;
         match field_receiver.to_relation_type() {
             RelationType::Relate(ref relate) => {
                 self.static_assertions
                     .push(self.create_static_assertions(&relate));
                 self.relate(relate)?;
                 let connection = relate.connection;
-                self.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_name_serialized))).into());
+                self.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#db_field_name))).into());
             }
             _ => {}
         }
@@ -52,8 +52,8 @@ impl<'a> Codegen<'a> {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = &self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-
         let VariablesModelMacro {
+            __________connect_node_to_graph_traversal_string,
             __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
@@ -65,7 +65,7 @@ impl<'a> Codegen<'a> {
             edge_direction,
             edge_table_name,
             foreign_node_table_name,
-        } = &RelateAttribute::from(relation);
+        } = &RelateAttribute::from(relate);
         let arrow = &ArrowTokenStream::from(edge_direction);
         let destination_node_table_name_str = &foreign_node_table_name.to_string();
 
@@ -210,25 +210,24 @@ impl<'a> Codegen<'a> {
             // #crate_name::validators::assert_type_eq_all!(HomeIdent, Student);
             // #crate_name::validators::assert_impl_one!(HomeIdent, surreal_macros::Node);
             quote!(
-            {
-             // #crate_name::validators::assert_fields!(<#home_node_type as #crate_name::Node>::TableNameChecker: #origin_node_table_name);
-             #crate_name::validators::assert_type_eq_all!(#home_node_type, #current_struct);
-             #crate_name::validators::assert_impl_one!(<#edge_type as #crate_name::Edge>::#home_node_associated_type_ident: #crate_name::Node);
-
-            }
+                {
+                     // #crate_name::validators::assert_fields!(<#home_node_type as #crate_name::Node>::TableNameChecker: #origin_node_table_name);
+                     #crate_name::validators::assert_type_eq_all!(#home_node_type, #current_struct);
+                     #crate_name::validators::assert_impl_one!(<#edge_type as #crate_name::Edge>::#home_node_associated_type_ident: #crate_name::Node);
+                }
             ),
             quote!(
-             #crate_name::validators::assert_fields!(<#foreign_node_type as #crate_name::Node>::TableNameChecker: #destination_node_table_name);
-             #crate_name::validators::assert_impl_one!(#foreign_node_type: #crate_name::Node);
+                 #crate_name::validators::assert_fields!(<#foreign_node_type as #crate_name::Node>::TableNameChecker: #destination_node_table_name);
+                 #crate_name::validators::assert_impl_one!(#foreign_node_type: #crate_name::Node);
             ),
             quote!(
-             #crate_name::validators::assert_fields!(<#edge_type as #crate_name::Edge>::TableNameChecker: #edge_table_name);
+                 #crate_name::validators::assert_fields!(<#edge_type as #crate_name::Edge>::TableNameChecker: #edge_table_name);
             ),
             // assert field type and attribute reference match
             // e.g Relate<Book> should match from attribute link = "->Writes->Book"
             quote!(
-             #crate_name::validators::assert_impl_one!(#edge_type: #crate_name::Edge);
-             #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_type>);
+                 #crate_name::validators::assert_impl_one!(#edge_type: #crate_name::Edge);
+                 #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_type>);
             ),
         ];
         StaticAssertionToken(quote!(
