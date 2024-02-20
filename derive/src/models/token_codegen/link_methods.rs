@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-use proc_macro2::TokenStream;
 use quote::quote;
 
 use crate::{
@@ -22,51 +21,49 @@ ListSimpleTraversalMethod
 
 use super::{Codegen, RelationType};
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_link_methods(
-        &self,
+        &mut self,
         store: &mut Codegen,
         table_derive_attrs: &TableDeriveAttributes,
     ) {
+        let table_derive_attrs = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
         let relation_type = self.to_relation_type();
-        let push_to_link = |link_method_meta: LinkMethodMeta| {
-            store
-                .imports_referenced_node_schema
+        let push_to_link = |meta: LinkMethodMeta| {
+            self.imports_referenced_node_schema
                 .push(meta.foreign_node_schema_import);
 
-            store
-                .record_link_fields_methods
-                .push(meta.link_field_method);
+            self.record_link_fields_methods.push(meta.link_field_method);
 
-            store
-                .static_assertions
+            self.static_assertions
                 .push(meta.foreign_node_type_validator.to_static_assertion());
         };
 
-        match self {
+        match field_receiver.to_relation_type() {
             RelationType::LinkSelf(link_self) => {
                 let link_one = link_self.to_linkone_attr_type(table_derive_attrs);
-                let meta = self.link_one(link_one, table_derive_attrs)?;
+                let meta = self.link_one(link_one)?;
                 push_to_link(meta);
             }
             RelationType::LinkOne(link_one) => {
-                let meta = self.link_one(link_one, table_derive_attrs)?;
+                let meta = self.link_one(link_one)?;
                 push_to_link(meta);
             }
             RelationType::LinkMany(link_many) => {
-                let meta = self.link_many(link_many, table_derive_attrs)?;
+                let meta = self.link_many(&link_many)?;
                 push_to_link(meta);
             }
             RelationType::NestArray(nest_array) => {
-                let meta = self.nest_array(nest_array, table_derive_attrs)?;
+                let meta = self.nest_array(&nest_array)?;
                 push_to_link(meta);
             }
             RelationType::NestObject(nest_object) => {
-                let meta = self.nest_object(nest_object, table_derive_attrs)?;
+                let meta = self.nest_object(&nest_object)?;
                 push_to_link(meta);
             }
             RelationType::List(list) => {
-                let method_token = self.list_simple(list, table_derive_attrs)?;
+                let method_token = self.list_simple(&list)?;
                 store.record_link_fields_methods.push(method_token);
             }
             RelationType::Relate(relate) => {}
@@ -77,15 +74,15 @@ impl Codegen {
     pub fn list_simple(
         &self,
         list_simple: &ListSimple,
-        table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<LinkFieldTraversalMethodToken> {
         let crate_name = get_crate_name(false);
+        let table_derive_attrs = self.table_derive_attributes();
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing);
         let field_name_serialized = self.db_field_name(&struct_casing);
 
         let record_link_default_alias_as_method = quote!(
-            pub fn #field_ident_normalized(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
+            pub fn #field_ident_normalized(&self, clause: impl ::std::convert::Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
                 let clause: #crate_name::NodeAliasClause = clause.into();
                 let clause: #crate_name::NodeClause = clause.into_inner();
 
@@ -96,9 +93,9 @@ impl Codegen {
                 };
 
                 let clause: #crate_name::NodeClause = clause.into();
-                let bindings = self.get_bindings().into_iter().chain(clause.get_bindings().into_iter()).collect::<Vec<_>>();
+                let bindings = self.get_bindings().into_iter().chain(clause.get_bindings().into_iter()).collect::<::std::vec::Vec<_>>();
 
-                let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<Vec<_>>();
+                let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<::std::vec::Vec<_>>();
 
                 let field = #crate_name::Field::new(format!("{field_name_serialized}{}", clause.build()))
                             .with_bindings(bindings)
@@ -111,25 +108,24 @@ impl Codegen {
         Ok(record_link_default_alias_as_method.into())
     }
 
-    fn link_one(
-        &self,
-        link_one: LinkOneAttrType,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<LinkMethodMeta> {
+    fn link_one(&self, link_one: LinkOneAttrType) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
         // TODO: Cross-check if not replacing self here is more ergonomic/correct
         // let link_one = &link_one.replace_self_with_current_struct_ident(table_def);
-        let struct_name_ident = table_derive_attrs.ident;
+        let table_derive_attrs = self.table_derive_attributes();
+        let current_struct = table_derive_attrs.ident();
         let struct_casing = table_derive_attrs.casing()?;
-        let field_ident_normalized = self.field_ident_normalized(&struct_casing);
-        let field_name_serialized = self.db_field_name(&struct_casing);
+        let field_receiver = self.field_receiver();
+        let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing);
+        let db_field_name = field_receiver.db_field_name(&struct_casing)?;
+        let db_field_name_as_ident = db_field_name.as_ident();
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if *struct_name_ident.is_same_name(link_one)? {
+        let foreign_node_schema_import = if *current_struct.is_same_name(link_one)? {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
@@ -137,13 +133,12 @@ impl Codegen {
         };
 
         let record_link_default_alias_as_method = quote!(
-            pub fn #normalized_field_name(&self) -> #link_one {
-            let clause = #crate_name::Clause::from(#crate_name::Empty);
+            pub fn #db_field_name_as_ident(&self) -> #link_one { let clause = #crate_name::Clause::from(#crate_name::Empty);
 
-            let normalized_field_name_str = if self.build().is_empty(){
-                #normalized_field_name_str.to_string()
+            let db_field_name = if self.build().is_empty(){
+                #db_field_name
             }else {
-                format!(".{}", #normalized_field_name_str)
+                format!(".{}", #db_field_name)
             };
 
             #link_one::#__________connect_node_to_graph_traversal_string(
@@ -163,16 +158,14 @@ impl Codegen {
         })
     }
 
-    fn link_many(
-        &self,
-        link_many_node_type: &LinkManyAttrType,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<LinkMethodMeta> {
+    fn link_many(&self, link_many_node_type: &LinkManyAttrType) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
+        let table_derive_attrs = self.table_derive_attributes();
         let current_struct_ident = &table_derive_attrs.ident;
+        let field_attr = self.field_receiver();
         let struct_casing = table_derive_attrs.casing()?;
-        let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = self.db_field_name(&struct_casing)?;
+        let field_ident_normalized = field_attr.field_ident_normalized(&struct_casing)?;
+        let db_field_name = field_attr.db_field_name(&struct_casing)?;
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
@@ -193,15 +186,15 @@ impl Codegen {
             let clause: #crate_name::NodeAliasClause = clause.into();
             let clause: #crate_name::NodeClause = clause.into_inner();
 
-            let normalized_field_name_str = if self.build().is_empty(){
-                #normalized_field_name_str.to_string()
+            let db_field_name = if self.build().is_empty(){
+                #db_field_name.to_string()
             }else {
-                format!(".{}", #normalized_field_name_str)
+                format!(".{}", #db_field_name)
             };
 
             #link_many_node_type::#__________connect_node_to_graph_traversal_string(
                     self,
-                    clause.with_field(normalized_field_name_str)
+                    clause.with_field(db_field_name)
                 )
             }
         );
@@ -219,9 +212,9 @@ impl Codegen {
     pub(crate) fn nest_object(
         &self,
         embedded_object: &NestObjectAttrType,
-        table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
+        let table_derive_attrs = self.table_derive_attributes();
         let current_struct_ident = &table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
@@ -263,7 +256,7 @@ impl Codegen {
         Ok(LinkMethodMeta {
             foreign_node_schema_import: foreign_node_schema_import.into(),
             foreign_node_type_validator: quote!(
-                #crate_name::validators::assert_impl_one!(#schema_type_ident: #crate_name::Object);
+                #crate_name::validators::assert_impl_one!(#embedded_object: #crate_name::Object);
             )
             .into(),
             link_field_method: connect_object_field_method.into(),
@@ -273,9 +266,9 @@ impl Codegen {
     pub(crate) fn nest_array(
         &self,
         nested_array: &NestArrayAttrType,
-        table_derive_attrs: &TableDeriveAttributes,
     ) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
+        let table_derive_attrs = self.table_derive_attributes();
         let current_struct_ident = &table_derive_attrs.ident;
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
@@ -318,7 +311,7 @@ impl Codegen {
         Ok(LinkMethodMeta {
             foreign_node_schema_import: foreign_node_schema_import.into(),
             foreign_node_type_validator: quote!(
-                #crate_name::validators::assert_impl_one!(#schema_type_ident: #crate_name::Object);
+                #crate_name::validators::assert_impl_one!(#nested_array: #crate_name::Object);
             )
             .into(),
             link_field_method: record_link_default_alias_as_method.into(),
