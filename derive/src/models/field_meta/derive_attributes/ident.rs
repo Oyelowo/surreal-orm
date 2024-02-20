@@ -5,13 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{
-    errors::ExtractorResult,
-    models::{
-        derive_attributes::TableDeriveAttributes, field_name_serialized::DbFieldName, CaseString,
-        StructLevelCasing,
-    },
-};
+use crate::{errors::ExtractorResult, models::*};
 use convert_case::Case;
 use quote::format_ident;
 
@@ -64,7 +58,7 @@ impl MyFieldReceiver {
             .map_or_else(field_ident_cased, |renamed| renamed.serialize);
 
         let (field_ident_normalized, field_name_serialized) =
-            if field_name_normalised.starts_with("r#") {
+            if field_ident_normalised.starts_with("r#") {
                 let field_ident_normalized = field_ident_normalised.trim_start_matches("r#");
                 (
                     format_ident!("{field_ident_normalised}_"),
