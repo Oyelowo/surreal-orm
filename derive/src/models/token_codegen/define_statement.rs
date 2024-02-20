@@ -10,31 +10,29 @@ use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 
 use super::Codegen;
-use crate::{
-    errors::ExtractorResult,
-    models::{
-        derive_attributes::TableDeriveAttributes, DataType, MyFieldReceiver, StaticAssertionToken,
-    },
-};
+use crate::{errors::ExtractorResult, models::*};
 
 pub struct DefineFieldStatementToken(TokenStream);
 
-impl Codegen {
+impl<'a> Codegen<'a> {
     pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
+        self.validate_field_attributes()?;
+
         self.field_definitions.extend(self.field_defintion_db()?);
         Ok(())
     }
 
     pub fn field_defintion_db(&self) -> ExtractorResult<Vec<DefineFieldStatementToken>> {
-        let table_derive_attrs = self.table_derive_attributes();
         let crate_name = get_crate_name(false);
+        let table_derive_attrs = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
+        let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?);
+        let casing = table_derive_attrs.casing()?;
+        let field_name_serialized = field_receiver.field_ident_normalized(casing)?;
+
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
-        let casing = table_derive_attrs.casing();
-        let field_name_serialized = self.field_receiver().field_ident_normalized(casing)?;
         let mut all_field_defintions = vec![];
-
-        self.validate_field_attributes()?;
 
         if let Some(define) = self.define {
             quote!(#define.to_raw());
@@ -57,7 +55,7 @@ impl Codegen {
         }
 
         let main_field_def = quote!(
-            #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
+            #crate_name::statements::define_field(#crate_name::Field::new(#db_field_name))
             .on_table(#crate_name::Table::from(Self::table_name()))
             #( # define_field_methods) *
             .to_raw()
@@ -96,15 +94,18 @@ impl Codegen {
     }
 
     fn validate_field_attributes(&self) -> ExtractorResult<()> {
-        MyFieldReceiver {
+        let field_receiver = self.field_receiver();
+        let MyFieldReceiver {
             define,
             assert: assert_,
             value,
             permissions,
             item_assert,
             ident,
+            relate,
             ..
-        } = &self.field_receiver();
+        } = field_receiver;
+        let db_field_name = field_receiver.db_field_name(&self.table_derive_attributes().casing()?);
 
         if define.is_some()
             && (assert_.is_some()
@@ -114,7 +115,7 @@ impl Codegen {
         {
             return Err(
                 syn::Error::new_spanned(
-                    field_name_normalized,
+                    db_field_name,
                     r#"Invalid combination. When `define`, the following attributes cannot be use in combination to prevent confusion:
     assert,
     value,
@@ -129,7 +130,7 @@ impl Codegen {
                 || permissions.is_some()
                 || item_assert.is_some())
         {
-            return (Err(syn::Error::new_spanned(
+            return Err(syn::Error::new_spanned(
                 ident,
                 r#"This is a read-only relation field and does not allow the following attributes:
     define,
@@ -138,7 +139,7 @@ impl Codegen {
     permissions,
     item_assert"#,
             )
-            .into()));
+            .into());
         }
 
         Ok(())
