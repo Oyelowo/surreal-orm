@@ -8,7 +8,7 @@
 use convert_case::{Case, Casing};
 use quote::format_ident;
 
-use crate::models::create_ident_wrapper;
+use crate::{errors::ExtractorResult, models::*};
 
 use super::derive_attributes::StructIdent;
 
@@ -20,6 +20,7 @@ impl TableNameIdent {
         struct_name_ident: &StructIdent,
         relax_table_name: &Option<bool>,
     ) -> ExtractorResult<&Self> {
+        let table_name = self;
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         if !relax_table_name.unwrap_or(false) && self.to_string() != expected_table_name {
             return Err(syn::Error::new(
