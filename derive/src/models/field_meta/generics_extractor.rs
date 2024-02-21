@@ -87,11 +87,11 @@ pub(crate) struct GenericTypeExtractor<'a> {
 
 impl<'a> GenericTypeExtractor<'a> {
     pub fn extract_generics_for_complex_type(
-        table_attributes: &'a TableDeriveAttributes,
+        model_attributes: &impl ModelAttributes,
         field_ty: &'a CustomType,
     ) -> &'a CustomGenerics {
         let generics = Self {
-            struct_generics: &table_attributes.generics,
+            struct_generics: &model_attributes.generics,
             field_generics: Generics::default(),
         };
         generics.visit_type(&field_ty.to_basic_type());

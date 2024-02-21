@@ -61,7 +61,8 @@ impl<'a> Codegen<'a> {
             field_where_clause,
         } = field_type.get_generics_meta(table_attributes);
 
-        let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
+        let field_name_pascalized =
+            field_receiver.field_name_pascalized(table_attributes.casing())?;
 
         let numeric_trait = if field_receiver.is_numeric() {
             Self::numeric_setter_impl(field_receiver, table_attributes)
@@ -156,27 +157,28 @@ impl<'a> Codegen<'a> {
 
     fn array_trait_impl(
         field_receiver: &MyFieldReceiver,
-        table_attributes: &TableDeriveAttributes,
+        model_attributes: &impl ModelAttributes,
     ) -> ExtractorResult<ArrayElementFieldSetterToken> {
         let crate_name = get_crate_name(false);
-        let field_name_as_pascalized = field_receiver.field_name_pascalized(table_attributes);
+        let field_name_as_pascalized =
+            field_receiver.field_name_pascalized(&model_attributes.casing()?)?;
 
         let (generics_meta, array_item_type) = match field_receiver.to_relation_type() {
             RelationType::LinkMany(foreign_node) => {
-                let generics_meta = foreign_node.get_generics_meta(table_attributes);
+                let generics_meta = foreign_node.get_generics_meta(model_attributes);
                 (
                     Some(generics_meta),
                     Some(quote!(<#foreign_node as #crate_name::Model>::Id)),
                 )
             }
             RelationType::NestArray(foreign_object) => {
-                let generics_meta = foreign_object.get_generics_meta(table_attributes);
+                let generics_meta = foreign_object.get_generics_meta(model_attributes);
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
             _ => {
                 let inferred_type = match field_receiver.ty.get_array_inner_type() {
                     Some(ref ty) => {
-                        let generics_meta = ty.get_generics_meta(table_attributes);
+                        let generics_meta = ty.get_generics_meta(model_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
                     None => {
@@ -232,7 +234,7 @@ impl<'a> Codegen<'a> {
         table_attributes: &TableDeriveAttributes,
     ) -> FieldSetterNumericImpl {
         let crate_name = get_crate_name(false);
-        let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes);
+        let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes)?;
         let field_type = field_receiver.ty;
         let FieldGenericsMeta {
             field_impl_generics,
