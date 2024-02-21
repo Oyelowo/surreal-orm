@@ -6,7 +6,7 @@
  */
 
 use crate::{errors::ExtractorResult, models::*};
-use convert_case::Case;
+use convert_case::{Case, Casing};
 use quote::format_ident;
 
 use super::{FieldIdentNormalized, FieldNamePascalized, IdentCased, MyFieldReceiver};
@@ -28,17 +28,16 @@ impl MyFieldReceiver {
 
     pub fn field_name_pascalized(
         &self,
-        table_attributes: &TableDeriveAttributes,
-    ) -> FieldNamePascalized {
-        let struct_level_casing = table_attributes.casing();
-        let field_name_normalized = self.field_ident_normalized(struct_level_casing)?;
+        struct_casing: &StructLevelCasing,
+    ) -> ExtractorResult<FieldNamePascalized> {
+        let field_name_normalized = self.field_ident_normalized(struct_casing)?;
 
         let field_name_pascalized = format_ident!(
             "{}",
             field_name_normalized.to_string().to_case(Case::Pascal)
         );
 
-        field_name_pascalized.into()
+        Ok(field_name_pascalized.into())
     }
 
     fn ident_meta(

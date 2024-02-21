@@ -12,7 +12,6 @@ use syn::{
     self,
     parse::{Parse, ParseStream},
     parse_quote,
-    spanned::Spanned,
     visit_mut::VisitMut,
     GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
 };
@@ -92,11 +91,11 @@ impl CustomType {
 
     pub fn get_generics_meta<'a>(
         &self,
-        table_attributes: &TableDeriveAttributes,
+        model_attributes: &impl ModelAttributes,
     ) -> FieldGenericsMeta<'a> {
         let (field_impl_generics, field_ty_generics, field_where_clause) =
             GenericTypeExtractor::extract_generics_for_complex_type(
-                table_attributes,
+                model_attributes,
                 &self.to_basic_type(),
             )
             .split_for_impl();
