@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::ops::Deref;
+
 use crate::{errors::ExtractorResult, models::*};
 use convert_case::{Case, Casing};
 use quote::format_ident;
@@ -12,6 +14,15 @@ use quote::format_ident;
 use super::{FieldIdentNormalized, FieldNamePascalized, IdentCased, MyFieldReceiver};
 
 impl MyFieldReceiver {
+    pub(crate) fn ident(&self) -> ExtractorResult<FieldIdentOriginal> {
+        Ok(self
+            .ident
+            .as_ref()
+            .ok_or(darling::Error::custom("Field must have an identifier"))?
+            .clone()
+            .into())
+    }
+
     pub(crate) fn field_ident_normalized(
         &self,
         struct_casing: &StructLevelCasing,
@@ -44,10 +55,7 @@ impl MyFieldReceiver {
         &self,
         struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<(FieldIdentNormalized, DbFieldName)> {
-        let field_ident_original = self
-            .ident
-            .as_ref()
-            .ok_or(darling::Error::custom("Field must have an identifier]"))?;
+        let field_ident_original = self.ident()?;
         let field_ident_cased =
             || Self::convert_case(field_ident_original.to_string(), struct_casing).to_string();
 
@@ -65,7 +73,7 @@ impl MyFieldReceiver {
                 )
             } else {
                 (
-                    field_ident_normalised.to_owned(),
+                    format_ident!("{field_ident_normalised}"),
                     field_ident_normalised.to_string(),
                 )
             };
@@ -75,7 +83,7 @@ impl MyFieldReceiver {
 
     fn convert_case(ident: impl Into<String>, casing: &StructLevelCasing) -> IdentCased {
         let ident: String = ident.into();
-        match casing.deref() {
+        let ident = match casing.deref() {
             CaseString::None => ident,
             CaseString::Camel => ident.to_case(Case::Camel),
             CaseString::Snake => ident.to_case(Case::Snake),
@@ -85,7 +93,7 @@ impl MyFieldReceiver {
             CaseString::ScreamingSnake => ident.to_case(Case::ScreamingSnake),
             CaseString::Kebab => ident.to_case(Case::Kebab),
             CaseString::ScreamingKebab => ident.to_case(Case::ScreamingSnake),
-        }
-        .into()
+        };
+        format_ident!("{ident}").into()
     }
 }

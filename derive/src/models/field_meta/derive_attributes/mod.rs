@@ -9,8 +9,10 @@ mod generics;
 mod ident;
 mod types;
 
-use darling::FromField;
+use darling::{FromField, FromMeta};
 pub use generics::FieldGenericsMeta;
+use proc_macro2::Ident;
+use syn::Type;
 
 use crate::models::*;
 
@@ -22,14 +24,16 @@ create_ident_wrapper!(FieldNamePascalized);
 create_ident_wrapper!(FieldIdentOriginal);
 create_ident_wrapper!(OldFieldName);
 
+impl FromMeta for OldFieldName {}
+
 #[derive(Debug, FromField)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
-    pub(crate) ident: Option<FieldIdentOriginal>,
+    ident: Option<Ident>,
     /// This magic field name pulls the type from the input.
-    pub(crate) ty: CustomType,
+    ty: Type,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]

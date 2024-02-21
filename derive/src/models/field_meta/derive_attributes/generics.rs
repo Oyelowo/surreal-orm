@@ -23,14 +23,14 @@ impl MyFieldReceiver {
         &self,
         table_attributes: TableDeriveAttributes,
     ) -> FieldGenericsMeta<'a> {
-        self.ty
+        self.ty()
             .replace_self_with_current_struct_ident(&table_attributes)
             .get_generics_meta(table_attributes)
     }
 
     // fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {
     //     let current_struct_generics = table_attributes.generics;
-    //     match ty {
+    //     match self.ty() {
     //         Type::Path(TypePath { path, .. }) => {
     //             path.segments.iter().any(|segment| {
     //             if current_struct_generics.params.iter().any(|param| matches!(param, syn::GenericParam::Type(type_param) if segment.ident == type_param.ident)) {
