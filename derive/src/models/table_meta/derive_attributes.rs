@@ -5,22 +5,13 @@
  * Licensed under the MIT license
  */
 
-use std::{fmt::Display, str::FromStr};
-
 use darling::{ast::Data, util, FromDeriveInput, FromMeta};
 use proc_macro2::TokenStream;
-use proc_macros_helpers::{get_crate_name, parse_lit_to_tokenstream};
-use quote::{format_ident, quote, ToTokens};
-use syn::{parse_quote, GenericArgument, Generics, Ident, Path, PathArguments, Type};
+use proc_macros_helpers::get_crate_name;
+use quote::{quote, ToTokens};
+use syn::Type;
 
-use crate::{
-    errors::ExtractorResult,
-    models::{
-        create_ident_wrapper, token_codegen::Codegen, AttributeAs, AttributeDefine, CaseString,
-        CustomType, MyFieldReceiver, Permissions, Rename, StructGenerics, StructLevelCasing,
-        TableDefinitions,
-    },
-};
+use crate::{errors::ExtractorResult, models::*};
 
 use super::table_name::TableNameIdent;
 

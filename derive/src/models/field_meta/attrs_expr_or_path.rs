@@ -10,10 +10,11 @@ use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
-use syn::Expr;
+use syn::{Expr, Meta, MetaNameValue};
 
 use crate::models::*;
 
+#[derive(Debug)]
 pub enum ExprOrPath {
     Expr(Expr),
     Path(syn::Path),
@@ -24,20 +25,25 @@ impl FromMeta for ExprOrPath {
         Ok(Self::Expr(expr.clone()))
     }
 
-    fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
+    fn from_meta(item: &Meta) -> Result<Self, darling::Error> {
         match item {
-            syn::Meta::Path(path) => Ok(Self::Path(path.clone())),
-            syn::Meta::NameValue(name_value) => {
-                let lit = &name_value.lit;
-                match lit {
-                    syn::Lit::Str(str_lit) => {
-                        let value_str = str_lit.value();
-                        Ok(Self::Path(syn::parse_str(&value_str)?))
+            Meta::Path(ref path) => Ok(ExprOrPath::Path(path.clone())),
+            Meta::NameValue(MetaNameValue { value, .. }) => match value {
+                Expr::Path(expr_path) => {
+                    if expr_path.path.segments.len() > 0 {
+                        Ok(ExprOrPath::Path(expr_path.path))
+                    } else {
+                        Err(darling::Error::custom("Path cannot be empty"))
                     }
-                    _ => Err(darling::Error::custom("Invalid value").with_span(lit)),
                 }
-            }
-            _ => Err(darling::Error::custom("Invalid value").with_span(item)),
+                _ => Err(darling::Error::custom(
+                    "Expected a valid Rust path or an expression",
+                )),
+            },
+            // Handle other `Meta` variants if necessary
+            _ => Err(darling::Error::unsupported_shape(
+                "Expected a path or a name-value pair",
+            )),
         }
     }
 }
@@ -51,10 +57,15 @@ impl ToTokens for ExprOrPath {
     }
 }
 
+#[derive(Debug)]
 pub struct AttributeValue(ExprOrPath);
+#[derive(Debug)]
 pub struct AttributeAssert(ExprOrPath);
+#[derive(Debug)]
 pub struct AttributeItemAssert(ExprOrPath);
+#[derive(Debug)]
 pub struct AttributeAs(ExprOrPath);
+#[derive(Debug)]
 pub struct AttributeDefine(ExprOrPath);
 
 macro_rules! impl_from_expr_or_path {
@@ -114,6 +125,6 @@ impl AttributeValue {
             FieldType::Any => quote!(#crate_name::sql::Value::from(#value_expr)),
         };
 
-        quote!(let _ = #convertible_values_to_db_type;)
+        quote!(let _ = #convertible_values_to_db_type;).into()
     }
 }

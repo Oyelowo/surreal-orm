@@ -57,6 +57,7 @@ impl CustomGenerics {
     }
 }
 
+#[derive(Debug)]
 pub struct StructGenerics(pub CustomGenerics);
 
 impl std::ops::Deref for StructGenerics {

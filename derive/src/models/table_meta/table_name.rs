@@ -6,6 +6,7 @@
  */
 
 use convert_case::{Case, Casing};
+use darling::FromMeta;
 use quote::format_ident;
 
 use crate::{errors::ExtractorResult, models::*};
@@ -13,6 +14,8 @@ use crate::{errors::ExtractorResult, models::*};
 use super::derive_attributes::StructIdent;
 
 create_ident_wrapper!(TableNameIdent);
+
+impl FromMeta for TableNameIdent {}
 
 impl TableNameIdent {
     pub(crate) fn validate_and_return(

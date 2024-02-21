@@ -23,19 +23,9 @@ impl MyFieldReceiver {
         &self,
         table_attributes: TableDeriveAttributes,
     ) -> FieldGenericsMeta<'a> {
-        let field_type = self
-            .ty
+        self.ty
             .replace_self_with_current_struct_ident(&table_attributes)
-            .get_generics_meta(table_attributes);
-
-        let (field_impl_generics, field_ty_generics, field_where_clause) =
-            GenericTypeExtractor::extract_generics_for_complex_type(&table_attributes, &field_type)
-                .split_for_impl();
-        FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        }
+            .get_generics_meta(table_attributes)
     }
 
     // fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {
