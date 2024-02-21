@@ -14,16 +14,16 @@ use super::MyFieldReceiver;
 impl MyFieldReceiver {
     pub fn field_type_db(
         &self,
-        table_attributes: &TableDeriveAttributes,
+        model_attributes: &impl ModelAttributes,
         model_type: &DataType,
     ) -> ExtractorResult<FieldTypeDb> {
         let db_type = match self.field_type_db {
             Some(ref db_type) => db_type.clone(),
             None => {
-                let casing = table_attributes.casing()?;
-                let field_name = &self.field_name_serialized(&casing)?;
+                let casing = model_attributes.casing()?;
+                let field_name = &self.db_field_name(&casing)?;
                 let inferred = self
-                    .ty
+                    .ty()
                     .infer_surreal_type_heuristically(
                         field_name,
                         &self.to_relation_type(),
@@ -49,7 +49,7 @@ impl MyFieldReceiver {
         // Infer/use user specified or error out
         // TODO: Add the compile time assertion/validations/checks for the dbtype here
         Ok(DbFieldTypeAstMeta {
-            field_type_db: self.field_type_db,
+            field_type_db: self.field_type_db.expect("Not yet implemented!"),
             static_assertion: todo!(),
         })
     }
@@ -62,7 +62,7 @@ impl MyFieldReceiver {
             field_type,
             FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
         );
-        explicit_db_ty_is_numeric || self.field_type_rust().is_numeric()
+        explicit_db_ty_is_numeric || self.ty().is_numeric()
     }
 
     pub fn is_array(&self) -> bool {
@@ -71,7 +71,7 @@ impl MyFieldReceiver {
             .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_list = matches!(field_type, FieldType::Array(item_ty, _));
         explicit_ty_is_list
-            || self.field_type_rust().is_array()
+            || self.ty().is_array()
             || self.field_type_db.map_or(false, |t| t.is_array())
             || self.link_many.is_some()
     }
@@ -82,7 +82,7 @@ impl MyFieldReceiver {
             .map_or(FieldType::Any, |t| t.into_inner());
         let explicit_ty_is_list = matches!(field_type, FieldType::Set(item_ty, _));
         explicit_ty_is_list
-            || self.field_type_rust().is_set()
+            || self.ty().is_set()
             || self.field_type_db.map_or(false, |t| t.is_set())
     }
 
@@ -93,12 +93,12 @@ impl MyFieldReceiver {
         let explicit_ty_is_list =
             matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
-            || self.field_type_rust().is_list()
+            || self.ty().is_list()
             || self.field_type_db.map_or(false, |t| t.is_list())
             || self.link_many.is_some()
     }
 
-    pub fn field_type_rust(&self) -> CustomType {
-        self.ty
+    pub fn ty(&self) -> CustomType {
+        self.ty.into()
     }
 }
