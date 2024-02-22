@@ -8,13 +8,18 @@
 use darling::FromMeta;
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{Expr, Lit, LitStr};
+use syn::{Expr, Lit, Meta, MetaNameValue, Path};
+
+use super::ExprOrPath;
 
 #[derive(Debug, Clone)]
 pub enum Permissions {
+    /// permissions = full
     Full,
+    /// permissions = none
     None,
-    FnName(Expr),
+    /// permissions = get_permissions or permissions = get_permissions() or permissions = get_permissions("some_arg")
+    FnName(ExprOrPath),
 }
 
 impl ToTokens for Permissions {
@@ -27,8 +32,6 @@ impl ToTokens for Permissions {
                 quote!(.permissions_none())
             }
             Self::FnName(permissions) => {
-                // TODO: Remove this
-                // let permissions = parse_lit_to_tokenstream(permissions)?;
                 quote!(.permissions(#permissions.to_raw()))
             }
         };
@@ -41,7 +44,37 @@ impl FromMeta for Permissions {
     fn from_expr(expr: &syn::Expr) -> darling::Result<Self> {
         match expr {
             syn::Expr::Lit(lit) => Self::from_value(&lit.lit),
-            _ => Ok(Self::FnName(expr.clone())),
+            _ => Ok(Self::FnName(ExprOrPath::Expr(expr.clone()))),
+        }
+    }
+
+    fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
+        match item {
+            Meta::Path(ref path) => {
+                let path_str = path.into_token_stream().to_string();
+                match path_str.to_lowercase().as_ref() {
+                    "none" => Ok(Self::None),
+                    "full" => Ok(Self::Full),
+                    _ => Ok(Self::FnName(ExprOrPath::Path(path.clone()))),
+                }
+            }
+            Meta::NameValue(MetaNameValue { value, .. }) => match value {
+                Expr::Path(expr_path) => {
+                    let path_str = expr_path.path.into_token_stream().to_string();
+                    match path_str.as_ref() {
+                        "none" => Ok(Self::None),
+                        "full" => Ok(Self::Full),
+                        _ => Ok(Self::FnName(ExprOrPath::Path(expr_path.path.clone()))),
+                    }
+                }
+                Expr::Lit(lit) => Self::from_value(&lit.lit),
+                _ => Err(darling::Error::custom(
+                    "Expected a valid Rust path or an expression",
+                )),
+            },
+            _ => Err(darling::Error::unsupported_shape(
+                "Expected a path or a name-value pair",
+            )),
         }
     }
 
@@ -49,16 +82,14 @@ impl FromMeta for Permissions {
         match value {
             Lit::Str(str_lit) => {
                 let value_str = str_lit.value();
-
-                if value_str.to_lowercase() == "none" {
-                    Ok(Self::None)
-                } else if value_str.to_lowercase() == "full" {
-                    Ok(Self::Full)
-                } else {
-                    Ok(Self::FnName(LitStr::new(&value_str, str_lit.span())))
-                    // Ok(Self::FnName(str_lit.to_owned()))
+                match value_str.to_lowercase().as_str() {
+                    "none" => Ok(Self::None),
+                    "full" => Ok(Self::Full),
+                    _ => match syn::parse_str::<Path>(&value_str) {
+                        Ok(path) => Ok(Self::FnName(ExprOrPath::Path(path))),
+                        Err(_) => Err(darling::Error::custom("Expected a valid Rust path")),
+                    },
                 }
-                // Ok(Self::FnName(LitStr::new(&value_str, str_lit.span())))
             }
             _ => Err(darling::Error::unexpected_lit_type(value)),
         }

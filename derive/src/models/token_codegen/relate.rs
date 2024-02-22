@@ -51,8 +51,8 @@ impl<'a> Codegen<'a> {
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
-        let current_struct_ident = table_derive_attributes.ident;
-        let field_type = &field_receiver.ty;
+        let current_struct_ident = table_derive_attributes.ident();
+        let field_type = &field_receiver.ty();
         let edge_type = relate.edge_type;
         let RelateAttribute {
             edge_direction,
