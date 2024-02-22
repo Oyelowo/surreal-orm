@@ -14,7 +14,7 @@ use syn::{Expr, Meta, MetaNameValue};
 
 use crate::models::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum ExprOrPath {
     Expr(Expr),
     Path(syn::Path),
