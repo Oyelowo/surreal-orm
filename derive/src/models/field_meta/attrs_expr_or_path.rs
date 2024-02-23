@@ -40,7 +40,6 @@ impl FromMeta for ExprOrPath {
                     "Expected a valid Rust path or an expression",
                 )),
             },
-            // Handle other `Meta` variants if necessary
             _ => Err(darling::Error::unsupported_shape(
                 "Expected a path or a name-value pair",
             )),

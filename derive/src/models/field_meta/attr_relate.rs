@@ -151,7 +151,7 @@ impl<'ast> Visit<'ast> for UniqueTypeVisitor {
     }
 
     fn visit_constraint(&mut self, i: &'ast Constraint) {
-        self.generics.insert(i.ident);
+        self.generics.insert(i.ident.to_string());
         for bound in i.bounds {
             self.visit_type_param_bound(&bound)
         }
@@ -203,7 +203,7 @@ impl FromMeta for Relate {
                 } = v;
                 Self {
                     connection,
-                    edge_type: model,
+                    edge_type: model.into(),
                 }
             }
         }

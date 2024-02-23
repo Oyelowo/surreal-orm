@@ -8,6 +8,7 @@
 use std::{
     fmt::{Display, Formatter},
     ops::Deref,
+    str::FromStr,
 };
 
 use darling::FromMeta;
@@ -38,7 +39,7 @@ impl FieldTypeDb {
 
     pub fn get_array_item_type(&self) -> Option<Self> {
         match self.0 {
-            FieldType::Array(ref ft, _) => Some(Self(ft.clone())),
+            FieldType::Array(ref ft, _) => Some(Self(ft.deref().clone())),
             _ => None,
         }
     }
@@ -62,7 +63,7 @@ impl FieldTypeDb {
                 quote!(#crate_name::sql::Value)
             }
             FieldType::Option(ft) => {
-                let val = Self(ft).as_db_sql_value_tokenstream();
+                let val = Self(ft.deref().clone()).as_db_sql_value_tokenstream();
                 quote!(::std::option::Option<#val>)
             }
             FieldType::String => {

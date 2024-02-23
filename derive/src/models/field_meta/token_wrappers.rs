@@ -22,6 +22,12 @@ create_tokenstream_wrapper!(=> SqlValueTokenStream);
 
 create_tokenstream_wrapper!(=> StaticAssertionToken);
 
+impl Default for StaticAssertionToken {
+    fn default() -> Self {
+        Self(quote!())
+    }
+}
+
 create_tokenstream_wrapper!(=> LinkedField);
 create_tokenstream_wrapper!(=> LinkOneField);
 create_tokenstream_wrapper!(=> LinkSelfField);
