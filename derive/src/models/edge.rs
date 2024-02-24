@@ -46,7 +46,7 @@ use super::{
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-struct EdgeToken(TableDeriveAttributes);
+pub struct EdgeToken(TableDeriveAttributes);
 
 impl ModelAttributes for EdgeToken {
     fn rename_all(&self) -> Option<super::Rename> {

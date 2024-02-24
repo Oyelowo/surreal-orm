@@ -21,7 +21,7 @@ use super::{
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-struct NodeToken(TableDeriveAttributes);
+pub struct NodeToken(TableDeriveAttributes);
 
 impl ModelAttributes for NodeToken {
     fn rename_all(&self) -> Option<super::Rename> {

@@ -8,7 +8,7 @@
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::models::*;
 
 create_tokenstream_wrapper!(=>FieldSetterNumericImpl);
 create_tokenstream_wrapper!(=>ArrayElementFieldSetterToken);
@@ -54,7 +54,7 @@ impl<'a> Codegen<'a> {
         let crate_name = get_crate_name(false);
         let field_receiver = self.field_receiver();
         let table_attributes = self.table_derive_attributes();
-        let field_type = field_receiver.ty;
+        let field_type = field_receiver.ty();
         let FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,
@@ -176,7 +176,7 @@ impl<'a> Codegen<'a> {
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
             _ => {
-                let inferred_type = match field_receiver.ty.get_array_inner_type() {
+                let inferred_type = match field_receiver.ty().get_array_inner_type() {
                     Some(ref ty) => {
                         let generics_meta = ty.get_generics_meta(model_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
@@ -235,7 +235,7 @@ impl<'a> Codegen<'a> {
     ) -> FieldSetterNumericImpl {
         let crate_name = get_crate_name(false);
         let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes)?;
-        let field_type = field_receiver.ty;
+        let field_type = field_receiver.ty();
         let FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,

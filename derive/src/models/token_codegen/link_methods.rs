@@ -7,10 +7,7 @@
 
 use quote::quote;
 
-use crate::{
-    errors::ExtractorResult,
-    models::{variables::VariablesModelMacro, *},
-};
+use crate::models::*;
 use table_meta::TableDeriveAttributes;
 
 create_tokenstream_wrapper!(
@@ -111,7 +108,7 @@ impl<'a> Codegen<'a> {
     fn link_one(&self, link_one: LinkOneAttrType) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
         // TODO: Cross-check if not replacing self here is more ergonomic/correct
-        // let link_one = &link_one.replace_self_with_current_struct_ident(table_def);
+        // let link_one = &link_one.replace_self_with_current_struct_concrete_type(table_def);
         let table_derive_attrs = self.table_derive_attributes();
         let current_struct = table_derive_attrs.ident();
         let struct_casing = table_derive_attrs.casing()?;
@@ -372,7 +369,7 @@ impl LinkSelfAttrType {
     ) -> LinkOneAttrType {
         LinkOneAttrType(
             self.0
-                .replace_self_with_current_struct_ident(table_derive_attrs),
+                .replace_self_with_current_struct_concrete_type(table_derive_attrs),
         )
     }
 }

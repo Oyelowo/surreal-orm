@@ -18,23 +18,11 @@ mod simple;
 mod updater_non_null;
 
 use convert_case::{Case, Casing};
-use darling::{ast, util, FromField, ToTokens};
-use proc_macro2::{Ident, TokenStream};
-use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote};
-use std::{
-    collections::{hash_map::Entry, HashMap, HashSet},
-    fmt::Display,
-    ops::Deref,
-    option,
-};
-use surreal_query_builder::FieldType;
-use syn::*;
+use darling::ToTokens;
+use quote::format_ident;
+use std::collections::HashSet;
 
-use crate::{
-    errors::ExtractorResult,
-    models::{derive_attributes::TableDeriveAttributes, CaseString, DataType, FieldGenericsMeta},
-};
+use crate::models::*;
 
 use self::{
     define_statement::DefineFieldStatementToken,
@@ -44,18 +32,13 @@ use self::{
 };
 
 use super::{
-    casing::CaseString,
-    create_ident_wrapper,
-    derive_attributes::{ModelAttributes, TableDeriveAttributes},
-    get_crate_name,
-    relations::{RelateAttribute, RelationType},
-    variables::VariablesModelMacro,
-    AliasesStructFieldsNamesKv, AliasesStructFieldsTypesKv, ConnectionWithFieldAppended, DataType,
-    DbFieldNamesToken, FieldMetadataToken, FieldsRelationsAliased, GenericTypeExtractor,
-    LinkManyField, LinkOneAndSelfField, LinkOneField, LinkSelfField, LinkedField, ModelAttributes,
-    MyFieldReceiver, NonNullUpdaterFields, RenamedSerializedFields, SchemaStructFieldsNamesKv,
-    SchemaStructFieldsNamesKvEmpty, SchemaStructFieldsNamesKvPrefixed, SchemaStructFieldsTypesKv,
-    SerializableField, StaticAssertionToken, TableIdType, TokenStreamHashable, TypeStripper,
+    create_ident_wrapper, relations::RelationType, AliasesStructFieldsNamesKv,
+    AliasesStructFieldsTypesKv, ConnectionWithFieldAppended, DataType, DbFieldNamesToken,
+    FieldMetadataToken, FieldsRelationsAliased, LinkManyField, LinkOneAndSelfField, LinkOneField,
+    LinkSelfField, LinkedField, ModelAttributes, MyFieldReceiver, NonNullUpdaterFields,
+    RenamedSerializedFields, SchemaStructFieldsNamesKv, SchemaStructFieldsNamesKvEmpty,
+    SchemaStructFieldsNamesKvPrefixed, SchemaStructFieldsTypesKv, SerializableField,
+    StaticAssertionToken, TableIdType,
 };
 
 create_ident_wrapper!(ModuleNameInternalIdent);
@@ -224,7 +207,7 @@ pub struct Codegen<'a> {
     pub record_link_fields_methods: Vec<LinkFieldTraversalMethodToken>,
     pub field_definitions: Vec<Vec<DefineFieldStatementToken>>,
     pub field_metadata: Vec<FieldMetadataToken>,
-    pub node_edge_metadata: NodeEdgeMetadataLookupTable,
+    pub node_edge_metadata: NodeEdgeMetadataLookupTable<'a>,
     pub fields_relations_aliased: Vec<FieldsRelationsAliased>,
     pub non_null_updater_fields: Vec<NonNullUpdaterFields>,
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
@@ -241,9 +224,9 @@ struct StructAttributesData<'a> {
 }
 
 impl<'a> Codegen<'a> {
-    fn new(table_derive_attributes: impl ModelAttributes, data_type: DataType) -> Self {
+    fn new(model_attributes: impl ModelAttributes, data_type: DataType) -> Self {
         let struct_attributes_data = StructAttributesData {
-            struct_basic_model_attributes: Some(&table_derive_attributes),
+            struct_basic_model_attributes: Some(&model_attributes),
             data_type: Some(data_type),
             field_receiver: None,
         };
@@ -288,7 +271,7 @@ impl<'a> Codegen<'a> {
     }
 
     // pub(crate) fn table_derive_attributes(&self) -> &impl ModelAttributes {
-    pub(crate) fn table_derive_attributes(&self) -> &impl ModelAttributes {
+    pub(crate) fn table_derive_attributes(&self) -> &dyn ModelAttributes {
         self.struct_attributes_data
             .struct_basic_model_attributes
             .as_ref()
@@ -304,12 +287,12 @@ impl<'a> Codegen<'a> {
 
     /// Derive the schema properties for a struct
     pub(crate) fn parse_fields(
-        table_derive_attributes: &impl ModelAttributes,
+        model_attributes: &impl ModelAttributes,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
-        let mut tokens_generator = Self::new(table_derive_attributes, data_type);
+        let mut tokens_generator = Self::new(model_attributes, data_type);
 
-        for field_receiver in table_derive_attributes
+        for field_receiver in model_attributes
             .data
             .as_ref()
             .take_struct()

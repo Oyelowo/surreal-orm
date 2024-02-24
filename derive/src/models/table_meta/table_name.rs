@@ -9,7 +9,7 @@ use convert_case::{Case, Casing};
 use darling::FromMeta;
 use quote::format_ident;
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::models::*;
 
 use super::derive_attributes::StructIdent;
 

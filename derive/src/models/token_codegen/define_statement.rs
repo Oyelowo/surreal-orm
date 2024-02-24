@@ -10,7 +10,7 @@ use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 
 use super::Codegen;
-use crate::{errors::ExtractorResult, models::*};
+use crate::models::*;
 
 pub struct DefineFieldStatementToken(TokenStream);
 
@@ -28,7 +28,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?);
         let casing = table_derive_attrs.casing()?;
-        let field_name_serialized = field_receiver.field_ident_normalized(casing)?;
+        let field_name_serialized = field_receiver.field_ident_normalized(&casing)?;
 
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
@@ -101,10 +101,10 @@ impl<'a> Codegen<'a> {
             value,
             permissions,
             item_assert,
-            ident,
             relate,
             ..
         } = field_receiver;
+        let ident = field_receiver.ident()?;
         let db_field_name = field_receiver.db_field_name(&self.table_derive_attributes().casing()?);
 
         if define.is_some()

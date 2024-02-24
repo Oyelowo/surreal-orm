@@ -10,7 +10,7 @@ use quote::ToTokens;
 use surreal_query_builder::EdgeDirection;
 use syn::spanned::Spanned;
 
-use crate::{errors::ExtractorError, models::MyFieldReceiver};
+use crate::models::*;
 
 use super::*;
 // Tuple, Array (T, T), [T; N]

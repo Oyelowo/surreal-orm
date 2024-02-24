@@ -9,7 +9,7 @@ use proc_macro::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
 
-use crate::{errors::ExtractorResult, models::RelationType};
+use crate::models::*;
 
 use super::Codegen;
 

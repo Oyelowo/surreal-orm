@@ -7,7 +7,7 @@
 
 use quote::quote;
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::models::*;
 
 use super::Codegen;
 
