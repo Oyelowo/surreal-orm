@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
@@ -7,22 +5,14 @@
  * Licensed under the MIT license
  */
 
-use convert_case::{Case, Casing};
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use std::{ops::Deref, str::FromStr};
+use quote::quote;
+use std::ops::Deref;
 
 use syn::{self, parse_macro_input};
 
-use crate::errors::ExtractorError;
-
-use super::{
-    derive_attributes::{ModelAttributes, TableDeriveAttributes},
-    token_codegen::{Codegen, CommonIdents},
-    variables::VariablesModelMacro,
-    *,
-};
+use crate::models::*;
 
 // #[derive(Debug, FromDeriveInput)]
 // #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
@@ -75,8 +65,8 @@ impl ToTokens for EdgeToken {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = self.deref();
         let struct_name_ident = &table_derive_attributes.ident;
-        let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
-            generics.split_for_impl();
+        let (impl_generics, ty_generics, where_clause) =
+            table_derive_attributes.generics.split_for_impl();
         let table_name_ident = match table_derive_attributes.table_name() {
             Ok(table_name) => table_name,
             Err(err) => return tokens.extend(err.write_errors()),

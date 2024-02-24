@@ -173,7 +173,7 @@ impl<'a> Codegen<'a> {
         let crate_name = get_crate_name(false);
         let current_struct = &self.table_derive_attributes().ident;
         let field_receiver = self.field_receiver();
-        let field_type = &field_receiver.ty;
+        let field_type = &field_receiver.ty();
         let edge_type = relate.edge_type;
         let RelateAttribute {
             edge_table_name,

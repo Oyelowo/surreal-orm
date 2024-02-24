@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{src/models/field_meta/custom_type.rs, models::*};
+use crate::models::*;
 
 use super::Codegen;
 
