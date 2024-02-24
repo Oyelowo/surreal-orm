@@ -8,8 +8,8 @@
 use syn::{
     parse_quote,
     visit_mut::{self, VisitMut},
-    AngleBracketedGenericArguments, ExprPath, GenericArgument, Ident, Path, PathArguments,
-    PathSegment, Type, TypePath,
+    AngleBracketedGenericArguments, ExprPath, Ident, Path, PathArguments, PathSegment, Type,
+    TypePath,
 };
 
 use crate::models::{CustomType, CustomTypeNoSelf};
@@ -201,37 +201,46 @@ impl VisitMut for ReplaceSelfVisitor {
     }
 }
 
-#[test]
-fn replace_self() {
-    let struct_ident = Ident::new("User", proc_macro2::Span::call_site());
-    let generics = AngleBracketedGenericArguments {
-        colon2_token: None,
-        lt_token: Default::default(),
-        args: vec![
-            GenericArgument::Lifetime(syn::Lifetime::new("'a", proc_macro2::Span::call_site())),
-            GenericArgument::Lifetime(syn::Lifetime::new("'b", proc_macro2::Span::call_site())),
-            GenericArgument::Type(Type::Path(TypePath {
-                qself: None,
-                path: Path::from(Ident::new("U", proc_macro2::Span::call_site())),
-            })),
-            GenericArgument::Type(Type::Path(TypePath {
-                qself: None,
-                path: Path::from(Ident::new("V", proc_macro2::Span::call_site())),
-            })),
-        ],
-        gt_token: Default::default(),
-    };
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::GenericArgument;
 
-    let mut ty_to_replace = Type::Path(TypePath {
-        qself: None,
-        path: Path::from(Ident::new("Self", proc_macro2::Span::call_site())),
-    });
+    #[test]
+    fn replace_self() {
+        let struct_ident = Ident::new("User", proc_macro2::Span::call_site());
+        let generics = AngleBracketedGenericArguments {
+            colon2_token: None,
+            lt_token: Default::default(),
+            args: vec![
+                GenericArgument::Lifetime(syn::Lifetime::new("'a", proc_macro2::Span::call_site())),
+                GenericArgument::Lifetime(syn::Lifetime::new("'b", proc_macro2::Span::call_site())),
+                GenericArgument::Type(Type::Path(TypePath {
+                    qself: None,
+                    path: Path::from(Ident::new("U", proc_macro2::Span::call_site())),
+                })),
+                GenericArgument::Type(Type::Path(TypePath {
+                    qself: None,
+                    path: Path::from(Ident::new("V", proc_macro2::Span::call_site())),
+                })),
+            ],
+            gt_token: Default::default(),
+        };
 
-    let replacer = ReplaceSelfVisitor {
-        struct_ident,
-        generics,
-    };
-    let ty_to_replace = replacer.replace_self(&ty_to_replace);
+        let mut ty_to_replace = Type::Path(TypePath {
+            qself: None,
+            path: Path::from(Ident::new("Self", proc_macro2::Span::call_site())),
+        });
 
-    println!("{}", quote::quote!(#ty_to_replace).to_string());
+        let replacer = ReplaceSelfVisitor {
+            struct_ident,
+            generics,
+        };
+        let ty_to_replace = replacer.replace_self(&ty_to_replace);
+
+        assert_eq!(
+            quote::quote!(#ty_to_replace).to_string(),
+            quote::quote!(User<'a, 'b, U, V>).to_string()
+        );
+    }
 }
