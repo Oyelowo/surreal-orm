@@ -13,7 +13,7 @@ use super::CustomType;
 
 struct StrippedBoundsGenerics(pub Generics);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 struct CustomGenerics(pub Generics);
 
 impl CustomGenerics {
@@ -130,6 +130,7 @@ impl StructGenerics {
     }
 }
 
+#[derive(Clone, Debug, Default)]
 pub struct FieldGenerics(pub CustomGenerics);
 
 impl FieldGenerics {
@@ -148,9 +149,9 @@ impl<'a> GenericTypeExtractor<'a> {
         model_attributes: &ModelAttributes,
         field_ty: &'a CustomType,
     ) -> &'a CustomGenerics {
-        let generics = Self {
-            struct_generics: &model_attributes.generics,
-            field_generics: Generics::default(),
+        let mut generics = Self {
+            struct_generics: &model_attributes.generics(),
+            field_generics: Default::default(),
         };
         generics.visit_type(&field_ty.to_basic_type());
         &generics.field_generics.0.into()
