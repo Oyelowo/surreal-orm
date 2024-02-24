@@ -14,10 +14,7 @@ use quote::quote;
 
 use syn::{self, parse_macro_input};
 
-use super::{
-    token_codegen::{Codegen, CommonIdents},
-    *,
-};
+use crate::models::*;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
