@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::models::*;
 use surreal_query_builder::FieldType;
 use syn::Ident;
 

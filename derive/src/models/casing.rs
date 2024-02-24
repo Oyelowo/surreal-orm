@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-#![allow(dead_code)]
-
 use strum_macros::EnumString;
 
 /// Options: "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case",

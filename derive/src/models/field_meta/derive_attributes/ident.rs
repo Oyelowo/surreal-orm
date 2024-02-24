@@ -7,7 +7,7 @@
 
 use std::ops::Deref;
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::models::*;
 use convert_case::{Case, Casing};
 use quote::format_ident;
 

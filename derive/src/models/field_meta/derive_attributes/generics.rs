@@ -21,11 +21,11 @@ impl MyFieldReceiver {
     // student: LinkOne<User<'a, T, u32>
     pub fn get_field_generics_meta<'a>(
         &self,
-        table_attributes: TableDeriveAttributes,
+        model_attributes: &impl ModelAttributes,
     ) -> FieldGenericsMeta<'a> {
         self.ty()
-            .replace_self_with_current_struct_ident(&table_attributes)
-            .get_generics_meta(table_attributes)
+            .replace_self_with_current_struct_concrete_type(&model_attributes)
+            .get_generics_meta(model_attributes)
     }
 
     // fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {

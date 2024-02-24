@@ -17,7 +17,7 @@ use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
 use surreal_query_builder::EdgeDirection;
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::models::*;
 
 use super::Codegen;
 

@@ -5,15 +5,13 @@
  * Licensed under the MIT license
  */
 
-use darling::{ast::Data, util, FromDeriveInput, FromMeta};
+use darling::{ast::Data, util, FromDeriveInput};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
-use syn::Type;
-
-use crate::{errors::ExtractorResult, models::*};
 
 use super::table_name::TableNameIdent;
+use crate::models::*;
 
 create_ident_wrapper!(StructIdent);
 

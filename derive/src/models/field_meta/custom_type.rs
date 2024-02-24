@@ -5,24 +5,15 @@
  * Licensed under the MIT license
  */
 
-use std::borrow::Borrow;
-
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use syn::{
-    self,
-    parse::{Parse, ParseStream},
-    parse_quote,
-    spanned::Spanned,
-    visit_mut::VisitMut,
-    GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
+    self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Ident, Lifetime,
+    Path, PathArguments, PathSegment, Type, TypeReference,
 };
 
-use crate::{
-    errors::ExtractorResult,
-    models::{self, *},
-};
+use crate::models::*;
 
 use super::{field_name_serialized::DbFieldName, *};
 
@@ -111,7 +102,7 @@ impl CustomType {
         }
     }
 
-    pub fn replace_self_with_current_struct_ident(
+    pub fn replace_self_with_current_struct_concrete_type(
         &self,
         model_attributes: &impl ModelAttributes,
     ) -> CustomTypeNoSelf {

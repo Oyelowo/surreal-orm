@@ -7,7 +7,7 @@
 
 use quote::quote;
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::{src/models/field_meta/custom_type.rs, models::*};
 
 use super::Codegen;
 

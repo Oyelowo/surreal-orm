@@ -31,7 +31,8 @@ use proc_macro::TokenStream;
 mod errors;
 mod migrations;
 mod models;
-pub use errors;
+
+pub use errors::*;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
 pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {

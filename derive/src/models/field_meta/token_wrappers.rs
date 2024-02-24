@@ -8,7 +8,7 @@
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
 
-use crate::models::create_tokenstream_wrapper;
+use crate::models::*;
 
 create_tokenstream_wrapper!(=> DbfieldTypeToken);
 
