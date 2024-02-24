@@ -97,7 +97,7 @@ impl ModelAttributes {
             .fields)
     }
 
-    fn rename_all(&self) -> Option<Rename> {
+    pub fn rename_all(&self) -> Option<Rename> {
         match self {
             ModelAttributes::Node(node) => node.0.rename_all,
             ModelAttributes::Edge(edge) => edge.0.rename_all,
@@ -105,7 +105,7 @@ impl ModelAttributes {
         }
     }
 
-    fn ident(&self) -> StructIdent {
+    pub fn ident(&self) -> StructIdent {
         match self {
             ModelAttributes::Node(node) => node.ident(),
             ModelAttributes::Edge(edge) => edge.ident(),
@@ -113,7 +113,7 @@ impl ModelAttributes {
         }
     }
 
-    fn generics(&self) -> &StructGenerics {
+    pub fn generics(&self) -> &StructGenerics {
         match self {
             ModelAttributes::Node(node)
             | ModelAttributes::Edge(node)

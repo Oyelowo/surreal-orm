@@ -281,13 +281,7 @@ impl<'a> Codegen<'a> {
     pub(crate) fn parse_fields(model_attributes: ModelAttributes) -> ExtractorResult<Self> {
         let mut tokens_generator = Self::new(model_attributes);
 
-        for field_receiver in model_attributes
-            .data
-            .as_ref()
-            .take_struct()
-            .ok_or_else(|| darling::Error::custom("Expected a struct"))?
-            .fields
-        {
+        for field_receiver in model_attributes.fields()? {
             tokens_generator.set_field_receiver(field_receiver);
 
             tokens_generator.create_table_id_type_token();
