@@ -36,7 +36,7 @@ use crate::models::*;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-pub struct EdgeToken(TableDeriveAttributes);
+pub struct EdgeToken(pub TableDeriveAttributes);
 
 impl Deref for EdgeToken {
     type Target = TableDeriveAttributes;
@@ -76,7 +76,7 @@ impl ToTokens for EdgeToken {
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let code_gen = match Codegen::parse_fields(self, DataType::Edge) {
+        let code_gen = match Codegen::parse_fields(ModelAttributes::Edge(self.clone())) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };

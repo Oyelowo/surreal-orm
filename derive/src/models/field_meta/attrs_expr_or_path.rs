@@ -56,15 +56,15 @@ impl ToTokens for ExprOrPath {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AttributeValue(ExprOrPath);
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AttributeAssert(ExprOrPath);
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AttributeItemAssert(ExprOrPath);
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AttributeAs(ExprOrPath);
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AttributeDefine(ExprOrPath);
 
 macro_rules! impl_from_expr_or_path {

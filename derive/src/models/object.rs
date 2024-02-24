@@ -8,6 +8,7 @@
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::Ident;
 
 use syn::{self, parse_macro_input};
 
@@ -16,10 +17,10 @@ use crate::models::*;
 // #[derive(Debug, FromDeriveInput)]
 // #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 // struct ObjectToken(TableDeriveAttributes);
-#[derive(Debug, FromDeriveInput)]
+#[derive(Debug, Clone, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct ObjectToken {
-    pub(crate) ident: StructIdent,
+    pub(crate) ident: Ident,
     pub(crate) attrs: Vec<syn::Attribute>,
     pub(crate) generics: StructGenerics,
     /// Receives the body of the struct or enum. We don't care about
@@ -30,17 +31,13 @@ pub struct ObjectToken {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 }
 
-impl ModelAttributes for ObjectToken {
-    fn rename_all(&self) -> Option<super::Rename> {
-        self.rename_all.clone()
+impl ObjectToken {
+    pub fn ident(&self) -> StructIdent {
+        self.ident.into()
     }
 
-    fn ident(&self) -> StructIdent {
-        self.ident.clone()
-    }
-
-    fn generics(&self) -> &StructGenerics {
-        &self.0.generics
+    pub fn generics(&self) -> &StructGenerics {
+        &self.generics
     }
 }
 
@@ -58,7 +55,7 @@ impl ToTokens for ObjectToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let code_gen = match Codegen::parse_fields(self, DataType::Object) {
+        let code_gen = match Codegen::parse_fields(ModelAttributes::Object(self.clone())) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
@@ -164,7 +161,6 @@ impl ToTokens for ObjectToken {
                     }
                 }
                 pub type #struct_name_ident = #_____schema_def::Schema;
-
 
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {

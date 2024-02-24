@@ -9,6 +9,7 @@ use darling::{ast::Data, util, FromDeriveInput};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
+use syn::Ident;
 
 use super::table_name::TableNameIdent;
 use crate::models::*;
@@ -31,7 +32,7 @@ struct StructGenericsComponents {
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
-    pub(crate) ident: StructIdent,
+    pub(crate) ident: Ident,
     // pub(crate) attrs: Vec<syn::Attribute>,
     pub(crate) generics: StructGenerics,
     /// Receives the body of the struct or enum. We don't care about
@@ -66,12 +67,16 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
+    pub fn ident(&self) -> StructIdent {
+        self.ident.into()
+    }
+
     pub fn table_name(&self) -> ExtractorResult<&TableNameIdent> {
         // TODO: Ask during alpha release if specifying table name explicitly
         // should be optional since it can be inferred from the struct name
         // as the snake case version of the struct name.
         self.table
-            .validate_and_return(&self.ident, &self.relax_table_name)
+            .validate_and_return(&self.ident(), &self.relax_table_name)
     }
 
     pub fn get_table_definition_token(&self) -> ExtractorResult<TableDefinitions> {

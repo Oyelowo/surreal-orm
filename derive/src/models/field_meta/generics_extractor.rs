@@ -6,22 +6,27 @@
  */
 
 use crate::models::*;
-use darling::ast::GenericParam;
+use darling::FromGenerics;
 use syn::{punctuated::Punctuated, visit::Visit, *};
 
 use super::CustomType;
 
 struct StrippedBoundsGenerics(pub Generics);
 
+#[derive(Clone, Debug)]
 struct CustomGenerics(pub Generics);
 
 impl CustomGenerics {
-    pub fn params(&self) -> &Punctuated<GenericParam, Token![,]> {
+    pub fn params(&self) -> &Punctuated<syn::GenericParam, Token![,]> {
         &self.0.params
     }
 
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
         self.0.split_for_impl()
+    }
+
+    pub fn to_basic_generics(&self) -> &Generics {
+        &self.0
     }
 
     pub fn strip_bounds_from_generics(original_generics: &Generics) -> StrippedBoundsGenerics {
@@ -33,17 +38,21 @@ impl CustomGenerics {
                     GenericParam::Type(type_param) => {
                         // Keep only the type identifier
                         let ident = &type_param.ident;
-                        parse_quote!(#ident)
+                        let new_type_param: GenericParam = parse_quote!(#ident);
+                        new_type_param
                     }
                     GenericParam::Lifetime(lifetime_def) => {
                         // Keep only the lifetime identifier
                         let lifetime = &lifetime_def.lifetime;
-                        parse_quote!(#lifetime)
+                        let new_lifetime_def: GenericParam = parse_quote!(#lifetime);
+                        new_lifetime_def
                     }
                     GenericParam::Const(const_param) => {
                         // Keep only the const parameter
                         let ident = &const_param.ident;
-                        parse_quote!(const #ident: usize)
+                        let ty = &const_param.ty;
+                        let new_const_param: GenericParam = parse_quote! { const #ident: #ty };
+                        new_const_param
                     }
                 }
             })
@@ -90,8 +99,14 @@ impl CustomGenerics {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct StructGenerics(pub CustomGenerics);
+
+impl FromGenerics for StructGenerics {
+    fn from_generics(generics: &Generics) -> darling::Result<Self> {
+        Ok(Self(CustomGenerics(generics.clone())))
+    }
+}
 
 impl std::ops::Deref for StructGenerics {
     type Target = CustomGenerics;
@@ -130,7 +145,7 @@ pub(crate) struct GenericTypeExtractor<'a> {
 
 impl<'a> GenericTypeExtractor<'a> {
     pub fn extract_generics_for_complex_type(
-        model_attributes: &impl ModelAttributes,
+        model_attributes: &ModelAttributes,
         field_ty: &'a CustomType,
     ) -> &'a CustomGenerics {
         let generics = Self {

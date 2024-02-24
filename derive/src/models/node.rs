@@ -18,19 +18,11 @@ use crate::models::*;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-pub struct NodeToken(TableDeriveAttributes);
+pub struct NodeToken(pub TableDeriveAttributes);
 
-impl ModelAttributes for NodeToken {
-    fn rename_all(&self) -> Option<super::Rename> {
-        self.0.rename_all.clone()
-    }
-
-    fn ident(&self) -> StructIdent {
-        self.0.ident.clone()
-    }
-
-    fn generics(&self) -> &StructGenerics {
-        &self.0.generics
+impl NodeToken {
+    pub fn into_inner(self) -> TableDeriveAttributes {
+        self.0
     }
 }
 
@@ -63,7 +55,7 @@ impl ToTokens for NodeToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let code_gen = match Codegen::parse_fields(self, DataType::Node) {
+        let code_gen = match Codegen::parse_fields(ModelAttributes::Node(self.clone())) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };

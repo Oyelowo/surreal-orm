@@ -14,7 +14,7 @@ use super::MyFieldReceiver;
 impl MyFieldReceiver {
     pub fn field_type_db(
         &self,
-        model_attributes: &impl ModelAttributes,
+        model_attributes: &ModelAttributes,
         model_type: &DataType,
     ) -> ExtractorResult<FieldTypeDb> {
         let db_type = match self.field_type_db {

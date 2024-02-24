@@ -222,7 +222,7 @@ struct StructAttributesData<'a> {
 }
 
 impl<'a> Codegen<'a> {
-    fn new(model_attributes: ModelAttributes, data_type: DataType) -> Self {
+    fn new(model_attributes: ModelAttributes) -> Self {
         let struct_attributes_data = StructAttributesData {
             struct_basic_model_attributes: Some(&model_attributes),
             field_receiver: None,
@@ -267,7 +267,6 @@ impl<'a> Codegen<'a> {
             .expect("Field receiver has not been set. Make sure it has been set by calling set_field_receiver")
     }
 
-    // pub(crate) fn table_derive_attributes(&self) -> &impl ModelAttributes {
     pub(crate) fn table_derive_attributes(&self) -> &ModelAttributes {
         self.struct_attributes_data.struct_basic_model_attributes
     }
@@ -279,11 +278,8 @@ impl<'a> Codegen<'a> {
     }
 
     /// Derive the schema properties for a struct
-    pub(crate) fn parse_fields(
-        model_attributes: &ModelAttributes,
-        data_type: DataType,
-    ) -> ExtractorResult<Self> {
-        let mut tokens_generator = Self::new(model_attributes, data_type);
+    pub(crate) fn parse_fields(model_attributes: ModelAttributes) -> ExtractorResult<Self> {
+        let mut tokens_generator = Self::new(model_attributes);
 
         for field_receiver in model_attributes
             .data
