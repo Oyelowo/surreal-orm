@@ -213,21 +213,18 @@ pub struct Codegen<'a> {
     pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
     pub table_id_type: TableIdType,
 
-    // struct_attributes_data: StructAttributesData<T>,
     struct_attributes_data: StructAttributesData<'a>,
 }
 
 struct StructAttributesData<'a> {
     field_receiver: Option<MyFieldReceiver>,
-    struct_basic_model_attributes: Option<&'a dyn ModelAttributes>,
-    data_type: Option<DataType>,
+    struct_basic_model_attributes: &'a ModelAttributes,
 }
 
 impl<'a> Codegen<'a> {
-    fn new(model_attributes: impl ModelAttributes, data_type: DataType) -> Self {
+    fn new(model_attributes: ModelAttributes, data_type: DataType) -> Self {
         let struct_attributes_data = StructAttributesData {
             struct_basic_model_attributes: Some(&model_attributes),
-            data_type: Some(data_type),
             field_receiver: None,
         };
         let mut store = Self {
@@ -271,23 +268,19 @@ impl<'a> Codegen<'a> {
     }
 
     // pub(crate) fn table_derive_attributes(&self) -> &impl ModelAttributes {
-    pub(crate) fn table_derive_attributes(&self) -> &dyn ModelAttributes {
-        self.struct_attributes_data
-            .struct_basic_model_attributes
-            .as_ref()
-            .expect("Table derive attribute has not been set. Make sure it has been set")
+    pub(crate) fn table_derive_attributes(&self) -> &ModelAttributes {
+        self.struct_attributes_data.struct_basic_model_attributes
     }
 
-    pub(crate) fn data_type(&self) -> &DataType {
+    pub(crate) fn data_type(&self) -> DataType {
         self.struct_attributes_data
-            .data_type
-            .as_ref()
-            .expect("Table derive attribute has not been set. Make sure it has been set")
+            .struct_basic_model_attributes
+            .to_data_type()
     }
 
     /// Derive the schema properties for a struct
     pub(crate) fn parse_fields(
-        model_attributes: &impl ModelAttributes,
+        model_attributes: &ModelAttributes,
         data_type: DataType,
     ) -> ExtractorResult<Self> {
         let mut tokens_generator = Self::new(model_attributes, data_type);

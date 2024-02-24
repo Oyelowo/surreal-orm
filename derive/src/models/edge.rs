@@ -38,20 +38,6 @@ use crate::models::*;
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct EdgeToken(TableDeriveAttributes);
 
-impl ModelAttributes for EdgeToken {
-    fn rename_all(&self) -> Option<super::Rename> {
-        self.0.rename_all.clone()
-    }
-
-    fn ident(&self) -> StructIdent {
-        self.0.ident.clone()
-    }
-
-    fn generics(&self) -> &StructGenerics {
-        &self.0.generics
-    }
-}
-
 impl Deref for EdgeToken {
     type Target = TableDeriveAttributes;
 
