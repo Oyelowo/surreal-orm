@@ -1,14 +1,19 @@
-use darling;
-use syn::{self, GenericArgument, Path, PathArguments, Type};
+use std::str::FromStr;
 
-use super::{RustFieldTypeSelfAllowed, StructIdent};
+use darling;
+use syn::{self, parse_quote, token::Lt, GenericArgument, Path, PathArguments, QSelf, Type};
+
+use super::StructIdent;
 
 use crate::{
     errors::ExtractorResult,
-    models::{CaseString, Rename, StructGenerics, StructLevelCasing},
+    models::{CaseString, CustomType, Rename, StructGenerics, StructLevelCasing},
 };
 
-pub trait ModelAttributes {
+pub trait ModelAttributes
+where
+    Self: Sized,
+{
     fn rename_all(&self) -> Option<Rename>;
     fn ident(&self) -> StructIdent;
     fn generics(&self) -> &StructGenerics;
@@ -30,11 +35,12 @@ pub trait ModelAttributes {
     fn struct_as_path_no_bounds(&self) -> Path {
         // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
         self.construct_type_without_bounds()
-            .replace_self_with_struct_concrete_type(self)
+            .replace_self_with_current_struct_ident(self)
+            // .replace_self_with_struct_concrete_type(self)
             .to_path()
     }
 
-    fn construct_type_without_bounds(&self) -> RustFieldTypeSelfAllowed {
+    fn construct_type_without_bounds(&self) -> CustomType {
         let mut path = Path::from(self.ident());
         let generics = self.generics().to_basic_generics();
 

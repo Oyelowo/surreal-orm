@@ -24,11 +24,6 @@ impl StructIdent {
     }
 }
 
-#[derive(Debug, Clone, FromMeta)]
-pub struct RustFieldTypeSelfAllowed {
-    pub(crate) ty: Type,
-}
-
 struct StructGenericsComponents {
     pub(crate) impl_generics: TokenStream,
     pub(crate) type_generics: TokenStream,

@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::borrow::Borrow;
+
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
@@ -12,11 +14,15 @@ use syn::{
     self,
     parse::{Parse, ParseStream},
     parse_quote,
+    spanned::Spanned,
     visit_mut::VisitMut,
     GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
 };
 
-use crate::{errors::ExtractorResult, models::*};
+use crate::{
+    errors::ExtractorResult,
+    models::{self, *},
+};
 
 use super::{field_name_serialized::DbFieldName, *};
 
@@ -38,21 +44,21 @@ impl CustomTypeNoSelf {
 
     pub fn get_generics_meta<'a>(
         &self,
-        table_attributes: TableDeriveAttributes,
+        model_attributes: &impl ModelAttributes,
     ) -> FieldGenericsMeta<'a> {
-        self.0.get_generics_meta(&table_attributes)
+        self.0.get_generics_meta(model_attributes)
     }
 }
 
 #[derive(Debug, Clone, FromMeta)]
 pub struct CustomType(Type);
 
-impl Parse for CustomType {
-    // TODO: Handle type parsing if frommeta does not work or manually implement fromMeta
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        todo!()
-    }
-}
+// impl Parse for CustomType {
+//     // TODO: Handle type parsing if frommeta does not work or manually implement fromMeta
+//     fn parse(input: ParseStream) -> syn::Result<Self> {
+//         todo!()
+//     }
+// }
 
 impl From<Type> for CustomType {
     fn from(ty: Type) -> Self {
@@ -85,7 +91,9 @@ impl CustomType {
                     .ok_or_else(|| darling::Error::custom("Expected a type. Make sure there are no typos and you are using a proper struct as the linked Node."))?;
                 Ok(last_segment.ident.clone())
             }
-            _ => Err(syn::Error::new(self.to_type().span(), "Expected a struct type").into()),
+            _ => {
+                Err(syn::Error::new(self.to_token_stream().span(), "Expected a struct type").into())
+            }
         }
     }
 
@@ -94,11 +102,8 @@ impl CustomType {
         model_attributes: &impl ModelAttributes,
     ) -> FieldGenericsMeta<'a> {
         let (field_impl_generics, field_ty_generics, field_where_clause) =
-            GenericTypeExtractor::extract_generics_for_complex_type(
-                model_attributes,
-                &self.to_basic_type(),
-            )
-            .split_for_impl();
+            GenericTypeExtractor::extract_generics_for_complex_type(model_attributes, self)
+                .split_for_impl();
         FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,
@@ -108,10 +113,16 @@ impl CustomType {
 
     pub fn replace_self_with_current_struct_ident(
         &self,
-        table_def: &TableDeriveAttributes,
+        model_attributes: &impl ModelAttributes,
     ) -> CustomTypeNoSelf {
+        // TODO: Consider using the declarative replacer over the more imperative approach
+        // let replacer = ReplaceSelfVisitor {
+        //     struct_ident: model_attributes.struct_as_path_no_bounds(),
+        //     generics: model_attributes.generics().to_basic_generics(),
+        // };
+        // let x = replacer.replace_self(self.to_basic_type().clone());
         let ty = &self.to_basic_type();
-        let replacement_path_from_current_struct = table_def.struct_as_path();
+        let replacement_path_from_current_struct = model_attributes.struct_as_path_no_bounds();
 
         fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
             if segment.ident == "Self" {
@@ -144,6 +155,84 @@ impl CustomType {
                         lifetime: type_reference.lifetime.clone(),
                         mutability: type_reference.mutability,
                         elem,
+                    })
+                }
+                Type::Paren(type_paren) => {
+                    let elem = Box::new(replace_type(&type_paren.elem, replacement_path));
+                    Type::Paren(syn::TypeParen {
+                        paren_token: type_paren.paren_token,
+                        elem,
+                    })
+                }
+                Type::Group(type_group) => {
+                    let elem = Box::new(replace_type(&type_group.elem, replacement_path));
+                    Type::Group(syn::TypeGroup {
+                        group_token: type_group.group_token,
+                        elem,
+                    })
+                }
+                Type::Array(type_array) => {
+                    let elem = Box::new(replace_type(&type_array.elem, replacement_path));
+                    Type::Array(syn::TypeArray {
+                        bracket_token: type_array.bracket_token,
+                        elem,
+                        semi_token: type_array.semi_token,
+                        len: type_array.len.clone(),
+                    })
+                }
+                Type::Tuple(type_tuple) => {
+                    let elems = type_tuple
+                        .elems
+                        .iter()
+                        .map(|elem| replace_type(elem, replacement_path))
+                        .collect();
+                    Type::Tuple(syn::TypeTuple {
+                        paren_token: type_tuple.paren_token,
+                        elems,
+                    })
+                }
+                Type::BareFn(type_bare_fn) => {
+                    let inputs = type_bare_fn
+                        .inputs
+                        .iter()
+                        .map(|input| replace_type(&input.ty, replacement_path))
+                        .collect();
+                    let output = type_bare_fn
+                        .output
+                        .as_ref()
+                        .map(|output| replace_type(output, replacement_path));
+                    Type::BareFn(syn::TypeBareFn {
+                        lifetimes: type_bare_fn.lifetimes.clone(),
+                        unsafety: type_bare_fn.unsafety,
+                        abi: type_bare_fn.abi.clone(),
+                        fn_token: type_bare_fn.fn_token,
+                        paren_token: type_bare_fn.paren_token,
+                        inputs,
+                        variadic: type_bare_fn.variadic,
+                        output,
+                    })
+                }
+                Type::Never(type_never) => Type::Never(type_never),
+                Type::TraitObject(type_trait_object) => {
+                    let bounds = type_trait_object
+                        .bounds
+                        .iter()
+                        .map(|bound| replace_type(bound, replacement_path))
+                        .collect();
+                    Type::TraitObject(syn::TypeTraitObject {
+                        dyn_token: type_trait_object.dyn_token,
+                        bounds,
+                    })
+                }
+                Type::ImplTrait(type_impl_trait) => {
+                    let bounds = type_impl_trait
+                        .bounds
+                        .iter()
+                        .map(|bound| replace_type(bound, replacement_path))
+                        .collect();
+                    Type::ImplTrait(syn::TypeImplTrait {
+                        impl_token: type_impl_trait.impl_token,
+                        bounds,
                     })
                 }
                 // TODO: Extend to handle other types like Tuple, Array, etc.
