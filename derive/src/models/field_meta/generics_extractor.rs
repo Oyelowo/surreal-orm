@@ -20,7 +20,11 @@ impl CustomGenerics {
         &self.0.params
     }
 
-    fn strip_bounds_from_generics(original_generics: &Generics) -> StrippedBoundsGenerics {
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+        self.0.split_for_impl()
+    }
+
+    pub fn strip_bounds_from_generics(original_generics: &Generics) -> StrippedBoundsGenerics {
         let stripped_params = original_generics
             .params
             .iter()
@@ -52,32 +56,7 @@ impl CustomGenerics {
         })
     }
 
-    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
-        self.0.split_for_impl()
-    }
-}
-
-#[derive(Debug)]
-pub struct StructGenerics(pub CustomGenerics);
-
-impl std::ops::Deref for StructGenerics {
-    type Target = CustomGenerics;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl StructGenerics {
-    pub fn to_basic_generics(&self) -> &Generics {
-        &self.0 .0
-    }
-
-    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
-        self.0.split_for_impl()
-    }
-
-    fn to_angle_bracketed(&self) -> AngleBracketedGenericArguments {
+    pub fn to_angle_bracketed(&self) -> AngleBracketedGenericArguments {
         let args = self
             .to_basic_generics()
             .params
@@ -111,7 +90,38 @@ impl StructGenerics {
     }
 }
 
+#[derive(Debug)]
+pub struct StructGenerics(pub CustomGenerics);
+
+impl std::ops::Deref for StructGenerics {
+    type Target = CustomGenerics;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl StructGenerics {
+    pub fn to_basic_generics(&self) -> &Generics {
+        &self.0 .0
+    }
+
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+        self.0.split_for_impl()
+    }
+
+    pub fn to_angle_bracketed(&self) -> AngleBracketedGenericArguments {
+        self.0.to_angle_bracketed()
+    }
+}
+
 pub struct FieldGenerics(pub CustomGenerics);
+
+impl FieldGenerics {
+    pub fn to_angle_bracketed(&self) -> AngleBracketedGenericArguments {
+        self.0.to_angle_bracketed()
+    }
+}
 
 pub(crate) struct GenericTypeExtractor<'a> {
     struct_generics: &'a StructGenerics,
