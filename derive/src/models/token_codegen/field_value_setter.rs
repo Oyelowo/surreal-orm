@@ -62,18 +62,18 @@ impl<'a> Codegen<'a> {
         } = field_type.get_generics_meta(table_attributes);
 
         let field_name_pascalized =
-            field_receiver.field_name_pascalized(table_attributes.casing())?;
+            field_receiver.field_name_pascalized(&table_attributes.casing()?)?;
 
         let numeric_trait = if field_receiver.is_numeric() {
             Self::numeric_setter_impl(field_receiver, table_attributes)
         } else {
-            quote!()
+            quote!().into()
         };
 
         let array_trait = if field_receiver.is_list() {
             Self::array_trait_impl(field_receiver, table_attributes)?
         } else {
-            quote!()
+            quote!().into()
         };
 
         let field_setter_impls = quote!(
@@ -152,12 +152,12 @@ impl<'a> Codegen<'a> {
 
             #array_trait
         );
-        FieldSetterImplTokens(field_setter_impls).into()
+        Ok(FieldSetterImplTokens(field_setter_impls).into())
     }
 
     fn array_trait_impl(
         field_receiver: &MyFieldReceiver,
-        model_attributes: &impl ModelAttributes,
+        model_attributes: &ModelAttributes,
     ) -> ExtractorResult<ArrayElementFieldSetterToken> {
         let crate_name = get_crate_name(false);
         let field_name_as_pascalized =
@@ -231,16 +231,17 @@ impl<'a> Codegen<'a> {
 
     fn numeric_setter_impl(
         field_receiver: &MyFieldReceiver,
-        table_attributes: &TableDeriveAttributes,
-    ) -> FieldSetterNumericImpl {
+        model_attributes: &ModelAttributes,
+    ) -> ExtractorResult<FieldSetterNumericImpl> {
         let crate_name = get_crate_name(false);
-        let field_name_pascalized = field_receiver.field_name_pascalized(table_attributes)?;
+        let field_name_pascalized =
+            field_receiver.field_name_pascalized(&model_attributes.casing()?)?;
         let field_type = field_receiver.ty();
         let FieldGenericsMeta {
             field_impl_generics,
             field_ty_generics,
             field_where_clause,
-        } = field_type.get_generics_meta(table_attributes);
+        } = field_type.get_generics_meta(model_attributes);
 
         let numeric_trait = {
             quote!(
@@ -372,6 +373,6 @@ impl<'a> Codegen<'a> {
                 }
             )
         };
-        FieldSetterNumericImpl(numeric_trait)
+        Ok(FieldSetterNumericImpl(numeric_trait))
     }
 }

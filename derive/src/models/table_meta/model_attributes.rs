@@ -84,11 +84,24 @@ pub enum ModelAttributes {
 }
 
 impl ModelAttributes {
+    pub fn fields(&self) -> ExtractorResult<Vec<&MyFieldReceiver>> {
+        let fields = match self {
+            ModelAttributes::Node(node) => node.0.data,
+            ModelAttributes::Edge(edge) => edge.0.data,
+            ModelAttributes::Object(object) => object.data,
+        };
+        Ok(fields
+            .as_ref()
+            .take_struct()
+            .ok_or(darling::Error::custom("Expected a struct"))?
+            .fields)
+    }
+
     fn rename_all(&self) -> Option<Rename> {
         match self {
-            ModelAttributes::Node(node) => node.rename_all(),
-            ModelAttributes::Edge(edge) => edge.rename_all(),
-            ModelAttributes::Object(object) => object.rename_all(),
+            ModelAttributes::Node(node) => node.0.rename_all,
+            ModelAttributes::Edge(edge) => edge.0.rename_all,
+            ModelAttributes::Object(object) => object.rename_all,
         }
     }
 
@@ -118,7 +131,7 @@ impl ModelAttributes {
         }
     }
 
-    fn casing(&self) -> ExtractorResult<StructLevelCasing> {
+    pub fn casing(&self) -> ExtractorResult<StructLevelCasing> {
         let struct_level_casing = self
             .rename_all()
             .as_ref()
@@ -132,7 +145,7 @@ impl ModelAttributes {
         Ok(casing.into())
     }
 
-    fn struct_as_path_no_bounds(&self) -> Path {
+    pub fn struct_as_path_no_bounds(&self) -> Path {
         // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
         self.construct_struct_type_without_bounds()
             .replace_self_with_current_struct_concrete_type(self)

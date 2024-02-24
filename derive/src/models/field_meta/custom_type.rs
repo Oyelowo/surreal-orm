@@ -35,7 +35,7 @@ impl CustomTypeNoSelf {
 
     pub fn get_generics_meta<'a>(
         &self,
-        model_attributes: &impl ModelAttributes,
+        model_attributes: &ModelAttributes,
     ) -> FieldGenericsMeta<'a> {
         self.0.get_generics_meta(model_attributes)
     }
@@ -90,7 +90,7 @@ impl CustomType {
 
     pub fn get_generics_meta<'a>(
         &self,
-        model_attributes: &impl ModelAttributes,
+        model_attributes: &ModelAttributes,
     ) -> FieldGenericsMeta<'a> {
         let (field_impl_generics, field_ty_generics, field_where_clause) =
             GenericTypeExtractor::extract_generics_for_complex_type(model_attributes, self)
@@ -104,7 +104,7 @@ impl CustomType {
 
     pub fn replace_self_with_current_struct_concrete_type(
         &self,
-        model_attributes: &impl ModelAttributes,
+        model_attributes: &ModelAttributes,
     ) -> CustomTypeNoSelf {
         // TODO: Consider using the declarative replacer over the more imperative approach
         // let replacer = ReplaceSelfVisitor {
