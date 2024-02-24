@@ -76,6 +76,39 @@ impl StructGenerics {
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
         self.0.split_for_impl()
     }
+
+    fn to_angle_bracketed(&self) -> AngleBracketedGenericArguments {
+        let args = self
+            .to_basic_generics()
+            .params
+            .iter()
+            .map(|param| match param {
+                syn::GenericParam::Type(type_param) => {
+                    let ident = &type_param.ident;
+                    let ty: Type = syn::parse_quote!(#ident);
+                    GenericArgument::Type(ty)
+                }
+                syn::GenericParam::Lifetime(lifetime_def) => {
+                    let lifetime = &lifetime_def.lifetime;
+                    GenericArgument::Lifetime(Lifetime::new(&lifetime.to_string(), lifetime.span()))
+                }
+                syn::GenericParam::Const(const_param) => {
+                    let ident = &const_param.ident;
+                    let ty = &const_param.ty;
+                    let expr: Expr = syn::parse_quote!(#ident as #ty);
+                    GenericArgument::Const(expr)
+                }
+                _ => todo!("Handle other generic parameters"),
+            })
+            .collect();
+
+        AngleBracketedGenericArguments {
+            colon2_token: None,
+            lt_token: Default::default(),
+            args,
+            gt_token: Default::default(),
+        }
+    }
 }
 
 pub struct FieldGenerics(pub CustomGenerics);
