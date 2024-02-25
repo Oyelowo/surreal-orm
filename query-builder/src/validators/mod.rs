@@ -36,6 +36,7 @@ macro_rules! assert_fields {
 }
 
 #[macro_export]
+/// Checks that two types are equal
 macro_rules! assert_type_eq_all {
     ($a:ty, $b:ty) => {
         let _a: $a = unimplemented!();
@@ -46,6 +47,7 @@ macro_rules! assert_type_eq_all {
 pub use assert_type_eq_all;
 
 #[macro_export]
+/// Checks that a type implements a trait
 macro_rules! assert_impl_one {
     ($ty:ty; $trait:path) => {{
         struct AssertTraitImpl<T: $trait>(PhantomData<T>);

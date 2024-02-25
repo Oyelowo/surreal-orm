@@ -58,7 +58,7 @@ impl<'a> Codegen<'a> {
             edge_direction,
             edge_table_name,
             foreign_node_table_name,
-        } = &RelateAttribute::from(relate);
+        } = &RelateAttribute::try_from(relate)?;
         let arrow = &ArrowTokenStream::from(edge_direction);
         let destination_node_table_name_str = &foreign_node_table_name.to_string();
 
@@ -229,7 +229,7 @@ impl<'a> Codegen<'a> {
     }
 }
 
-create_ident_wrapper!(EdgeTableName);
+// create_ident_wrapper!(EdgeTableName);
 
 impl EdgeTableName {
     pub fn to_str_typed(&self) -> EdgeTableNameStr {
@@ -241,7 +241,7 @@ struct EdgeTableNameStr(String);
 
 impl EdgeTableNameStr {
     pub fn to_pascal_case_ident(&self) -> EdgeNameAsStructOriginalIdent {
-        EdgeNameAsStructOriginalIdent(format_ident!("{}", self.as_pascal_case()))
+        EdgeNameAsStructOriginalIdent(format_ident!("{}", self.as_pascal_case().to_string()))
     }
 
     fn as_pascal_case(&self) -> EdgeTableNameStr {
@@ -412,8 +412,8 @@ create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
 
 create_tokenstream_wrapper!(=>ArrowTokenStream);
 
-impl From<EdgeDirection> for ArrowTokenStream {
-    fn from(value: EdgeDirection) -> Self {
+impl From<&EdgeDirection> for ArrowTokenStream {
+    fn from(value: &EdgeDirection) -> Self {
         let crate_name = get_crate_name(false);
 
         let arrow = match value {

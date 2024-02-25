@@ -11,8 +11,6 @@ use quote::format_ident;
 
 use crate::models::*;
 
-use super::derive_attributes::StructIdent;
-
 create_ident_wrapper!(TableNameIdent);
 
 impl FromMeta for TableNameIdent {}

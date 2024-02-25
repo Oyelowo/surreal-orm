@@ -6,9 +6,8 @@
  */
 
 use proc_macro2::Span;
-use quote::ToTokens;
+use quote::format_ident;
 use surreal_query_builder::EdgeDirection;
-use syn::spanned::Spanned;
 
 use crate::models::*;
 
@@ -103,60 +102,63 @@ impl From<&MyFieldReceiver> for RelationType {
     }
 }
 
-macro_rules! wrapper_struct_to_ident {
-    ($simple_wrapper_struct:ty) => {
-        impl ::std::convert::From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {
-            fn from(simple_wrapper_struct: &$simple_wrapper_struct) -> Self {
-                let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
-                ::quote::quote!(#ident)
-            }
-        }
+// macro_rules! wrapper_struct_to_ident {
+//     ($simple_wrapper_struct:ty) => {
+//         impl ::std::convert::From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {
+//             fn from(simple_wrapper_struct: &$simple_wrapper_struct) -> Self {
+//                 let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
+//                 ::quote::quote!(#ident)
+//             }
+//         }
+//
+//         impl ::std::convert::From<$simple_wrapper_struct> for ::proc_macro2::TokenStream {
+//             fn from(simple_wrapper_struct: $simple_wrapper_struct) -> Self {
+//                 let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
+//                 ::quote::quote!(#ident)
+//             }
+//         }
+//
+//         impl ::std::fmt::Display for $simple_wrapper_struct {
+//             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//                 f.write_fmt(format_args!("{}", self.0))
+//             }
+//         }
+//
+//         impl ::std::convert::From<&String> for $simple_wrapper_struct {
+//             fn from(value: &String) -> Self {
+//                 Self(value.into())
+//             }
+//         }
+//
+//         impl ::std::convert::From<$simple_wrapper_struct> for String {
+//             fn from(value: $simple_wrapper_struct) -> Self {
+//                 value.0
+//             }
+//         }
+//
+//
+//         impl ::quote::ToTokens for $simple_wrapper_struct {
+//             fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+//                 let ident = ::quote::format_ident!("{self}");
+//                 tokens.extend(ident.into_token_stream());
+//             }
+//         }
+//     };
+// }
 
-        impl ::std::convert::From<$simple_wrapper_struct> for ::proc_macro2::TokenStream {
-            fn from(simple_wrapper_struct: $simple_wrapper_struct) -> Self {
-                let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
-                ::quote::quote!(#ident)
-            }
-        }
+// #[derive(Debug, Clone)]
+// pub struct EdgeTableName(String);
+// wrapper_struct_to_ident!(EdgeTableName);
+//
+// #[derive(Debug, Clone)]
+// pub struct NodeTableName(String);
+// wrapper_struct_to_ident!(NodeTableName);
 
-        impl ::std::fmt::Display for $simple_wrapper_struct {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                f.write_fmt(format_args!("{}", self.0))
-            }
-        }
-
-        impl ::std::convert::From<&String> for $simple_wrapper_struct {
-            fn from(value: &String) -> Self {
-                Self(value.into())
-            }
-        }
-
-        impl ::std::convert::From<$simple_wrapper_struct> for String {
-            fn from(value: $simple_wrapper_struct) -> Self {
-                value.0
-            }
-        }
-
-
-        impl ::quote::ToTokens for $simple_wrapper_struct {
-            fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-                let ident = ::quote::format_ident!("{self}");
-                tokens.extend(ident.into_token_stream());
-            }
-        }
-    };
-}
+create_ident_wrapper!(EdgeTableName);
+create_ident_wrapper!(NodeTableName);
 
 #[derive(Debug, Clone)]
-pub(crate) struct EdgeTableName(String);
-wrapper_struct_to_ident!(EdgeTableName);
-
-#[derive(Debug, Clone)]
-pub(crate) struct NodeTableName(String);
-wrapper_struct_to_ident!(NodeTableName);
-
-#[derive(Debug, Clone)]
-pub(crate) struct RelateAttribute {
+pub struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
     pub(crate) edge_table_name: EdgeTableName,
     /// user->writes->book // here, user is current struct, book is the foreign node
@@ -207,9 +209,10 @@ impl TryFrom<&Relate> for RelateAttribute {
 
         let (edge_action, node_object) =
             match (substrings.next(), substrings.next(), substrings.next()) {
-                (Some(action), Some(node_obj), None) => {
-                    (EdgeTableName(action.into()), NodeTableName(node_obj.into()))
-                }
+                (Some(action), Some(node_obj), None) => (
+                    EdgeTableName(format_ident!("{action}").into()),
+                    NodeTableName(format_ident!("{node_obj}").into()),
+                ),
                 _ => {
                     return Err(syn::Error::new(
                         Span::call_site(),
