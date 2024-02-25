@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
 

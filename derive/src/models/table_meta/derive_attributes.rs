@@ -71,6 +71,10 @@ impl TableDeriveAttributes {
         self.ident.into()
     }
 
+    pub fn generics(&self) -> &StructGenerics {
+        &self.generics
+    }
+
     pub fn table_name(&self) -> ExtractorResult<&TableNameIdent> {
         // TODO: Ask during alpha release if specifying table name explicitly
         // should be optional since it can be inferred from the struct name

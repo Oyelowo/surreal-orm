@@ -39,6 +39,15 @@ impl CustomTypeNoSelf {
     ) -> FieldGenericsMeta<'a> {
         self.0.get_generics_meta(model_attributes)
     }
+
+    pub fn to_path(&self) -> ExtractorResult<Path> {
+        match &self.to_basic_type() {
+            Type::Path(type_path) => Ok(type_path.path.clone()),
+            _ => Err(
+                syn::Error::new(self.0.to_token_stream().span(), "Expected a struct type").into(),
+            ),
+        }
+    }
 }
 
 #[derive(Debug, Clone, FromMeta)]
