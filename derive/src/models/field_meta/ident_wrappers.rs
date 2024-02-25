@@ -7,7 +7,7 @@
 
 macro_rules! create_ident_wrapper {
     ($ident:ident) => {
-        #[derive(Debug, Clone)]
+        #[derive(Clone, Debug, PartialEq, Eq, Hash)]
         pub struct $ident(::syn::Ident);
 
         impl $ident {

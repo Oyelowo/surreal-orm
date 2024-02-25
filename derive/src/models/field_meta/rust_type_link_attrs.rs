@@ -17,6 +17,12 @@ macro_rules! create_custom_type_wrapper {
         #[derive(Debug, Clone, FromMeta)]
         pub struct $name(pub CustomType);
 
+        impl $name {
+            pub fn into_inner(self) -> CustomType {
+                self.0
+            }
+        }
+
         impl ::std::convert::Into<CustomType> for $name {
             fn into(self) -> CustomType {
                 self.0

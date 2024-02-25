@@ -31,7 +31,7 @@ impl<'a> Codegen<'a> {
         match field_receiver.to_relation_type() {
             RelationType::Relate(ref relate) => {
                 self.static_assertions
-                    .push(self.create_static_assertions(&relate));
+                    .push(self.create_static_assertions(&relate)?);
                 self.relate(relate)?;
                 let connection = relate.connection;
                 self.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#db_field_name))).into());
@@ -121,11 +121,12 @@ impl<'a> Codegen<'a> {
             table_derive_attributes,
             edge_name_as_method_ident: format_ident!(
                 "{}",
-                edge_name_with_direction_as_method_ident()
-            ),
+                edge_name_with_direction_as_method_ident().to_string()
+            )
+            .into(),
             imports: vec![import()],
-            edge_relation_model_selected_ident: edge_type.type_name()?,
-            foreign_node_name: foreign_node_table_name.into(),
+            edge_relation_model_selected_ident: edge_type.type_name()?.into(),
+            foreign_node_name: foreign_node_table_name.clone().into(),
         };
 
         match self
@@ -157,7 +158,7 @@ impl<'a> Codegen<'a> {
     /// semantics, it's just a way to differentiate same edge but with different
     /// direction
     /// e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
-    fn add_direction_indication_to_ident(
+    pub(crate) fn add_direction_indication_to_ident(
         edge_table_name: &EdgeTableName,
         edge_direction: &EdgeDirection,
     ) -> EdgeWithDunderDirectionIndicator {
@@ -169,9 +170,9 @@ impl<'a> Codegen<'a> {
         edge.into()
     }
 
-    fn create_static_assertions(&self, relate: &Relate) -> StaticAssertionToken {
+    fn create_static_assertions(&self, relate: &Relate) -> ExtractorResult<StaticAssertionToken> {
         let crate_name = get_crate_name(false);
-        let current_struct = &self.table_derive_attributes().ident;
+        let current_struct = &self.table_derive_attributes().ident();
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver.ty();
         let edge_type = relate.edge_type;
@@ -179,7 +180,7 @@ impl<'a> Codegen<'a> {
             edge_table_name,
             foreign_node_table_name: destination_node_table_name,
             edge_direction,
-        } = RelateAttribute::from(relate);
+        } = RelateAttribute::try_from(relate)?;
         let (home_node_associated_type_ident, foreign_node_associated_type_ident) =
             match &edge_direction {
                 EdgeDirection::Out => (format_ident!("In"), format_ident!("Out")),
@@ -223,9 +224,9 @@ impl<'a> Codegen<'a> {
                  #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_type>);
             ),
         ];
-        StaticAssertionToken(quote!(
+        Ok(StaticAssertionToken(quote!(
                 #( #static_assertions) *
-        ))
+        )))
     }
 }
 
@@ -285,6 +286,7 @@ impl ForeignNodeSchemaIdent {
     }
 }
 
+#[derive(Clone, Debug)]
 struct DestinationNodeName(String);
 
 impl From<NodeTableName> for DestinationNodeName {
@@ -293,7 +295,6 @@ impl From<NodeTableName> for DestinationNodeName {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
 struct NodeEdgeMetadata<'a> {
     /// Example value: writes
@@ -303,7 +304,7 @@ struct NodeEdgeMetadata<'a> {
     // /// The current struct name ident.
     // /// e.g given: struct Student {  }, value = Student
     // current_struct_ident: StructIdent,
-    table_derive_attributes: &'a TableDeriveAttributes,
+    table_derive_attributes: &'a ModelAttributes,
     /// The database table name of the edge. Used for generating other tokens
     /// e.g "writes"
     direction: EdgeDirection,
@@ -388,27 +389,27 @@ struct NodeEdgeMetadata<'a> {
     edge_name_as_method_ident: EdgeNameAsMethodIdent,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-struct EdgeNameWithDirectionIndicator(String);
+// #[derive(Clone, Debug, PartialEq, Eq, Hash)]
+// struct EdgeNameWithDirectionIndicator(String);
+create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
 
 #[derive(Default, Clone)]
 pub struct NodeEdgeMetadataLookupTable<'a>(
-    HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata<'a>>,
+    HashMap<EdgeWithDunderDirectionIndicator, NodeEdgeMetadata<'a>>,
 );
 impl<'a> Deref for NodeEdgeMetadataLookupTable<'a> {
-    type Target = HashMap<EdgeNameAsStructWithDirectionIdent, NodeEdgeMetadata<'a>>;
+    type Target = HashMap<EdgeWithDunderDirectionIndicator, NodeEdgeMetadata<'a>>;
 
     fn deref(&self) -> &Self::Target {
-        self.0
+        &self.0
     }
 }
 
 impl<'a> NodeEdgeMetadataLookupTable<'a> {
-    pub fn into_inner(self) -> HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata<'a>> {
+    pub fn into_inner(self) -> HashMap<EdgeWithDunderDirectionIndicator, NodeEdgeMetadata<'a>> {
         self.0
     }
 }
-create_ident_wrapper!(EdgeWithDunderDirectionIndicator);
 
 create_tokenstream_wrapper!(=>ArrowTokenStream);
 
@@ -455,9 +456,9 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
             table_derive_attributes,
             ..
         }: &NodeEdgeMetadata = value;
-        let current_struct_ident = value.table_derive_attributes.ident;
+        let current_struct_ident = value.table_derive_attributes.ident();
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
-            value.table_derive_attributes.generics.split_for_impl();
+            value.table_derive_attributes.generics().split_for_impl();
         let arrow = ArrowTokenStream::from(direction);
         let edge_table_name_str = edge_table_name.to_str_typed();
         let edge_name_as_struct_original_ident = edge_table_name_str.to_pascal_case_ident();
