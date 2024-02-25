@@ -16,7 +16,7 @@ use syn::{self, parse_macro_input};
 
 use crate::models::*;
 
-#[derive(Debug, FromDeriveInput)]
+#[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct NodeToken(pub TableDeriveAttributes);
 
@@ -40,7 +40,7 @@ impl ToTokens for NodeToken {
         let table_derive_attributes = self.deref();
         let struct_name_ident = &table_derive_attributes.ident;
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
-            self.generics().split_for_impl();
+            table_derive_attributes.generics.split_for_impl();
         let table_name_ident = match table_derive_attributes.table_name() {
             Ok(table_name) => table_name,
             Err(err) => return tokens.extend(err.write_errors()),

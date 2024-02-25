@@ -15,7 +15,6 @@ impl MyFieldReceiver {
     pub fn field_type_db(
         &self,
         model_attributes: &ModelAttributes,
-        model_type: &DataType,
     ) -> ExtractorResult<FieldTypeDb> {
         let db_type = match self.field_type_db {
             Some(ref db_type) => db_type.clone(),
@@ -27,7 +26,7 @@ impl MyFieldReceiver {
                     .infer_surreal_type_heuristically(
                         field_name,
                         &self.to_relation_type(),
-                        model_type,
+                        &model_attributes.to_data_type(),
                     )
                     .map(|ft_db| ft_db.field_type_db)?;
                 inferred

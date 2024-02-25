@@ -19,10 +19,12 @@ use surreal_query_builder::FieldType;
 
 use crate::models::*;
 
-#[derive(Debug, Clone, Default)]
+create_tokenstream_wrapper!(=> FieldTypeDbToken);
+
+#[derive(Debug, Clone)]
 pub struct DbFieldTypeAstMeta {
-    pub(crate) field_type_db: FieldTypeDb,
-    pub(crate) static_assertion: StaticAssertionToken,
+    pub(crate) field_type_db_token: FieldTypeDbToken,
+    pub(crate) static_assertion_token: StaticAssertionToken,
 }
 
 #[derive(Debug, Clone, Default)]
