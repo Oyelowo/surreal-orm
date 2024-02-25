@@ -23,13 +23,13 @@ impl<'a> Codegen<'a> {
         &mut self,
         store: &mut Codegen,
         table_derive_attrs: &TableDeriveAttributes,
-    ) {
+    ) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let relation_type = self.to_relation_type();
-        let push_to_link = |meta: LinkMethodMeta| {
+        let relation_type = field_receiver.to_relation_type();
+        let mut push_to_link = |meta: LinkMethodMeta| {
             self.imports_referenced_node_schema
-                .push(meta.foreign_node_schema_import);
+                .insert(meta.foreign_node_schema_import);
 
             self.record_link_fields_methods.push(meta.link_field_method);
 
@@ -66,6 +66,8 @@ impl<'a> Codegen<'a> {
             RelationType::Relate(relate) => {}
             RelationType::None => {}
         }
+
+        Ok(())
     }
 
     pub fn list_simple(
@@ -74,9 +76,10 @@ impl<'a> Codegen<'a> {
     ) -> ExtractorResult<LinkFieldTraversalMethodToken> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
         let struct_casing = table_derive_attrs.casing()?;
-        let field_ident_normalized = self.field_ident_normalized(&struct_casing);
-        let field_name_serialized = self.db_field_name(&struct_casing);
+        let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
+        let db_field_name = field_receiver.db_field_name(&struct_casing)?;
 
         let record_link_default_alias_as_method = quote!(
             pub fn #field_ident_normalized(&self, clause: impl ::std::convert::Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
@@ -84,9 +87,9 @@ impl<'a> Codegen<'a> {
                 let clause: #crate_name::NodeClause = clause.into_inner();
 
                 let normalized_field_name_str = if self.build().is_empty(){
-                    #field_name_serialized.to_string()
+                    #db_field_name.to_string()
                 }else {
-                    format!(".{}", #field_name_serialized)
+                    format!(".{}", #db_field_name)
                 };
 
                 let clause: #crate_name::NodeClause = clause.into();
@@ -365,11 +368,12 @@ struct LinkMethodMeta {
 impl LinkSelfAttrType {
     pub(crate) fn to_linkone_attr_type(
         self,
-        table_derive_attrs: &TableDeriveAttributes,
+        table_derive_attrs: &ModelAttributes,
     ) -> LinkOneAttrType {
         LinkOneAttrType(
-            self.0
-                .replace_self_with_current_struct_concrete_type(table_derive_attrs),
+            self.into_inner()
+                .replace_self_with_current_struct_concrete_type(table_derive_attrs)
+                .into_inner(),
         )
     }
 }

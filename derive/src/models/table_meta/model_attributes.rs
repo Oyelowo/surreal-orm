@@ -77,6 +77,7 @@ use crate::models::{edge::EdgeToken, node::NodeToken, object::ObjectToken, *};
 //     }
 // }
 
+#[derive(Clone, Debug)]
 pub enum ModelAttributes {
     Node(NodeToken),
     Edge(EdgeToken),

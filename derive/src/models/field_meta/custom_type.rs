@@ -25,6 +25,10 @@ impl CustomTypeNoSelf {
         Self(CustomType(ty))
     }
 
+    pub fn into_inner(self) -> CustomType {
+        self.0
+    }
+
     pub fn type_name(&self) -> ExtractorResult<Ident> {
         self.0.type_name()
     }
