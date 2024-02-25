@@ -5,20 +5,17 @@
  * Licensed under the MIT license
  */
 
-use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 
 use super::Codegen;
 use crate::models::*;
-
-pub struct DefineFieldStatementToken(TokenStream);
 
 impl<'a> Codegen<'a> {
     pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
         self.validate_field_attributes()?;
 
-        self.field_definitions.extend(self.field_defintion_db()?);
+        self.field_definitions.push(self.field_defintion_db()?);
         Ok(())
     }
 
@@ -26,31 +23,31 @@ impl<'a> Codegen<'a> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?);
+        let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
         let casing = table_derive_attrs.casing()?;
-        let field_name_serialized = field_receiver.field_ident_normalized(&casing)?;
+        let field_name_serialized = field_receiver.db_field_name(&casing)?;
 
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
-        let mut all_field_defintions = vec![];
+        let mut all_field_defintions: Vec<DefineFieldStatementToken> = vec![];
 
-        if let Some(define) = self.define {
+        if let Some(define) = field_receiver.define {
             quote!(#define.to_raw());
         }
 
-        if let Some(assert) = self.assert {
+        if let Some(assert) = field_receiver.assert {
             define_field_methods.push(quote!(.assert(#assert)));
         }
 
-        if let Some(item_assert) = self.item_assert {
+        if let Some(item_assert) = field_receiver.item_assert {
             define_array_field_item_methods.push(quote!(.assert(#item_assert)));
         }
 
-        if let Some(value) = self.value {
+        if let Some(value) = field_receiver.value {
             define_field_methods.push(quote!(.value(#value)));
         }
 
-        if let Some(permissions) = self.permissions {
+        if let Some(permissions) = field_receiver.permissions {
             define_field_methods.push(permissions.into_token_stream());
         }
 
@@ -60,10 +57,10 @@ impl<'a> Codegen<'a> {
             #( # define_field_methods) *
             .to_raw()
         );
-        all_field_defintions.push(main_field_def);
+        all_field_defintions.push(main_field_def.into());
 
         if !define_array_field_item_methods.is_empty() {
-            let array_field_item_str = format!("{field_name_serialized}.*");
+            let array_field_item_str = format_ident!("{field_name_serialized}.*");
             let array_item_definition = quote!(
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_item_str))
                                         .on_table(#crate_name::Table::from(Self::table_name()))
@@ -71,24 +68,25 @@ impl<'a> Codegen<'a> {
                                         .to_raw()
 
             );
-            all_field_defintions.push(array_item_definition);
+            all_field_defintions.push(array_item_definition.into());
         };
 
-        Ok(DefineFieldStatementToken(all_field_defintions))
+        Ok(all_field_defintions)
     }
 
     pub fn static_assertion_field_value(
         &self,
-        table_derive_attrs: &TableDeriveAttributes,
+        model_attrs: &ModelAttributes,
         model_type: &DataType,
     ) -> ExtractorResult<StaticAssertionToken> {
-        let field_type = self
-            .field_type_db(table_derive_attrs, model_type)?
-            .into_inner();
+        let field_receiver = self.field_receiver();
+        let field_type = field_receiver.field_type_db(model_attrs)?.into_inner();
 
-        let static_assertion = self.value.map_or(StaticAssertionToken::default(), |v| {
-            v.get_static_assertion(field_type)
-        });
+        let static_assertion = field_receiver
+            .value
+            .map_or(StaticAssertionToken::default(), |v| {
+                v.get_static_assertion(field_type)
+            });
 
         Ok(static_assertion)
     }

@@ -29,7 +29,7 @@ struct StructGenericsComponents {
     pub(crate) where_clause: Option<TokenStream>,
 }
 
-#[derive(Debug, FromDeriveInput)]
+#[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
     pub(crate) ident: Ident,

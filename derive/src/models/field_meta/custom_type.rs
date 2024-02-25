@@ -643,27 +643,27 @@ impl CustomType {
         model_type: &DataType,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let crate_name = get_crate_name(false);
-        let ty = &self.into_inner();
+        let ty = &self.to_basic_type();
 
         let meta = if self.raw_type_is_bool() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Bool),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
+                field_type_db_token: quote!(#crate_name::FieldType::Bool).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);).into(),
             }
         } else if self.raw_type_is_float() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Float),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
+                field_type_db_token: quote!(#crate_name::FieldType::Float).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);).into(),
             }
         } else if self.raw_type_is_integer() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Int),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
+                field_type_db_token: quote!(#crate_name::FieldType::Int).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);).into(),
             }
         } else if self.raw_type_is_string() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::String),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
+                field_type_db_token: quote!(#crate_name::FieldType::String).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);).into(),
             }
         } else if self.raw_type_is_optional() {
             let get_option_item_type = self.get_option_item_type();
@@ -681,78 +681,80 @@ impl CustomType {
                     "Could not infer type for the field",
                 ))??;
 
-            let inner_type = item.field_type_db;
-            let item_static_assertion = item.static_assertion;
+            let inner_type = item.field_type_db_token;
+            let item_static_assertion = item.static_assertion_token;
 
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
-                static_assertion: quote!(
+                field_type_db_token:
+                    quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type)))
+                        .into(),
+                static_assertion_token: quote!(
                     #crate_name::validators::assert_option::<#ty>();
                     #item_static_assertion
-                ),
+                )
+                .into(),
             }
         } else if self.is_list() {
             let inner_type = self.get_array_inner_type();
             let inner_item = inner_type
                 .map(|ct| {
-                    Self::new(ct).infer_surreal_type_heuristically(
-                        field_name,
-                        relation_type,
-                        model_type,
-                    )
+                    ct.infer_surreal_type_heuristically(field_name, relation_type, model_type)
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),
                     "Could not infer type for the field",
                 ))??;
 
-            let inner_type = inner_item.field_type_db;
-            let inner_static_assertion = inner_item.static_assertion;
+            let inner_type = inner_item.field_type_db_token;
+            let inner_static_assertion = inner_item.static_assertion_token;
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
-                static_assertion: quote!(
+                field_type_db_token: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)).into(),
+                static_assertion_token: quote!(
                             #crate_name::validators::assert_is_vec::<#ty>();
                             #inner_static_assertion
-                ),
+                ).into(),
             }
         } else if self.raw_type_is_hash_set() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
-                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
+                field_type_db_token: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_is_vec::<#ty>();).into(),
             }
         } else if self.raw_type_is_object() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Object),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
+                field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);).into(),
             }
         } else if self.raw_type_is_duration() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Duration),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
+                field_type_db_token: quote!(#crate_name::FieldType::Duration).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);).into(),
             }
         } else if self.raw_type_is_datetime() {
             DbFieldTypeAstMeta {
-                field_type_db: quote!(#crate_name::FieldType::Datetime),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
+                field_type_db_token: quote!(#crate_name::FieldType::Datetime).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);).into(),
             }
         } else if self.raw_type_is_geometry() {
             DbFieldTypeAstMeta {
                 // TODO: check if to auto-infer more speicific geometry type?
-                field_type_db: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
+                field_type_db_token: quote!(#crate_name::FieldType::Geometry(::std::vec![])).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);).into(),
             }
         } else {
             if field_name.is_id() {
                 DbFieldTypeAstMeta {
-                    field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
-                    static_assertion: quote!(),
+                    field_type_db_token:
+                        quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()]))
+                            .into(),
+                    static_assertion_token: quote!().into(),
                 }
             } else if field_name.is_orig_or_dest_edge_node(model_type) {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
                 DbFieldTypeAstMeta {
-                    field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![])),
-                    static_assertion: quote!(),
+                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![]))
+                        .into(),
+                    static_assertion_token: quote!().into(),
                 }
             } else if relation_type.is_some() {
                 match relation_type {
@@ -761,49 +763,49 @@ impl CustomType {
                         // on edges. Just used on nodes for convenience
                         // during deserialization
                         DbFieldTypeAstMeta {
-                            field_type_db: quote!(),
-                            static_assertion: quote!(),
+                            field_type_db_token: quote!().into(),
+                            static_assertion_token: quote!().into(),
                         }
                     }
                     RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
-                        field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
-                        static_assertion: quote!(),
+                        field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])).into(),
+                        static_assertion_token: quote!().into(),
                     },
                     RelationType::LinkSelf(self_node) => DbFieldTypeAstMeta {
-                        field_type_db: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
-                        static_assertion: quote!(),
+                        field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
+                        static_assertion_token: quote!().into(),
                     },
                     RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
-                        field_type_db: quote!(#crate_name::FieldType::Array(
+                        field_type_db_token: quote!(#crate_name::FieldType::Array(
                             ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
                             ::std::option::Option::None
-                        )),
-                        static_assertion: quote!(),
+                        )).into(),
+                        static_assertion_token: quote!().into(),
                     },
                     RelationType::NestObject(ref_object) => DbFieldTypeAstMeta {
-                        field_type_db: quote!(#crate_name::FieldType::Object),
-                        static_assertion: quote!(),
+                        field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
+                        static_assertion_token: quote!().into(),
                     },
                     RelationType::NestArray(ref_array) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
-                        field_type_db: quote!(#crate_name::FieldType::Object),
+                        field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                         // db_field_type: quote!(#crate_name::FieldType::Array(
                         //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
                         //     ::std::option::Option::None
                         // )),
-                        static_assertion: quote!(),
+                        static_assertion_token: quote!().into(),
                     },
                     RelationType::List(list_simple) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
-                        field_type_db: quote!(#crate_name::FieldType::Array(
+                        field_type_db_token: quote!(#crate_name::FieldType::Array(
                             ::std::boxed::Box::new(#crate_name::FieldType::Any),
                             ::std::option::Option::None
-                        )),
+                        )).into(),
                         // db_field_type: quote!(#crate_name::FieldType::Array(
                         //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
                         //     ::std::option::Option::None
                         // )),
-                        static_assertion: quote!(),
+                        static_assertion_token: quote!().into(),
                     },
                     RelationType::None => {
                         return Err(syn::Error::new(
