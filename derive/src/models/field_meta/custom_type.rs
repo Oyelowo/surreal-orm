@@ -826,12 +826,19 @@ impl CustomType {
 
     pub fn type_is_inferrable(
         &self,
-        field_name: &FieldIdentNormalized,
-        model_type: &DataType,
+        field_receiver: &MyFieldReceiver,
+        model_attributes: &ModelAttributes,
+        // field_name: &FieldIdentNormalized,
+        // model_type: &DataType,
     ) -> bool {
-        self.relation_type.is_some()
-            || field_name.is_id()
-            || field_name.is_orig_or_dest_edge_node(model_type)
+        let is_db_field = model_attributes.casing().map_or(false, |casing| {
+            field_receiver.db_field_name(&casing).map_or(false, |dfn| {
+                dfn.is_id() || dfn.is_orig_or_dest_edge_node(&model_attributes.to_data_type())
+            })
+        });
+
+        field_receiver.to_relation_type().is_some()
+            || is_db_field
             || self.raw_type_is_float()
             || self.raw_type_is_integer()
             || self.raw_type_is_string()
