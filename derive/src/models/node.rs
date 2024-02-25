@@ -55,7 +55,8 @@ impl ToTokens for NodeToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let code_gen = match Codegen::parse_fields(ModelAttributes::Node(self.clone())) {
+        let table_attrs = ModelAttributes::Node(self.clone());
+        let code_gen = match Codegen::parse_fields(&table_attrs) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
@@ -86,7 +87,7 @@ impl ToTokens for NodeToken {
             table_id_type,
             field_metadata,
             ..
-        } = code_gen;
+        } = &code_gen;
 
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()

@@ -33,7 +33,7 @@ pub struct ObjectToken {
 
 impl ObjectToken {
     pub fn ident(&self) -> StructIdent {
-        self.ident.into()
+        self.ident.clone().into()
     }
 
     pub fn generics(&self) -> &StructGenerics {
@@ -55,7 +55,8 @@ impl ToTokens for ObjectToken {
             schema_instance,
             ..
         } = VariablesModelMacro::new();
-        let code_gen = match Codegen::parse_fields(ModelAttributes::Object(self.clone())) {
+        let table_attrs = ModelAttributes::Object(self.clone());
+        let code_gen = match Codegen::parse_fields(&table_attrs) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
@@ -71,7 +72,7 @@ impl ToTokens for ObjectToken {
             schema_struct_fields_names_kv_empty,
             non_null_updater_fields,
             ..
-        } = code_gen;
+        } = &code_gen;
 
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()
