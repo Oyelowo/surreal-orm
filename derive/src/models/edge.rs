@@ -76,7 +76,8 @@ impl ToTokens for EdgeToken {
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let code_gen = match Codegen::parse_fields(ModelAttributes::Edge(self.clone())) {
+        let table_attrs = ModelAttributes::Edge(self.clone());
+        let code_gen = match Codegen::parse_fields(&table_attrs) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };

@@ -211,12 +211,12 @@ struct StructAttributesData<'a> {
 }
 
 impl<'a> Codegen<'a> {
-    fn new(model_attributes: ModelAttributes) -> Self {
+    fn new(model_attributes: &'a ModelAttributes) -> Self {
         let struct_attributes_data = StructAttributesData {
-            struct_basic_model_attributes: Some(&model_attributes),
+            struct_basic_model_attributes: Some(model_attributes),
             field_receiver: None,
         };
-        let mut store = Self {
+        let store = Self {
             struct_attributes_data,
             ..Default::default()
         };
@@ -230,13 +230,13 @@ impl<'a> Codegen<'a> {
             format_ident!("________internal_{struct_name_ident_snake}_schema");
 
         CommonIdents {
-            module_name_internal: module_name_internal.into(),
-            module_name_rexported: format_ident!("{struct_name_ident_snake}").into(),
-            aliases_struct_name: format_ident!("{struct_name_ident}Aliases").into(),
             test_function_name: format_ident!(
                 "_________test_{module_name_internal}_static_funcs_name__________"
             )
             .into(),
+            module_name_internal: module_name_internal.into(),
+            module_name_rexported: format_ident!("{struct_name_ident_snake}").into(),
+            aliases_struct_name: format_ident!("{struct_name_ident}Aliases").into(),
             non_null_updater_struct_name: format_ident!("{struct_name_ident}NonNullUpdater").into(),
             struct_with_renamed_serialized_fields: format_ident!(
                 "{struct_name_ident}RenamedCreator"
@@ -246,7 +246,7 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn set_field_receiver(&mut self, field_receiver: &MyFieldReceiver) {
+    fn set_field_receiver(&mut self, field_receiver: &'a MyFieldReceiver) {
         self.struct_attributes_data.field_receiver = Some(&field_receiver);
     }
 
@@ -267,7 +267,7 @@ impl<'a> Codegen<'a> {
     }
 
     /// Derive the schema properties for a struct
-    pub(crate) fn parse_fields(model_attributes: ModelAttributes) -> ExtractorResult<Self> {
+    pub(crate) fn parse_fields(model_attributes: &'a ModelAttributes) -> ExtractorResult<Self> {
         let mut tokens_generator = Self::new(model_attributes);
 
         for field_receiver in model_attributes.fields()? {
