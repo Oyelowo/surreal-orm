@@ -114,12 +114,11 @@ impl ModelAttributes {
     }
 
     pub fn generics(&self) -> &StructGenerics {
+        use ModelAttributes::*;
         match self {
-            ModelAttributes::Node(node)
-            | ModelAttributes::Edge(node)
-            | ModelAttributes::Object(node) => node.generics(),
-            // ModelAtt::Edge(edge) => edge.generics(),
-            // ModelAtt::Object(object) => object.generics(),
+            Node(node) => &node.generics(),
+            Edge(edge) => &edge.generics(),
+            Object(object) => &object.generics(),
         }
     }
 
@@ -145,7 +144,7 @@ impl ModelAttributes {
         Ok(casing.into())
     }
 
-    pub fn struct_as_path_no_bounds(&self) -> Path {
+    pub fn struct_as_path_no_bounds(&self) -> ExtractorResult<Path> {
         // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
         self.construct_struct_type_without_bounds()
             .replace_self_with_current_struct_concrete_type(self)

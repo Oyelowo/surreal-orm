@@ -34,7 +34,7 @@ use crate::models::*;
 //     pub(crate) relax_table_name: ::std::option::Option<bool>,
 // }
 
-#[derive(Debug, FromDeriveInput)]
+#[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct EdgeToken(pub TableDeriveAttributes);
 
@@ -104,13 +104,23 @@ impl ToTokens for EdgeToken {
             field_metadata,
             ..
         } = code_gen;
-        // if serialized_field_names_normalised.conta("")
-        if !serialized_field_names_normalised.contains(&"in".into())
-            || !serialized_field_names_normalised.contains(&"out".into())
-        {
-            tokens.extend(ExtractorError::Darling(
-                darling::Error::custom("Edge struct must include 'in' and 'out'").write_errors(),
-            ));
+
+        let has_in_and_out_fields = || {
+            !serialized_field_names_normalised
+                .iter()
+                .any(|this| this.to_string() == "in")
+                || !serialized_field_names_normalised
+                    .iter()
+                    .any(|this| this.to_string() == "out")
+        };
+
+        if has_in_and_out_fields() {
+            tokens.extend(
+                ExtractorError::Darling(darling::Error::custom(
+                    "Edge struct must include 'in' and 'out'",
+                ))
+                .write_errors(),
+            );
         }
         let imports_referenced_node_schema = Vec::from_iter(imports_referenced_node_schema);
         let CommonIdents {
