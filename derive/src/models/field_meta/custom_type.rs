@@ -54,6 +54,12 @@ impl CustomTypeNoSelf {
     }
 }
 
+impl ToTokens for CustomTypeNoSelf {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.0.to_tokens(tokens)
+    }
+}
+
 #[derive(Debug, Clone, FromMeta)]
 pub struct CustomType(Type);
 

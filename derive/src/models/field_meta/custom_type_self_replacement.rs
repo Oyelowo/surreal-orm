@@ -7,9 +7,11 @@
 
 use syn::{
     parse_quote,
+    punctuated::Punctuated,
+    token::Comma,
     visit_mut::{self, VisitMut},
-    AngleBracketedGenericArguments, ExprPath, Ident, Path, PathArguments, PathSegment, Type,
-    TypePath,
+    AngleBracketedGenericArguments, ExprPath, GenericArgument, Ident, Path, PathArguments,
+    PathSegment, Type, TypePath,
 };
 
 use crate::models::{CustomType, CustomTypeNoSelf};
@@ -204,7 +206,6 @@ impl VisitMut for ReplaceSelfVisitor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use syn::GenericArgument;
 
     #[test]
     fn replace_self() {
@@ -212,18 +213,22 @@ mod tests {
         let generics = AngleBracketedGenericArguments {
             colon2_token: None,
             lt_token: Default::default(),
-            args: vec![
-                GenericArgument::Lifetime(syn::Lifetime::new("'a", proc_macro2::Span::call_site())),
-                GenericArgument::Lifetime(syn::Lifetime::new("'b", proc_macro2::Span::call_site())),
-                GenericArgument::Type(Type::Path(TypePath {
-                    qself: None,
-                    path: Path::from(Ident::new("U", proc_macro2::Span::call_site())),
-                })),
-                GenericArgument::Type(Type::Path(TypePath {
-                    qself: None,
-                    path: Path::from(Ident::new("V", proc_macro2::Span::call_site())),
-                })),
-            ],
+            args: vec_to_punctuated(vec![
+                parse_quote!('a),
+                parse_quote!('b),
+                parse_quote!(U),
+                parse_quote!(T),
+                // GenericArgument::Lifetime(syn::Lifetime::new("'a", proc_macro2::Span::call_site())),
+                // GenericArgument::Lifetime(syn::Lifetime::new("'b", proc_macro2::Span::call_site())),
+                // GenericArgument::Type(Type::Path(TypePath {
+                //     qself: None,
+                //     path: Path::from(Ident::new("U", proc_macro2::Span::call_site())),
+                // })),
+                // GenericArgument::Type(Type::Path(TypePath {
+                //     qself: None,
+                //     path: Path::from(Ident::new("V", proc_macro2::Span::call_site())),
+                // })),
+            ]),
             gt_token: Default::default(),
         };
 
@@ -232,15 +237,24 @@ mod tests {
             path: Path::from(Ident::new("Self", proc_macro2::Span::call_site())),
         });
 
-        let replacer = ReplaceSelfVisitor {
+        let mut replacer = ReplaceSelfVisitor {
             struct_ident,
             generics,
         };
-        let ty_to_replace = replacer.replace_self(&ty_to_replace);
+        let ty_to_replace = replacer.replace_self(&mut ty_to_replace.into());
 
         assert_eq!(
             quote::quote!(#ty_to_replace).to_string(),
             quote::quote!(User<'a, 'b, U, V>).to_string()
         );
     }
+}
+
+fn vec_to_punctuated(vec: Vec<GenericArgument>) -> Punctuated<GenericArgument, Comma> {
+    let mut punctuated = Punctuated::new();
+    for item in vec {
+        punctuated.push_value(item);
+        punctuated.push_punct(Comma::default());
+    }
+    punctuated
 }
