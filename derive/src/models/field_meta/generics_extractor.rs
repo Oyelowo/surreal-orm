@@ -117,7 +117,7 @@ impl std::ops::Deref for StructGenerics {
 }
 
 impl StructGenerics {
-    pub fn to_basic_generics(&self) -> &Generics {
+    pub fn to_basic_generics_ref(&self) -> &Generics {
         &self.0 .0
     }
 
@@ -134,6 +134,14 @@ impl StructGenerics {
 pub struct FieldGenerics(pub CustomGenerics);
 
 impl FieldGenerics {
+    pub fn to_basic_generics_ref(&self) -> &Generics {
+        &self.0 .0
+    }
+
+    pub fn to_basic_generics_ref_mut(&mut self) -> &mut Generics {
+        &mut self.0 .0
+    }
+
     pub fn to_angle_bracketed(&self) -> AngleBracketedGenericArguments {
         self.0.to_angle_bracketed()
     }
@@ -159,15 +167,14 @@ impl<'a> GenericTypeExtractor<'a> {
 
     fn add_lifetime_if_not_exists(&mut self, lt: &Lifetime) {
         let lifetime_exists = self
-            .field_generics
-            .0
+            .field_generics.to_basic_generics_ref()
             .params
             .iter()
             .any(|param| matches!(param, GenericParam::Lifetime(lifetime_def) if lifetime_def.lifetime == *lt));
 
         if !lifetime_exists {
             self.field_generics
-                .0
+                .to_basic_generics_ref_mut()
                 .params
                 .push(GenericParam::Lifetime(LifetimeParam {
                     attrs: Vec::new(),
@@ -184,18 +191,18 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
     fn visit_type_path(&mut self, i: &'a TypePath) {
         for segment in &i.path.segments {
             // Check if segment matches a generic parameter of the struct
-            if let Some(gen_param) = self.struct_generics.params.iter().find(|param| {
+            if let Some(gen_param) = self.struct_generics.params().iter().find(|param| {
                 matches!(param, GenericParam::Type(type_param) if segment.ident == type_param.ident)
             }) {
-                self.field_generics.params.push(gen_param.clone());
+                self.field_generics.to_basic_generics_ref_mut().params.push(gen_param.clone());
 
                 // Handle constraints on the generic parameter
-                if let Some(where_clause) = &self.struct_generics.where_clause {
+                if let Some(where_clause) = &self.struct_generics.to_basic_generics_ref().where_clause {
                     for predicate in &where_clause.predicates {
                         if let WherePredicate::Type(predicate_type) = predicate {
                             if let syn::Type::Path(type_path) = &predicate_type.bounded_ty {
                                 if type_path.path.is_ident(&segment.ident) {
-                                    self.field_generics.make_where_clause().predicates.push(predicate.clone());
+                                    self.field_generics.to_basic_generics_ref_mut().make_where_clause().predicates.push(predicate.clone());
                                 }
                             }
                         }

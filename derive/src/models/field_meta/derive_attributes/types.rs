@@ -28,8 +28,13 @@ impl MyFieldReceiver {
                         &self.to_relation_type(),
                         &model_attributes.to_data_type(),
                     )
-                    .map(|ft_db| ft_db.field_type_db_token)?;
+                    .map(|ft_db| ft_db.field_type_db_original)?;
                 inferred
+                    .map(|ft| FieldTypeDb(ft))
+                    .ok_or(darling::Error::custom(format!(
+                        "Could not infer the field type for field: {}",
+                        field_name
+                    )))?
             }
         };
         Ok(db_type)
@@ -48,7 +53,8 @@ impl MyFieldReceiver {
         // Infer/use user specified or error out
         // TODO: Add the compile time assertion/validations/checks for the dbtype here
         Ok(DbFieldTypeAstMeta {
-            field_type_db_token: self.field_type_db.expect("Not yet implemented!"),
+            field_type_db_original: todo!(),
+            field_type_db_token: todo!(),
             static_assertion_token: todo!(),
         })
     }

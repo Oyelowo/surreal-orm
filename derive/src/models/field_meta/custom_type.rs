@@ -805,7 +805,7 @@ impl CustomType {
                         // on edges. Just used on nodes for convenience
                         // during deserialization
                         DbFieldTypeAstMeta {
-                            field_type_db_original: Some(FieldType::Any),
+                            field_type_db_original: None,
                             field_type_db_token: quote!().into(),
                             static_assertion_token: quote!().into(),
                         }
@@ -822,7 +822,7 @@ impl CustomType {
                     },
                     RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
                         field_type_db_original: Some(FieldType::Array(
-                            ::std::boxed::Box::new(FieldType::Record(::std::vec![#ref_node::table_name()])),
+                            ::std::boxed::Box::new(FieldType::Record(vec![])),
                             ::std::option::Option::None
                         )),
                         field_type_db_token: quote!(#crate_name::FieldType::Array(
@@ -832,11 +832,13 @@ impl CustomType {
                         static_assertion_token: quote!().into(),
                     },
                     RelationType::NestObject(ref_object) => DbFieldTypeAstMeta {
+                        field_type_db_original: Some(FieldType::Object),
                         field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                         static_assertion_token: quote!().into(),
                     },
                     RelationType::NestArray(ref_array) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
+                        field_type_db_original: Some(FieldType::Object),
                         field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                         // db_field_type: quote!(#crate_name::FieldType::Array(
                         //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
@@ -846,6 +848,10 @@ impl CustomType {
                     },
                     RelationType::List(list_simple) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
+                        field_type_db_original: Some(FieldType::Array(
+                            ::std::boxed::Box::new(FieldType::Any),
+                            ::std::option::Option::None
+                        )),
                         field_type_db_token: quote!(#crate_name::FieldType::Array(
                             ::std::boxed::Box::new(#crate_name::FieldType::Any),
                             ::std::option::Option::None
