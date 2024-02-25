@@ -28,11 +28,14 @@ impl<'a> Codegen<'a> {
         };
 
         if !field_definition.is_empty() {
-            self.field_metadata.push(quote!(#crate_name::FieldMetadata {
-                name: #field_name_serialized.into(),
-                old_name: #old_field_name,
-                definition: ::std::vec![ #field_definition ]
-            }));
+            self.field_metadata.push(
+                quote!(#crate_name::FieldMetadata {
+                    name: #field_name_serialized.into(),
+                    old_name: #old_field_name,
+                    definition: ::std::vec![ #( #field_definition ),*]
+                })
+                .into(),
+            );
         }
 
         Ok(())

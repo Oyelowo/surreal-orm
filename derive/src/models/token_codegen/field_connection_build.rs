@@ -33,9 +33,9 @@ impl<'a> Codegen<'a> {
 
         let field_ident_normalized =
             field_receiver.field_ident_normalized(&table_derive_attrs.casing()?)?;
-        let field_name_serialized = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
-        let field_name_pascalized =
-            field_receiver.field_name_pascalized(table_derive_attrs.casing())?;
+        let casing = table_derive_attrs.casing()?;
+        let field_name_serialized = field_receiver.db_field_name(&casing)?;
+        let field_name_pascalized = field_receiver.field_name_pascalized(&casing)?;
 
         self.schema_struct_fields_types_kv.push(
             quote!(pub #field_ident_normalized: #_____field_names::#field_name_pascalized, ).into(),

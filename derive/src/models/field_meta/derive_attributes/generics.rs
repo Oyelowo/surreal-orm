@@ -22,10 +22,11 @@ impl MyFieldReceiver {
     pub fn get_field_generics_meta<'a>(
         &self,
         model_attributes: &ModelAttributes,
-    ) -> FieldGenericsMeta<'a> {
-        self.ty()
-            .replace_self_with_current_struct_concrete_type(&model_attributes)
-            .get_generics_meta(model_attributes)
+    ) -> ExtractorResult<FieldGenericsMeta<'a>> {
+        Ok(self
+            .ty()
+            .replace_self_with_current_struct_concrete_type(&model_attributes)?
+            .get_generics_meta(model_attributes))
     }
 
     // fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {

@@ -28,7 +28,7 @@ impl MyFieldReceiver {
                         &self.to_relation_type(),
                         &model_attributes.to_data_type(),
                     )
-                    .map(|ft_db| ft_db.field_type_db)?;
+                    .map(|ft_db| ft_db.field_type_db_token)?;
                 inferred
             }
         };
@@ -48,8 +48,8 @@ impl MyFieldReceiver {
         // Infer/use user specified or error out
         // TODO: Add the compile time assertion/validations/checks for the dbtype here
         Ok(DbFieldTypeAstMeta {
-            field_type_db: self.field_type_db.expect("Not yet implemented!"),
-            static_assertion: todo!(),
+            field_type_db_token: self.field_type_db.expect("Not yet implemented!"),
+            static_assertion_token: todo!(),
         })
     }
 
