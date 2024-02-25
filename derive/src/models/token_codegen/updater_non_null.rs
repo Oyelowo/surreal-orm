@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use proc_macro::TokenStream;
+use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
 
@@ -18,7 +18,7 @@ impl<'a> Codegen<'a> {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let field_type = field_receiver.field_type_rust();
+        let field_type = field_receiver.ty();
         let field_ident_normalized =
             field_receiver.field_ident_normalized(&table_derive_attributes.casing()?)?;
 
@@ -35,7 +35,7 @@ impl<'a> Codegen<'a> {
                 );
             }
             RelationType::NestObject(nested_object) => {
-                self.non_null_updater_fields(
+                self.insert_non_null_updater_token(
                     quote!(pub #field_ident_normalized: ::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>, ).into(),
                 );
             }
@@ -53,7 +53,7 @@ impl<'a> Codegen<'a> {
         let db_field_name = self
             .field_receiver()
             .db_field_name(&table_derive_attributes.casing()?)?;
-        if db_field_name.is_updateable_by_default(self.data_type()) {
+        if db_field_name.is_updateable_by_default(&self.data_type()) {
             self.non_null_updater_fields
                 .push(updater_field_token.into());
         }
