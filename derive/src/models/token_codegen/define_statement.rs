@@ -15,7 +15,7 @@ impl<'a> Codegen<'a> {
     pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
         self.validate_field_attributes()?;
 
-        self.field_definitions.push(self.field_defintion_db()?);
+        self.field_definitions.extend(self.field_defintion_db()?);
         Ok(())
     }
 
@@ -103,7 +103,8 @@ impl<'a> Codegen<'a> {
             ..
         } = field_receiver;
         let ident = field_receiver.ident()?;
-        let db_field_name = field_receiver.db_field_name(&self.table_derive_attributes().casing()?);
+        let db_field_name =
+            field_receiver.db_field_name(&self.table_derive_attributes().casing()?)?;
 
         if define.is_some()
             && (assert_.is_some()

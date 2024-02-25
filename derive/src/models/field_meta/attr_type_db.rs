@@ -29,7 +29,7 @@ pub struct DbFieldTypeAstMeta {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct FieldTypeDb(FieldType);
+pub struct FieldTypeDb(pub FieldType);
 
 impl ToTokens for FieldTypeDb {
     fn to_tokens(&self, tokens: &mut TokenStream) {}
