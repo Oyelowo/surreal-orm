@@ -148,7 +148,7 @@ impl ModelAttributes {
     pub fn struct_as_path_no_bounds(&self) -> ExtractorResult<Path> {
         // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
         self.construct_struct_type_without_bounds()
-            .replace_self_with_current_struct_concrete_type(self)
+            .replace_self_with_current_struct_concrete_type(self)?
             .to_path()
     }
 

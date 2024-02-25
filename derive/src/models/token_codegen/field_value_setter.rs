@@ -65,7 +65,7 @@ impl<'a> Codegen<'a> {
             field_receiver.field_name_pascalized(&table_attributes.casing()?)?;
 
         let numeric_trait = if field_receiver.is_numeric() {
-            Self::numeric_setter_impl(field_receiver, table_attributes)
+            Self::numeric_setter_impl(field_receiver, table_attributes)?
         } else {
             quote!().into()
         };
@@ -196,7 +196,7 @@ impl<'a> Codegen<'a> {
                             return Err(syn::Error::new_spanned(
                                 field_receiver.field_type_db,
                                 "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
-                            ))
+                            ).into())
                         }
                     };
                         array_inner_ty_db_concrete

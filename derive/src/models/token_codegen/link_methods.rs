@@ -40,7 +40,7 @@ impl<'a> Codegen<'a> {
         match field_receiver.to_relation_type() {
             RelationType::LinkSelf(link_self) => {
                 let link_one = link_self.to_linkone_attr_type(table_derive_attrs);
-                let meta = self.link_one(link_one)?;
+                let meta = self.link_one(link_one?)?;
                 push_to_link(meta);
             }
             RelationType::LinkOne(link_one) => {
@@ -125,7 +125,7 @@ impl<'a> Codegen<'a> {
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if *current_struct.is_same_name(link_one)? {
+        let foreign_node_schema_import = if current_struct.is_same_name(link_one.into_inner())? {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
@@ -161,7 +161,7 @@ impl<'a> Codegen<'a> {
     fn link_many(&self, link_many_node_type: &LinkManyAttrType) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
-        let current_struct_ident = &table_derive_attrs.ident;
+        let current_struct_ident = &table_derive_attrs.ident();
         let field_attr = self.field_receiver();
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = field_attr.field_ident_normalized(&struct_casing)?;
@@ -172,8 +172,8 @@ impl<'a> Codegen<'a> {
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if *current_struct_ident
-            .is_same_name(link_many_node_type)?
+        let foreign_node_schema_import = if current_struct_ident
+            .is_same_name(link_many_node_type.into_inner())?
         {
             // Dont import for current struct since that already exists in scope
             quote!()
@@ -215,10 +215,11 @@ impl<'a> Codegen<'a> {
     ) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
-        let current_struct_ident = &table_derive_attrs.ident;
+        let current_struct_ident = &table_derive_attrs.ident();
         let struct_casing = table_derive_attrs.casing()?;
-        let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = self.db_field_name(&struct_casing)?;
+        let field_receiver = self.field_receiver();
+        let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
+        let field_name_serialized = field_receiver.db_field_name(&struct_casing)?;
         let node_type_alias_with_trait_bounds = embedded_object;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
@@ -226,7 +227,9 @@ impl<'a> Codegen<'a> {
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if *current_struct_ident.is_same_name(embedded_object)? {
+        let foreign_node_schema_import = if current_struct_ident
+            .is_same_name(embedded_object.into_inner())?
+        {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
@@ -269,17 +272,20 @@ impl<'a> Codegen<'a> {
     ) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
-        let current_struct_ident = &table_derive_attrs.ident;
+        let current_struct_ident = &table_derive_attrs.ident();
         let struct_casing = table_derive_attrs.casing()?;
-        let field_ident_normalized = self.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = self.db_field_name(&struct_casing)?;
+        let field_receiver = self.field_receiver();
+        let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
+        let field_name_serialized = field_receiver.db_field_name(&struct_casing)?;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if *current_struct_ident.is_same_name(nested_array)? {
+        let foreign_node_schema_import = if current_struct_ident
+            .is_same_name(nested_array.into_inner())?
+        {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
@@ -369,11 +375,11 @@ impl LinkSelfAttrType {
     pub(crate) fn to_linkone_attr_type(
         self,
         table_derive_attrs: &ModelAttributes,
-    ) -> LinkOneAttrType {
-        LinkOneAttrType(
+    ) -> ExtractorResult<LinkOneAttrType> {
+        Ok(LinkOneAttrType(
             self.into_inner()
-                .replace_self_with_current_struct_concrete_type(table_derive_attrs)
+                .replace_self_with_current_struct_concrete_type(table_derive_attrs)?
                 .into_inner(),
-        )
+        ))
     }
 }

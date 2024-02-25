@@ -23,8 +23,9 @@ create_tokenstream_wrapper!(=> FieldTypeDbToken);
 
 #[derive(Debug, Clone)]
 pub struct DbFieldTypeAstMeta {
-    pub(crate) field_type_db_token: FieldTypeDbToken,
-    pub(crate) static_assertion_token: StaticAssertionToken,
+    pub field_type_db_original: Option<FieldType>,
+    pub field_type_db_token: FieldTypeDbToken,
+    pub static_assertion_token: StaticAssertionToken,
 }
 
 #[derive(Debug, Clone, Default)]

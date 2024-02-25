@@ -8,6 +8,7 @@
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
+use surreal_query_builder::FieldType;
 use syn::{
     self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Ident, Lifetime,
     Path, PathArguments, PathSegment, Type, TypeReference,
@@ -87,6 +88,10 @@ impl CustomType {
         Self(ty)
     }
 
+    pub fn into_inner(self) -> Type {
+        self.0
+    }
+
     pub fn to_basic_type(self) -> Type {
         self.0
     }
@@ -124,7 +129,7 @@ impl CustomType {
     pub fn replace_self_with_current_struct_concrete_type(
         &self,
         model_attributes: &ModelAttributes,
-    ) -> CustomTypeNoSelf {
+    ) -> ExtractorResult<CustomTypeNoSelf> {
         // TODO: Consider using the declarative replacer over the more imperative approach
         // let replacer = ReplaceSelfVisitor {
         //     struct_ident: model_attributes.struct_as_path_no_bounds(),
@@ -132,7 +137,7 @@ impl CustomType {
         // };
         // let x = replacer.replace_self(self.to_basic_type().clone());
         let ty = &self.to_basic_type();
-        let replacement_path_from_current_struct = model_attributes.struct_as_path_no_bounds();
+        let replacement_path_from_current_struct = model_attributes.struct_as_path_no_bounds()?;
 
         fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
             if segment.ident == "Self" {
@@ -201,60 +206,63 @@ impl CustomType {
                         elems,
                     })
                 }
-                Type::BareFn(type_bare_fn) => {
-                    let inputs = type_bare_fn
-                        .inputs
-                        .iter()
-                        .map(|input| replace_type(&input.ty, replacement_path))
-                        .collect();
-                    let output = type_bare_fn
-                        .output
-                        .as_ref()
-                        .map(|output| replace_type(output, replacement_path));
-                    Type::BareFn(syn::TypeBareFn {
-                        lifetimes: type_bare_fn.lifetimes.clone(),
-                        unsafety: type_bare_fn.unsafety,
-                        abi: type_bare_fn.abi.clone(),
-                        fn_token: type_bare_fn.fn_token,
-                        paren_token: type_bare_fn.paren_token,
-                        inputs,
-                        variadic: type_bare_fn.variadic,
-                        output,
-                    })
-                }
-                Type::Never(type_never) => Type::Never(type_never),
-                Type::TraitObject(type_trait_object) => {
-                    let bounds = type_trait_object
-                        .bounds
-                        .iter()
-                        .map(|bound| replace_type(bound, replacement_path))
-                        .collect();
-                    Type::TraitObject(syn::TypeTraitObject {
-                        dyn_token: type_trait_object.dyn_token,
-                        bounds,
-                    })
-                }
-                Type::ImplTrait(type_impl_trait) => {
-                    let bounds = type_impl_trait
-                        .bounds
-                        .iter()
-                        .map(|bound| replace_type(bound, replacement_path))
-                        .collect();
-                    Type::ImplTrait(syn::TypeImplTrait {
-                        impl_token: type_impl_trait.impl_token,
-                        bounds,
-                    })
-                }
+                // Type::BareFn(type_bare_fn) => {
+                //     let inputs = type_bare_fn
+                //         .inputs
+                //         .iter()
+                //         .map(|input| replace_type(&input.ty, replacement_path))
+                //         .collect();
+                //     let output = type_bare_fn
+                //         .output
+                //         .as_ref()
+                //         .map(|output| replace_type(output, replacement_path));
+                //     Type::BareFn(syn::TypeBareFn {
+                //         lifetimes: type_bare_fn.lifetimes.clone(),
+                //         unsafety: type_bare_fn.unsafety,
+                //         abi: type_bare_fn.abi.clone(),
+                //         fn_token: type_bare_fn.fn_token,
+                //         paren_token: type_bare_fn.paren_token,
+                //         inputs,
+                //         variadic: type_bare_fn.variadic,
+                //         output,
+                //     })
+                // }
+                // Type::Never(type_never) => Type::Never(type_never),
+                // Type::TraitObject(type_trait_object) => {
+                //     let bounds = type_trait_object
+                //         .bounds
+                //         .iter()
+                //         .map(|bound| replace_type(bound, replacement_path))
+                //         .collect();
+                //     Type::TraitObject(syn::TypeTraitObject {
+                //         dyn_token: type_trait_object.dyn_token,
+                //         bounds,
+                //     })
+                // }
+                // Type::ImplTrait(type_impl_trait) => {
+                //     let bounds = type_impl_trait
+                //         .bounds
+                //         .iter()
+                //         .map(|bound| replace_type(bound, replacement_path))
+                //         .collect();
+                //     Type::ImplTrait(syn::TypeImplTrait {
+                //         impl_token: type_impl_trait.impl_token,
+                //         bounds,
+                //     })
+                // }
                 // TODO: Extend to handle other types like Tuple, Array, etc.
                 _ => ty.clone(),
             }
         }
 
-        CustomTypeNoSelf::new(replace_type(ty, &replacement_path_from_current_struct))
+        Ok(CustomTypeNoSelf::new(replace_type(
+            ty,
+            &replacement_path_from_current_struct,
+        )))
     }
 
     fn strip_bounds_from_generics(&self) -> Self {
-        let stripped_ty = match self.into_inner() {
+        let stripped_ty = match self.to_basic_type() {
             Type::Path(type_path) => {
                 let mut new_type_path = type_path.clone();
 
@@ -292,7 +300,7 @@ impl CustomType {
 
                 Type::Path(new_type_path)
             }
-            _ => self.into_inner().clone(),
+            _ => self.to_basic_type().clone(),
         };
         Self(stripped_ty)
     }
@@ -314,7 +322,7 @@ impl CustomType {
     }
 
     pub fn is_numeric(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = &self.to_basic_type();
         let type_is_numeric = match ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -335,7 +343,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_float(&self) -> bool {
-        match self.into_inner() {
+        match self.to_basic_type() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -348,7 +356,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_integer(&self) -> bool {
-        match self.into_inner() {
+        match self.to_basic_type() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -666,21 +674,25 @@ impl CustomType {
 
         let meta = if self.raw_type_is_bool() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Bool),
                 field_type_db_token: quote!(#crate_name::FieldType::Bool).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);).into(),
             }
         } else if self.raw_type_is_float() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Float),
                 field_type_db_token: quote!(#crate_name::FieldType::Float).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);).into(),
             }
         } else if self.raw_type_is_integer() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Int),
                 field_type_db_token: quote!(#crate_name::FieldType::Int).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);).into(),
             }
         } else if self.raw_type_is_string() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::String),
                 field_type_db_token: quote!(#crate_name::FieldType::String).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);).into(),
             }
@@ -704,6 +716,9 @@ impl CustomType {
             let item_static_assertion = item.static_assertion_token;
 
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Option(Box::new(
+                    item.field_type_db_original.unwrap_or(FieldType::Any),
+                ))),
                 field_type_db_token:
                     quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type)))
                         .into(),
@@ -727,6 +742,7 @@ impl CustomType {
             let inner_type = inner_item.field_type_db_token;
             let inner_static_assertion = inner_item.static_assertion_token;
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Array(Box::new(inner_item.field_type_db_original.unwrap_or(FieldType::Any)), None)),
                 field_type_db_token: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)).into(),
                 static_assertion_token: quote!(
                             #crate_name::validators::assert_is_vec::<#ty>();
@@ -735,33 +751,39 @@ impl CustomType {
             }
         } else if self.raw_type_is_hash_set() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Set(Box::new(FieldType::Any), None)),
                 field_type_db_token: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_is_vec::<#ty>();).into(),
             }
         } else if self.raw_type_is_object() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Object),
                 field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);).into(),
             }
         } else if self.raw_type_is_duration() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Duration),
                 field_type_db_token: quote!(#crate_name::FieldType::Duration).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);).into(),
             }
         } else if self.raw_type_is_datetime() {
             DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Datetime),
                 field_type_db_token: quote!(#crate_name::FieldType::Datetime).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);).into(),
             }
         } else if self.raw_type_is_geometry() {
             DbFieldTypeAstMeta {
                 // TODO: check if to auto-infer more speicific geometry type?
+                field_type_db_original: Some(FieldType::Geometry(vec![])),
                 field_type_db_token: quote!(#crate_name::FieldType::Geometry(::std::vec![])).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);).into(),
             }
         } else {
             if field_name.is_id() {
                 DbFieldTypeAstMeta {
+                    field_type_db_original: Some(FieldType::Record(vec![])),
                     field_type_db_token:
                         quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()]))
                             .into(),
@@ -771,6 +793,7 @@ impl CustomType {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
                 DbFieldTypeAstMeta {
+                    field_type_db_original: Some(FieldType::Record(vec![])),
                     field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![]))
                         .into(),
                     static_assertion_token: quote!().into(),
@@ -782,19 +805,26 @@ impl CustomType {
                         // on edges. Just used on nodes for convenience
                         // during deserialization
                         DbFieldTypeAstMeta {
+                            field_type_db_original: Some(FieldType::Any),
                             field_type_db_token: quote!().into(),
                             static_assertion_token: quote!().into(),
                         }
                     }
                     RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
+                        field_type_db_original: Some(FieldType::Record(vec![])),
                         field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])).into(),
                         static_assertion_token: quote!().into(),
                     },
                     RelationType::LinkSelf(self_node) => DbFieldTypeAstMeta {
+                        field_type_db_original: Some(FieldType::Record(vec![])),
                         field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
                         static_assertion_token: quote!().into(),
                     },
                     RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
+                        field_type_db_original: Some(FieldType::Array(
+                            ::std::boxed::Box::new(FieldType::Record(::std::vec![#ref_node::table_name()])),
+                            ::std::option::Option::None
+                        )),
                         field_type_db_token: quote!(#crate_name::FieldType::Array(
                             ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
                             ::std::option::Option::None
