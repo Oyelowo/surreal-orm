@@ -250,9 +250,8 @@ impl<'a> Codegen<'a> {
         self.struct_attributes_data.field_receiver = Some(&field_receiver);
     }
 
-    pub(crate) fn field_receiver(&self) -> &MyFieldReceiver {
+    pub(crate) fn field_receiver(&self) -> &'a MyFieldReceiver {
         self.struct_attributes_data.field_receiver
-            .as_ref()
             .expect("Field receiver has not been set. Make sure it has been set by calling set_field_receiver")
     }
 

@@ -22,18 +22,20 @@ impl<'a> Codegen<'a> {
         let serialized_field_fmt = quote!(#crate_name::Field::new(#db_field_name));
 
         self.serialized_fmt_db_field_names_instance
-            .push(serialized_field_fmt.into());
+            .push(serialized_field_fmt.clone().into());
 
         if !field_receiver.skip_serializing && !field_receiver.skip {
             match field_receiver.to_relation_type() {
                 RelationType::LinkOne(_) => {
-                    self.link_one_fields.push(serialized_field_fmt.into());
+                    self.link_one_fields
+                        .push(serialized_field_fmt.clone().into());
                     self.link_one_and_self_fields
-                        .push(serialized_field_fmt.into());
-                    self.linked_fields.push(serialized_field_fmt.into());
+                        .push(serialized_field_fmt.clone().into());
+                    self.linked_fields.push(serialized_field_fmt.clone().into());
                 }
                 RelationType::LinkSelf(_) => {
-                    self.link_self_fields.push(serialized_field_fmt.into());
+                    self.link_self_fields
+                        .push(serialized_field_fmt.clone().into());
                     self.link_one_and_self_fields
                         .push(serialized_field_fmt.into());
                     self.linked_fields.push(serialized_field_fmt.into());
