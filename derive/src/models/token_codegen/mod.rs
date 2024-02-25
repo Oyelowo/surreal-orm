@@ -18,27 +18,15 @@ mod simple;
 mod updater_non_null;
 
 use convert_case::{Case, Casing};
-use darling::ToTokens;
 use quote::format_ident;
 use std::collections::HashSet;
 
 use crate::models::*;
 
 use self::{
-    define_statement::DefineFieldStatementToken,
     field_value_setter::FieldSetterImplTokens,
     link_methods::{ForeignNodeSchemaImport, LinkFieldTraversalMethodToken},
     relate::NodeEdgeMetadataLookupTable,
-};
-
-use super::{
-    create_ident_wrapper, relations::RelationType, AliasesStructFieldsNamesKv,
-    AliasesStructFieldsTypesKv, ConnectionWithFieldAppended, DataType, DbFieldNamesToken,
-    FieldMetadataToken, FieldsRelationsAliased, LinkManyField, LinkOneAndSelfField, LinkOneField,
-    LinkSelfField, LinkedField, ModelAttributes, MyFieldReceiver, NonNullUpdaterFields,
-    RenamedSerializedFields, SchemaStructFieldsNamesKv, SchemaStructFieldsNamesKvEmpty,
-    SchemaStructFieldsNamesKvPrefixed, SchemaStructFieldsTypesKv, SerializableField,
-    StaticAssertionToken, TableIdType,
 };
 
 create_ident_wrapper!(ModuleNameInternalIdent);

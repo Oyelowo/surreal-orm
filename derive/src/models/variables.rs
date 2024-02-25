@@ -7,7 +7,7 @@
 
 use quote::format_ident;
 
-pub(crate) struct VariablesModelMacro {
+pub struct VariablesModelMacro {
     /// This joins present model to the currently built graph.
     /// e.g Account->likes->Book.name
     /// For Node, this is usually just concatenating dot and the model fields i.e
