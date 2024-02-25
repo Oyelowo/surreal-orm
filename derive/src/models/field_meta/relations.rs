@@ -187,15 +187,19 @@ impl TryFrom<&Relate> for RelateAttribute {
             (2, 0) => EdgeDirection::In,
             (0, 2) => EdgeDirection::Out,
             _ => {
-                return Err(syn::Error::new(
-                    Span::call_site(),
+                // return Err(syn::Error::new(
+                //     Span::call_site(),
+                //     "Invalid arrow direction usage. Should be either only -> or <-",
+                // )
+                // .into())
+                return Err(darling::Error::custom(
                     "Invalid arrow direction usage. Should be either only -> or <-",
                 )
-                .into())
+                .into());
             }
         };
 
-        let edge_direction_str: String = edge_direction.into();
+        let edge_direction_str = edge_direction.as_arrow_symbol().to_string();
         let mut substrings = relation
             .connection
             .split(edge_direction_str.as_str())
@@ -210,7 +214,8 @@ impl TryFrom<&Relate> for RelateAttribute {
                     return Err(syn::Error::new(
                         Span::call_site(),
                         format!("too many edges or nodes, {}", get_relation_error(relation)),
-                    ))
+                    )
+                    .into())
                 }
             };
 

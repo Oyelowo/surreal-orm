@@ -46,6 +46,12 @@ create_tokenstream_wrapper!(=> RenamedSerializedFields);
 create_tokenstream_wrapper!(=> NonNullUpdaterFields);
 
 create_tokenstream_wrapper!(=> TableIdType);
+impl Default for TableIdType {
+    fn default() -> Self {
+        let crate_name = get_crate_name(false);
+        Self(quote!())
+    }
+}
 
 create_tokenstream_wrapper!(=> FieldMetadataToken);
 

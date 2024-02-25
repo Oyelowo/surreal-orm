@@ -16,6 +16,7 @@ pub enum EdgeDirection {
 // }
 
 impl EdgeDirection {
+    /// Get the arrow symbol for the edge direction
     pub fn as_arrow_symbol(&self) -> Arrow {
         match self {
             EdgeDirection::Out => Arrow::Right,

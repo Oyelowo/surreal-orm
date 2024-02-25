@@ -205,7 +205,7 @@ pub struct Codegen<'a> {
     /// }
     /// ```
     pub record_link_fields_methods: Vec<LinkFieldTraversalMethodToken>,
-    pub field_definitions: Vec<Vec<DefineFieldStatementToken>>,
+    pub field_definitions: Vec<DefineFieldStatementToken>,
     pub field_metadata: Vec<FieldMetadataToken>,
     pub node_edge_metadata: NodeEdgeMetadataLookupTable<'a>,
     pub fields_relations_aliased: Vec<FieldsRelationsAliased>,
@@ -216,9 +216,10 @@ pub struct Codegen<'a> {
     struct_attributes_data: StructAttributesData<'a>,
 }
 
+#[derive(Clone, Default)]
 struct StructAttributesData<'a> {
-    field_receiver: Option<MyFieldReceiver>,
-    struct_basic_model_attributes: &'a ModelAttributes,
+    field_receiver: Option<&'a MyFieldReceiver>,
+    struct_basic_model_attributes: Option<&'a ModelAttributes>,
 }
 
 impl<'a> Codegen<'a> {
@@ -235,7 +236,7 @@ impl<'a> Codegen<'a> {
     }
 
     pub(crate) fn common_idents(&self) -> CommonIdents {
-        let struct_name_ident = self.table_derive_attributes().ident.to_string();
+        let struct_name_ident = self.table_derive_attributes().ident().to_string();
         let struct_name_ident_snake = struct_name_ident.to_case(Case::Snake);
         let module_name_internal =
             format_ident!("________internal_{struct_name_ident_snake}_schema");
@@ -257,8 +258,8 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn set_field_receiver(&mut self, field_receiver: MyFieldReceiver) {
-        self.struct_attributes_data.field_receiver = Some(field_receiver);
+    fn set_field_receiver(&mut self, field_receiver: &MyFieldReceiver) {
+        self.struct_attributes_data.field_receiver = Some(&field_receiver);
     }
 
     pub(crate) fn field_receiver(&self) -> &MyFieldReceiver {
@@ -268,13 +269,13 @@ impl<'a> Codegen<'a> {
     }
 
     pub(crate) fn table_derive_attributes(&self) -> &ModelAttributes {
-        self.struct_attributes_data.struct_basic_model_attributes
+        self.struct_attributes_data
+            .struct_basic_model_attributes
+            .expect("Model attributes has not been set. Make sure it has been set by calling set_field_receiver")
     }
 
     pub(crate) fn data_type(&self) -> DataType {
-        self.struct_attributes_data
-            .struct_basic_model_attributes
-            .to_data_type()
+        self.table_derive_attributes().to_data_type()
     }
 
     /// Derive the schema properties for a struct
@@ -295,8 +296,7 @@ impl<'a> Codegen<'a> {
             tokens_generator.create_db_fields_for_links_and_loaders();
             tokens_generator.create_relation_aliases_struct_fields_types_kv();
             tokens_generator.create_non_null_updater_struct_fields();
-
-            Ok(tokens_generator)
         }
+        Ok(tokens_generator)
     }
 }
