@@ -101,7 +101,8 @@ impl VisitMut for ReplaceSelfVisitor {
     fn visit_expr_path_mut(&mut self, i: &mut ExprPath) {
         // Example: Replace `Self` in expressions, e.g., `Self::function()`
         if i.path.is_ident("Self") {
-            i.path = parse_quote! { #self.struct_ident };
+            let struct_ident = &self.struct_ident;
+            i.path = parse_quote! { #struct_ident };
             if !self.generics.args.is_empty() {
                 i.path.segments.last_mut().unwrap().arguments =
                     PathArguments::AngleBracketed(self.generics.clone());

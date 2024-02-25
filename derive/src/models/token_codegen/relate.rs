@@ -158,7 +158,7 @@ impl<'a> Codegen<'a> {
     /// semantics, it's just a way to differentiate same edge but with different
     /// direction
     /// e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
-    pub(crate) fn add_direction_indication_to_ident(
+    pub fn add_direction_indication_to_ident(
         edge_table_name: &EdgeTableName,
         edge_direction: &EdgeDirection,
     ) -> EdgeWithDunderDirectionIndicator {
@@ -478,10 +478,12 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
         let edge_name_as_struct_with_direction_ident =
             EdgeNameAsStructWithDirectionIdent(format_ident!(
                 "{}",
-                MyFieldReceiver::add_direction_indication_to_ident(
-                    edge_name_as_struct_original_ident.deref(),
+                Codegen::add_direction_indication_to_ident(
+                    // edge_name_as_struct_original_ident.deref(),
+                    edge_table_name,
                     direction,
                 )
+                .to_string()
             ));
         // TODO: Remove if no good purpose served
         // let edge_type_with_direction = CustomType::from(syn::parse2::<Type>(
@@ -495,7 +497,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 .to_lowercase()
         ));
 
-        quote!(
+        tokens.extend(quote!(
             #( #imports) *
 
             // Edge to Node
@@ -602,7 +604,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 }
             }
 
-        )
+        ))
     }
 }
 

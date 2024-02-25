@@ -17,10 +17,10 @@ impl<'a> Codegen<'a> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_ident_serialized_fmt =
             field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
-        let field_type = &field_receiver.field_type_rust();
+        let field_type = &field_receiver.ty();
 
         if field_ident_serialized_fmt.is_id() {
-            self.table_id_type = quote!(#field_type);
+            self.table_id_type = quote!(#field_type).into();
             // self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
         }
 
@@ -33,7 +33,7 @@ impl<'a> Codegen<'a> {
             .db_field_name(&self.table_derive_attributes().casing()?)?;
 
         self.serialized_field_names_normalised
-            .push(db_field_name.to_owned().into());
+            .push(db_field_name.to_token_stream().into());
 
         Ok(())
     }
