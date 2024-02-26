@@ -153,7 +153,7 @@ impl<'ast> Visit<'ast> for UniqueTypeVisitor {
     fn visit_constraint(&mut self, i: &'ast Constraint) {
         self.generics.insert(i.ident.to_string());
         for bound in i.bounds.iter() {
-            self.visit_type_param_bound(&bound)
+            self.visit_type_param_bound(bound)
         }
     }
 

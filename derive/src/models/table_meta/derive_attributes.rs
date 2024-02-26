@@ -19,7 +19,7 @@ create_ident_wrapper!(StructIdent);
 impl StructIdent {
     pub fn is_same_name(&self, other: impl Into<CustomType>) -> ExtractorResult<bool> {
         let other: CustomType = other.into();
-        Ok(self.to_string() == other.type_name()?.to_string())
+        Ok(other.type_name()? == self.to_string())
     }
 }
 

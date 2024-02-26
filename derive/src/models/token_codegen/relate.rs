@@ -31,7 +31,7 @@ impl<'a> Codegen<'a> {
         match field_receiver.to_relation_type() {
             RelationType::Relate(ref relate) => {
                 self.static_assertions
-                    .push(self.create_static_assertions(&relate)?);
+                    .push(self.create_static_assertions(relate)?);
                 self.relate(relate)?;
                 let connection = &relate.connection;
                 self.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#db_field_name))).into());

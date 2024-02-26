@@ -216,11 +216,11 @@ impl<'a> Codegen<'a> {
             struct_basic_model_attributes: Some(model_attributes),
             field_receiver: None,
         };
-        let store = Self {
+        
+        Self {
             struct_attributes_data,
             ..Default::default()
-        };
-        store
+        }
     }
 
     pub(crate) fn common_idents(&self) -> CommonIdents {
@@ -247,7 +247,7 @@ impl<'a> Codegen<'a> {
     }
 
     fn set_field_receiver(&mut self, field_receiver: &'a MyFieldReceiver) {
-        self.struct_attributes_data.field_receiver = Some(&field_receiver);
+        self.struct_attributes_data.field_receiver = Some(field_receiver);
     }
 
     pub(crate) fn field_receiver(&self) -> &'a MyFieldReceiver {

@@ -149,7 +149,7 @@ impl<'a> Codegen<'a> {
 
             #array_trait
         );
-        Ok(FieldSetterImplTokens(field_setter_impls).into())
+        Ok(FieldSetterImplTokens(field_setter_impls))
     }
 
     fn array_trait_impl(
@@ -183,8 +183,7 @@ impl<'a> Codegen<'a> {
                         let array_inner_field_ty = field_receiver
                             .field_type_db
                             .as_ref()
-                            .map(|db_ty| db_ty.get_array_item_type())
-                            .flatten();
+                            .and_then(|db_ty| db_ty.get_array_item_type());
 
                         let array_inner_ty_db_concrete =  match array_inner_field_ty{
                         Some(ref db_array_item_ty) => (

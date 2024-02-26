@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use darling;
 use syn::{self, parse_quote, GenericArgument, Path, PathArguments, Type};
 
 use super::StructIdent;
@@ -115,11 +114,11 @@ impl ModelAttributes {
     }
 
     pub fn generics(&self) -> &StructGenerics {
-        use ModelAttributes::*;
+        use ModelAttributes::{Edge, Node, Object};
         match self {
-            Node(node) => &node.generics(),
-            Edge(edge) => &edge.generics(),
-            Object(object) => &object.generics(),
+            Node(node) => node.generics(),
+            Edge(edge) => edge.generics(),
+            Object(object) => object.generics(),
         }
     }
 
@@ -180,13 +179,15 @@ impl ModelAttributes {
                 })
                 .collect();
 
-            path.segments.last_mut().unwrap().arguments =
-                PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
-                    colon2_token: None,
-                    lt_token: generics.lt_token.unwrap(),
-                    args,
-                    gt_token: generics.gt_token.unwrap(),
-                });
+            path.segments
+                .last_mut()
+                .expect("Problem getting last segment of path. Path potentially empty.")
+                .arguments = PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+                colon2_token: None,
+                lt_token: generics.lt_token.unwrap(),
+                args,
+                gt_token: generics.gt_token.unwrap(),
+            });
         }
 
         Type::Path(syn::TypePath { qself: None, path }).into()
