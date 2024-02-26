@@ -281,6 +281,7 @@ impl<'a> Codegen<'a> {
             tokens_generator.create_field_connection_builder_token();
             tokens_generator.create_relation_connection_tokenstream();
             tokens_generator.create_db_fields_for_links_and_loaders();
+            tokens_generator.create_link_methods();
             tokens_generator.create_relation_aliases_struct_fields_types_kv();
             tokens_generator.create_non_null_updater_struct_fields();
         }
