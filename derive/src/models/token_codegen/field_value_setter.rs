@@ -184,6 +184,7 @@ impl<'a> Codegen<'a> {
                     None => {
                         let array_inner_field_ty = field_receiver
                             .field_type_db
+                            .as_ref()
                             .map(|db_ty| db_ty.get_array_item_type())
                             .flatten();
 
@@ -194,7 +195,7 @@ impl<'a> Codegen<'a> {
                         ),
                         None => {
                             return Err(syn::Error::new_spanned(
-                                field_receiver.field_type_db,
+                                field_receiver.field_type_db.as_ref(),
                                 "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
                             ).into())
                         }

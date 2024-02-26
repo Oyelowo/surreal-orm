@@ -19,15 +19,42 @@ ListSimpleTraversalMethod
 use super::{Codegen, RelationType};
 
 impl<'a> Codegen<'a> {
-    pub fn create_link_methods(
-        &mut self,
-        store: &mut Codegen,
-        table_derive_attrs: &TableDeriveAttributes,
-    ) -> ExtractorResult<()> {
+    pub fn create_link_methods(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let relation_type = field_receiver.to_relation_type();
-        let mut push_to_link = |meta: LinkMethodMeta| {
+
+        let mut metas = vec![];
+        match field_receiver.to_relation_type() {
+            RelationType::LinkSelf(link_self) => {
+                let link_one = link_self.to_linkone_attr_type(table_derive_attrs);
+                let meta = self.link_one(link_one?)?;
+                metas.push(meta);
+            }
+            RelationType::LinkOne(link_one) => {
+                let meta = self.link_one(link_one)?;
+                metas.push(meta);
+            }
+            RelationType::LinkMany(link_many) => {
+                let meta = self.link_many(&link_many)?;
+                metas.push(meta);
+            }
+            RelationType::NestArray(nest_array) => {
+                let meta = self.nest_array(&nest_array)?;
+                metas.push(meta);
+            }
+            RelationType::NestObject(nest_object) => {
+                let meta = self.nest_object(&nest_object)?;
+                metas.push(meta);
+            }
+            RelationType::List(list) => {
+                let method_token = self.list_simple(&list)?;
+                self.record_link_fields_methods.push(method_token);
+            }
+            RelationType::Relate(relate) => {}
+            RelationType::None => {}
+        }
+
+        for meta in metas {
             self.imports_referenced_node_schema
                 .insert(meta.foreign_node_schema_import);
 
@@ -35,36 +62,6 @@ impl<'a> Codegen<'a> {
 
             self.static_assertions
                 .push(meta.foreign_node_type_validator.to_static_assertion());
-        };
-
-        match field_receiver.to_relation_type() {
-            RelationType::LinkSelf(link_self) => {
-                let link_one = link_self.to_linkone_attr_type(table_derive_attrs);
-                let meta = self.link_one(link_one?)?;
-                push_to_link(meta);
-            }
-            RelationType::LinkOne(link_one) => {
-                let meta = self.link_one(link_one)?;
-                push_to_link(meta);
-            }
-            RelationType::LinkMany(link_many) => {
-                let meta = self.link_many(&link_many)?;
-                push_to_link(meta);
-            }
-            RelationType::NestArray(nest_array) => {
-                let meta = self.nest_array(&nest_array)?;
-                push_to_link(meta);
-            }
-            RelationType::NestObject(nest_object) => {
-                let meta = self.nest_object(&nest_object)?;
-                push_to_link(meta);
-            }
-            RelationType::List(list) => {
-                let method_token = self.list_simple(&list)?;
-                store.record_link_fields_methods.push(method_token);
-            }
-            RelationType::Relate(relate) => {}
-            RelationType::None => {}
         }
 
         Ok(())
@@ -125,12 +122,13 @@ impl<'a> Codegen<'a> {
             ..
         } = VariablesModelMacro::new();
 
-        let foreign_node_schema_import = if current_struct.is_same_name(link_one.into_inner())? {
-            // Dont import for current struct since that already exists in scope
-            quote!()
-        } else {
-            quote!(type #link_one = <super::#link_one as #crate_name::SchemaGetter>::Schema;)
-        };
+        let foreign_node_schema_import =
+            if current_struct.is_same_name(link_one.clone().into_inner())? {
+                // Dont import for current struct since that already exists in scope
+                quote!()
+            } else {
+                quote!(type #link_one = <super::#link_one as #crate_name::SchemaGetter>::Schema;)
+            };
 
         let record_link_default_alias_as_method = quote!(
             pub fn #db_field_name_as_ident(&self) -> #link_one { let clause = #crate_name::Clause::from(#crate_name::Empty);
@@ -173,7 +171,7 @@ impl<'a> Codegen<'a> {
         } = VariablesModelMacro::new();
 
         let foreign_node_schema_import = if current_struct_ident
-            .is_same_name(link_many_node_type.into_inner())?
+            .is_same_name(link_many_node_type.clone().into_inner())?
         {
             // Dont import for current struct since that already exists in scope
             quote!()
@@ -228,7 +226,7 @@ impl<'a> Codegen<'a> {
         } = VariablesModelMacro::new();
 
         let foreign_node_schema_import = if current_struct_ident
-            .is_same_name(embedded_object.into_inner())?
+            .is_same_name(embedded_object.clone().into_inner())?
         {
             // Dont import for current struct since that already exists in scope
             quote!()
@@ -284,7 +282,7 @@ impl<'a> Codegen<'a> {
         } = VariablesModelMacro::new();
 
         let foreign_node_schema_import = if current_struct_ident
-            .is_same_name(nested_array.into_inner())?
+            .is_same_name(nested_array.clone().into_inner())?
         {
             // Dont import for current struct since that already exists in scope
             quote!()

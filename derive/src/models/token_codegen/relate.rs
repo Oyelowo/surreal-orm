@@ -175,7 +175,7 @@ impl<'a> Codegen<'a> {
         let current_struct = &self.table_derive_attributes().ident();
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver.ty();
-        let edge_type = relate.edge_type;
+        let edge_type = &relate.edge_type;
         let RelateAttribute {
             edge_table_name,
             foreign_node_table_name: destination_node_table_name,
@@ -623,7 +623,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
 impl<'a> ToTokens for NodeEdgeMetadataLookupTable<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let node_edge_token_streams = self
-            .into_inner()
+            .deref()
             .values()
             .map(|value| value.to_token_stream())
             .collect::<Vec<_>>();

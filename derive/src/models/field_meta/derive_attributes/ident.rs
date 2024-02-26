@@ -59,26 +59,26 @@ impl MyFieldReceiver {
         let field_ident_cased =
             || Self::convert_case(field_ident_original.to_string(), struct_casing).to_string();
 
-        let field_ident_normalised = &self
+        let field_ident_normalized = &self
             .rename
             .as_ref()
-            .map_or_else(field_ident_cased, |renamed| renamed.serialize);
+            .map_or_else(field_ident_cased, |renamed| renamed.serialize.clone());
 
         let (field_ident_normalized, field_name_serialized) =
-            if field_ident_normalised.starts_with("r#") {
-                let field_ident_normalized = field_ident_normalised.trim_start_matches("r#");
+            if field_ident_normalized.starts_with("r#") {
+                let field_ident_normalized = field_ident_normalized.trim_start_matches("r#");
                 (
-                    format_ident!("{field_ident_normalised}_"),
-                    field_ident_normalized.to_string(),
+                    format_ident!("{field_ident_normalized}_"),
+                    format_ident!("{field_ident_normalized}"),
                 )
             } else {
                 (
-                    format_ident!("{field_ident_normalised}"),
-                    field_ident_normalised.to_string(),
+                    format_ident!("{field_ident_normalized}"),
+                    format_ident!("{field_ident_normalized}"),
                 )
             };
 
-        Ok((field_ident_normalized.into(), field_ident_normalized.into()))
+        Ok((field_ident_normalized.into(), field_name_serialized.into()))
     }
 
     fn convert_case(ident: impl Into<String>, casing: &StructLevelCasing) -> IdentCased {
