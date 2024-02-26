@@ -26,6 +26,7 @@ impl MyFieldReceiver {
         Ok(self
             .ty()
             .replace_self_with_current_struct_concrete_type(&model_attributes)?
+            .into_inner_ref()
             .get_generics_meta(model_attributes)
             .clone())
     }

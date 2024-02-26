@@ -30,19 +30,16 @@ impl CustomTypeNoSelf {
         self.0
     }
 
+    pub fn into_inner_ref(&self) -> &CustomType {
+        &self.0
+    }
+
     pub fn type_name(&self) -> ExtractorResult<Ident> {
         self.0.type_name()
     }
 
     pub fn to_basic_type(&self) -> &Type {
         self.0.to_basic_type()
-    }
-
-    pub fn get_generics_meta<'a>(
-        &self,
-        model_attributes: &'a ModelAttributes,
-    ) -> &FieldGenericsMeta<'a> {
-        &self.0.get_generics_meta(model_attributes)
     }
 
     pub fn to_path(&self) -> ExtractorResult<Path> {
