@@ -55,11 +55,8 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let table_attributes = self.table_derive_attributes();
         let field_type = field_receiver.ty();
-        let FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        } = field_type.get_generics_meta(table_attributes);
+        let binding = field_type.get_generics_from_current_struct(table_attributes);
+        let (field_impl_generics, field_ty_generics, field_where_clause) = binding.split_for_impl();
 
         let field_name_pascalized =
             field_receiver.field_name_pascalized(&table_attributes.casing()?)?;
@@ -163,22 +160,23 @@ impl<'a> Codegen<'a> {
         let field_name_as_pascalized =
             field_receiver.field_name_pascalized(&model_attributes.casing()?)?;
 
-        let (generics_meta, array_item_type) = match field_receiver.to_relation_type() {
+        let (generics, array_item_type) = match field_receiver.to_relation_type() {
             RelationType::LinkMany(foreign_node) => {
-                let generics_meta = foreign_node.get_generics_meta(model_attributes);
+                let generics_meta = foreign_node.get_generics_from_current_struct(model_attributes);
                 (
                     Some(generics_meta),
                     Some(quote!(<#foreign_node as #crate_name::Model>::Id)),
                 )
             }
             RelationType::NestArray(foreign_object) => {
-                let generics_meta = foreign_object.get_generics_meta(model_attributes);
+                let generics_meta =
+                    foreign_object.get_generics_from_current_struct(model_attributes);
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
             _ => {
                 let inferred_type = match field_receiver.ty().get_array_inner_type() {
                     Some(ref ty) => {
-                        let generics_meta = ty.get_generics_meta(model_attributes);
+                        let generics_meta = ty.get_generics_from_current_struct(model_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
                     None => {
@@ -208,16 +206,13 @@ impl<'a> Codegen<'a> {
         };
 
         let array_setter_impl = array_item_type.map_or(quote!(), |item_type| {
-            generics_meta.map_or(
+            generics.map_or(
                 quote!(
                     impl #crate_name::SetterArray<#item_type> for self::#field_name_as_pascalized {}
                 ),
-                |generics_meta| {
-                    let FieldGenericsMeta {
-                        field_impl_generics,
-                        field_ty_generics,
-                        field_where_clause,
-                    } = generics_meta;
+                |this| {
+                    let (field_impl_generics, field_ty_generics, field_where_clause) =
+                        this.split_for_impl();
 
                     quote!(
                         impl #field_impl_generics #crate_name::SetterArray<#item_type> for
@@ -238,11 +233,8 @@ impl<'a> Codegen<'a> {
         let field_name_pascalized =
             field_receiver.field_name_pascalized(&model_attributes.casing()?)?;
         let field_type = field_receiver.ty();
-        let FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        } = field_type.get_generics_meta(model_attributes);
+        let binding = field_type.get_generics_from_current_struct(model_attributes);
+        let (field_impl_generics, field_ty_generics, field_where_clause) = binding.split_for_impl();
 
         let numeric_trait = {
             quote!(
