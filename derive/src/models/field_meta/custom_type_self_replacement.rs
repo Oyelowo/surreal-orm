@@ -22,6 +22,7 @@ pub struct ReplaceSelfVisitor {
 }
 
 impl ReplaceSelfVisitor {
+    #[allow(dead_code)]
     pub fn replace_self(&mut self, ty: &CustomType) -> CustomTypeNoSelf {
         let mut ty = ty.to_basic_type().clone();
         self.visit_type_mut(&mut ty);
@@ -251,6 +252,7 @@ mod tests {
     }
 }
 
+#[allow(dead_code)]
 fn vec_to_punctuated(vec: Vec<GenericArgument>) -> Punctuated<GenericArgument, Comma> {
     let mut punctuated = Punctuated::new();
     for item in vec {

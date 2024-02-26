@@ -9,7 +9,7 @@ use darling::FromMeta;
 
 use super::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct ListSimple;
 
 macro_rules! create_custom_type_wrapper {
@@ -54,7 +54,6 @@ macro_rules! create_custom_type_wrapper {
 pub(crate) use create_custom_type_wrapper;
 
 create_custom_type_wrapper!(LinkSelfAttrType);
-create_custom_type_wrapper!(LinkSelfAttrTypeReplaceSelfWithCurrentStructIdent);
 create_custom_type_wrapper!(LinkOneAttrType);
 create_custom_type_wrapper!(LinkManyAttrType);
 create_custom_type_wrapper!(NestObjectAttrType);

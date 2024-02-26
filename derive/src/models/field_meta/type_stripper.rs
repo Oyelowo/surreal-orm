@@ -31,7 +31,8 @@ impl VisitMut for TypeStripper {
     }
 }
 
-struct CustomTypeRefLifetimeStripped(CustomType);
+#[derive(Debug, Clone)]
+pub struct CustomTypeRefLifetimeStripped(CustomType);
 
 impl CustomType {
     pub fn strip_references_and_lifetimes(&self) -> CustomTypeRefLifetimeStripped {

@@ -336,6 +336,7 @@ pub struct NodeEdgeMetadata<'a> {
     /// ],
     /// ```
     foreign_node_schema: Vec<ForeignNodeSchema>,
+    #[allow(dead_code)]
     foreign_node_table_name: DestinationNodeTableName,
     /// Example Generated:
     ///
@@ -406,17 +407,7 @@ impl<'a> DerefMut for NodeEdgeMetadataLookupTable<'a> {
     }
 }
 
-impl<'a> NodeEdgeMetadataLookupTable<'a> {
-    pub fn into_inner(self) -> HashMap<EdgeWithDunderDirectionIndicator, NodeEdgeMetadata<'a>> {
-        self.0
-    }
-
-    pub fn into_inner_ref(
-        &self,
-    ) -> &HashMap<EdgeWithDunderDirectionIndicator, NodeEdgeMetadata<'a>> {
-        &self.0
-    }
-}
+impl<'a> NodeEdgeMetadataLookupTable<'a> {}
 
 create_tokenstream_wrapper!(=>ArrowTokenStream);
 

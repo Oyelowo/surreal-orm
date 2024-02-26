@@ -32,7 +32,13 @@ pub struct DbFieldTypeAstMeta {
 pub struct FieldTypeDb(pub FieldType);
 
 impl ToTokens for FieldTypeDb {
-    fn to_tokens(&self, tokens: &mut TokenStream) {}
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let field_type_str = self.0.to_string();
+        let crate_name = get_crate_name(false);
+        let as_token = quote!(#crate_name::FieldTypeDb::from_str(#field_type_str).unwrap());
+
+        as_token.to_tokens(tokens);
+    }
 }
 
 impl FieldTypeDb {

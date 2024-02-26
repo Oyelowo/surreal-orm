@@ -38,6 +38,7 @@ pub enum CaseString {
     ScreamingKebab,
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct StructLevelCasing(CaseString);
 
 impl From<CaseString> for StructLevelCasing {

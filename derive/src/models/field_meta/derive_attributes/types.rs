@@ -7,7 +7,6 @@
 
 use crate::models::*;
 use surreal_query_builder::FieldType;
-use syn::Ident;
 
 use super::MyFieldReceiver;
 
