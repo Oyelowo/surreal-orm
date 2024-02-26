@@ -34,15 +34,15 @@ impl CustomTypeNoSelf {
         self.0.type_name()
     }
 
-    pub fn to_basic_type(self) -> Type {
+    pub fn to_basic_type(&self) -> &Type {
         self.0.to_basic_type()
     }
 
     pub fn get_generics_meta<'a>(
         &self,
-        model_attributes: &ModelAttributes,
-    ) -> FieldGenericsMeta<'a> {
-        self.0.get_generics_meta(model_attributes)
+        model_attributes: &'a ModelAttributes,
+    ) -> &FieldGenericsMeta<'a> {
+        &self.0.get_generics_meta(model_attributes)
     }
 
     pub fn to_path(&self) -> ExtractorResult<Path> {
@@ -92,12 +92,16 @@ impl CustomType {
         self.0
     }
 
-    pub fn to_basic_type(self) -> Type {
-        self.0
+    pub fn to_basic_type(&self) -> &Type {
+        &self.0
+    }
+
+    pub fn to_basic_type_mut_ref(&mut self) -> &mut Type {
+        &mut self.0
     }
 
     pub fn type_name(&self) -> ExtractorResult<Ident> {
-        match self.0 {
+        match self.to_basic_type() {
             Type::Path(type_path) => {
                 let last_segment = type_path
                     .path
@@ -114,10 +118,10 @@ impl CustomType {
 
     pub fn get_generics_meta<'a>(
         &self,
-        model_attributes: &ModelAttributes,
+        model_attributes: &'a ModelAttributes,
     ) -> FieldGenericsMeta<'a> {
         let (field_impl_generics, field_ty_generics, field_where_clause) =
-            GenericTypeExtractor::extract_generics_for_complex_type(model_attributes, self)
+            GenericTypeExtractor::extract_generics_for_complex_type(model_attributes, &self)
                 .split_for_impl();
         FieldGenericsMeta {
             field_impl_generics,
@@ -374,7 +378,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_string(&self) -> bool {
-        match &self.into_inner() {
+        match &self.to_basic_type() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -398,7 +402,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_bool(&self) -> bool {
-        match self.into_inner() {
+        match self.to_basic_type() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -411,7 +415,7 @@ impl CustomType {
     }
 
     pub fn is_set(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = &self.to_basic_type();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -434,7 +438,7 @@ impl CustomType {
     }
 
     pub fn is_array(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = &self.to_basic_type();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -458,7 +462,7 @@ impl CustomType {
     }
 
     pub fn is_list(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = self.to_basic_type();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -482,7 +486,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_optional(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = self.to_basic_type();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -506,7 +510,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_hash_set(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = self.to_basic_type();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -530,7 +534,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_object(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = self.to_basic_type();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -554,7 +558,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_datetime(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = self.to_basic_type();
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path
@@ -569,7 +573,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_duration(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = self.to_basic_type();
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path
@@ -584,7 +588,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_geometry(&self) -> bool {
-        let ty = &self.into_inner();
+        let ty = &self.to_basic_type();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -607,7 +611,7 @@ impl CustomType {
     }
 
     pub fn get_array_inner_type(&self) -> Option<CustomType> {
-        let ty = &self.into_inner();
+        let ty = &self.to_basic_type();
 
         let item_ty = match ty {
             syn::Type::Path(type_path) => {
@@ -637,7 +641,7 @@ impl CustomType {
     }
 
     pub fn get_option_item_type(&self) -> Option<Type> {
-        let ty = &self.into_inner();
+        let ty = &self.to_basic_type();
 
         let item_ty = match ty {
             syn::Type::Path(type_path) => {

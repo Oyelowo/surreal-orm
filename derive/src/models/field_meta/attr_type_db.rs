@@ -40,6 +40,10 @@ impl FieldTypeDb {
         self.0
     }
 
+    pub fn into_inner_ref(&self) -> &FieldType {
+        &self.0
+    }
+
     pub fn get_array_item_type(&self) -> Option<Self> {
         match self.0 {
             FieldType::Array(ref ft, _) => Some(Self(ft.deref().clone())),
@@ -49,7 +53,7 @@ impl FieldTypeDb {
 
     pub fn as_db_sql_value_tokenstream(&self) -> SqlValueTokenStream {
         let crate_name = get_crate_name(false);
-        let value = match self.into_inner() {
+        let value = match self.into_inner_ref() {
             FieldType::Any => {
                 quote!(#crate_name::sql::Value)
             }

@@ -68,7 +68,7 @@ pub struct TableDeriveAttributes {
 
 impl TableDeriveAttributes {
     pub fn ident(&self) -> StructIdent {
-        self.ident.into()
+        StructIdent(self.ident.clone())
     }
 
     pub fn generics(&self) -> &StructGenerics {

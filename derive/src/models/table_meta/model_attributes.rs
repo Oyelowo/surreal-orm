@@ -87,9 +87,9 @@ pub enum ModelAttributes {
 impl ModelAttributes {
     pub fn fields(&self) -> ExtractorResult<Vec<&MyFieldReceiver>> {
         let fields = match self {
-            ModelAttributes::Node(node) => node.0.data,
-            ModelAttributes::Edge(edge) => edge.0.data,
-            ModelAttributes::Object(object) => object.data,
+            ModelAttributes::Node(node) => &node.0.data,
+            ModelAttributes::Edge(edge) => &edge.0.data,
+            ModelAttributes::Object(object) => &object.data,
         };
         Ok(fields
             .as_ref()
@@ -98,11 +98,11 @@ impl ModelAttributes {
             .fields)
     }
 
-    pub fn rename_all(&self) -> Option<Rename> {
+    pub fn rename_all(&self) -> Option<&Rename> {
         match self {
-            ModelAttributes::Node(node) => node.0.rename_all,
-            ModelAttributes::Edge(edge) => edge.0.rename_all,
-            ModelAttributes::Object(object) => object.rename_all,
+            ModelAttributes::Node(node) => node.0.rename_all.as_ref(),
+            ModelAttributes::Edge(edge) => edge.0.rename_all.as_ref(),
+            ModelAttributes::Object(object) => object.rename_all.as_ref(),
         }
     }
 
@@ -154,7 +154,7 @@ impl ModelAttributes {
 
     fn construct_struct_type_without_bounds(&self) -> CustomType {
         let mut path = Path::from(self.ident());
-        let generics = self.generics().to_basic_generics();
+        let generics = self.generics().to_basic_generics_ref();
 
         // Process generics, excluding bounds
         if !generics.params.is_empty() {

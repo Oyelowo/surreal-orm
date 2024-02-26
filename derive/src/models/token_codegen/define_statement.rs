@@ -15,6 +15,8 @@ impl<'a> Codegen<'a> {
     pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
         self.validate_field_attributes()?;
 
+        self.static_assertions
+            .push(self.static_assertion_field_value(self.table_derive_attributes())?);
         self.field_definitions.extend(self.field_defintion_db()?);
         Ok(())
     }
@@ -31,23 +33,23 @@ impl<'a> Codegen<'a> {
         let mut define_array_field_item_methods = vec![];
         let mut all_field_defintions: Vec<DefineFieldStatementToken> = vec![];
 
-        if let Some(define) = field_receiver.define {
+        if let Some(define) = field_receiver.define.as_ref() {
             quote!(#define.to_raw());
         }
 
-        if let Some(assert) = field_receiver.assert {
+        if let Some(assert) = field_receiver.assert.as_ref() {
             define_field_methods.push(quote!(.assert(#assert)));
         }
 
-        if let Some(item_assert) = field_receiver.item_assert {
+        if let Some(item_assert) = field_receiver.item_assert.as_ref() {
             define_array_field_item_methods.push(quote!(.assert(#item_assert)));
         }
 
-        if let Some(value) = field_receiver.value {
+        if let Some(value) = field_receiver.value.as_ref() {
             define_field_methods.push(quote!(.value(#value)));
         }
 
-        if let Some(permissions) = field_receiver.permissions {
+        if let Some(permissions) = field_receiver.permissions.as_ref() {
             define_field_methods.push(permissions.into_token_stream());
         }
 
@@ -74,16 +76,16 @@ impl<'a> Codegen<'a> {
         Ok(all_field_defintions)
     }
 
-    pub fn static_assertion_field_value(
+    fn static_assertion_field_value(
         &self,
         model_attrs: &ModelAttributes,
-        model_type: &DataType,
     ) -> ExtractorResult<StaticAssertionToken> {
         let field_receiver = self.field_receiver();
         let field_type = field_receiver.field_type_db(model_attrs)?.into_inner();
 
         let static_assertion = field_receiver
             .value
+            .as_ref()
             .map_or(StaticAssertionToken::default(), |v| {
                 v.get_static_assertion(field_type)
             });

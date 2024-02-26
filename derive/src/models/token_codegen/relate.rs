@@ -8,7 +8,7 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
     fmt::Display,
-    ops::Deref,
+    ops::{Deref, DerefMut},
 };
 
 use convert_case::{Case, Casing};
@@ -33,7 +33,7 @@ impl<'a> Codegen<'a> {
                 self.static_assertions
                     .push(self.create_static_assertions(&relate)?);
                 self.relate(relate)?;
-                let connection = relate.connection;
+                let connection = &relate.connection;
                 self.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#db_field_name))).into());
             }
             _ => {}
@@ -53,7 +53,7 @@ impl<'a> Codegen<'a> {
         } = VariablesModelMacro::new();
         let current_struct_ident = table_derive_attributes.ident();
         let field_type = &field_receiver.ty();
-        let edge_type = relate.edge_type;
+        let edge_type = &relate.edge_type;
         let RelateAttribute {
             edge_direction,
             edge_table_name,
@@ -131,7 +131,7 @@ impl<'a> Codegen<'a> {
 
         match self
             .node_edge_metadata
-            .into_inner()
+            .deref_mut()
             .entry(edge_name_with_direction_as_method_ident())
         {
             Entry::Occupied(o) => {
@@ -405,9 +405,21 @@ impl<'a> Deref for NodeEdgeMetadataLookupTable<'a> {
     }
 }
 
+impl<'a> DerefMut for NodeEdgeMetadataLookupTable<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl<'a> NodeEdgeMetadataLookupTable<'a> {
     pub fn into_inner(self) -> HashMap<EdgeWithDunderDirectionIndicator, NodeEdgeMetadata<'a>> {
         self.0
+    }
+
+    pub fn into_inner_ref(
+        &self,
+    ) -> &HashMap<EdgeWithDunderDirectionIndicator, NodeEdgeMetadata<'a>> {
+        &self.0
     }
 }
 

@@ -31,7 +31,7 @@ impl FromMeta for ExprOrPath {
             Meta::NameValue(MetaNameValue { value, .. }) => match value {
                 Expr::Path(expr_path) => {
                     if expr_path.path.segments.len() > 0 {
-                        Ok(ExprOrPath::Path(expr_path.path))
+                        Ok(ExprOrPath::Path(expr_path.path.clone()))
                     } else {
                         Err(darling::Error::custom("Path cannot be empty"))
                     }
