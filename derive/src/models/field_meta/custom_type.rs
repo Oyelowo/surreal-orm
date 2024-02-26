@@ -294,7 +294,7 @@ impl CustomType {
         )))
     }
 
-    fn strip_bounds_from_generics(&self) -> Self {
+    fn _strip_bounds_from_generics(&self) -> Self {
         let stripped_ty = match self.to_basic_type() {
             Type::Path(type_path) => {
                 let mut new_type_path = type_path.clone();
@@ -833,7 +833,7 @@ impl CustomType {
                 }
             } else if relation_type.is_some() {
                 match relation_type {
-                    RelationType::Relate(ref_node) => {
+                    RelationType::Relate(_ref_node) => {
                         // Relation are not stored on nodes, but
                         // on edges. Just used on nodes for convenience
                         // during deserialization
@@ -848,7 +848,7 @@ impl CustomType {
                         field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])).into(),
                         static_assertion_token: quote!().into(),
                     },
-                    RelationType::LinkSelf(self_node) => DbFieldTypeAstMeta {
+                    RelationType::LinkSelf(_self_node) => DbFieldTypeAstMeta {
                         field_type_db_original: Some(FieldType::Record(vec![])),
                         field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
                         static_assertion_token: quote!().into(),
@@ -864,12 +864,12 @@ impl CustomType {
                         )).into(),
                         static_assertion_token: quote!().into(),
                     },
-                    RelationType::NestObject(ref_object) => DbFieldTypeAstMeta {
+                    RelationType::NestObject(_ref_object) => DbFieldTypeAstMeta {
                         field_type_db_original: Some(FieldType::Object),
                         field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                         static_assertion_token: quote!().into(),
                     },
-                    RelationType::NestArray(ref_array) => DbFieldTypeAstMeta {
+                    RelationType::NestArray(_ref_array) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
                         field_type_db_original: Some(FieldType::Object),
                         field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
@@ -879,7 +879,7 @@ impl CustomType {
                         // )),
                         static_assertion_token: quote!().into(),
                     },
-                    RelationType::List(list_simple) => DbFieldTypeAstMeta {
+                    RelationType::List(_list_simple) => DbFieldTypeAstMeta {
                         // provide the inner type for when the array part start recursing
                         field_type_db_original: Some(FieldType::Array(
                             ::std::boxed::Box::new(FieldType::Any),
@@ -916,8 +916,6 @@ impl CustomType {
         &self,
         field_receiver: &MyFieldReceiver,
         model_attributes: &ModelAttributes,
-        // field_name: &FieldIdentNormalized,
-        // model_type: &DataType,
     ) -> bool {
         let is_db_field = model_attributes.casing().map_or(false, |casing| {
             field_receiver.db_field_name(&casing).map_or(false, |dfn| {

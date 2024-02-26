@@ -141,7 +141,7 @@ impl<'ast> Visit<'ast> for UniqueTypeVisitor {
                     GenericArgument::Constraint(constraint) => {
                         self.visit_constraint(constraint);
                     }
-                    GenericArgument::Const(expr) => {}
+                    GenericArgument::Const(_) => {}
                     _ => {}
                 }
             }

@@ -11,7 +11,8 @@ use syn::{punctuated::Punctuated, visit::Visit, *};
 
 use super::CustomType;
 
-struct StrippedBoundsGenerics(pub Generics);
+#[derive(Debug)]
+pub struct StrippedBoundsGenerics(pub Generics);
 
 #[derive(Clone, Debug, Default)]
 pub struct CustomGenerics(pub Generics);
@@ -86,7 +87,6 @@ impl CustomGenerics {
                     let expr: Expr = syn::parse_quote!(#ident as #ty);
                     GenericArgument::Const(expr)
                 }
-                _ => todo!("Handle other generic parameters"),
             })
             .collect();
 
@@ -140,10 +140,6 @@ impl FieldGenerics {
 
     pub fn to_basic_generics_ref_mut(&mut self) -> &mut Generics {
         &mut self.0 .0
-    }
-
-    pub fn to_angle_bracketed(&self) -> AngleBracketedGenericArguments {
-        self.0.to_angle_bracketed()
     }
 }
 
@@ -214,7 +210,7 @@ impl<'a> Visit<'a> for GenericTypeExtractor<'a> {
                 }
             }
             // Recursively visit nested generic arguments
-            if let PathArguments::AngleBracketed(args) = &segment.arguments {
+            if let PathArguments::AngleBracketed(_args) = &segment.arguments {
                 // for arg in &args.args {
                 //     match arg {
                 //         // Recursively visit the nested type

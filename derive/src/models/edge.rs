@@ -127,11 +127,11 @@ impl ToTokens for EdgeToken {
         let CommonIdents {
             module_name_internal,
             module_name_rexported,
-            aliases_struct_name,
             test_function_name,
             non_null_updater_struct_name,
             struct_with_renamed_serialized_fields,
             _____schema_def,
+            ..
         } = code_gen.common_idents();
 
         let serializable_fields_count = serializable_fields.len();

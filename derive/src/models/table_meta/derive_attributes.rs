@@ -23,12 +23,6 @@ impl StructIdent {
     }
 }
 
-struct StructGenericsComponents {
-    pub(crate) impl_generics: TokenStream,
-    pub(crate) type_generics: TokenStream,
-    pub(crate) where_clause: Option<TokenStream>,
-}
-
 #[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {

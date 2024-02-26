@@ -44,21 +44,6 @@ impl MyFieldReceiver {
         self.into()
     }
 
-    pub fn field_type_and_assertion(
-        &self,
-        field_name: &DbFieldName,
-        model_type: &DataType,
-        table: &Ident,
-    ) -> ExtractorResult<DbFieldTypeAstMeta> {
-        // Infer/use user specified or error out
-        // TODO: Add the compile time assertion/validations/checks for the dbtype here
-        Ok(DbFieldTypeAstMeta {
-            field_type_db_original: todo!(),
-            field_type_db_token: todo!(),
-            static_assertion_token: todo!(),
-        })
-    }
-
     pub fn is_numeric(&self) -> bool {
         let field_type = self
             .field_type_db
@@ -76,7 +61,7 @@ impl MyFieldReceiver {
             .field_type_db
             .as_ref()
             .map_or(&FieldType::Any, |t| t.into_inner_ref());
-        let explicit_ty_is_list = matches!(field_type, FieldType::Array(item_ty, _));
+        let explicit_ty_is_list = matches!(field_type, FieldType::Array(_item_ty, _));
         explicit_ty_is_list
             || self.ty().is_array()
             || self.field_type_db.as_ref().map_or(false, |t| t.is_array())
@@ -88,7 +73,7 @@ impl MyFieldReceiver {
             .field_type_db
             .as_ref()
             .map_or(&FieldType::Any, |t| t.into_inner_ref());
-        let explicit_ty_is_list = matches!(field_type, FieldType::Set(item_ty, _));
+        let explicit_ty_is_list = matches!(field_type, FieldType::Set(_item_ty, _));
         explicit_ty_is_list
             || self.ty().is_set()
             || self.field_type_db.as_ref().map_or(false, |t| t.is_set())

@@ -10,7 +10,6 @@ mod ident;
 mod types;
 
 use darling::{FromField, FromMeta};
-pub use generics::FieldGenericsMeta;
 use proc_macro2::Ident;
 use syn::Type;
 
@@ -26,6 +25,7 @@ create_ident_wrapper!(OldFieldName);
 
 impl FromMeta for OldFieldName {}
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, FromField)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {

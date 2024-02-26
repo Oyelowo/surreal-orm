@@ -51,7 +51,6 @@ impl<'a> Codegen<'a> {
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
-        let current_struct_ident = table_derive_attributes.ident();
         let field_type = &field_receiver.ty();
         let edge_type = &relate.edge_type;
         let RelateAttribute {
@@ -61,13 +60,11 @@ impl<'a> Codegen<'a> {
         } = &RelateAttribute::try_from(relate)?;
         let arrow = &ArrowTokenStream::from(edge_direction);
         let destination_node_table_name_str = &foreign_node_table_name.to_string();
+        let binding = field_type.get_generics_from_current_struct(table_derive_attributes);
+        let (_edge_impl_generics, edge_ty_generics, _edge_where_clause) = binding.split_for_impl();
 
         let edge_name_with_direction_as_method_ident =
             &(|| Self::add_direction_indication_to_ident(edge_table_name, edge_direction));
-        // let binding = GenericTypeExtractor::new(table_derive_attributes, field_type);
-        // let (edge_impl_generics, edge_ty_generics, edge_where_clause) = binding.split_for_impl();
-        let binding = field_type.get_generics_from_current_struct(table_derive_attributes);
-        let (edge_impl_generics, edge_ty_generics, edge_where_clause) = binding.split_for_impl();
 
         let foreign_node_schema_ident =
             ForeignNodeSchemaIdent::from_node_table_name(foreign_node_table_name);
@@ -125,7 +122,7 @@ impl<'a> Codegen<'a> {
             .into(),
             imports: vec![import()],
             edge_relation_model_selected_ident: edge_type.type_name()?.into(),
-            foreign_node_name: foreign_node_table_name.clone().into(),
+            foreign_node_table_name: foreign_node_table_name.clone().into(),
         };
 
         match self
@@ -229,15 +226,14 @@ impl<'a> Codegen<'a> {
     }
 }
 
-// create_ident_wrapper!(EdgeTableName);
-
 impl EdgeTableName {
     pub fn to_str_typed(&self) -> EdgeTableNameStr {
         EdgeTableNameStr(self.to_string())
     }
 }
 
-struct EdgeTableNameStr(String);
+#[derive(Clone, Debug)]
+pub struct EdgeTableNameStr(String);
 
 impl EdgeTableNameStr {
     pub fn to_pascal_case_ident(&self) -> EdgeNameAsStructOriginalIdent {
@@ -286,9 +282,9 @@ impl ForeignNodeSchemaIdent {
 }
 
 #[derive(Clone, Debug)]
-struct DestinationNodeName(String);
+struct DestinationNodeTableName(String);
 
-impl From<NodeTableName> for DestinationNodeName {
+impl From<NodeTableName> for DestinationNodeTableName {
     fn from(name: NodeTableName) -> Self {
         Self(name.to_string())
     }
@@ -340,7 +336,7 @@ pub struct NodeEdgeMetadata<'a> {
     /// ],
     /// ```
     foreign_node_schema: Vec<ForeignNodeSchema>,
-    foreign_node_name: DestinationNodeName,
+    foreign_node_table_name: DestinationNodeTableName,
     /// Example Generated:
     ///
     /// ```rust, ignore
@@ -445,8 +441,6 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
             ___________errors,
             ___________graph_traversal_string,
             ____________update_many_bindings,
-            bindings,
-            schema_instance,
             ___________model,
             ___________in_marker,
             ___________out_marker,
@@ -482,9 +476,6 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
             aggregated_edge_type.get_generics_from_current_struct(table_derive_attributes);
         let (edge_type_impl_generics, edge_type_ty_generics, edge_type_where_clause) =
             binding.split_for_impl();
-
-        let edge_name_as_struct_original_type_alias =
-            quote!(#edge_name_as_struct_original_ident #edge_type_ty_generics);
 
         let edge_name_as_struct_with_direction_ident =
             EdgeNameAsStructWithDirectionIdent(format_ident!(

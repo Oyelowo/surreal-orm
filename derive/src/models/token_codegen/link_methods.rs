@@ -46,11 +46,11 @@ impl<'a> Codegen<'a> {
                 let meta = self.nest_object(&nest_object)?;
                 metas.push(meta);
             }
-            RelationType::List(list) => {
-                let method_token = self.list_simple(&list)?;
+            RelationType::List(_list) => {
+                let method_token = self.list_simple()?;
                 self.record_link_fields_methods.push(method_token);
             }
-            RelationType::Relate(relate) => {}
+            RelationType::Relate(_relate) => {}
             RelationType::None => {}
         }
 
@@ -67,10 +67,7 @@ impl<'a> Codegen<'a> {
         Ok(())
     }
 
-    pub fn list_simple(
-        &self,
-        list_simple: &ListSimple,
-    ) -> ExtractorResult<LinkFieldTraversalMethodToken> {
+    pub fn list_simple(&self) -> ExtractorResult<LinkFieldTraversalMethodToken> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
@@ -207,7 +204,7 @@ impl<'a> Codegen<'a> {
         })
     }
 
-    pub(crate) fn nest_object(
+    pub fn nest_object(
         &self,
         embedded_object: &NestObjectAttrType,
     ) -> ExtractorResult<LinkMethodMeta> {
@@ -218,7 +215,6 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
         let field_name_serialized = field_receiver.db_field_name(&struct_casing)?;
-        let node_type_alias_with_trait_bounds = embedded_object;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -264,10 +260,7 @@ impl<'a> Codegen<'a> {
         })
     }
 
-    pub(crate) fn nest_array(
-        &self,
-        nested_array: &NestArrayAttrType,
-    ) -> ExtractorResult<LinkMethodMeta> {
+    pub fn nest_array(&self, nested_array: &NestArrayAttrType) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let current_struct_ident = &table_derive_attrs.ident();
@@ -363,7 +356,7 @@ create_tokenstream_wrapper!(
 LinkFieldTraversalMethodToken
 );
 
-struct LinkMethodMeta {
+pub struct LinkMethodMeta {
     foreign_node_schema_import: ForeignNodeSchemaImport,
     foreign_node_type_validator: ForeignNodeTypeValidator,
     link_field_method: LinkFieldTraversalMethodToken,
