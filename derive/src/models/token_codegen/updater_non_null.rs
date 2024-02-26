@@ -30,13 +30,12 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkMany(_)
             | RelationType::List(_) => {
                 self.insert_non_null_updater_token(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, )
-                        .into(),
+                    quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, ),
                 )?;
             }
             RelationType::NestObject(nested_object) => {
                 self.insert_non_null_updater_token(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>, ).into(),
+                    quote!(pub #field_ident_normalized: ::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>, ),
                 )?;
             }
             RelationType::Relate(_) => {}

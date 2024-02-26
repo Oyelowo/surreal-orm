@@ -151,11 +151,11 @@ pub struct GenericTypeExtractor<'a> {
 impl<'a> GenericTypeExtractor<'a> {
     pub fn new(model_attributes: &'a ModelAttributes, field_ty: &CustomType) -> CustomGenerics {
         let mut generics = Self {
-            struct_generics: &model_attributes.generics(),
+            struct_generics: model_attributes.generics(),
             field_generics: Default::default(),
         };
-        generics.visit_type(&field_ty.to_basic_type());
-        generics.field_generics.0.into()
+        generics.visit_type(field_ty.to_basic_type());
+        generics.field_generics.0
     }
 
     fn add_lifetime_if_not_exists(&mut self, lt: &Lifetime) {

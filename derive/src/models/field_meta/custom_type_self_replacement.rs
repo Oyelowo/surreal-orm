@@ -205,6 +205,16 @@ impl VisitMut for ReplaceSelfVisitor {
     }
 }
 
+#[allow(dead_code)]
+fn vec_to_punctuated(vec: Vec<GenericArgument>) -> Punctuated<GenericArgument, Comma> {
+    let mut punctuated = Punctuated::new();
+    for item in vec {
+        punctuated.push_value(item);
+        punctuated.push_punct(Comma::default());
+    }
+    punctuated
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -250,14 +260,4 @@ mod tests {
             quote::quote!(User<'a, 'b, U, V>).to_string()
         );
     }
-}
-
-#[allow(dead_code)]
-fn vec_to_punctuated(vec: Vec<GenericArgument>) -> Punctuated<GenericArgument, Comma> {
-    let mut punctuated = Punctuated::new();
-    for item in vec {
-        punctuated.push_value(item);
-        punctuated.push_punct(Comma::default());
-    }
-    punctuated
 }

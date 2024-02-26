@@ -206,8 +206,8 @@ impl TryFrom<&Relate> for RelateAttribute {
         let (edge_action, node_object) =
             match (substrings.next(), substrings.next(), substrings.next()) {
                 (Some(action), Some(node_obj), None) => (
-                    EdgeTableName(format_ident!("{action}").into()),
-                    NodeTableName(format_ident!("{node_obj}").into()),
+                    EdgeTableName(format_ident!("{action}")),
+                    NodeTableName(format_ident!("{node_obj}")),
                 ),
                 _ => {
                     return Err(syn::Error::new(

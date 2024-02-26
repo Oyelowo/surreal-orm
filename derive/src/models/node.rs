@@ -90,7 +90,7 @@ impl ToTokens for NodeToken {
         } = &code_gen;
 
         let imports_referenced_node_schema = imports_referenced_node_schema
-            .into_iter()
+            .iter()
             .collect::<Vec<_>>();
 
         let CommonIdents {

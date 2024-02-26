@@ -122,26 +122,26 @@ impl CustomType {
     // e.g
     // #[surreal_orm(link_one = User<'a, T, u32>)]
     // student: LinkOne<User<'a, T, u32>
-    pub fn get_generics_from_current_struct<'a>(
+    pub fn get_generics_from_current_struct(
         &self,
-        model_attributes: &'a ModelAttributes,
+        model_attributes: &ModelAttributes,
     ) -> CustomGenerics {
-        let binding = GenericTypeExtractor::new(model_attributes, &self);
-        binding
+        
+        GenericTypeExtractor::new(model_attributes, self)
     }
 
-    pub fn extract_generics_for_complex_type<'a>(
+    pub fn extract_generics_for_complex_type(
         &self,
-        model_attributes: &'a ModelAttributes,
+        model_attributes: &ModelAttributes,
         // field_ty: &CustomType,
     ) -> CustomGenerics {
         let mut generics = GenericTypeExtractor {
-            struct_generics: &model_attributes.generics(),
+            struct_generics: model_attributes.generics(),
             field_generics: Default::default(),
         };
         generics.visit_type(self.to_basic_type());
         // generics.visit_type(&field_ty.to_basic_type());
-        generics.field_generics.0.into()
+        generics.field_generics.0
     }
 
     // pub fn get_generics_meta<'a>(
@@ -813,101 +813,99 @@ impl CustomType {
                 field_type_db_token: quote!(#crate_name::FieldType::Geometry(::std::vec![])).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);).into(),
             }
-        } else {
-            if field_name.is_id() {
-                DbFieldTypeAstMeta {
-                    field_type_db_original: Some(FieldType::Record(vec![])),
-                    field_type_db_token:
-                        quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()]))
-                            .into(),
-                    static_assertion_token: quote!().into(),
-                }
-            } else if field_name.is_orig_or_dest_edge_node(model_type) {
-                // An edge might be shared by multiple In/Out nodes. So, default to any type of
-                // record for edge in and out
-                DbFieldTypeAstMeta {
-                    field_type_db_original: Some(FieldType::Record(vec![])),
-                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![]))
+        } else if field_name.is_id() {
+            DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Record(vec![])),
+                field_type_db_token:
+                    quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()]))
                         .into(),
-                    static_assertion_token: quote!().into(),
-                }
-            } else if relation_type.is_some() {
-                match relation_type {
-                    RelationType::Relate(_ref_node) => {
-                        // Relation are not stored on nodes, but
-                        // on edges. Just used on nodes for convenience
-                        // during deserialization
-                        DbFieldTypeAstMeta {
-                            field_type_db_original: None,
-                            field_type_db_token: quote!().into(),
-                            static_assertion_token: quote!().into(),
-                        }
-                    }
-                    RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
-                        field_type_db_original: Some(FieldType::Record(vec![])),
-                        field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])).into(),
-                        static_assertion_token: quote!().into(),
-                    },
-                    RelationType::LinkSelf(_self_node) => DbFieldTypeAstMeta {
-                        field_type_db_original: Some(FieldType::Record(vec![])),
-                        field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
-                        static_assertion_token: quote!().into(),
-                    },
-                    RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
-                        field_type_db_original: Some(FieldType::Array(
-                            ::std::boxed::Box::new(FieldType::Record(vec![])),
-                            ::std::option::Option::None
-                        )),
-                        field_type_db_token: quote!(#crate_name::FieldType::Array(
-                            ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
-                            ::std::option::Option::None
-                        )).into(),
-                        static_assertion_token: quote!().into(),
-                    },
-                    RelationType::NestObject(_ref_object) => DbFieldTypeAstMeta {
-                        field_type_db_original: Some(FieldType::Object),
-                        field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
-                        static_assertion_token: quote!().into(),
-                    },
-                    RelationType::NestArray(_ref_array) => DbFieldTypeAstMeta {
-                        // provide the inner type for when the array part start recursing
-                        field_type_db_original: Some(FieldType::Object),
-                        field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
-                        // db_field_type: quote!(#crate_name::FieldType::Array(
-                        //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
-                        //     ::std::option::Option::None
-                        // )),
-                        static_assertion_token: quote!().into(),
-                    },
-                    RelationType::List(_list_simple) => DbFieldTypeAstMeta {
-                        // provide the inner type for when the array part start recursing
-                        field_type_db_original: Some(FieldType::Array(
-                            ::std::boxed::Box::new(FieldType::Any),
-                            ::std::option::Option::None
-                        )),
-                        field_type_db_token: quote!(#crate_name::FieldType::Array(
-                            ::std::boxed::Box::new(#crate_name::FieldType::Any),
-                            ::std::option::Option::None
-                        )).into(),
-                        // db_field_type: quote!(#crate_name::FieldType::Array(
-                        //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
-                        //     ::std::option::Option::None
-                        // )),
-                        static_assertion_token: quote!().into(),
-                    },
-                    RelationType::None => {
-                        return Err(syn::Error::new(
-                            ty.span(),
-                            "Could not infer type for the field",
-                        )
-                        .into())
-                    }
-                }
-            } else {
-                return Err(
-                    syn::Error::new(ty.span(), "Could not infer type for the field").into(),
-                );
+                static_assertion_token: quote!().into(),
             }
+        } else if field_name.is_orig_or_dest_edge_node(model_type) {
+            // An edge might be shared by multiple In/Out nodes. So, default to any type of
+            // record for edge in and out
+            DbFieldTypeAstMeta {
+                field_type_db_original: Some(FieldType::Record(vec![])),
+                field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![]))
+                    .into(),
+                static_assertion_token: quote!().into(),
+            }
+        } else if relation_type.is_some() {
+            match relation_type {
+                RelationType::Relate(_ref_node) => {
+                    // Relation are not stored on nodes, but
+                    // on edges. Just used on nodes for convenience
+                    // during deserialization
+                    DbFieldTypeAstMeta {
+                        field_type_db_original: None,
+                        field_type_db_token: quote!().into(),
+                        static_assertion_token: quote!().into(),
+                    }
+                }
+                RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
+                    field_type_db_original: Some(FieldType::Record(vec![])),
+                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])).into(),
+                    static_assertion_token: quote!().into(),
+                },
+                RelationType::LinkSelf(_self_node) => DbFieldTypeAstMeta {
+                    field_type_db_original: Some(FieldType::Record(vec![])),
+                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
+                    static_assertion_token: quote!().into(),
+                },
+                RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
+                    field_type_db_original: Some(FieldType::Array(
+                        ::std::boxed::Box::new(FieldType::Record(vec![])),
+                        ::std::option::Option::None
+                    )),
+                    field_type_db_token: quote!(#crate_name::FieldType::Array(
+                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
+                        ::std::option::Option::None
+                    )).into(),
+                    static_assertion_token: quote!().into(),
+                },
+                RelationType::NestObject(_ref_object) => DbFieldTypeAstMeta {
+                    field_type_db_original: Some(FieldType::Object),
+                    field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
+                    static_assertion_token: quote!().into(),
+                },
+                RelationType::NestArray(_ref_array) => DbFieldTypeAstMeta {
+                    // provide the inner type for when the array part start recursing
+                    field_type_db_original: Some(FieldType::Object),
+                    field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
+                    // db_field_type: quote!(#crate_name::FieldType::Array(
+                    //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
+                    //     ::std::option::Option::None
+                    // )),
+                    static_assertion_token: quote!().into(),
+                },
+                RelationType::List(_list_simple) => DbFieldTypeAstMeta {
+                    // provide the inner type for when the array part start recursing
+                    field_type_db_original: Some(FieldType::Array(
+                        ::std::boxed::Box::new(FieldType::Any),
+                        ::std::option::Option::None
+                    )),
+                    field_type_db_token: quote!(#crate_name::FieldType::Array(
+                        ::std::boxed::Box::new(#crate_name::FieldType::Any),
+                        ::std::option::Option::None
+                    )).into(),
+                    // db_field_type: quote!(#crate_name::FieldType::Array(
+                    //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
+                    //     ::std::option::Option::None
+                    // )),
+                    static_assertion_token: quote!().into(),
+                },
+                RelationType::None => {
+                    return Err(syn::Error::new(
+                        ty.span(),
+                        "Could not infer type for the field",
+                    )
+                    .into())
+                }
+            }
+        } else {
+            return Err(
+                syn::Error::new(ty.span(), "Could not infer type for the field").into(),
+            );
         };
         Ok(meta)
     }
