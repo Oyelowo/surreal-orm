@@ -184,9 +184,9 @@ impl ModelAttributes {
                 .expect("Problem getting last segment of path. Path potentially empty.")
                 .arguments = PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
                 colon2_token: None,
-                lt_token: generics.lt_token.unwrap(),
+                lt_token: generics.lt_token.expect("Missing lt token"),
                 args,
-                gt_token: generics.gt_token.unwrap(),
+                gt_token: generics.gt_token.expect("Missing gt token"),
             });
         }
 
