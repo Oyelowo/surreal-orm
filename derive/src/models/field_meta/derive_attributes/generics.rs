@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-use crate::models::*;
-
 use super::MyFieldReceiver;
 
 impl MyFieldReceiver {
@@ -36,11 +34,4 @@ impl MyFieldReceiver {
     //     }
     // }
     //
-}
-
-#[derive(Clone, Debug)]
-pub struct FieldGenericsMeta<'a> {
-    pub(crate) field_impl_generics: syn::ImplGenerics<'a>,
-    pub(crate) field_ty_generics: syn::TypeGenerics<'a>,
-    pub(crate) field_where_clause: Option<&'a syn::WhereClause>,
 }

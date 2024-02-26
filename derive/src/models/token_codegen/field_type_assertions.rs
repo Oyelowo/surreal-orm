@@ -19,7 +19,7 @@ impl<'a> Codegen<'a> {
         let field_type = &field_receiver.ty();
 
         match field_receiver.to_relation_type() {
-            RelationType::Relate(relate) => {}
+            RelationType::Relate(_relate) => {}
             RelationType::LinkOne(foreign_node) => {
                 self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);).into());
             }

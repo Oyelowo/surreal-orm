@@ -56,7 +56,8 @@ impl<'a> Codegen<'a> {
         let table_attributes = self.table_derive_attributes();
         let field_type = field_receiver.ty();
         let binding = field_type.get_generics_from_current_struct(table_attributes);
-        let (field_impl_generics, field_ty_generics, field_where_clause) = binding.split_for_impl();
+        let (field_impl_generics, _field_ty_generics, field_where_clause) =
+            binding.split_for_impl();
 
         let field_name_pascalized =
             field_receiver.field_name_pascalized(&table_attributes.casing()?)?;

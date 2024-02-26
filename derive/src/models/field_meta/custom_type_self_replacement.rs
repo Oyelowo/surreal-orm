@@ -233,7 +233,7 @@ mod tests {
             gt_token: Default::default(),
         };
 
-        let mut ty_to_replace = Type::Path(TypePath {
+        let ty_to_replace = Type::Path(TypePath {
             qself: None,
             path: Path::from(Ident::new("Self", proc_macro2::Span::call_site())),
         });

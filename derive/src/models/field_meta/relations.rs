@@ -43,7 +43,7 @@ use super::*;
 // type RelatedUser<'a, T> = Relate<User<'a, T>>;
 
 #[derive(Debug, Clone)]
-pub(crate) enum RelationType {
+pub enum RelationType {
     // ->studies->Course
     Relate(Relate),
     LinkOne(LinkOneAttrType),
@@ -58,10 +58,6 @@ pub(crate) enum RelationType {
 impl RelationType {
     pub fn is_relate_graph(&self) -> bool {
         matches!(self, RelationType::Relate(_))
-    }
-
-    pub fn is_none_relational(&self) -> bool {
-        matches!(self, RelationType::None)
     }
 
     pub fn is_some(&self) -> bool {
