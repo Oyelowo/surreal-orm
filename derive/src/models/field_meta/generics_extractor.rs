@@ -149,7 +149,10 @@ pub struct GenericTypeExtractor<'a> {
 }
 
 impl<'a> GenericTypeExtractor<'a> {
-    pub fn new(model_attributes: &'a ModelAttributes, field_ty: &CustomType) -> CustomGenerics {
+    pub fn sync_field_type_to_current_struct_generics(
+        model_attributes: &'a ModelAttributes,
+        field_ty: &CustomType,
+    ) -> CustomGenerics {
         let mut generics = Self {
             struct_generics: model_attributes.generics(),
             field_generics: Default::default(),

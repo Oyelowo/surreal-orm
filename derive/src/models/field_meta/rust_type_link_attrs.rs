@@ -21,11 +21,21 @@ macro_rules! create_custom_type_wrapper {
             pub fn into_inner(self) -> CustomType {
                 self.0
             }
+
+            pub fn into_inner_ref(&self) -> &CustomType {
+                &self.0
+            }
         }
 
-        impl ::std::convert::Into<CustomType> for $name {
-            fn into(self) -> CustomType {
-                self.0
+        impl ::std::convert::From<CustomType> for $name {
+            fn from(ty: CustomType) -> Self {
+                Self(ty)
+            }
+        }
+
+        impl ::std::convert::From<$name> for CustomType {
+            fn from(ty: $name) -> Self {
+                ty.0
             }
         }
 

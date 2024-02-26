@@ -126,8 +126,7 @@ impl CustomType {
         &self,
         model_attributes: &ModelAttributes,
     ) -> CustomGenerics {
-        
-        GenericTypeExtractor::new(model_attributes, self)
+        GenericTypeExtractor::sync_field_type_to_current_struct_generics(model_attributes, self)
     }
 
     pub fn extract_generics_for_complex_type(
@@ -159,6 +158,7 @@ impl CustomType {
     //     }
     // }
 
+    #[allow(clippy::items_after_statements)]
     pub fn replace_self_with_current_struct_concrete_type(
         &self,
         model_attributes: &ModelAttributes,
@@ -339,17 +339,17 @@ impl CustomType {
     }
 
     pub fn replace_lifetimes_with_underscore(&self) -> Self {
-        let ty = &self.0;
-        let mut ty = ty.clone();
         struct ReplaceLifetimesVisitor;
-
         impl VisitMut for ReplaceLifetimesVisitor {
             fn visit_lifetime_mut(&mut self, i: &mut Lifetime) {
                 *i = Lifetime::new("'_", i.apostrophe);
             }
         }
 
+        let ty = &self.0;
+        let mut ty = ty.clone();
         let mut visitor = ReplaceLifetimesVisitor;
+
         visitor.visit_type_mut(&mut ty);
         ty.into()
     }
@@ -817,8 +817,7 @@ impl CustomType {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Record(vec![])),
                 field_type_db_token:
-                    quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()]))
-                        .into(),
+                    quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
                 static_assertion_token: quote!().into(),
             }
         } else if field_name.is_orig_or_dest_edge_node(model_type) {
@@ -826,8 +825,7 @@ impl CustomType {
             // record for edge in and out
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Record(vec![])),
-                field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![]))
-                    .into(),
+                field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![])).into(),
                 static_assertion_token: quote!().into(),
             }
         } else if relation_type.is_some() {
@@ -903,9 +901,7 @@ impl CustomType {
                 }
             }
         } else {
-            return Err(
-                syn::Error::new(ty.span(), "Could not infer type for the field").into(),
-            );
+            return Err(syn::Error::new(ty.span(), "Could not infer type for the field").into());
         };
         Ok(meta)
     }

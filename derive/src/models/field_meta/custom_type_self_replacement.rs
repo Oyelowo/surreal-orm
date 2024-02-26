@@ -57,14 +57,11 @@ impl VisitMut for ReplaceSelfVisitor {
             }
         } else {
             // Handle nested generics in path segments
-            match &mut segment.arguments {
-                PathArguments::AngleBracketed(angle_bracketed_args) => {
-                    // self.visit_angle_bracketed_generic_arguments_mut(angle_bracketed_args);
-                    for arg in &mut angle_bracketed_args.args {
-                        self.visit_generic_argument_mut(arg);
-                    }
+            if let PathArguments::AngleBracketed(angle_bracketed_args) = &mut segment.arguments {
+                // self.visit_angle_bracketed_generic_arguments_mut(angle_bracketed_args);
+                for arg in &mut angle_bracketed_args.args {
+                    self.visit_generic_argument_mut(arg);
                 }
-                _ => {}
             }
         }
     }
@@ -156,12 +153,8 @@ impl VisitMut for ReplaceSelfVisitor {
 
     // Replace `Self` in generic arguments (e.g., Vec<Self>)
     fn visit_generic_argument_mut(&mut self, i: &mut syn::GenericArgument) {
-        match i {
-            syn::GenericArgument::Type(ty) => {
-                self.visit_type_mut(ty);
-            }
-            // Handle other generic argument types as needed...
-            _ => {}
+        if let syn::GenericArgument::Type(ty) = i {
+            self.visit_type_mut(ty);
         }
         syn::visit_mut::visit_generic_argument_mut(self, i);
     }

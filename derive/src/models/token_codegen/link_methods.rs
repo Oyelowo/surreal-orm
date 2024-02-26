@@ -60,7 +60,7 @@ impl<'a> Codegen<'a> {
             self.record_link_fields_methods.push(meta.link_field_method);
 
             self.static_assertions
-                .push(meta.foreign_node_type_validator.to_static_assertion());
+                .push(meta.foreign_node_type_validator.static_assertion());
         }
 
         Ok(())
@@ -338,7 +338,7 @@ ForeignNodeTypeValidator
 );
 
 impl ForeignNodeTypeValidator {
-    pub fn to_static_assertion(self) -> StaticAssertionToken {
+    pub fn static_assertion(self) -> StaticAssertionToken {
         self.0.into()
     }
 }
@@ -362,11 +362,11 @@ pub struct LinkMethodMeta {
 
 impl LinkSelfAttrType {
     pub(crate) fn to_linkone_attr_type(
-        self,
+        &self,
         table_derive_attrs: &ModelAttributes,
     ) -> ExtractorResult<LinkOneAttrType> {
         Ok(LinkOneAttrType(
-            self.into_inner()
+            self.into_inner_ref()
                 .replace_self_with_current_struct_concrete_type(table_derive_attrs)?
                 .into_inner(),
         ))
