@@ -43,7 +43,7 @@ impl EdgeType {
         let mut common_generics = HashSet::new();
 
         for edge_type in edge_types {
-            let edge_type = &edge_type.to_basic_type();
+            let edge_type = &edge_type.as_basic_type_ref();
             let mut visitor = UniqueTypeVisitor::default();
             visitor.visit_type(edge_type);
 
@@ -163,8 +163,15 @@ impl<'ast> Visit<'ast> for UniqueTypeVisitor {
             TypeParamBound::Lifetime(lt) => {
                 self.visit_lifetime(lt);
             }
-            // TypeParamBound::Trait(trait_bound) => {}
-            // TypeParamBound::Verbatim(_) => {}
+            TypeParamBound::Trait(trait_bound) => {
+                self.visit_path(&trait_bound.path);
+            }
+            TypeParamBound::Verbatim(token) => {
+                // e.g., `?Sized` in `T: ?Sized`
+                if token.to_string() == "?Sized" {
+                    self.generics.insert(token.to_string());
+                }
+            }
             _ => {}
         }
 

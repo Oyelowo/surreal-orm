@@ -30,7 +30,7 @@ impl CustomTypeNoSelf {
         self.0
     }
 
-    pub fn into_inner_ref(&self) -> &CustomType {
+    pub fn as_custom_type_ref(&self) -> &CustomType {
         &self.0
     }
 
@@ -39,7 +39,7 @@ impl CustomTypeNoSelf {
     }
 
     pub fn to_basic_type(&self) -> &Type {
-        self.0.to_basic_type()
+        self.0.as_basic_type_ref()
     }
 
     pub fn to_path(&self) -> ExtractorResult<Path> {
@@ -89,16 +89,12 @@ impl CustomType {
         self.0
     }
 
-    pub fn to_basic_type(&self) -> &Type {
+    pub fn as_basic_type_ref(&self) -> &Type {
         &self.0
     }
 
-    pub fn to_basic_type_mut_ref(&mut self) -> &mut Type {
-        &mut self.0
-    }
-
     pub fn type_name(&self) -> ExtractorResult<Ident> {
-        match self.to_basic_type() {
+        match self.as_basic_type_ref() {
             Type::Path(type_path) => {
                 let last_segment = type_path
                     .path
@@ -138,7 +134,7 @@ impl CustomType {
             struct_generics: model_attributes.generics(),
             field_generics: Default::default(),
         };
-        generics.visit_type(self.to_basic_type());
+        generics.visit_type(self.as_basic_type_ref());
         // generics.visit_type(&field_ty.to_basic_type());
         generics.field_generics.0
     }
@@ -169,7 +165,7 @@ impl CustomType {
         //     generics: model_attributes.generics().to_basic_generics(),
         // };
         // let x = replacer.replace_self(self.to_basic_type().clone());
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
         let replacement_path_from_current_struct = model_attributes.struct_as_path_no_bounds()?;
 
         fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
@@ -295,7 +291,7 @@ impl CustomType {
     }
 
     fn _strip_bounds_from_generics(&self) -> Self {
-        let stripped_ty = match self.to_basic_type() {
+        let stripped_ty = match self.as_basic_type_ref() {
             Type::Path(type_path) => {
                 let mut new_type_path = type_path.clone();
 
@@ -310,7 +306,10 @@ impl CustomType {
                                 match arg {
                                     GenericArgument::Type(Type::Path(tp)) => {
                                         // Keep only the type identifier
-                                        let ident = &tp.path.get_ident().unwrap();
+                                        let ident = &tp
+                                            .path
+                                            .get_ident()
+                                            .expect("Problem getting type path as ident.");
                                         parse_quote!(#ident)
                                     }
                                     GenericArgument::Lifetime(lifetime) => {
@@ -333,7 +332,7 @@ impl CustomType {
 
                 Type::Path(new_type_path)
             }
-            _ => self.to_basic_type().clone(),
+            _ => self.as_basic_type_ref().clone(),
         };
         Self(stripped_ty)
     }
@@ -355,7 +354,7 @@ impl CustomType {
     }
 
     pub fn is_numeric(&self) -> bool {
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
         let type_is_numeric = match ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -376,7 +375,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_float(&self) -> bool {
-        match self.to_basic_type() {
+        match self.as_basic_type_ref() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -389,7 +388,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_integer(&self) -> bool {
-        match self.to_basic_type() {
+        match self.as_basic_type_ref() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -407,7 +406,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_string(&self) -> bool {
-        match &self.to_basic_type() {
+        match &self.as_basic_type_ref() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -431,7 +430,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_bool(&self) -> bool {
-        match self.to_basic_type() {
+        match self.as_basic_type_ref() {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
@@ -444,7 +443,7 @@ impl CustomType {
     }
 
     pub fn is_set(&self) -> bool {
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -467,7 +466,7 @@ impl CustomType {
     }
 
     pub fn is_array(&self) -> bool {
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -491,7 +490,7 @@ impl CustomType {
     }
 
     pub fn is_list(&self) -> bool {
-        let ty = self.to_basic_type();
+        let ty = self.as_basic_type_ref();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -515,7 +514,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_optional(&self) -> bool {
-        let ty = self.to_basic_type();
+        let ty = self.as_basic_type_ref();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -539,7 +538,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_hash_set(&self) -> bool {
-        let ty = self.to_basic_type();
+        let ty = self.as_basic_type_ref();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -563,7 +562,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_object(&self) -> bool {
-        let ty = self.to_basic_type();
+        let ty = self.as_basic_type_ref();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -587,7 +586,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_datetime(&self) -> bool {
-        let ty = self.to_basic_type();
+        let ty = self.as_basic_type_ref();
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path
@@ -602,7 +601,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_duration(&self) -> bool {
-        let ty = self.to_basic_type();
+        let ty = self.as_basic_type_ref();
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path
@@ -617,7 +616,7 @@ impl CustomType {
     }
 
     pub fn raw_type_is_geometry(&self) -> bool {
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path
@@ -640,7 +639,7 @@ impl CustomType {
     }
 
     pub fn get_array_inner_type(&self) -> Option<CustomType> {
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
 
         let item_ty = match ty {
             syn::Type::Path(type_path) => {
@@ -670,7 +669,7 @@ impl CustomType {
     }
 
     pub fn get_option_item_type(&self) -> Option<Type> {
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
 
         let item_ty = match ty {
             syn::Type::Path(type_path) => {
@@ -703,7 +702,7 @@ impl CustomType {
         model_type: &DataType,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let crate_name = get_crate_name(false);
-        let ty = &self.to_basic_type();
+        let ty = &self.as_basic_type_ref();
 
         let meta = if self.raw_type_is_bool() {
             DbFieldTypeAstMeta {

@@ -366,7 +366,7 @@ impl LinkSelfAttrType {
         table_derive_attrs: &ModelAttributes,
     ) -> ExtractorResult<LinkOneAttrType> {
         Ok(LinkOneAttrType(
-            self.into_inner_ref()
+            self.as_custom_type_ref()
                 .replace_self_with_current_struct_concrete_type(table_derive_attrs)?
                 .into_inner(),
         ))

@@ -47,7 +47,7 @@ impl MyFieldReceiver {
         let field_type = self
             .field_type_db
             .as_ref()
-            .map_or(&FieldType::Any, |t| t.into_inner_ref());
+            .map_or(&FieldType::Any, |t| t.as_field_type_ref());
         let explicit_db_ty_is_numeric = matches!(
             field_type,
             FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
@@ -59,7 +59,7 @@ impl MyFieldReceiver {
         let field_type = self
             .field_type_db
             .as_ref()
-            .map_or(&FieldType::Any, |t| t.into_inner_ref());
+            .map_or(&FieldType::Any, |t| t.as_field_type_ref());
         let explicit_ty_is_list = matches!(field_type, FieldType::Array(_item_ty, _));
         explicit_ty_is_list
             || self.ty().is_array()
@@ -71,7 +71,7 @@ impl MyFieldReceiver {
         let field_type = self
             .field_type_db
             .as_ref()
-            .map_or(&FieldType::Any, |t| t.into_inner_ref());
+            .map_or(&FieldType::Any, |t| t.as_field_type_ref());
         let explicit_ty_is_list = matches!(field_type, FieldType::Set(_item_ty, _));
         explicit_ty_is_list
             || self.ty().is_set()
@@ -82,7 +82,7 @@ impl MyFieldReceiver {
         let field_type = self
             .field_type_db
             .as_ref()
-            .map_or(&FieldType::Any, |t| t.into_inner_ref());
+            .map_or(&FieldType::Any, |t| t.as_field_type_ref());
         let explicit_ty_is_list =
             matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
