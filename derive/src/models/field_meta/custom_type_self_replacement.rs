@@ -24,7 +24,7 @@ pub struct ReplaceSelfVisitor {
 impl ReplaceSelfVisitor {
     #[allow(dead_code)]
     pub fn replace_self(&mut self, ty: &CustomType) -> CustomTypeNoSelf {
-        let mut ty = ty.to_basic_type().clone();
+        let mut ty = ty.as_basic_type_ref().clone();
         self.visit_type_mut(&mut ty);
         CustomTypeNoSelf::new(ty.clone())
     }
@@ -102,8 +102,11 @@ impl VisitMut for ReplaceSelfVisitor {
             let struct_ident = &self.struct_ident;
             i.path = parse_quote! { #struct_ident };
             if !self.generics.args.is_empty() {
-                i.path.segments.last_mut().unwrap().arguments =
-                    PathArguments::AngleBracketed(self.generics.clone());
+                i.path
+                    .segments
+                    .last_mut()
+                    .expect("Empty paths segments.")
+                    .arguments = PathArguments::AngleBracketed(self.generics.clone());
             }
         }
         visit_mut::visit_expr_path_mut(self, i);
@@ -246,7 +249,7 @@ mod tests {
             struct_ident,
             generics,
         };
-        let ty_to_replace = replacer.replace_self(&mut ty_to_replace.into());
+        let ty_to_replace = replacer.replace_self(&ty_to_replace.into());
 
         assert_eq!(
             quote::quote!(#ty_to_replace).to_string(),

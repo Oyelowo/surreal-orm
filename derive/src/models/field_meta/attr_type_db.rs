@@ -46,7 +46,7 @@ impl FieldTypeDb {
         self.0
     }
 
-    pub fn into_inner_ref(&self) -> &FieldType {
+    pub fn as_field_type_ref(&self) -> &FieldType {
         &self.0
     }
 
@@ -59,7 +59,7 @@ impl FieldTypeDb {
 
     pub fn as_db_sql_value_tokenstream(&self) -> SqlValueTokenStream {
         let crate_name = get_crate_name(false);
-        let value = match self.into_inner_ref() {
+        let value = match self.as_field_type_ref() {
             FieldType::Any => {
                 quote!(#crate_name::sql::Value)
             }

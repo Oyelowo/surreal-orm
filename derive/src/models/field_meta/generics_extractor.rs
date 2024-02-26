@@ -157,7 +157,7 @@ impl<'a> GenericTypeExtractor<'a> {
             struct_generics: model_attributes.generics(),
             field_generics: Default::default(),
         };
-        generics.visit_type(field_ty.to_basic_type());
+        generics.visit_type(field_ty.as_basic_type_ref());
         generics.field_generics.0
     }
 

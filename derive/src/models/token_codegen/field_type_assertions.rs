@@ -36,7 +36,7 @@ impl<'a> Codegen<'a> {
                 self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_object);).into());
             }
             RelationType::NestArray(foreign_array_object) => {
-                let nesting_level = Self::count_vec_nesting(field_type.to_basic_type());
+                let nesting_level = Self::count_vec_nesting(field_type.as_basic_type_ref());
                 let nested_vec_type =
                     Self::generate_nested_vec_type(&foreign_array_object, nesting_level);
 

@@ -22,7 +22,7 @@ macro_rules! create_custom_type_wrapper {
                 self.0
             }
 
-            pub fn into_inner_ref(&self) -> &CustomType {
+            pub fn as_custom_type_ref(&self) -> &CustomType {
                 &self.0
             }
         }
