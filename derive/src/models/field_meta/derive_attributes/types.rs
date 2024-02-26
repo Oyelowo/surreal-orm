@@ -62,7 +62,8 @@ impl MyFieldReceiver {
     pub fn is_numeric(&self) -> bool {
         let field_type = self
             .field_type_db
-            .map_or(FieldType::Any, |t| t.into_inner());
+            .as_ref()
+            .map_or(&FieldType::Any, |t| t.into_inner_ref());
         let explicit_db_ty_is_numeric = matches!(
             field_type,
             FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
@@ -73,37 +74,40 @@ impl MyFieldReceiver {
     pub fn is_array(&self) -> bool {
         let field_type = self
             .field_type_db
-            .map_or(FieldType::Any, |t| t.into_inner());
+            .as_ref()
+            .map_or(&FieldType::Any, |t| t.into_inner_ref());
         let explicit_ty_is_list = matches!(field_type, FieldType::Array(item_ty, _));
         explicit_ty_is_list
             || self.ty().is_array()
-            || self.field_type_db.map_or(false, |t| t.is_array())
+            || self.field_type_db.as_ref().map_or(false, |t| t.is_array())
             || self.link_many.is_some()
     }
 
     pub fn is_set(&self) -> bool {
         let field_type = self
             .field_type_db
-            .map_or(FieldType::Any, |t| t.into_inner());
+            .as_ref()
+            .map_or(&FieldType::Any, |t| t.into_inner_ref());
         let explicit_ty_is_list = matches!(field_type, FieldType::Set(item_ty, _));
         explicit_ty_is_list
             || self.ty().is_set()
-            || self.field_type_db.map_or(false, |t| t.is_set())
+            || self.field_type_db.as_ref().map_or(false, |t| t.is_set())
     }
 
     pub fn is_list(&self) -> bool {
         let field_type = self
             .field_type_db
-            .map_or(FieldType::Any, |t| t.into_inner());
+            .as_ref()
+            .map_or(&FieldType::Any, |t| t.into_inner_ref());
         let explicit_ty_is_list =
             matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
             || self.ty().is_list()
-            || self.field_type_db.map_or(false, |t| t.is_list())
+            || self.field_type_db.as_ref().map_or(false, |t| t.is_list())
             || self.link_many.is_some()
     }
 
     pub fn ty(&self) -> CustomType {
-        self.ty.into()
+        CustomType::new(self.ty.clone())
     }
 }

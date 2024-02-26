@@ -60,7 +60,7 @@ impl FromMeta for Permissions {
             }
             Meta::NameValue(MetaNameValue { value, .. }) => match value {
                 Expr::Path(expr_path) => {
-                    let path_str = expr_path.path.into_token_stream().to_string();
+                    let path_str = expr_path.path.to_token_stream().to_string();
                     match path_str.as_ref() {
                         "none" => Ok(Self::None),
                         "full" => Ok(Self::Full),

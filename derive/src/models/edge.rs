@@ -104,7 +104,7 @@ impl ToTokens for EdgeToken {
             table_id_type,
             field_metadata,
             ..
-        } = code_gen;
+        } = &code_gen;
 
         let has_in_and_out_fields = || {
             !serialized_field_names_normalised

@@ -255,7 +255,7 @@ impl<'a> Codegen<'a> {
             .expect("Field receiver has not been set. Make sure it has been set by calling set_field_receiver")
     }
 
-    pub(crate) fn table_derive_attributes(&self) -> &ModelAttributes {
+    pub(crate) fn table_derive_attributes(&self) -> &'a ModelAttributes {
         self.struct_attributes_data
             .struct_basic_model_attributes
             .expect("Model attributes has not been set. Make sure it has been set by calling set_field_receiver")
