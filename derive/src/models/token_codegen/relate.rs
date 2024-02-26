@@ -64,11 +64,10 @@ impl<'a> Codegen<'a> {
 
         let edge_name_with_direction_as_method_ident =
             &(|| Self::add_direction_indication_to_ident(edge_table_name, edge_direction));
-        let FieldGenericsMeta {
-            field_impl_generics: edge_impl_generics,
-            field_ty_generics: edge_ty_generics,
-            field_where_clause: edge_where_clause,
-        } = &edge_type.get_generics_meta(table_derive_attributes);
+        // let binding = GenericTypeExtractor::new(table_derive_attributes, field_type);
+        // let (edge_impl_generics, edge_ty_generics, edge_where_clause) = binding.split_for_impl();
+        let binding = field_type.get_generics_from_current_struct(table_derive_attributes);
+        let (edge_impl_generics, edge_ty_generics, edge_where_clause) = binding.split_for_impl();
 
         let foreign_node_schema_ident =
             ForeignNodeSchemaIdent::from_node_table_name(foreign_node_table_name);
@@ -479,11 +478,11 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 edge_name_as_struct_original_ident.deref(),
                 edge_types,
             );
-        let FieldGenericsMeta {
-            field_impl_generics: edge_type_impl_generics,
-            field_ty_generics: edge_type_ty_generics,
-            field_where_clause: edge_type_where_clause,
-        } = aggregated_edge_type.get_generics_meta(table_derive_attributes);
+        let binding =
+            aggregated_edge_type.get_generics_from_current_struct(table_derive_attributes);
+        let (edge_type_impl_generics, edge_type_ty_generics, edge_type_where_clause) =
+            binding.split_for_impl();
+
         let edge_name_as_struct_original_type_alias =
             quote!(#edge_name_as_struct_original_ident #edge_type_ty_generics);
 

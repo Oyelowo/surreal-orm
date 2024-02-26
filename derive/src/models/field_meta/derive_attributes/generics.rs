@@ -10,27 +10,6 @@ use crate::models::*;
 use super::MyFieldReceiver;
 
 impl MyFieldReceiver {
-    // This extracts generics metadata for field and from struct generics metadata.
-    // This could come from the concrete rust field type or
-    // as an attribute on the field from links which link to
-    // other tables structs models i.e Edge, Node and Objects.
-    // These are usually specified using the link_one, link_self
-    // and link_many and relate attributes.
-    // e.g
-    // #[surreal_orm(link_one = User<'a, T, u32>)]
-    // student: LinkOne<User<'a, T, u32>
-    pub fn get_field_generics_meta<'a>(
-        &self,
-        model_attributes: &'a ModelAttributes,
-    ) -> ExtractorResult<FieldGenericsMeta<'a>> {
-        Ok(self
-            .ty()
-            .replace_self_with_current_struct_concrete_type(&model_attributes)?
-            .into_inner_ref()
-            .get_generics_meta(model_attributes)
-            .clone())
-    }
-
     // fn has_generics(&self, table_attributes: TableDeriveAttributes) -> bool {
     //     let current_struct_generics = table_attributes.generics;
     //     match self.ty() {

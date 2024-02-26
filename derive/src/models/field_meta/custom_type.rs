@@ -10,8 +10,8 @@ use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
-    self, parse_quote, spanned::Spanned, visit_mut::VisitMut, GenericArgument, Ident, Lifetime,
-    Path, PathArguments, PathSegment, Type, TypeReference,
+    self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
+    Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
 };
 
 use crate::models::*;
@@ -113,19 +113,51 @@ impl CustomType {
         }
     }
 
-    pub fn get_generics_meta<'a>(
+    // This extracts generics metadata for field and from struct generics metadata.
+    // This could come from the concrete rust field type or
+    // as an attribute on the field from links which link to
+    // other tables structs models i.e Edge, Node and Objects.
+    // These are usually specified using the link_one, link_self
+    // and link_many and relate attributes.
+    // e.g
+    // #[surreal_orm(link_one = User<'a, T, u32>)]
+    // student: LinkOne<User<'a, T, u32>
+    pub fn get_generics_from_current_struct<'a>(
         &self,
         model_attributes: &'a ModelAttributes,
-    ) -> FieldGenericsMeta<'a> {
-        let (field_impl_generics, field_ty_generics, field_where_clause) =
-            GenericTypeExtractor::extract_generics_for_complex_type(model_attributes, &self)
-                .split_for_impl();
-        FieldGenericsMeta {
-            field_impl_generics,
-            field_ty_generics,
-            field_where_clause,
-        }
+    ) -> CustomGenerics {
+        let binding = GenericTypeExtractor::new(model_attributes, &self);
+        binding
     }
+
+    pub fn extract_generics_for_complex_type<'a>(
+        &self,
+        model_attributes: &'a ModelAttributes,
+        // field_ty: &CustomType,
+    ) -> CustomGenerics {
+        let mut generics = GenericTypeExtractor {
+            struct_generics: &model_attributes.generics(),
+            field_generics: Default::default(),
+        };
+        generics.visit_type(self.to_basic_type());
+        // generics.visit_type(&field_ty.to_basic_type());
+        generics.field_generics.0.into()
+    }
+
+    // pub fn get_generics_meta<'a>(
+    //     &self,
+    //     model_attributes: &'a ModelAttributes,
+    // ) -> FieldGenericsMeta<'a> {
+    //     let binding =
+    //         GenericTypeExtractor::extract_generics_for_complex_type(model_attributes, &self);
+    //     let (field_impl_generics, field_ty_generics, field_where_clause) =
+    //         &binding.split_for_impl();
+    //     FieldGenericsMeta {
+    //         field_impl_generics,
+    //         field_ty_generics,
+    //         field_where_clause: field_where_clause.cloned(),
+    //     }
+    // }
 
     pub fn replace_self_with_current_struct_concrete_type(
         &self,

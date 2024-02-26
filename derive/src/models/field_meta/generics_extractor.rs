@@ -14,7 +14,7 @@ use super::CustomType;
 struct StrippedBoundsGenerics(pub Generics);
 
 #[derive(Clone, Debug, Default)]
-struct CustomGenerics(pub Generics);
+pub struct CustomGenerics(pub Generics);
 
 impl CustomGenerics {
     pub fn params(&self) -> &Punctuated<syn::GenericParam, Token![,]> {
@@ -147,16 +147,13 @@ impl FieldGenerics {
     }
 }
 
-pub(crate) struct GenericTypeExtractor<'a> {
-    struct_generics: &'a StructGenerics,
-    field_generics: FieldGenerics,
+pub struct GenericTypeExtractor<'a> {
+    pub struct_generics: &'a StructGenerics,
+    pub field_generics: FieldGenerics,
 }
 
 impl<'a> GenericTypeExtractor<'a> {
-    pub fn extract_generics_for_complex_type(
-        model_attributes: &'a ModelAttributes,
-        field_ty: &CustomType,
-    ) -> CustomGenerics {
+    pub fn new(model_attributes: &'a ModelAttributes, field_ty: &CustomType) -> CustomGenerics {
         let mut generics = Self {
             struct_generics: &model_attributes.generics(),
             field_generics: Default::default(),
