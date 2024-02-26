@@ -42,7 +42,7 @@ impl TableNameIdent {
     }
 }
 
-struct TableNameAsString(String);
+pub struct TableNameAsString(String);
 
 impl ToTokens for TableNameAsString {
     fn to_tokens(&self, tokens: &mut TokenStream) {

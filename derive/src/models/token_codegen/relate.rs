@@ -295,7 +295,7 @@ impl From<NodeTableName> for DestinationNodeName {
 }
 
 #[derive(Clone, Debug)]
-struct NodeEdgeMetadata<'a> {
+pub struct NodeEdgeMetadata<'a> {
     /// Example value: writes
     edge_table_name: EdgeTableName,
     // edge_type: EdgeType,
