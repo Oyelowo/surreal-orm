@@ -14,13 +14,11 @@ use syn::{self, parse_macro_input};
 
 use crate::models::*;
 
-// #[derive(Debug, FromDeriveInput)]
-// #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-// struct ObjectToken(TableDeriveAttributes);
 #[derive(Debug, Clone, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct ObjectToken {
     pub(crate) ident: Ident,
+    #[allow(dead_code)]
     pub(crate) attrs: Vec<syn::Attribute>,
     pub(crate) generics: StructGenerics,
     /// Receives the body of the struct or enum. We don't care about

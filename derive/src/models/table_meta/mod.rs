@@ -10,4 +10,3 @@ mod table_name;
 
 pub use derive_attributes::*;
 pub use model_attributes::*;
-pub use table_name::*;

@@ -8,7 +8,6 @@
 use quote::quote;
 
 use crate::models::*;
-use table_meta::TableDeriveAttributes;
 
 create_tokenstream_wrapper!(
 /// Genera
@@ -110,7 +109,6 @@ impl<'a> Codegen<'a> {
         let current_struct = table_derive_attrs.ident();
         let struct_casing = table_derive_attrs.casing()?;
         let field_receiver = self.field_receiver();
-        let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing);
         let db_field_name = field_receiver.db_field_name(&struct_casing)?;
         let db_field_name_as_ident = db_field_name.as_ident();
         let VariablesModelMacro {

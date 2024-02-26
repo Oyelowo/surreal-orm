@@ -32,12 +32,12 @@ impl<'a> Codegen<'a> {
                 self.insert_non_null_updater_token(
                     quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, )
                         .into(),
-                );
+                )?;
             }
             RelationType::NestObject(nested_object) => {
                 self.insert_non_null_updater_token(
                     quote!(pub #field_ident_normalized: ::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>, ).into(),
-                );
+                )?;
             }
             RelationType::Relate(_) => {}
         }

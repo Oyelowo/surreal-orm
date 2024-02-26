@@ -24,7 +24,7 @@ pub use token_codegen::*;
 pub use utils::*;
 pub use variables::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum DataType {
     Node,
     Edge,

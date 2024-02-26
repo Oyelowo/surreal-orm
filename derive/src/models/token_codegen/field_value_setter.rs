@@ -35,7 +35,6 @@ use super::Codegen;
 
 impl<'a> Codegen<'a> {
     pub fn create_field_setter_impl(&mut self) -> ExtractorResult<()> {
-        let table_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
 
         match field_receiver.to_relation_type() {
