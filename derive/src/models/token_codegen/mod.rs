@@ -216,7 +216,7 @@ impl<'a> Codegen<'a> {
             struct_basic_model_attributes: Some(model_attributes),
             field_receiver: None,
         };
-        
+
         Self {
             struct_attributes_data,
             ..Default::default()

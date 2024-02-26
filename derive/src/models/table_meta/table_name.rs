@@ -8,12 +8,44 @@
 use convert_case::{Case, Casing};
 use darling::FromMeta;
 use quote::format_ident;
+use syn::{Expr, Lit, Meta};
 
 use crate::models::*;
 
 create_ident_wrapper!(TableNameIdent);
 
-impl FromMeta for TableNameIdent {}
+impl FromMeta for TableNameIdent {
+    fn from_meta(item: &Meta) -> darling::Result<Self> {
+        match item {
+            Meta::Path(path) => path
+                .get_ident()
+                .map(|ident| TableNameIdent(ident.clone()))
+                .ok_or_else(|| darling::Error::custom("Expected an identifier.")),
+            Meta::NameValue(nv) => match &nv.value {
+                Expr::Lit(expr_lit) => {
+                    if let Lit::Str(lit_str) = &expr_lit.lit {
+                        Ok(TableNameIdent(format_ident!("{}", lit_str.value())))
+                    } else {
+                        Err(darling::Error::custom("Expected a string literal."))
+                    }
+                }
+                Expr::Verbatim(expr_verbatim) => {
+                    let ident = syn::parse2(expr_verbatim.clone().into_token_stream())?;
+                    Ok(TableNameIdent(ident))
+                }
+                Expr::Path(expr_path) => {
+                    let ident = expr_path
+                        .path
+                        .get_ident()
+                        .ok_or_else(|| darling::Error::custom("Expected an identifier."))?;
+                    Ok(TableNameIdent(ident.clone()))
+                }
+                _ => Err(darling::Error::custom("Expected a string literal.")),
+            },
+            _ => Err(darling::Error::custom("Unsupported format for table name.")),
+        }
+    }
+}
 
 impl TableNameIdent {
     pub(crate) fn validate_and_return(
@@ -26,10 +58,12 @@ impl TableNameIdent {
         if !relax_table_name.unwrap_or(false) && self.to_string() != expected_table_name {
             return Err(syn::Error::new(
                 table_name.span(),
-                "table name must be in snake case of the current struct name. 
+                format!(
+                    "table name must be in snake case of the current struct name. 
         Try: `{expected_table_name}`.
         
-        If you don't want to follow this convention, use attribute `relax_table_name`. ",
+        If you don't want to follow this convention, use attribute `relax_table_name`. "
+                ),
             )
             .into());
         };
