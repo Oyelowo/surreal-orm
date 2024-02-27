@@ -7,6 +7,7 @@
 
 use convert_case::{Case, Casing};
 use darling::FromMeta;
+use proc_macro2::Ident;
 use quote::format_ident;
 use syn::{Expr, Lit, Meta};
 
@@ -24,7 +25,7 @@ impl FromMeta for TableNameIdent {
             Meta::NameValue(nv) => match &nv.value {
                 Expr::Lit(expr_lit) => {
                     if let Lit::Str(lit_str) = &expr_lit.lit {
-                        Ok(TableNameIdent(format_ident!("{}", lit_str.value())))
+                        Ok(TableNameIdent(Ident::new(&lit_str.value(), lit_str.span())))
                     } else {
                         Err(darling::Error::custom("Expected a string literal."))
                     }
@@ -61,7 +62,6 @@ impl TableNameIdent {
                 format!(
                     "table name must be in snake case of the current struct name. 
         Try: `{expected_table_name}`.
-        
         If you don't want to follow this convention, use attribute `relax_table_name`. "
                 ),
             )
