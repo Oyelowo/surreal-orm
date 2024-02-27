@@ -14,7 +14,7 @@ pub struct ListSimple;
 
 macro_rules! create_custom_type_wrapper {
     ($name:ident) => {
-        #[derive(Debug, Clone, FromMeta)]
+        #[derive(Debug, Clone)]
         pub struct $name(pub CustomType);
 
         impl $name {
@@ -24,6 +24,13 @@ macro_rules! create_custom_type_wrapper {
 
             pub fn as_custom_type_ref(&self) -> &CustomType {
                 &self.0
+            }
+        }
+
+        impl ::darling::FromMeta for $name {
+            fn from_meta(item: &::syn::Meta) -> ::darling::Result<Self> {
+                let custom_type = CustomType::from_meta(item)?;
+                Ok(Self(custom_type))
             }
         }
 

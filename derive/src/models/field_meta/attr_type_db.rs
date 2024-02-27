@@ -236,13 +236,28 @@ impl Deref for FieldTypeDb {
 }
 
 impl FromMeta for FieldTypeDb {
-    fn from_value(value: &syn::Lit) -> darling::Result<Self> {
-        let field_type = match value {
-            syn::Lit::Str(lit_str) => lit_str.value(),
+    fn from_expr(expr: &syn::Expr) -> darling::Result<Self> {
+        let field_type = match expr {
+            syn::Expr::Lit(expr_lit) => {
+                if let syn::Lit::Str(lit_str) = &expr_lit.lit {
+                    lit_str.value()
+                } else {
+                    return Err(darling::Error::custom("Expected a string literal for ty"));
+                }
+            }
+            syn::Expr::Path(expr_path) => expr_path
+                .path
+                .get_ident()
+                .map(|ident| ident.to_string())
+                .ok_or_else(|| darling::Error::custom("Expected an identifier for ty"))?,
+            syn::Expr::Verbatim(expr_verbatim) => expr_verbatim.to_string(),
             _ => return Err(darling::Error::custom("Expected a string literal for ty")),
         };
         let field_type = FieldType::from_str(&field_type).map_err(|_| {
-            darling::Error::custom(format!("Invalid db_field_type: {}", field_type))
+            darling::Error::custom(format!(
+                "Invalid db_field_type: {field_type}. Must be one of these: {}",
+                FieldType::variants().join(", ")
+            ))
         })?;
         Ok(Self(field_type))
     }

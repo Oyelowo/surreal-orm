@@ -58,8 +58,60 @@ impl ToTokens for CustomTypeNoSelf {
     }
 }
 
-#[derive(Debug, Clone, FromMeta)]
+// takes type as path and stringified also e.g User<'a, T, u32> or "User<'a, T, u32>"
+#[derive(Debug, Clone)]
 pub struct CustomType(Type);
+
+impl FromMeta for CustomType {
+    fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
+        panic!("Item: {:?}", item);
+        // Type::from_meta(item).map(Self)
+        let ty = match item {
+            syn::Meta::Path(ref path) => {
+                let ty = Type::Path(syn::TypePath {
+                    qself: None,
+                    path: path.clone(),
+                });
+                ty
+            }
+            syn::Meta::NameValue(ref name_value) => {
+                panic!("Name value: {:?}", name_value);
+                let ty = match &name_value.value {
+                    syn::Expr::Lit(lit_str) => match lit_str.lit {
+                        syn::Lit::Str(ref lit_str) => {
+                            let ty = syn::parse_str::<Type>(&lit_str.value())?;
+                            ty
+                        }
+                        _ => {
+                            return Err(darling::Error::custom(
+                                "Unable to parse stringified type. Expected a valid Rust path or a stringified type",
+                            ));
+                        }
+                    },
+                    syn::Expr::Path(ref path) => {
+                        let ty = Type::Path(syn::TypePath {
+                            qself: None,
+                            path: path.path.clone(),
+                        });
+                        ty
+                    }
+                    _ => {
+                        return Err(darling::Error::custom(
+                            "Expected a valid Rust path or a stringified type",
+                        ));
+                    }
+                };
+                ty
+            }
+            _ => {
+                return Err(darling::Error::unsupported_shape(
+                    "Expected a path or a name-value pair",
+                ));
+            }
+        };
+        Ok(Self(ty))
+    }
+}
 
 // impl Parse for CustomType {
 //     // TODO: Handle type parsing if frommeta does not work or manually implement fromMeta

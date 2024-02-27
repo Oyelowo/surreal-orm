@@ -22,29 +22,30 @@ pub enum ExprOrPath {
 
 impl FromMeta for ExprOrPath {
     fn from_expr(expr: &syn::Expr) -> darling::Result<Self> {
+        // TODO: Check if it makes sense to allow path alone of it that works OOTB
         Ok(Self::Expr(expr.clone()))
     }
 
-    fn from_meta(item: &Meta) -> Result<Self, darling::Error> {
-        match item {
-            Meta::Path(ref path) => Ok(ExprOrPath::Path(path.clone())),
-            Meta::NameValue(MetaNameValue { value, .. }) => match value {
-                Expr::Path(expr_path) => {
-                    if expr_path.path.segments.is_empty() {
-                        Err(darling::Error::custom("Path cannot be empty"))
-                    } else {
-                        Ok(ExprOrPath::Path(expr_path.path.clone()))
-                    }
-                }
-                _ => Err(darling::Error::custom(
-                    "Expected a valid Rust path or an expression",
-                )),
-            },
-            _ => Err(darling::Error::unsupported_shape(
-                "Expected a path or a name-value pair",
-            )),
-        }
-    }
+    // fn from_meta(item: &Meta) -> Result<Self, darling::Error> {
+    //     match item {
+    //         Meta::Path(ref path) => Ok(ExprOrPath::Path(path.clone())),
+    //         Meta::NameValue(MetaNameValue { value, .. }) => match value {
+    //             Expr::Path(expr_path) => {
+    //                 if expr_path.path.segments.is_empty() {
+    //                     Err(darling::Error::custom("Path cannot be empty"))
+    //                 } else {
+    //                     Ok(ExprOrPath::Path(expr_path.path.clone()))
+    //                 }
+    //             }
+    //             _ => Err(darling::Error::custom(
+    //                 "Expected a valid Rust path or an expression",
+    //             )),
+    //         },
+    //         _ => Err(darling::Error::unsupported_shape(
+    //             "Expected a path or a name-value pair",
+    //         )),
+    //     }
+    // }
 }
 
 impl ToTokens for ExprOrPath {
