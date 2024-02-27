@@ -255,8 +255,23 @@ impl FieldType {
     /// Returns a list of all the variants of the enum
     pub fn variants() -> Vec<&'static str> {
         vec![
-            "any", "null", "array", "set", "bool", "datetime", "decimal", "duration", "float",
-            "int", "number", "object", "string", "record", "geometry", "option", "union",
+            "any",
+            "null",
+            "array<string>",
+            "set<string>",
+            "bool",
+            "datetime",
+            "decimal",
+            "duration",
+            "float",
+            "int",
+            "number",
+            "object",
+            "string",
+            "record<user>",
+            "geometry<point>",
+            "option<string>",
+            "union<string | number>",
         ]
     }
 
