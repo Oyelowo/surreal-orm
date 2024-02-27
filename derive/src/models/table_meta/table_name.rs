@@ -9,43 +9,66 @@ use convert_case::{Case, Casing};
 use darling::FromMeta;
 use proc_macro2::Ident;
 use quote::format_ident;
-use syn::{Expr, Lit, Meta};
+use syn::{Expr, Lit};
 
 use crate::models::*;
 
 create_ident_wrapper!(TableNameIdent);
 
 impl FromMeta for TableNameIdent {
-    fn from_meta(item: &Meta) -> darling::Result<Self> {
-        match item {
-            Meta::Path(path) => path
-                .get_ident()
-                .map(|ident| TableNameIdent(ident.clone()))
-                .ok_or_else(|| darling::Error::custom("Expected an identifier.")),
-            Meta::NameValue(nv) => match &nv.value {
-                Expr::Lit(expr_lit) => {
-                    if let Lit::Str(lit_str) = &expr_lit.lit {
-                        Ok(TableNameIdent(Ident::new(&lit_str.value(), lit_str.span())))
-                    } else {
-                        Err(darling::Error::custom("Expected a string literal."))
-                    }
+    fn from_expr(expr: &Expr) -> darling::Result<Self> {
+        match expr {
+            Expr::Lit(expr) => {
+                if let Lit::Str(lit_str) = &expr.lit {
+                    Ok(TableNameIdent(Ident::new(&lit_str.value(), lit_str.span())))
+                } else {
+                    Err(darling::Error::custom("Expected a string literal."))
                 }
-                Expr::Verbatim(expr_verbatim) => {
-                    let ident = syn::parse2(expr_verbatim.clone().into_token_stream())?;
-                    Ok(TableNameIdent(ident))
-                }
-                Expr::Path(expr_path) => {
-                    let ident = expr_path
-                        .path
-                        .get_ident()
-                        .ok_or_else(|| darling::Error::custom("Expected an identifier."))?;
-                    Ok(TableNameIdent(ident.clone()))
-                }
-                _ => Err(darling::Error::custom("Expected a string literal.")),
-            },
-            _ => Err(darling::Error::custom("Unsupported format for table name.")),
+            }
+            // Expr::Verbatim(expr_verbatim) => {
+            //     let ident = syn::parse2(expr_verbatim.clone().into_token_stream())?;
+            //     Ok(TableNameIdent(ident))
+            // }
+            Expr::Path(expr_path) => {
+                let ident = expr_path
+                    .path
+                    .get_ident()
+                    .ok_or_else(|| darling::Error::custom("Expected an identifier."))?;
+                Ok(TableNameIdent(ident.clone()))
+            }
+            _ => Err(darling::Error::custom("Expected a string literal.")),
         }
     }
+    // fn from_meta(item: &Meta) -> darling::Result<Self> {
+    //     match item {
+    //         Meta::Path(path) => path
+    //             .get_ident()
+    //             .map(|ident| TableNameIdent(ident.clone()))
+    //             .ok_or_else(|| darling::Error::custom("Expected an identifier.")),
+    //         Meta::NameValue(nv) => match &nv.value {
+    //             Expr::Lit(expr_lit) => {
+    //                 if let Lit::Str(lit_str) = &expr_lit.lit {
+    //                     Ok(TableNameIdent(Ident::new(&lit_str.value(), lit_str.span())))
+    //                 } else {
+    //                     Err(darling::Error::custom("Expected a string literal."))
+    //                 }
+    //             }
+    //             Expr::Verbatim(expr_verbatim) => {
+    //                 let ident = syn::parse2(expr_verbatim.clone().into_token_stream())?;
+    //                 Ok(TableNameIdent(ident))
+    //             }
+    //             Expr::Path(expr_path) => {
+    //                 let ident = expr_path
+    //                     .path
+    //                     .get_ident()
+    //                     .ok_or_else(|| darling::Error::custom("Expected an identifier."))?;
+    //                 Ok(TableNameIdent(ident.clone()))
+    //             }
+    //             _ => Err(darling::Error::custom("Expected a string literal.")),
+    //         },
+    //         _ => Err(darling::Error::custom("Unsupported format for table name.")),
+    //     }
+    // }
 }
 
 impl TableNameIdent {
