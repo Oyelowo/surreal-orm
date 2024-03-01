@@ -5,13 +5,15 @@
  * Licensed under the MIT license
  */
 
+use std::path::Path;
+
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
     self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
-    Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
+    Lifetime, PathArguments, PathSegment, Type, TypeReference,
 };
 
 use crate::models::*;
@@ -64,7 +66,7 @@ pub struct CustomType(Type);
 
 impl FromMeta for CustomType {
     fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
-        panic!("Item: {:?}", item);
+        // panic!("Item: {:?}", item);
         // Type::from_meta(item).map(Self)
         let ty = match item {
             syn::Meta::Path(ref path) => {
@@ -75,11 +77,12 @@ impl FromMeta for CustomType {
                 ty
             }
             syn::Meta::NameValue(ref name_value) => {
-                panic!("Name value: {:?}", name_value);
+                // panic!("Name value: {:?}", name_value);
                 let ty = match &name_value.value {
                     syn::Expr::Lit(lit_str) => match lit_str.lit {
                         syn::Lit::Str(ref lit_str) => {
                             let ty = syn::parse_str::<Type>(&lit_str.value())?;
+                            panic!("Parsed type: {:?}", ty);
                             ty
                         }
                         _ => {

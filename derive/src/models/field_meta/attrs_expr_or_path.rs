@@ -10,7 +10,7 @@ use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
-use syn::{Expr, Meta, MetaNameValue};
+use syn::Expr;
 
 use crate::models::*;
 
