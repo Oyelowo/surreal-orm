@@ -5,15 +5,13 @@
  * Licensed under the MIT license
  */
 
-use std::path::Path;
-
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
     self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
-    Lifetime, PathArguments, PathSegment, Type, TypeReference,
+    Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
 };
 
 use crate::models::*;
@@ -221,7 +219,8 @@ impl CustomType {
         // };
         // let x = replacer.replace_self(self.to_basic_type().clone());
         let ty = &self.as_basic_type_ref();
-        let replacement_path_from_current_struct = model_attributes.struct_as_path_no_bounds()?;
+        let replacement_path_from_current_struct =
+            model_attributes.struct_no_bounds()?.to_path()?;
 
         fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
             if segment.ident == "Self" {

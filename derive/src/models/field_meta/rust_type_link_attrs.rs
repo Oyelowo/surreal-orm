@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-use darling::FromMeta;
-
 use super::*;
 
 #[derive(Debug, Copy, Clone)]
