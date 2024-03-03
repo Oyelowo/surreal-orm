@@ -83,7 +83,7 @@ impl ToTokens for NodeToken {
             field_definitions,
             fields_relations_aliased,
             non_null_updater_fields,
-            renamed_serialized_fields,
+            renamed_serialized_fields_kv,
             table_id_type,
             field_metadata,
             ..
@@ -133,7 +133,7 @@ impl ToTokens for NodeToken {
         //     written_blogs: Relate<Blog>,
         // }
         tokens.extend(quote!(
-            use #crate_name::{ToRaw as _};
+            use #crate_name::ToRaw as _;
             use #crate_name::Aliasable as _;
 
             impl #struct_impl_generics #crate_name::SchemaGetter for #struct_name_ident #struct_ty_generics #struct_where_clause {
@@ -200,7 +200,7 @@ impl ToTokens for NodeToken {
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
             pub struct #struct_with_renamed_serialized_fields {
                #(
-                    #renamed_serialized_fields
+                    #renamed_serialized_fields_kv
                 ) *
             }
 

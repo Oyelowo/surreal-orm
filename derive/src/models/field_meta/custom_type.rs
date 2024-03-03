@@ -80,7 +80,7 @@ impl FromMeta for CustomType {
                     syn::Expr::Lit(lit_str) => match lit_str.lit {
                         syn::Lit::Str(ref lit_str) => {
                             let ty = syn::parse_str::<Type>(&lit_str.value())?;
-                            panic!("Parsed type: {:?}", ty);
+                            // panic!("Parsed type: {:?}", ty);
                             ty
                         }
                         _ => {

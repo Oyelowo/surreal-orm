@@ -198,7 +198,7 @@ pub struct Codegen<'a> {
     pub node_edge_metadata: NodeEdgeMetadataLookupTable<'a>,
     pub fields_relations_aliased: Vec<FieldsRelationsAliased>,
     pub non_null_updater_fields: Vec<NonNullUpdaterFields>,
-    pub renamed_serialized_fields: Vec<RenamedSerializedFields>,
+    pub renamed_serialized_fields_kv: Vec<RenamedSerializedFields>,
     pub table_id_type: TableIdType,
 
     struct_attributes_data: StructAttributesData<'a>,
