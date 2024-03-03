@@ -100,7 +100,7 @@ impl ToTokens for EdgeToken {
             link_one_and_self_fields,
             link_many_fields,
             non_null_updater_fields,
-            renamed_serialized_fields,
+            renamed_serialized_fields_kv,
             table_id_type,
             field_metadata,
             ..
@@ -192,7 +192,7 @@ impl ToTokens for EdgeToken {
                 #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
                 pub struct #struct_with_renamed_serialized_fields {
                    #(
-                        #renamed_serialized_fields
+                        #renamed_serialized_fields_kv
                     ) *
                 }
 

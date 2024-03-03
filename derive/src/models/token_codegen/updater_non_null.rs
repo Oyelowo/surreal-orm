@@ -49,9 +49,8 @@ impl<'a> Codegen<'a> {
         updater_field_token: TokenStream,
     ) -> ExtractorResult<()> {
         let table_derive_attributes = self.table_derive_attributes();
-        let db_field_name = self
-            .field_receiver()
-            .db_field_name(&table_derive_attributes.casing()?)?;
+        let fr = self.field_receiver();
+        let db_field_name = fr.db_field_name(&table_derive_attributes.casing()?)?;
         if db_field_name.is_updateable_by_default(&self.data_type()) {
             self.non_null_updater_fields
                 .push(updater_field_token.into());
@@ -59,7 +58,9 @@ impl<'a> Codegen<'a> {
         // We dont care about the field type. We just use this struct to check for
         // renamed serialized field names at compile time by asserting that the a field
         // exist.
-        self.renamed_serialized_fields
+        let field_ident = fr.field_ident_normalized(&table_derive_attributes.casing()?)?;
+
+        self.renamed_serialized_fields_kv
             .push(quote!(pub #db_field_name: &'static str, ).into());
         Ok(())
     }
