@@ -59,9 +59,8 @@ impl<'a> Codegen<'a> {
         // renamed serialized field names at compile time by asserting that the a field
         // exist.
         let field_ident = fr.field_ident_normalized(&table_derive_attributes.casing()?)?;
-
         self.renamed_serialized_fields_kv
-            .push(quote!(pub #db_field_name: &'static str, ).into());
+            .push(quote!(pub #field_ident: &'static str, ).into());
         Ok(())
     }
 }
