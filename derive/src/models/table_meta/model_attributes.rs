@@ -144,11 +144,10 @@ impl ModelAttributes {
         Ok(casing.into())
     }
 
-    pub fn struct_as_path_no_bounds(&self) -> ExtractorResult<Path> {
+    pub fn struct_no_bounds(&self) -> ExtractorResult<CustomTypeNoSelf> {
         // let replacement_path: Path = parse_quote!(#struct_name #ty_generics);
         self.construct_struct_type_without_bounds()
-            .replace_self_with_current_struct_concrete_type(self)?
-            .to_path()
+            .replace_self_with_current_struct_concrete_type(self)
     }
 
     fn construct_struct_type_without_bounds(&self) -> CustomType {

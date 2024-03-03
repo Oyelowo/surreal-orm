@@ -24,7 +24,7 @@ impl<'a> Codegen<'a> {
                 self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);).into());
             }
             RelationType::LinkSelf(self_node) => {
-                let current_struct_type = table_derive_attrs.struct_as_path_no_bounds()?;
+                let current_struct_type = table_derive_attrs.struct_no_bounds()?;
                 self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#self_node>);).into());
 
                 self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#self_node>);).into());
