@@ -406,7 +406,7 @@ impl ToTokens for NodeToken {
 
                     pub fn #__________connect_node_to_graph_traversal_string(
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
-                        clause: impl Into<#crate_name::NodeClause>,
+                        clause: impl ::std::convert::Into<#crate_name::NodeClause>,
                     ) -> Self {
                         let mut #schema_instance = Self::new();
                         let clause: #crate_name::NodeClause = clause.into();

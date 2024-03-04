@@ -364,7 +364,7 @@ impl ToTokens for EdgeToken {
 
                         pub fn #__________connect_edge_to_graph_traversal_string(
                             connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
-                            clause: impl Into<#crate_name::EdgeClause>,
+                            clause: impl ::std::convert::Into<#crate_name::EdgeClause>,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
                             let clause: #crate_name::EdgeClause = clause.into();
