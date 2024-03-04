@@ -116,6 +116,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let db_field_name = field_receiver.db_field_name(&struct_casing)?;
         let db_field_name_as_ident = db_field_name.as_ident();
+        let link_one_turbo_fished = link_one.turbo_fishize()?;
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
@@ -140,7 +141,7 @@ impl<'a> Codegen<'a> {
                     format!(".{}", #db_field_name)
                 };
 
-                #link_one::#__________connect_node_to_graph_traversal_string(
+                #link_one_turbo_fished::#__________connect_node_to_graph_traversal_string(
                     self,
                     clause.with_field(normalized_field_name_str)
                 )
@@ -165,6 +166,7 @@ impl<'a> Codegen<'a> {
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = field_attr.field_ident_normalized(&struct_casing)?;
         let db_field_name = field_attr.db_field_name(&struct_casing)?;
+        let link_many_node_type_turbo_fished = link_many_node_type.turbo_fishize()?;
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
@@ -191,7 +193,7 @@ impl<'a> Codegen<'a> {
                 format!(".{}", #db_field_name)
             };
 
-            #link_many_node_type::#__________connect_node_to_graph_traversal_string(
+            #link_many_node_type_turbo_fished::#__________connect_node_to_graph_traversal_string(
                     self,
                     clause.with_field(db_field_name)
                 )
@@ -219,6 +221,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
         let field_name_serialized = field_receiver.db_field_name(&struct_casing)?;
+        let embedded_object_turbo_fished = embedded_object.turbo_fishize()?;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -246,7 +249,7 @@ impl<'a> Codegen<'a> {
                     format!(".{}", #field_name_serialized)
                 };
 
-                #embedded_object::#__________connect_object_to_graph_traversal_string(
+                #embedded_object_turbo_fished::#__________connect_object_to_graph_traversal_string(
                     self,
                     clause.with_field(normalized_field_name_str)
                 )
@@ -272,6 +275,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
         let field_name_serialized = field_receiver.db_field_name(&struct_casing)?;
+        let nest_array_turbo_fished = nested_array.turbo_fishize()?;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -301,7 +305,7 @@ impl<'a> Codegen<'a> {
                     format!(".{}", #field_name_serialized)
                 };
 
-                #nested_array::#__________connect_object_to_graph_traversal_string(
+                #nest_array_turbo_fished::#__________connect_object_to_graph_traversal_string(
                     self,
                     clause.with_field(normalized_field_name_str)
                 )

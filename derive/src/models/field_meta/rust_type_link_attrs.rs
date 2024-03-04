@@ -13,15 +13,33 @@ pub struct ListSimple;
 macro_rules! create_custom_type_wrapper {
     ($name:ident) => {
         #[derive(Debug, Clone)]
-        pub struct $name(pub CustomType);
+        pub struct $name(pub crate::models::CustomType);
+
+        ::paste::paste! {
+            #[derive(Debug, Clone)]
+            pub struct [<$name TurboFished>](pub crate::models::CustomTypeTurboFished);
+
+            impl ::quote::ToTokens for [<$name TurboFished>] {
+                fn to_tokens(&self, tokens: &mut ::proc_macro2::TokenStream) {
+                    self.0.to_tokens(tokens);
+                }
+            }
+        }
 
         impl $name {
-            pub fn into_inner(self) -> CustomType {
+            pub fn into_inner(self) -> crate::models::CustomType {
                 self.0
             }
 
             pub fn as_custom_type_ref(&self) -> &CustomType {
                 &self.0
+            }
+
+            ::paste::paste! {
+                pub fn turbo_fishize(&self) -> crate::models::ExtractorResult<[<$name TurboFished>]> {
+                    Ok([<$name TurboFished>](self.0.turbo_fishize()?))
+                }
+
             }
         }
 
@@ -32,20 +50,20 @@ macro_rules! create_custom_type_wrapper {
             }
         }
 
-        impl ::std::convert::From<CustomType> for $name {
+        impl ::std::convert::From<crate::models::CustomType> for $name {
             fn from(ty: CustomType) -> Self {
                 Self(ty)
             }
         }
 
-        impl ::std::convert::From<$name> for CustomType {
+        impl ::std::convert::From<$name> for crate::models::CustomType {
             fn from(ty: $name) -> Self {
                 ty.0
             }
         }
 
         impl ::std::ops::Deref for $name {
-            type Target = CustomType;
+            type Target = crate::models::CustomType;
 
             fn deref(&self) -> &Self::Target {
                 &self.0
@@ -69,6 +87,7 @@ macro_rules! create_custom_type_wrapper {
 pub(crate) use create_custom_type_wrapper;
 
 create_custom_type_wrapper!(LinkSelfAttrType);
+
 create_custom_type_wrapper!(LinkOneAttrType);
 create_custom_type_wrapper!(LinkManyAttrType);
 create_custom_type_wrapper!(NestObjectAttrType);

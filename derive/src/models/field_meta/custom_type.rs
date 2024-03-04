@@ -10,8 +10,8 @@ use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
-    self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
-    Lifetime, Path, PathArguments, PathSegment, Type, TypeReference,
+    self, parse_quote, spanned::Spanned, token::PathSep, visit::Visit, visit_mut::VisitMut,
+    GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Token, Type, TypeReference,
 };
 
 use crate::models::*;
@@ -133,6 +133,15 @@ impl ToTokens for CustomType {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct CustomTypeTurboFished(Type);
+
+impl ToTokens for CustomTypeTurboFished {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.0.to_tokens(tokens)
+    }
+}
+
 impl CustomType {
     pub fn new(ty: Type) -> Self {
         Self(ty)
@@ -144,6 +153,43 @@ impl CustomType {
 
     pub fn as_basic_type_ref(&self) -> &Type {
         &self.0
+    }
+
+    pub fn turbo_fishize(&self) -> ExtractorResult<CustomTypeTurboFished> {
+        match self.as_basic_type_ref() {
+            Type::Path(type_path) => {
+                let mut path = type_path.path.clone();
+
+                if let Some(last) = path.segments.last_mut() {
+                    let arguments = std::mem::replace(&mut last.arguments, PathArguments::None);
+                    match arguments {
+                        PathArguments::AngleBracketed(angle_bracketed) => {
+                            let colon2_token = Some(Token![::](angle_bracketed.span()));
+                            last.arguments = PathArguments::AngleBracketed(
+                                syn::AngleBracketedGenericArguments {
+                                    colon2_token,
+                                    ..angle_bracketed
+                                },
+                            );
+                        }
+                        _ => last.arguments = arguments,
+                    }
+                }
+
+                let ty = Type::Path(syn::TypePath {
+                    qself: type_path.qself.clone(),
+                    path,
+                });
+                Ok(CustomTypeTurboFished(ty))
+            }
+            _ => {
+                return Err(syn::Error::new(
+                    self.to_token_stream().span(),
+                    "Unsupported type for turbofishing",
+                )
+                .into());
+            }
+        }
     }
 
     pub fn type_name(&self) -> ExtractorResult<Ident> {
