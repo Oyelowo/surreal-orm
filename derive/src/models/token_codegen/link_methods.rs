@@ -46,8 +46,8 @@ impl<'a> Codegen<'a> {
                 metas.push(meta);
             }
             RelationType::List(_list) => {
-                let method_token = self.list_simple()?;
-                self.record_link_fields_methods.push(method_token);
+                let meta = self.list_simple()?;
+                metas.push(meta);
             }
             RelationType::Relate(_relate) => {}
             RelationType::None => {}
@@ -66,7 +66,7 @@ impl<'a> Codegen<'a> {
         Ok(())
     }
 
-    pub fn list_simple(&self) -> ExtractorResult<LinkFieldTraversalMethodToken> {
+    pub fn list_simple(&self) -> ExtractorResult<LinkMethodMeta> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
@@ -98,7 +98,12 @@ impl<'a> Codegen<'a> {
             }
         );
 
-        Ok(record_link_default_alias_as_method.into())
+        // Ok(record_link_default_alias_as_method.into())
+        Ok(LinkMethodMeta {
+            foreign_node_schema_import: quote!().into(),
+            foreign_node_type_validator: quote!().into(),
+            link_field_method: record_link_default_alias_as_method.to_token_stream().into(),
+        })
     }
 
     fn link_one(&self, link_one: LinkOneAttrType) -> ExtractorResult<LinkMethodMeta> {
@@ -126,17 +131,18 @@ impl<'a> Codegen<'a> {
             };
 
         let record_link_default_alias_as_method = quote!(
-            pub fn #db_field_name_as_ident(&self) -> #link_one { let clause = #crate_name::Clause::from(#crate_name::Empty);
+            pub fn #db_field_name_as_ident(&self) -> #link_one {
+                let clause = #crate_name::Clause::from(#crate_name::Empty);
 
-            let db_field_name = if self.build().is_empty(){
-                #db_field_name
-            }else {
-                format!(".{}", #db_field_name)
-            };
+                let db_field_name = if self.build().is_empty(){
+                    #db_field_name
+                } else {
+                    format!(".{}", #db_field_name)
+                };
 
-            #link_one::#__________connect_node_to_graph_traversal_string(
-                self,
-                clause.with_field(normalized_field_name_str)
+                #link_one::#__________connect_node_to_graph_traversal_string(
+                    self,
+                    clause.with_field(normalized_field_name_str)
                 )
             }
         );
