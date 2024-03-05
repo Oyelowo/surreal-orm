@@ -128,7 +128,8 @@ struct PhantomDataType(Type);
 
 impl ToTokens for PhantomDataType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        tokens.extend(self.0);
+        let ty = self.0;
+        tokens.extend(quote!(#ty));
     }
 }
 
