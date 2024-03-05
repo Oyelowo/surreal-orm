@@ -116,7 +116,56 @@ impl std::ops::Deref for StructGenerics {
     }
 }
 
+struct PhantomDataGenericArguments {
+    colon2_token: Option<Token![::]>,
+    lt_token: Token![<],
+    args: Punctuated<GenericArgument, Token![,]>,
+    gt_token: Token![>],
+}
+
+// PhantomData<(&'a dyn std::any::Any, &'b dyn std::any::Any, T, U, V)>,
+struct PhantomDataType(Type);
+
+impl ToTokens for PhantomDataType {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        tokens.extend(self.0);
+    }
+}
+
 impl StructGenerics {
+    pub fn phantom_marker_type(&self) -> PhantomDataType {
+        let args = self
+            .to_basic_generics_ref()
+            .params
+            .iter()
+            .map(|param| match param {
+                syn::GenericParam::Type(type_param) => {
+                    let ident = &type_param.ident;
+                    let ty: Type = syn::parse_quote!(#ident);
+                    // GenericArgument::Type(ty)
+                    quote!(#ty)
+                }
+                syn::GenericParam::Lifetime(lifetime_def) => {
+                    let lifetime = &lifetime_def.lifetime;
+                    // GenericArgument::Lifetime(Lifetime::new(&lifetime.to_string(), lifetime.span()))
+                    quote!(& #lifetime dyn ::std::any::Any)
+                }
+                syn::GenericParam::Const(const_param) => {
+                    let ident = &const_param.ident;
+                    let ty = &const_param.ty;
+                    let expr: Expr = syn::parse_quote!(#ident as #ty);
+                    // GenericArgument::Const(expr)
+                    quote!(#expr)
+                }
+            })
+            .collect();
+
+        let marker = quote! (::std::marker::PhantomData<( #( #args ),* )>);
+        let marker: Type = parse_quote!(marker);
+        // let marker: Type = syn::parse2(marker).unwrap();
+        PhantomDataType(marker)
+    }
+
     pub fn to_basic_generics_ref(&self) -> &Generics {
         &self.0 .0
     }

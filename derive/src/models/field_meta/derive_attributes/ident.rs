@@ -44,7 +44,7 @@ impl MyFieldReceiver {
         let field_name_normalized = self.field_ident_normalized(struct_casing)?;
 
         let field_name_pascalized = format_ident!(
-            "{}",
+            "__{}__",
             field_name_normalized.to_string().to_case(Case::Pascal)
         );
 
