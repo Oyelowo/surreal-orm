@@ -27,6 +27,7 @@ pub struct VariablesModelMacro {
     pub ___________in_marker: syn::Ident,
     pub ___________out_marker: syn::Ident,
     pub _____field_names: syn::Ident,
+    pub _____struct_marker_ident: syn::Ident,
 }
 
 impl VariablesModelMacro {
@@ -56,6 +57,7 @@ impl VariablesModelMacro {
         Self {
             ___________graph_traversal_string,
             schema_instance,
+            _____struct_marker_ident: format_ident!("_____struct_marker_ident"),
             ___________model,
             ___________in_marker,
             ___________out_marker,

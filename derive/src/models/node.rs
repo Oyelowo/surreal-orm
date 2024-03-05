@@ -383,6 +383,7 @@ impl ToTokens for NodeToken {
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -394,6 +395,7 @@ impl ToTokens for NodeToken {
                             #___________graph_traversal_string: prefix.build(),
                             #___________bindings: prefix.get_bindings(),
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -403,6 +405,7 @@ impl ToTokens for NodeToken {
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
