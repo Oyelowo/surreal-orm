@@ -138,14 +138,14 @@ impl ToTokens for NodeToken {
             use #crate_name::Aliasable as _;
 
             impl #struct_impl_generics #crate_name::SchemaGetter for #struct_name_ident #struct_ty_generics #struct_where_clause {
-                type Schema = #module_name_rexported::Schema;
+                type Schema = #module_name_rexported::Schema #struct_ty_generics;
 
-                fn schema() -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new()
+                fn schema() -> #module_name_rexported::Schema #struct_ty_generics {
+                    #module_name_rexported::Schema:: #struct_ty_generics ::new()
                 }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new_prefixed(prefix)
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema #struct_ty_generics {
+                    #module_name_rexported::Schema:: #struct_ty_generics ::new_prefixed(prefix)
                 }
             }
 
