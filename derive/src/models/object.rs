@@ -44,6 +44,7 @@ impl ToTokens for ObjectToken {
         let crate_name = get_crate_name(false);
         let struct_name_ident = &self.ident();
         let (impl_generics, ty_generics, where_clause) = self.generics().split_for_impl();
+        let struct_marker = self.generics().phantom_marker_type();
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -51,6 +52,7 @@ impl ToTokens for ObjectToken {
             ___________errors,
             _____field_names,
             schema_instance,
+            _____struct_marker_ident,
             ..
         } = VariablesModelMacro::new();
         let table_attrs = ModelAttributes::Object(self.clone());
@@ -94,14 +96,14 @@ impl ToTokens for ObjectToken {
             use #crate_name::{ToRaw as _};
 
             impl #impl_generics #crate_name::SchemaGetter for #struct_name_ident #ty_generics #where_clause {
-                type Schema = #module_name_internal::#struct_name_ident;
+                type Schema = #module_name_internal::#struct_name_ident #ty_generics;
 
-                fn schema() -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new()
+                fn schema() -> #module_name_rexported::Schema #ty_generics #where_clause {
+                    #module_name_rexported::Schema:: #ty_generics ::new()
                 }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new_prefixed(prefix)
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema #ty_generics #where_clause {
+                    #module_name_rexported::Schema:: #ty_generics ::new_prefixed(prefix)
                 }
             }
 
@@ -151,67 +153,69 @@ impl ToTokens for ObjectToken {
 
                     #[allow(non_snake_case)]
                     #[derive(Debug, Clone)]
-                    pub struct Schema {
+                    pub struct Schema #ty_generics #where_clause {
                        #( #schema_struct_fields_types_kv) *
                         pub(super) #___________graph_traversal_string: ::std::string::String,
                         pub(super) #___________bindings: #crate_name::BindingsList,
                         pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
+                        #_____struct_marker_ident: #struct_marker,
                     }
                 }
-                pub type #struct_name_ident = #_____schema_def::Schema;
+                pub type #struct_name_ident #ty_generics = #_____schema_def::Schema #ty_generics;
 
-                impl #crate_name::Parametric for #struct_name_ident {
+                impl #impl_generics #crate_name::Parametric for #struct_name_ident #ty_generics #where_clause{
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for #struct_name_ident {
+                impl #impl_generics #crate_name::Buildable for #struct_name_ident #ty_generics #where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for #struct_name_ident {
+                impl #impl_generics #crate_name::Erroneous for #struct_name_ident #ty_generics #where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl ::std::fmt::Display for #struct_name_ident #ty_generics #where_clause {
+                impl #impl_generics ::std::fmt::Display for #struct_name_ident #ty_generics #where_clause {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
 
-                impl #crate_name::Aliasable for &#struct_name_ident {}
+                impl #impl_generics #crate_name::Aliasable for &#struct_name_ident #ty_generics #where_clause {}
 
-                impl #crate_name::Parametric for &#struct_name_ident {
+                impl #impl_generics #crate_name::Parametric for &#struct_name_ident #ty_generics #where_clause {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for &#struct_name_ident {
+                impl #impl_generics #crate_name::Buildable for &#struct_name_ident #ty_generics #where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for &#struct_name_ident {
+                impl #impl_generics #crate_name::Erroneous for &#struct_name_ident #ty_generics #where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
 
-                impl #struct_name_ident {
+                impl #struct_name_ident #ty_generics #where_clause {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -222,6 +226,7 @@ impl ToTokens for ObjectToken {
                             #___________graph_traversal_string: prefix.build(),
                             #___________bindings: prefix.get_bindings(),
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -231,6 +236,7 @@ impl ToTokens for ObjectToken {
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
