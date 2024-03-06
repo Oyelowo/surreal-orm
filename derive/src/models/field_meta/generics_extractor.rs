@@ -163,7 +163,7 @@ impl StructGenerics {
             .collect::<Vec<TokenStream>>();
 
         let marker = quote! (::std::marker::PhantomData<( #( #args ),* )>);
-        let marker: Type = parse_quote!(marker);
+        let marker: Type = parse_quote!(#marker);
         // let marker: Type = syn::parse2(marker).unwrap();
         PhantomDataType(marker)
     }
