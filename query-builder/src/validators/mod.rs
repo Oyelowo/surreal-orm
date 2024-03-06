@@ -49,9 +49,9 @@ pub use assert_type_eq_all;
 #[macro_export]
 /// Checks that a type implements a trait
 macro_rules! assert_impl_one {
-    ($ty:ty; $trait:path) => {{
-        struct AssertTraitImpl<T: $trait>(PhantomData<T>);
-        AssertTraitImpl::<$ty>(std::marker::PhantomData);
+    ($ty:ty: $trait:path) => {{
+        struct AssertTraitImpl<T: $trait>(::std::marker::PhantomData<T>);
+        AssertTraitImpl::<$ty>(::std::marker::PhantomData);
     }};
 }
 
