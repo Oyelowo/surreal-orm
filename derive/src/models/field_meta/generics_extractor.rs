@@ -7,6 +7,7 @@
 
 use crate::models::*;
 use darling::FromGenerics;
+use proc_macro2::TokenStream;
 use syn::{punctuated::Punctuated, visit::Visit, *};
 
 use super::CustomType;
@@ -124,12 +125,12 @@ struct PhantomDataGenericArguments {
 }
 
 // PhantomData<(&'a dyn std::any::Any, &'b dyn std::any::Any, T, U, V)>,
-struct PhantomDataType(Type);
+#[derive(Clone, Debug)]
+pub struct PhantomDataType(Type);
 
 impl ToTokens for PhantomDataType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let ty = self.0;
-        tokens.extend(quote!(#ty));
+        tokens.extend(self.0.to_token_stream());
     }
 }
 
@@ -159,7 +160,7 @@ impl StructGenerics {
                     quote!(#expr)
                 }
             })
-            .collect();
+            .collect::<Vec<TokenStream>>();
 
         let marker = quote! (::std::marker::PhantomData<( #( #args ),* )>);
         let marker: Type = parse_quote!(marker);
