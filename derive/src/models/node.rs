@@ -306,7 +306,7 @@ impl ToTokens for NodeToken {
                         pub(super) #___________graph_traversal_string: ::std::string::String,
                         pub(super) #___________bindings: #crate_name::BindingsList,
                         pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
-                        #_____struct_marker_ident: #struct_marker
+                        pub(super) #_____struct_marker_ident: #struct_marker
                     }
                 }
                 pub type #struct_name_ident #struct_ty_generics = #_____schema_def::Schema #struct_ty_generics;
