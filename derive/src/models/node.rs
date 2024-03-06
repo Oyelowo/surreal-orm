@@ -159,8 +159,8 @@ impl ToTokens for NodeToken {
                 fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
 
-                    #module_name_internal::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
-                                #module_name_internal::#struct_name_ident::empty(),
+                    #module_name_internal::#struct_name_ident:: #struct_ty_generics ::#__________connect_node_to_graph_traversal_string(
+                                #module_name_internal::#struct_name_ident:: #struct_ty_generics ::empty(),
                                 clause.with_table(#table_name_str),
                     )
                 }

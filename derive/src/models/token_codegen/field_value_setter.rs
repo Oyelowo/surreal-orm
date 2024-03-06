@@ -7,11 +7,13 @@
 
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
+use surreal_query_builder::field_type;
 
 use crate::models::*;
 
 create_tokenstream_wrapper!(=>FieldSetterNumericImpl);
 create_tokenstream_wrapper!(=>ArrayElementFieldSetterToken);
+create_tokenstream_wrapper!(=>FieldTypeSetterPatcherImpls);
 
 create_tokenstream_wrapper!(
     /// Generated Field wrapper type implementations for each fiekd around `Field` type
@@ -54,12 +56,26 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let table_attributes = self.table_derive_attributes();
         let field_type = field_receiver.ty();
+        let casing = &table_attributes.casing()?;
         let binding = field_type.get_generics_from_current_struct(table_attributes);
         let (field_impl_generics, _field_ty_generics, field_where_clause) =
             binding.split_for_impl();
+        let field_name_pascalized = field_receiver.field_name_pascalized(casing)?;
 
-        let field_name_pascalized =
-            field_receiver.field_name_pascalized(&table_attributes.casing()?)?;
+        let field_type_setterPatcherImpls: FieldTypeSetterPatcherImpls = if field_receiver
+            .db_field_name(casing)?
+            .is_id()
+        {
+            quote!().into()
+        } else {
+            let field_type =
+                field_type.replace_self_with_current_struct_concrete_type(table_attributes);
+            quote!(
+                impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_pascalized  #field_where_clause {}
+
+                impl #field_impl_generics #crate_name::Patchable<#field_type> for self::#field_name_pascalized  #field_where_clause {}
+            ).into()
+        };
 
         let numeric_trait = if field_receiver.is_numeric() {
             Self::numeric_setter_impl(field_receiver, table_attributes)?
@@ -141,9 +157,7 @@ impl<'a> Codegen<'a> {
                 }
             }
 
-            impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_pascalized  #field_where_clause {}
-
-            impl #field_impl_generics #crate_name::Patchable<#field_type> for self::#field_name_pascalized  #field_where_clause {}
+            #field_type_setterPatcherImpls
 
             #numeric_trait
 
