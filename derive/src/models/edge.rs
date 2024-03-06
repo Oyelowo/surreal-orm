@@ -153,14 +153,14 @@ impl ToTokens for EdgeToken {
                 }
 
                 impl #impl_generics #crate_name::SchemaGetter for #struct_name_ident #ty_generics #where_clause  {
-                    type Schema = #module_name_internal::#struct_name_ident;
+                    type Schema = #module_name_internal::#struct_name_ident #ty_generics;
 
                     fn schema() -> #module_name_rexported::Schema {
-                        #module_name_rexported::Schema::new()
+                        #module_name_rexported::Schema:: #ty_generics ::new()
                     }
 
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
-                        #module_name_rexported::Schema::new_prefixed(prefix)
+                        #module_name_rexported::Schema:: #ty_generics ::new_prefixed(prefix)
                     }
                 }
 
