@@ -327,7 +327,7 @@ impl ToTokens for NodeToken {
 
                 impl #struct_impl_generics #crate_name::Aliasable for &#struct_name_ident #struct_ty_generics #struct_where_clause {}
 
-                impl #struct_impl_generics From<#struct_name_ident #struct_ty_generics> for #crate_name::ValueLike #struct_ty_generics {
+                impl #struct_impl_generics From<#struct_name_ident #struct_ty_generics> for #crate_name::ValueLike #struct_where_clause {
                     fn from(node: #struct_name_ident) -> Self {
                        Self::new(node)
                     }
