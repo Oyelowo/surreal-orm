@@ -22,6 +22,10 @@ impl<'a> Codegen<'a> {
         let field_ident_normalized =
             field_receiver.field_ident_normalized(&table_derive_attributes.casing()?)?;
 
+        let is_option = field_receiver
+            .field_type_db(table_derive_attributes)?
+            .into_inner()
+            .is_option();
         match field_receiver.to_relation_type() {
             RelationType::None
             | RelationType::NestArray(_)
@@ -29,13 +33,23 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkSelf(_)
             | RelationType::LinkMany(_)
             | RelationType::List(_) => {
+                let field_type = if is_option {
+                    quote!(#field_type)
+                } else {
+                    quote!(::std::option::Option<#field_type>)
+                };
                 self.insert_non_null_updater_token(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<#field_type>, ),
+                    quote!(pub #field_ident_normalized: #field_type, ),
                 )?;
             }
             RelationType::NestObject(nested_object) => {
+                let field_type = if is_option {
+                    quote!(#field_type)
+                } else {
+                    quote!(::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>)
+                };
                 self.insert_non_null_updater_token(
-                    quote!(pub #field_ident_normalized: ::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>, ),
+                    quote!(pub #field_ident_normalized: #field_type, ),
                 )?;
             }
             RelationType::Relate(_) => {}
