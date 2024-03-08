@@ -208,7 +208,7 @@ impl ToTokens for ObjectToken {
                 }
 
 
-                impl #struct_name_ident #ty_generics #where_clause {
+                impl #impl_generics #struct_name_ident #ty_generics #where_clause {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *

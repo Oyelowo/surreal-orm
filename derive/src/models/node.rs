@@ -325,33 +325,33 @@ impl ToTokens for NodeToken {
                     }
                 }
 
-                impl #struct_impl_generics #crate_name::Aliasable for &#struct_name_ident #struct_ty_generics #struct_where_clause {}
+                impl #struct_impl_generics #crate_name::Aliasable for #struct_name_ident #struct_ty_generics #struct_where_clause {}
 
                 impl #struct_impl_generics From<#struct_name_ident #struct_ty_generics> for #crate_name::ValueLike #struct_where_clause {
-                    fn from(node: #struct_name_ident) -> Self {
+                    fn from(node: #struct_name_ident #struct_ty_generics) -> Self {
                        Self::new(node)
                     }
                 }
 
-                impl #struct_impl_generics #crate_name::Parametric for &#struct_name_ident #struct_ty_generics #struct_where_clause {
+                impl #struct_impl_generics #crate_name::Parametric for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #struct_impl_generics #crate_name::Buildable for &#struct_name_ident #struct_ty_generics #struct_where_clause {
+                impl #struct_impl_generics #crate_name::Buildable for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #struct_impl_generics #crate_name::Erroneous for &#struct_name_ident #struct_ty_generics #struct_where_clause {
+                impl #struct_impl_generics #crate_name::Erroneous for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl #struct_impl_generics ::std::fmt::Display for &#struct_name_ident #struct_ty_generics #struct_where_clause {
+                impl #struct_impl_generics ::std::fmt::Display for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
