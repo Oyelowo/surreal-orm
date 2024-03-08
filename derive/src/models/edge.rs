@@ -137,10 +137,6 @@ impl ToTokens for EdgeToken {
         } = code_gen.common_idents();
 
         let serializable_fields_count = serializable_fields.len();
-        let serializable_fields_as_str = serializable_fields
-            .iter()
-            .map(|f| f.to_string())
-            .collect::<Vec<_>>();
 
         tokens.extend(quote!(
                 use #crate_name::{ToRaw as _};
@@ -148,7 +144,7 @@ impl ToTokens for EdgeToken {
                 impl #impl_generics #struct_name_ident #ty_generics #where_clause {
                       // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
                     pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
-                        [#( #serializable_fields_as_str), *]
+                        [#( #serializable_fields), *]
                     }
                 }
 
