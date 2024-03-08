@@ -137,6 +137,7 @@ impl ToTokens for ObjectToken {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
+                use super::*;
 
                #( #imports_referenced_node_schema) *
 
