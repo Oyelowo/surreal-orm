@@ -105,11 +105,6 @@ impl ToTokens for NodeToken {
         } = code_gen.common_idents();
 
         let serializable_fields_count = serializable_fields.len();
-        let serializable_fields_as_str = serializable_fields
-            .iter()
-            .map(|f| f.to_string())
-            .collect::<Vec<_>>();
-
         let table_definitions = match self.get_table_definition_token() {
             Ok(table_definitions) => table_definitions,
             Err(err) => return tokens.extend(err.write_errors()),
@@ -210,7 +205,7 @@ impl ToTokens for NodeToken {
                   // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
 
                 pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
-                    [#( #serializable_fields_as_str), *]
+                    [#( #serializable_fields), *]
                 }
             }
 

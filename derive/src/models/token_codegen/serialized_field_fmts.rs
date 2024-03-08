@@ -20,7 +20,7 @@ impl<'a> Codegen<'a> {
         let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
 
         self.serialized_fmt_db_field_names_instance
-            .push(db_field_name.to_token_stream().into());
+            .push(quote!(#db_field_name .into()).into());
 
         let serialized_field_fmt = || quote!(#crate_name::Field::new(#db_field_name));
 
