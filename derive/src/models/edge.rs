@@ -163,7 +163,7 @@ impl ToTokens for EdgeToken {
                     }
                 }
             
-                impl #impl_generics #crate_name::Updater for #struct_name_ident #ty_generics #where_clause {
+                impl #impl_generics #crate_name::PartialUpdater for #struct_name_ident #ty_generics #where_clause {
                     type PartialBuilder = #struct_partial_builder_ident #ty_generics;
 
                     fn partial_builder() -> Self::PartialBuilder {
