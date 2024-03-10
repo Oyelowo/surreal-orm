@@ -45,18 +45,21 @@ impl<'a> Codegen<'a> {
                     pub #field_ident_normalized: #optionalized_field_type,
                 ))?;
 
-                self.insert_struct_partial_builder_fields_methods(optionalized_field_type.into())?;
+                self.insert_struct_partial_builder_fields_methods(
+                    field_type.to_token_stream().into(),
+                )?;
             }
             RelationType::NestObject(nested_object) => {
-                let optionalized_field_type = quote!(
-                        ::std::option::Option<<#nested_object as #crate_name::Object>::PartialBuilder>
-                );
+                let inner_field_type =
+                    quote!(<#nested_object as #crate_name::Object>::PartialBuilder);
+
+                let optionalized_field_type = quote!(::std::option::Option<#inner_field_type>);
 
                 self.insert_struct_partial_field_type_def_meta(quote!(
                         #[serde(skip_serializing_if = "Option::is_none", rename = #db_field_name)]
                         pub #field_ident_normalized: #optionalized_field_type,
                 ))?;
-                self.insert_struct_partial_builder_fields_methods(optionalized_field_type.into())?;
+                self.insert_struct_partial_builder_fields_methods(inner_field_type.into())?;
             }
             RelationType::Relate(_) => {}
         }

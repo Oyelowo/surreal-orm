@@ -35,9 +35,6 @@ pub struct FieldMetadata {
 pub trait Model: Sized {
     /// The id of the model/table
     type Id;
-    /// Used for updating a model/table. Useful when you want to skip optional fields
-    /// when updating a model/table.
-    type NonNullUpdater;
     /// For checking renamed struct field names
     type StructRenamedCreator;
     /// The name of the model/table
@@ -177,8 +174,6 @@ impl<T> SurrealCrudNode for T where T: Sized + Serialize + DeserializeOwned + No
 /// Node is a trait signifying a node in the graph
 #[async_trait::async_trait]
 pub trait Node: Model + Serialize + SchemaGetter {
-    /// For merge update of object
-    type NonNullUpdater;
     /// The type of the schema
     // type Schema;
     /// The type of the aliases
@@ -295,8 +290,11 @@ pub trait Edge: Model + Serialize + SchemaGetter {
 
 /// Object is a trait signifying a nested object in the graph
 pub trait Object: Serialize + SchemaGetter {
-    /// For merge update of object
-    type NonNullUpdater;
+    // For merge update of object
+    // type PartialBuilder;
+
+    // returns the partial builder of the object
+    // fn partial_builder() -> Self::PartialBuilder;
     // The type of the schema
     // type Schema;
     // returns the schema of a nested object.
@@ -311,6 +309,14 @@ pub trait SchemaGetter {
     fn schema() -> Self::Schema;
     ///
     fn schema_prefixed(prefix: impl Into<ValueLike>) -> Self::Schema;
+}
+
+pub trait PartialUpdater {
+    /// Used for updating a model/table. Useful when you want to skip optional fields
+    /// when updating a model/table.
+    type PartialBuilder;
+
+    fn partial_builder() -> Self::PartialBuilder;
 }
 
 /// List of error

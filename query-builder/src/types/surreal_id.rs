@@ -448,7 +448,6 @@ pub type TestUserNumberId = SurrealId<TestUser, u64>;
 pub type TestUserObjectId = SurrealId<TestUser, HashMap<String, String>>;
 impl Model for TestUser {
     type Id = TestUserSimpleId;
-    type NonNullUpdater = ();
     type StructRenamedCreator = ();
     fn table_name() -> crate::Table {
         "user".into()
