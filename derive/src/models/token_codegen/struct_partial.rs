@@ -40,7 +40,7 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkMany(_)
             | RelationType::List(_) => {
                 let optionalized_field_type = quote!(::std::option::Option<#field_type>);
-                self.insert_non_null_updater_token(
+                self.insert_struct_partial_field_type_def_meta(
                     quote!(pub #field_ident_normalized: #optionalized_field_type, ),
                 )?;
 
@@ -49,7 +49,7 @@ impl<'a> Codegen<'a> {
             RelationType::NestObject(nested_object) => {
                 let optionalized_field_type = quote!(::std::option::Option<<#nested_object as #crate_name::Object>::PartialBuilder>);
 
-                self.insert_non_null_updater_token(
+                self.insert_struct_partial_field_type_def_meta(
                     quote!(pub #field_ident_normalized: #optionalized_field_type, ),
                 )?;
                 self.insert_struct_partial_builder_fields_methods(optionalized_field_type.into())?;
@@ -80,7 +80,7 @@ impl<'a> Codegen<'a> {
         Ok(())
     }
 
-    fn insert_non_null_updater_token(
+    fn insert_struct_partial_field_type_def_meta(
         &mut self,
         updater_field_token: TokenStream,
     ) -> ExtractorResult<()> {

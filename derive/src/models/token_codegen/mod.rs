@@ -15,7 +15,7 @@ mod link_methods;
 mod relate;
 mod serialized_field_fmts;
 mod simple;
-mod updater_non_null;
+mod struct_partial;
 
 use convert_case::{Case, Casing};
 use quote::format_ident;
