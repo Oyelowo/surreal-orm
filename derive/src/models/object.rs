@@ -109,8 +109,8 @@ impl ToTokens for ObjectToken {
                 }
             }
         
-            impl #struct_impl_generics #crate_name::Updater for #struct_name_ident #struct_ty_generics #struct_where_clause {
-                type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
+            impl #impl_generics #crate_name::Updater for #struct_name_ident #ty_generics #where_clause {
+                type PartialBuilder = #struct_partial_builder_ident #ty_generics;
 
                 fn partial_builder() -> Self::PartialBuilder {
                     #struct_partial_builder_ident::default()
