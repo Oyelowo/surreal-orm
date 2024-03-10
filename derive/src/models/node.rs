@@ -148,6 +148,7 @@ impl ToTokens for NodeToken {
                 }
             }
             impl #struct_impl_generics #crate_name::PartialUpdater for #struct_name_ident #struct_ty_generics #struct_where_clause {
+                type StructPartial = #struct_partial_ident #struct_ty_generics;
                 type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
 
                 fn partial_builder() -> Self::PartialBuilder {

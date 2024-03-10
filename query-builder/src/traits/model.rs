@@ -313,6 +313,8 @@ pub trait SchemaGetter {
 
 /// Trait for updating a model/table. Useful when you want to skip optional fields
 pub trait PartialUpdater {
+    /// Partial state of the original model/table struct
+    type StructPartial;
     /// Used for updating a model/table. Useful when you want to skip optional fields
     /// when updating a model/table.
     type PartialBuilder;

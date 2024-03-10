@@ -52,7 +52,7 @@ impl<'a> Codegen<'a> {
             }
             RelationType::NestObject(nested_object) => {
                 let inner_field_type =
-                    quote!(<#nested_object as #crate_name::Object>::PartialBuilder);
+                    quote!(<#nested_object as #crate_name::PartialUpdater>::StructPartial);
 
                 let optionalized_field_type = quote!(#crate_name::Maybe<#inner_field_type>);
 
