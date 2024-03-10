@@ -197,7 +197,6 @@ impl ToTokens for NodeToken {
             #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
             pub struct  #struct_partial_ident #struct_impl_generics #struct_where_clause {
                #(
-                    #[serde(skip_serializing_if = "Option::is_none")]
                     #struct_partial_fields
                 ) *
             }
