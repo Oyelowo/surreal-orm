@@ -8,15 +8,28 @@
 use darling::{ast::Data, util, FromDeriveInput};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
 
 use super::table_name::TableNameIdent;
 use crate::models::*;
 
 create_ident_wrapper!(StructIdent);
+create_ident_wrapper!(StructPartialIdent);
+create_ident_wrapper!(StructPartialBuilderIdent);
 
 impl StructIdent {
+    pub fn partial_ident(&self) -> StructPartialIdent {
+        StructPartialIdent(format_ident!("{}Partial", self.to_string()))
+    }
+
+    pub fn partial_builder_ident(&self) -> StructPartialBuilderIdent {
+        StructPartialBuilderIdent(format_ident!(
+            "{}Builder",
+            self.partial_ident().into_inner()
+        ))
+    }
+
     pub fn is_same_name(&self, other: impl Into<CustomType>) -> ExtractorResult<bool> {
         let other: CustomType = other.into();
         Ok(other.type_name()? == self.to_string())
