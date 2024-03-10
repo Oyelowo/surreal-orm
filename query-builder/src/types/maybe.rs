@@ -1,12 +1,13 @@
 use serde::Serialize;
 
 /// Represents a value that may or may not be present
-#[derive(Clone, Debug, Serialize)]
+#[derive(Default, Clone, Debug, Serialize)]
 #[serde(untagged)]
 pub enum Maybe<T> {
     /// When the value is present
     Some(T),
     /// When the value is absent
+    #[default]
     None,
 }
 
