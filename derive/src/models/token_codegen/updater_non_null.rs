@@ -12,9 +12,10 @@ use quote::quote;
 use crate::models::*;
 
 use super::Codegen;
+create_tokenstream_wrapper!(=> StructPartialFieldType);
 
 impl<'a> Codegen<'a> {
-    pub fn create_non_null_updater_struct_fields(&mut self) -> ExtractorResult<()> {
+    pub fn create_struct_partial_metadata(&mut self) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
@@ -33,28 +34,44 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkSelf(_)
             | RelationType::LinkMany(_)
             | RelationType::List(_) => {
-                let field_type = if is_option {
-                    quote!(#field_type)
-                } else {
-                    quote!(::std::option::Option<#field_type>)
-                };
+                let optionalized_field_type = quote!(::std::option::Option<#field_type>);
                 self.insert_non_null_updater_token(
-                    quote!(pub #field_ident_normalized: #field_type, ),
+                    quote!(pub #field_ident_normalized: #optionalized_field_type, ),
                 )?;
+
+                self.insert_struct_partial_builder_fields_methods(optionalized_field_type.into())?;
             }
             RelationType::NestObject(nested_object) => {
-                let field_type = if is_option {
-                    quote!(#field_type)
-                } else {
-                    quote!(::std::option::Option<<#nested_object as #crate_name::Object>::NonNullUpdater>)
-                };
+                let optionalized_field_type = quote!(::std::option::Option<<#nested_object as #crate_name::Object>::PartialBuilder>);
+
                 self.insert_non_null_updater_token(
-                    quote!(pub #field_ident_normalized: #field_type, ),
+                    quote!(pub #field_ident_normalized: #optionalized_field_type, ),
                 )?;
+                self.insert_struct_partial_builder_fields_methods(optionalized_field_type.into())?;
             }
             RelationType::Relate(_) => {}
         }
 
+        Ok(())
+    }
+
+    fn insert_struct_partial_builder_fields_methods(
+        &mut self,
+        struct_partial_field_type: StructPartialFieldType,
+    ) -> ExtractorResult<()> {
+        let table_derive_attributes = self.table_derive_attributes();
+        let field_receiver = self.field_receiver();
+        let original_field_ident = field_receiver.ident()?;
+
+        let ass_functions = quote! {
+            pub fn #original_field_ident(mut self, value: #struct_partial_field_type) -> Self {
+                    self.0.#original_field_ident = Some(value);
+                    self
+             }
+        };
+
+        self.struct_partial_associated_functions
+            .push(ass_functions.into());
         Ok(())
     }
 
@@ -66,8 +83,7 @@ impl<'a> Codegen<'a> {
         let fr = self.field_receiver();
         let db_field_name = fr.db_field_name(&table_derive_attributes.casing()?)?;
         if db_field_name.is_updateable_by_default(&self.data_type()) {
-            self.non_null_updater_fields
-                .push(updater_field_token.into());
+            self.struct_partial_fields.push(updater_field_token.into());
         }
         // We dont care about the field type. We just use this struct to check for
         // renamed serialized field names at compile time by asserting that the a field
