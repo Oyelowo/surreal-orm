@@ -192,7 +192,6 @@ impl ToTokens for EdgeToken {
                 #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
                 pub struct  #struct_partial_ident #impl_generics #where_clause {
                    #(
-                        #[serde(skip_serializing_if = "Option::is_none")]
                         #struct_partial_fields
                     ) *
                 }

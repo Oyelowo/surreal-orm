@@ -40,18 +40,22 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkMany(_)
             | RelationType::List(_) => {
                 let optionalized_field_type = quote!(::std::option::Option<#field_type>);
-                self.insert_struct_partial_field_type_def_meta(
-                    quote!(pub #field_ident_normalized: #optionalized_field_type, ),
-                )?;
+                self.insert_struct_partial_field_type_def_meta(quote!(
+                    #[serde(skip_serializing_if = "Option::is_none", rename = #db_field_name)]
+                    pub #field_ident_normalized: #optionalized_field_type,
+                ))?;
 
                 self.insert_struct_partial_builder_fields_methods(optionalized_field_type.into())?;
             }
             RelationType::NestObject(nested_object) => {
-                let optionalized_field_type = quote!(::std::option::Option<<#nested_object as #crate_name::Object>::PartialBuilder>);
+                let optionalized_field_type = quote!(
+                        ::std::option::Option<<#nested_object as #crate_name::Object>::PartialBuilder>
+                );
 
-                self.insert_struct_partial_field_type_def_meta(
-                    quote!(pub #field_ident_normalized: #optionalized_field_type, ),
-                )?;
+                self.insert_struct_partial_field_type_def_meta(quote!(
+                        #[serde(skip_serializing_if = "Option::is_none", rename = #db_field_name)]
+                        pub #field_ident_normalized: #optionalized_field_type,
+                ))?;
                 self.insert_struct_partial_builder_fields_methods(optionalized_field_type.into())?;
             }
             RelationType::Relate(_) => {}
