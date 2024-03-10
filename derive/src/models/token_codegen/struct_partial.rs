@@ -32,7 +32,7 @@ impl<'a> Codegen<'a> {
             .field_type_db(table_derive_attributes)?
             .into_inner()
             .is_option();
-        let maybe_fn_path = format!("{crate_name}::Maybe");
+        let maybe_fn_path = format!("{crate_name}::Maybe::is_none");
         match field_receiver.to_relation_type() {
             RelationType::None
             | RelationType::NestArray(_)
