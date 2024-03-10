@@ -32,6 +32,7 @@ impl<'a> Codegen<'a> {
             .field_type_db(table_derive_attributes)?
             .into_inner()
             .is_option();
+        let maybe_fn_path = format!("{crate_name}::Maybe");
         match field_receiver.to_relation_type() {
             RelationType::None
             | RelationType::NestArray(_)
@@ -39,9 +40,9 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkSelf(_)
             | RelationType::LinkMany(_)
             | RelationType::List(_) => {
-                let optionalized_field_type = quote!(::std::option::Option<#field_type>);
+                let optionalized_field_type = quote!(#crate_name:: Maybe<#field_type>);
                 self.insert_struct_partial_field_type_def_meta(quote!(
-                    #[serde(skip_serializing_if = "Option::is_none", rename = #db_field_name)]
+                    #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]
                     pub #field_ident_normalized: #optionalized_field_type,
                 ))?;
 
@@ -53,10 +54,10 @@ impl<'a> Codegen<'a> {
                 let inner_field_type =
                     quote!(<#nested_object as #crate_name::Object>::PartialBuilder);
 
-                let optionalized_field_type = quote!(::std::option::Option<#inner_field_type>);
+                let optionalized_field_type = quote!(#crate_name::Maybe<#inner_field_type>);
 
                 self.insert_struct_partial_field_type_def_meta(quote!(
-                        #[serde(skip_serializing_if = "Option::is_none", rename = #db_field_name)]
+                        #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]
                         pub #field_ident_normalized: #optionalized_field_type,
                 ))?;
                 self.insert_struct_partial_builder_fields_methods(inner_field_type.into())?;
@@ -74,10 +75,11 @@ impl<'a> Codegen<'a> {
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let original_field_ident = field_receiver.ident()?;
+        let crate_name = get_crate_name(false);
 
         let ass_functions = quote! {
             pub fn #original_field_ident(mut self, value: #struct_partial_field_type) -> Self {
-                    self.0.#original_field_ident = Some(value);
+                    self.0.#original_field_ident = #crate_name::Maybe::Some(value);
                     self
              }
         };
