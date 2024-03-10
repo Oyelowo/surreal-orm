@@ -311,11 +311,16 @@ pub trait SchemaGetter {
     fn schema_prefixed(prefix: impl Into<ValueLike>) -> Self::Schema;
 }
 
+/// Trait for updating a model/table. Useful when you want to skip optional fields
 pub trait PartialUpdater {
     /// Used for updating a model/table. Useful when you want to skip optional fields
     /// when updating a model/table.
     type PartialBuilder;
 
+    /// returns the partial builder of the model/table.
+    /// You can still set a field as null as that is a valid databse value.
+    /// To do that, you heve to explicitly set the field to None. Fields
+    /// that are not set are not updated.
     fn partial_builder() -> Self::PartialBuilder;
 }
 
