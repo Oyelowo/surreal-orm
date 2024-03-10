@@ -70,7 +70,8 @@ impl ToTokens for ObjectToken {
             connection_with_field_appended,
             record_link_fields_methods,
             schema_struct_fields_names_kv_empty,
-            non_null_updater_fields,
+            struct_partial_fields,
+            struct_partial_associated_functions,
             ..
         } = &code_gen;
 
@@ -80,10 +81,11 @@ impl ToTokens for ObjectToken {
             module_name_internal,
             module_name_rexported,
             test_function_name,
-            non_null_updater_struct_name,
             _____schema_def,
             ..
         } = code_gen.common_idents();
+        let struct_partial_ident = struct_name_ident.partial_ident();
+        let struct_partial_builder_ident = struct_name_ident.partial_builder_ident();
 
         // #[derive(Object, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
@@ -106,11 +108,17 @@ impl ToTokens for ObjectToken {
                     #module_name_rexported::Schema:: #ty_generics ::new_prefixed(prefix)
                 }
             }
+        
+            impl #struct_impl_generics #crate_name::Updater for #struct_name_ident #struct_ty_generics #struct_where_clause {
+                type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
+
+                fn partial_builder() -> Self::PartialBuilder {
+                    #struct_partial_builder_ident::default()
+                }
+            }
 
             impl #impl_generics #crate_name::Object for #struct_name_ident #ty_generics #where_clause {
                 // type Schema = #module_name::#struct_name_ident;
-                // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
-                type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
 
                 // fn schema() -> Self::Schema {
                 //     #module_name::#struct_name_ident::new()
@@ -118,12 +126,23 @@ impl ToTokens for ObjectToken {
             }
 
             #[allow(non_snake_case)]
-            #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-            pub struct #non_null_updater_struct_name #impl_generics #where_clause {
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+            pub struct  #struct_partial_ident #impl_generics #where_clause {
                #(
                     #[serde(skip_serializing_if = "Option::is_none")]
-                    #non_null_updater_fields
+                    #struct_partial_fields
                 ) *
+            }
+
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+            pub struct #struct_partial_builder_ident #impl_generics (#struct_partial_ident #ty_generics) #where_clause;
+
+            impl #impl_generics #struct_partial_builder_ident #ty_generics #where_clause {
+                #( #struct_partial_associated_functions) *
+
+                pub fn build(self) -> #struct_partial_ident #ty_generics {
+                    self.0
+                }
             }
 
             #[allow(non_snake_case)]

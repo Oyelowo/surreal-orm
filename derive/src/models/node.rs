@@ -38,7 +38,7 @@ impl ToTokens for NodeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = self.deref();
-        let struct_name_ident = &table_derive_attributes.ident;
+        let struct_name_ident = &table_derive_attributes.ident();
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
             table_derive_attributes.generics.split_for_impl();
         let struct_marker = table_derive_attributes.generics().phantom_marker_type();
@@ -104,9 +104,8 @@ impl ToTokens for NodeToken {
             _____schema_def,
         } = code_gen.common_idents();
 
-        // TODO:  Use wrapper type for easy identification
-        let struct_partial_ident = format_ident!("{struct_name_ident}Partial",);
-        let struct_partial_builder_ident = format_ident!("{struct_partial_ident}Builder");
+        let struct_partial_ident = struct_name_ident.partial_ident();
+        let struct_partial_builder_ident = struct_name_ident.partial_builder_ident();
 
         let serializable_fields_count = serializable_fields.len();
         let table_definitions = match self.get_table_definition_token() {
@@ -148,12 +147,18 @@ impl ToTokens for NodeToken {
                     #module_name_rexported::Schema:: #struct_ty_generics ::new_prefixed(prefix)
                 }
             }
+            impl #struct_impl_generics #crate_name::Updater for #struct_name_ident #struct_ty_generics #struct_where_clause {
+                type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
+
+                fn partial_builder() -> Self::PartialBuilder {
+                    #struct_partial_builder_ident::default()
+                }
+            }
 
             impl #struct_impl_generics #crate_name::Node for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type TableNameChecker = #module_name_internal::TableNameStaticChecker;
                 // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name_internal::#aliases_struct_name;
-                type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
 
                 fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
@@ -189,7 +194,7 @@ impl ToTokens for NodeToken {
             }
 
             #[allow(non_snake_case)]
-            #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
             pub struct  #struct_partial_ident #struct_impl_generics #struct_where_clause {
                #(
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -197,6 +202,7 @@ impl ToTokens for NodeToken {
                 ) *
             }
 
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
             pub struct #struct_partial_builder_ident #struct_impl_generics (#struct_partial_ident #struct_ty_generics) #struct_where_clause;
 
             impl #struct_impl_generics #struct_partial_builder_ident #struct_ty_generics #struct_where_clause {
@@ -226,7 +232,6 @@ impl ToTokens for NodeToken {
 
             impl #struct_impl_generics #crate_name::Model for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type Id = #table_id_type;
-                type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
                 fn table_name() -> #crate_name::Table {

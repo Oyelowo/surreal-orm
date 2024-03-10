@@ -50,7 +50,7 @@ impl ToTokens for EdgeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = self.deref();
-        let struct_name_ident = &table_derive_attributes.ident;
+        let struct_name_ident = &table_derive_attributes.ident();
         let (impl_generics, ty_generics, where_clause) =
             table_derive_attributes.generics.split_for_impl();
         let struct_marker = table_derive_attributes.generics().phantom_marker_type();
@@ -101,7 +101,8 @@ impl ToTokens for EdgeToken {
             link_self_fields,
             link_one_and_self_fields,
             link_many_fields,
-            non_null_updater_fields,
+            struct_partial_fields,
+            struct_partial_associated_functions,
             renamed_serialized_fields_kv,
             table_id_type,
             field_metadata,
@@ -130,13 +131,14 @@ impl ToTokens for EdgeToken {
             module_name_internal,
             module_name_rexported,
             test_function_name,
-            non_null_updater_struct_name,
             struct_with_renamed_serialized_fields,
             _____schema_def,
             ..
         } = code_gen.common_idents();
 
         let serializable_fields_count = serializable_fields.len();
+        let struct_partial_ident = struct_name_ident.partial_ident();
+        let struct_partial_builder_ident = struct_name_ident.partial_builder_ident();
 
         tokens.extend(quote!(
                 use #crate_name::{ToRaw as _};
@@ -160,6 +162,14 @@ impl ToTokens for EdgeToken {
                         #module_name_rexported::Schema:: #ty_generics ::new_prefixed(prefix)
                     }
                 }
+            
+                impl #impl_generics #crate_name::Updater for #struct_name_ident #ty_generics #where_clause {
+                    type PartialBuilder = #struct_partial_builder_ident #ty_generics;
+
+                    fn partial_builder() -> Self::PartialBuilder {
+                        #struct_partial_builder_ident::default()
+                    }
+                }
 
                 #[allow(non_snake_case)]
                 impl #impl_generics #crate_name::Edge for #struct_name_ident #ty_generics #where_clause   {
@@ -177,18 +187,30 @@ impl ToTokens for EdgeToken {
                         #table_name_str.into()
                     }
                 }
-
+      
                 #[allow(non_snake_case)]
-                #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-                pub struct #non_null_updater_struct_name #impl_generics #where_clause {
+                #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+                pub struct  #struct_partial_ident #impl_generics #where_clause {
                    #(
                         #[serde(skip_serializing_if = "Option::is_none")]
-                        #non_null_updater_fields
+                        #struct_partial_fields
                     ) *
                 }
 
+                #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+                pub struct #struct_partial_builder_ident #impl_generics (#struct_partial_ident #ty_generics) #where_clause;
+
+                impl #impl_generics #struct_partial_builder_ident #ty_generics #where_clause {
+                    #( #struct_partial_associated_functions) *
+
+                    pub fn build(self) -> #struct_partial_ident #ty_generics {
+                        self.0
+                    }
+                }
+
+
                 #[allow(non_snake_case)]
-                #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
+                #[derive(#crate_name::serde::Serialize,  ebug, Clone)]
                 pub struct #struct_with_renamed_serialized_fields {
                    #(
                         #renamed_serialized_fields_kv
@@ -198,7 +220,6 @@ impl ToTokens for EdgeToken {
                 #[allow(non_snake_case)]
                 impl #impl_generics #crate_name::Model for #struct_name_ident #ty_generics #where_clause {
                     type Id = #table_id_type;
-                    type NonNullUpdater = #non_null_updater_struct_name #ty_generics;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
                     fn table_name() -> #crate_name::Table {
