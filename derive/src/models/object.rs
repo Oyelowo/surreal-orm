@@ -131,6 +131,8 @@ impl ToTokens for ObjectToken {
             pub struct  #struct_partial_ident #impl_generics #where_clause {
                #(
                     #struct_partial_fields
+                    #[serde(skip)]
+                    pub(super) #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>
                 ) *
             }
 
