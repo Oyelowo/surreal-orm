@@ -68,8 +68,8 @@ impl<'a> Codegen<'a> {
         {
             quote!().into()
         } else {
-            let field_type =
-                field_type.replace_self_with_current_struct_concrete_type(table_attributes)?;
+            // let field_type =
+            //     field_type.replace_self_with_current_struct_concrete_type(table_attributes)?;
             quote!(
                 impl #field_impl_generics #crate_name::SetterAssignable<#field_type> for self::#field_name_pascalized  #field_where_clause {}
 
@@ -251,7 +251,7 @@ impl<'a> Codegen<'a> {
 
         let numeric_trait = {
             quote!(
-                impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_pascalized #field_ty_generics
+                impl #field_impl_generics #crate_name::SetterNumeric<#field_type> for self::#field_name_pascalized
                 #field_where_clause {}
 
                 impl ::std::convert::From<self::#field_name_pascalized> for #crate_name::NumberLike {

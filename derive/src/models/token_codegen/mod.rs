@@ -42,7 +42,6 @@ pub(crate) struct CommonIdents {
     pub module_name_rexported: ModuleNameRexportedIdent,
     pub aliases_struct_name: AliasesStructNameIdent,
     pub test_function_name: TestFunctionNameIdent,
-    pub non_null_updater_struct_name: NonNullUpdaterStructNameIdent,
     pub struct_with_renamed_serialized_fields: StructWithRenamedSerializedFields,
     pub _____schema_def: SchemaDefIdent,
 }
@@ -197,7 +196,12 @@ pub struct Codegen<'a> {
     pub field_metadata: Vec<FieldMetadataToken>,
     pub node_edge_metadata: NodeEdgeMetadataLookupTable<'a>,
     pub fields_relations_aliased: Vec<FieldsRelationsAliased>,
-    pub non_null_updater_fields: Vec<NonNullUpdaterFields>,
+    pub struct_partial_fields: Vec<StructPartialFields>,
+    //     pub fn #field_name(mut self, value: #original_field_type) -> Self {
+    //     self.0.#field_name = value;
+    //             self
+    //     }
+    pub struct_partial_associated_functions: Vec<StructPartialMethods>,
     pub renamed_serialized_fields_kv: Vec<RenamedSerializedFields>,
     pub table_id_type: TableIdType,
 
@@ -237,7 +241,6 @@ impl<'a> Codegen<'a> {
             module_name_internal: module_name_internal.into(),
             module_name_rexported: format_ident!("{struct_name_ident_snake}").into(),
             aliases_struct_name: format_ident!("{struct_name_ident}Aliases").into(),
-            non_null_updater_struct_name: format_ident!("{struct_name_ident}NonNullUpdater").into(),
             struct_with_renamed_serialized_fields: format_ident!(
                 "{struct_name_ident}RenamedCreator"
             )
@@ -283,7 +286,7 @@ impl<'a> Codegen<'a> {
             tokens_generator.create_db_fields_for_links_and_loaders()?;
             tokens_generator.create_link_methods()?;
             tokens_generator.create_relation_aliases_struct_fields_types_kv()?;
-            tokens_generator.create_non_null_updater_struct_fields()?;
+            tokens_generator.create_struct_partial_metadata()?;
         }
         Ok(tokens_generator)
     }

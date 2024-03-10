@@ -43,7 +43,8 @@ create_tokenstream_wrapper!(=> AliasesStructFieldsNamesKv);
 create_tokenstream_wrapper!(=> FieldsRelationsAliased);
 
 create_tokenstream_wrapper!(=> RenamedSerializedFields);
-create_tokenstream_wrapper!(=> NonNullUpdaterFields);
+create_tokenstream_wrapper!(=> StructPartialFields);
+create_tokenstream_wrapper!(=> StructPartialMethods);
 
 create_tokenstream_wrapper!(=> TableIdType);
 impl Default for TableIdType {
