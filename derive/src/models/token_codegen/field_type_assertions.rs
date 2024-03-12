@@ -19,136 +19,155 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver.ty();
 
-        match field_receiver.to_relation_type() {
-            RelationType::Relate(_relate) => {}
+        let static_assertions = match field_receiver.to_relation_type() {
+            RelationType::Relate(_relate) => {
+                vec![]
+            }
             RelationType::LinkOne(foreign_node) => {
-                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);).into());
+                vec![
+                    quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);),
+                ]
             }
             RelationType::LinkSelf(self_node) => {
                 let current_struct_type = table_derive_attrs.struct_no_bounds()?;
-                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#self_node>);).into());
-
-                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#self_node>);).into());
+                vec![
+                    quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#self_node>);),
+                    quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#self_node>);),
+                ]
             }
             RelationType::LinkMany(foreign_node) => {
-                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);).into());
+                vec![
+                    quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);),
+                ]
             }
             RelationType::NestObject(foreign_object) => {
-                self.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_object);).into());
+                vec![
+                    quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_object);),
+                ]
             }
             RelationType::NestArray(foreign_array_object) => {
                 let nesting_level = Self::count_vec_nesting(field_type.as_basic_type_ref());
                 let nested_vec_type =
                     Self::generate_nested_vec_type(&foreign_array_object, nesting_level);
 
-                self.static_assertions.push(quote! {
-                        #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
-                    }.into());
+                vec![quote! {
+                    #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
+                }]
             }
             RelationType::None | RelationType::List(_) => {
-                // TODO: Add attribute, skip type check
-                surreal_query_builder::validators::assert_impl_one!(
-                    &'static str: Into<std::string::String>
-                );
-                let x = 45u32;
-                x.to_string();
-                // &'static str
-                // surreal_query_builder::validators::assert_impl_one!(&String: Into<String>);
-                // surreal_query_builder::validators::assert_impl_one!(Option<&String>: Into<Option<String>>);
-                // surreal_query_builder::validators::assert_impl_one!(u32: Into<String>);
-                // surreal_query_builder::validators::assert_impl_one!(Option<u32>: Into<Option<String>>);
-                // let x: surreal_query_builder::sql::String = 2.into();
-                let table_derive_attrs = self.table_derive_attributes();
-                let ft = field_receiver.field_type_db(table_derive_attrs)?;
-                let is_simple = ft.is_primitive();
-                let raw_type = field_type;
-                let db_type_static_checker = match ft.into_inner_ref() {
+                let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
+                let db_type_static_checker = match db_field_type.into_inner_ref() {
                     FieldType::Any => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
+                        ]
                     }
                     FieldType::Null => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
+                        ]
                     }
                     FieldType::Uuid => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Uuid>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Uuid>);),
+                        ]
                     }
                     FieldType::Bytes => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Bytes>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Bytes>);),
+                        ]
                     }
                     FieldType::Union(_) => {
                         // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
-                        quote!()
+                        vec![quote!()]
                     }
-                    FieldType::Option(_) => {
+                    FieldType::Option(ft) => {
+                        let x = field_type.raw_type_is_optional();
+                        let xx = field_type.inner_angle_bracket_type()?;
+                        // .map(|x| x.type_is_inferrable(field_receiver, model_attributes));
+                        // .map(|x| x.type_is_inferrable(field_receiver, model_attributes));
                         // option<bool>  => assert_impl_one!(Option<bool>: Into<Option<bool>>);
                         // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
                         // TODO: Should I do a recursive option check?
-                        quote!()
+                        vec![quote!(#crate_name::validators::assert_is_option::<#field_type>;)]
                     }
                     FieldType::String => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::string::String>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<::std::string::String>);),
+                        ]
                     }
                     FieldType::Int => {
-                        quote!(
-                            #crate_name::validators::is_int::<#raw_type>();
+                        vec![quote!(
+                            #crate_name::validators::is_int::<#field_type>();
                             // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
-                        )
+                        )]
                     }
                     FieldType::Float => {
-                        quote!(
-                            #crate_name::validators::is_float::<#raw_type>();
+                        vec![quote!(
+                            #crate_name::validators::is_float::<#field_type>();
                             // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
-                        )
+                        )]
                         // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                     }
                     FieldType::Bool => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::primitive::bool>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<::std::primitive::bool>);),
+                        ]
                     }
                     FieldType::Array(_, _) => {
-                        quote!(
-                            #crate_name::validators::assert_is_vec::<#raw_type>();
-                        )
+                        vec![quote!(
+                            #crate_name::validators::assert_is_array::<#field_type>();
+                        )]
                     }
                     FieldType::Set(_, _) => {
-                        // TODO, create is_set. Set field should use hashset or something
-                        quote!(
-                            #crate_name::validators::assert_is_vec::<#raw_type>();
-                        )
+                        vec![quote!(
+                            #crate_name::validators::assert_is_set::<#field_type>();
+                        )]
                     }
                     FieldType::Datetime => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Datetime>);),
+                        ]
                     }
                     FieldType::Decimal => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                        vec![quote!(
+                            #crate_name::validators::is_number::<#field_type>();
+                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
+                        )]
                     }
                     FieldType::Duration => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Duration>);),
+                        ]
                     }
                     FieldType::Number => {
-                        quote!(
-                            #crate_name::validators::is_number::<#raw_type>();
+                        vec![quote!(
+                            #crate_name::validators::is_number::<#field_type>();
                             // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
-                        )
+                        )]
                         // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                     }
                     FieldType::Object => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Object>);),
+                        ]
                     }
                     FieldType::Record(_) => {
-                        if let DataType::Edge = model_type {
-                            quote!()
-                        } else {
-                            quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
-                        }
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Thing>);),
+                        ]
                     }
                     FieldType::Geometry(_) => {
-                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
+                        vec![
+                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Geometry>);),
+                        ]
                     }
                 };
 
                 self.static_assertions.push(x);
             }
-        }
+        };
 
         Ok(())
     }

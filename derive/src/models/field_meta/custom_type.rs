@@ -62,6 +62,17 @@ impl ToTokens for CustomTypeNoSelf {
 #[derive(Debug, Clone)]
 pub struct CustomType(Type);
 
+#[derive(Debug, Clone)]
+pub struct CustomTypeInnerAngleBracket(CustomType);
+
+impl std::ops::Deref for CustomTypeInnerAngleBracket {
+    type Target = CustomType;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl FromMeta for CustomType {
     fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
         // panic!("Item: {:?}", item);
@@ -155,6 +166,32 @@ impl CustomType {
         &self.0
     }
 
+    // e.g User if Option<User> or ::std::option::Option<User>
+    pub fn inner_angle_bracket_type(&self) -> ExtractorResult<Option<CustomTypeInnerAngleBracket>> {
+        match self.as_basic_type_ref() {
+            Type::Path(type_path) => {
+                let last_segment = type_path
+                    .path
+                    .segments
+                    .last()
+                    .ok_or_else(|| darling::Error::custom("Expected a type. Make sure there are no typos and you are using a proper struct as the linked Node."))?;
+                if let PathArguments::AngleBracketed(angle_bracketed) = &last_segment.arguments {
+                    let first_arg = angle_bracketed.args.first();
+                    match first_arg {
+                        Some(GenericArgument::Type(ty)) => Ok(Some(ty.clone().into())),
+                        _ => Ok(None),
+                    }
+                } else {
+                    Ok(None)
+                }
+            }
+            _ => {
+                Err(syn::Error::new(self.to_token_stream().span(), "Expected a struct type").into())
+            }
+        }
+    }
+
+    // e.g from User<T> to User::<T>
     pub fn turbo_fishize(&self) -> ExtractorResult<CustomTypeTurboFished> {
         match self.as_basic_type_ref() {
             Type::Path(type_path) => {
