@@ -197,12 +197,9 @@ impl ToTokens for NodeToken {
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
             pub struct  #struct_partial_ident #struct_impl_generics #struct_where_clause {
-               #(
-                    #struct_partial_fields
-                    #[serde(skip)]
-                    pub(super) #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>
-
-                ) *
+                #[serde(skip)]
+                #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>,
+               #(#struct_partial_fields), * 
             }
 
             #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
@@ -220,9 +217,7 @@ impl ToTokens for NodeToken {
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
             pub struct #struct_with_renamed_serialized_fields {
-               #(
-                    #renamed_serialized_fields_kv
-                ) *
+               #(#renamed_serialized_fields_kv), *
             }
 
             impl #struct_impl_generics #struct_name_ident #struct_ty_generics #struct_where_clause {
@@ -400,8 +395,8 @@ impl ToTokens for NodeToken {
                         Self {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
-                            #___________bindings: vec![],
-                            #___________errors: vec![],
+                            #___________bindings: ::std::vec![],
+                            #___________errors: ::std::vec![],
                             #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
@@ -413,7 +408,7 @@ impl ToTokens for NodeToken {
                            #( #schema_struct_fields_names_kv_prefixed) *
                             #___________graph_traversal_string: prefix.build(),
                             #___________bindings: prefix.get_bindings(),
-                            #___________errors: vec![],
+                            #___________errors: ::std::vec![],
                             #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
@@ -422,8 +417,8 @@ impl ToTokens for NodeToken {
                         Self {
                            #( #schema_struct_fields_names_kv_empty) *
                             #___________graph_traversal_string: "".into(),
-                            #___________bindings: vec![],
-                            #___________errors: vec![],
+                            #___________bindings: ::std::vec![],
+                            #___________errors: ::std::vec![],
                             #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }

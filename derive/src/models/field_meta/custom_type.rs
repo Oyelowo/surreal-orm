@@ -10,8 +10,8 @@ use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
-    self, parse_quote, spanned::Spanned, token::PathSep, visit::Visit, visit_mut::VisitMut,
-    GenericArgument, Ident, Lifetime, Path, PathArguments, PathSegment, Token, Type, TypeReference,
+    self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
+    Lifetime, Path, PathArguments, PathSegment, Token, Type, TypeReference,
 };
 
 use crate::models::*;
