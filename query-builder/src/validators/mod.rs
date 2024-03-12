@@ -7,6 +7,7 @@ pub use static_assertions::assert_trait_sub_all;
 pub use static_assertions::assert_trait_super_all;
 // pub use static_assertions::assert_type_eq_all;
 use std::any::TypeId;
+use std::collections::BTreeSet;
 use std::collections::HashSet;
 
 // macro_rules! assert_fields {
@@ -104,6 +105,68 @@ pub fn is_int<T: Int>() {}
 /// ```
 pub fn is_float<T: Float>() {}
 
+/// Validate that type is iterable at compile time
+pub fn assert_is_iterable<T: IntoIterator>() {
+    let _ = <T as IntoIterator>::into_iter;
+}
+
+/// This function can only be called with two arrays of the same length.
+pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T; N]) {
+    println!("Both arrays have the same length of {}", N);
+}
+
+/// Validate that type is a set at compile time
+pub trait IsSet {}
+
+impl<T> IsSet for HashSet<T> {}
+impl<T> IsSet for BTreeSet<T> {}
+
+/// Validate that type is a Set at compile time
+pub fn assert_is_set<T: IsSet>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that type is a HashSet at compile time
+pub trait IsHashSet {}
+
+impl<T> IsHashSet for HashSet<T> {}
+
+/// Validate that type is a HashSet at compile time
+pub fn assert_is_hashset<T: IsHashSet>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// check if a type is an Option
+pub trait IsOption {}
+
+impl<T> IsOption for Option<T> {}
+impl<T> IsOption for &Option<T> {}
+
+/// Validate that type is an Option at compile time
+pub fn assert_option<T: IsOption>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Check if a type is an array
+pub trait IsArray {}
+
+impl<T> IsArray for Vec<T> {}
+impl<T> IsArray for &Vec<T> {}
+impl<T, const N: usize> IsArray for [T; N] {}
+
+/// Validate that type is an array at compile time
+/// Array can be a Vec or a slice
+pub fn assert_is_array<T: IsArray>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that type is a vector at compile time
+pub trait IsVec {}
+
+impl<T> IsVec for Vec<T> {}
+impl<T> IsVec for &Vec<T> {}
+
+/// Validate that type is an Vec at compile time
 /// Validate that type is a vector at compile time
 ///
 /// # Example
@@ -124,40 +187,10 @@ pub fn is_float<T: Float>() {}
 /// assert_is_vec::<Vec<f32>>();
 /// assert_is_vec::<Vec<f64>>();
 /// ```
-pub fn assert_is_vec<T: IntoIterator>() {
-    let _ = <T as IntoIterator>::into_iter;
-}
-
-/// Validate that type is a hashset at compile time
-pub fn assert_is_hashset<T: 'static>(_: &T) -> bool {
-    // Here, you can change i32 to any other type based on what you are comparing with
-    TypeId::of::<T>() == TypeId::of::<HashSet<i32>>()
-}
-
-/// This function can only be called with two arrays of the same length.
-pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T; N]) {
-    println!("Both arrays have the same length of {}", N);
-}
-
-/// check if a type is an Option
-pub trait IsOption {}
-
-impl<T> IsOption for Option<T> {}
-
-/// Validate that type is an Option at compile time
-pub fn assert_option<T: IsOption>() {
+pub fn assert_is_vec<T: IsVec>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
 
-/// Check if a type is an array
-pub trait IsArray {}
-
-impl<T> IsArray for Vec<T> {}
-
-/// Validate that type is an Vec at compile time
-pub fn assert_vec<T: IsArray>() {
-    // This function doesn't need to do anything; it's just here to enforce the type constraint.
-}
 /// Checks that all idents are unique.
 #[macro_export]
 macro_rules! check_unique_idents {
