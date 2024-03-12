@@ -6,6 +6,7 @@
  */
 
 use quote::quote;
+use surreal_query_builder::FieldType;
 
 use crate::models::*;
 
@@ -44,8 +45,109 @@ impl<'a> Codegen<'a> {
                         #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
                     }.into());
             }
-            RelationType::List(_) => {}
-            RelationType::None => {}
+            RelationType::None | RelationType::List(_) => {
+                // TODO: Add attribute, skip type check
+                surreal_query_builder::validators::assert_impl_one!(
+                    &'static str: Into<std::string::String>
+                );
+                let x = 45u32;
+                x.to_string();
+                // &'static str
+                // surreal_query_builder::validators::assert_impl_one!(&String: Into<String>);
+                // surreal_query_builder::validators::assert_impl_one!(Option<&String>: Into<Option<String>>);
+                // surreal_query_builder::validators::assert_impl_one!(u32: Into<String>);
+                // surreal_query_builder::validators::assert_impl_one!(Option<u32>: Into<Option<String>>);
+                // let x: surreal_query_builder::sql::String = 2.into();
+                let table_derive_attrs = self.table_derive_attributes();
+                let ft = field_receiver.field_type_db(table_derive_attrs)?;
+                let is_simple = ft.is_primitive();
+                let raw_type = field_type;
+                let db_type_static_checker = match ft.into_inner_ref() {
+                    FieldType::Any => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                    }
+                    FieldType::Null => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                    }
+                    FieldType::Uuid => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Uuid>);)
+                    }
+                    FieldType::Bytes => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Bytes>);)
+                    }
+                    FieldType::Union(_) => {
+                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                        quote!()
+                    }
+                    FieldType::Option(_) => {
+                        // option<bool>  => assert_impl_one!(Option<bool>: Into<Option<bool>>);
+                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                        // TODO: Should I do a recursive option check?
+                        quote!()
+                    }
+                    FieldType::String => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::string::String>);)
+                    }
+                    FieldType::Int => {
+                        quote!(
+                            #crate_name::validators::is_int::<#raw_type>();
+                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
+                        )
+                    }
+                    FieldType::Float => {
+                        quote!(
+                            #crate_name::validators::is_float::<#raw_type>();
+                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
+                        )
+                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                    }
+                    FieldType::Bool => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::primitive::bool>);)
+                    }
+                    FieldType::Array(_, _) => {
+                        quote!(
+                            #crate_name::validators::assert_is_vec::<#raw_type>();
+                        )
+                    }
+                    FieldType::Set(_, _) => {
+                        // TODO, create is_set. Set field should use hashset or something
+                        quote!(
+                            #crate_name::validators::assert_is_vec::<#raw_type>();
+                        )
+                    }
+                    FieldType::Datetime => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
+                    }
+                    FieldType::Decimal => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                    }
+                    FieldType::Duration => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
+                    }
+                    FieldType::Number => {
+                        quote!(
+                            #crate_name::validators::is_number::<#raw_type>();
+                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
+                        )
+                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                    }
+                    FieldType::Object => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
+                    }
+                    FieldType::Record(_) => {
+                        if let DataType::Edge = model_type {
+                            quote!()
+                        } else {
+                            quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                        }
+                    }
+                    FieldType::Geometry(_) => {
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
+                    }
+                };
+
+                self.static_assertions.push(x);
+            }
         }
 
         Ok(())
