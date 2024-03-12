@@ -292,9 +292,8 @@ impl FieldType {
     pub fn is_primitive(&self) -> bool {
         matches!(
             self,
-            FieldType::Any
-                | FieldType::Null
-                | FieldType::Bool
+            // FieldType::Any
+            |FieldType::Null| FieldType::Bool
                 | FieldType::Bytes
                 | FieldType::Datetime
                 | FieldType::Decimal
