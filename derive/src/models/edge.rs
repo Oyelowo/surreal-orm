@@ -192,11 +192,9 @@ impl ToTokens for EdgeToken {
                 #[allow(non_snake_case)]
                 #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
                 pub struct  #struct_partial_ident #impl_generics #where_clause {
-                   #(
-                        #struct_partial_fields
-                        #[serde(skip)]
-                        pub(super) #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>
-                    ) *
+                    #[serde(skip)]
+                    #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>,
+                   #(#struct_partial_fields), *
                 }
 
                 #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
@@ -214,9 +212,7 @@ impl ToTokens for EdgeToken {
                 #[allow(non_snake_case)]
                 #[derive(#crate_name::serde::Serialize,  ebug, Clone)]
                 pub struct #struct_with_renamed_serialized_fields {
-                   #(
-                        #renamed_serialized_fields_kv
-                    ) *
+                   #(#renamed_serialized_fields_kv), *
                 }
 
                 #[allow(non_snake_case)]
@@ -237,27 +233,27 @@ impl ToTokens for EdgeToken {
                     }
 
                     fn get_serializable_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                        return vec![#( #serializable_fields), *]
+                        return ::std::vec![#( #serializable_fields), *] ,
                     }
 
                     fn get_linked_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                        return vec![#( #linked_fields), *]
+                        return ::std::vec![#( #linked_fields), *]
                     }
 
                     fn get_link_one_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                        return vec![#( #link_one_fields), *]
+                        return ::std::vec![#( #link_one_fields), *]
                     }
 
                     fn get_link_self_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                        return vec![#( #link_self_fields), *]
+                        return ::std::vec![#( #link_self_fields), *]
                     }
 
                     fn get_link_one_and_self_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                        return vec![#( #link_one_and_self_fields), *]
+                        return ::std::vec![#( #link_one_and_self_fields), *]
                     }
 
                     fn get_link_many_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                        return vec![#( #link_many_fields), *]
+                        return ::std::vec![#( #link_many_fields), *]
                     }
 
                     fn define_table() -> #crate_name::Raw{
@@ -331,7 +327,7 @@ impl ToTokens for EdgeToken {
                     }
 
                     impl #impl_generics #crate_name::Erroneous for #struct_name_ident #ty_generics #where_clause {
-                        fn get_errors(&self) -> Vec<::std::string::String> {
+                        fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                             self.#___________errors.to_vec()
                         }
                     }
@@ -361,8 +357,8 @@ impl ToTokens for EdgeToken {
                             Self {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________bindings: vec![],
-                                #___________errors: vec![],
+                                #___________bindings: ::std::vec![],
+                                #___________errors: ::std::vec![],
                                 #_____struct_marker_ident: ::std::marker::PhantomData,
                             }
                         }
@@ -373,7 +369,7 @@ impl ToTokens for EdgeToken {
                                #( #schema_struct_fields_names_kv_prefixed) *
                                 #___________graph_traversal_string: prefix.build(),
                                 #___________bindings: prefix.get_bindings(),
-                                #___________errors: vec![],
+                                #___________errors: ::std::vec![],
                                 #_____struct_marker_ident: ::std::marker::PhantomData,
                             }
                         }
@@ -382,8 +378,8 @@ impl ToTokens for EdgeToken {
                             Self {
                                #( #schema_struct_fields_names_kv_empty) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________bindings: vec![],
-                                #___________errors: vec![],
+                                #___________bindings: ::std::vec![],
+                                #___________errors: ::std::vec![],
                                 #_____struct_marker_ident: ::std::marker::PhantomData,
                             }
                         }

@@ -43,7 +43,7 @@ impl<'a> Codegen<'a> {
                 let optionalized_field_type = quote!(#crate_name:: Maybe<#field_type>);
                 self.insert_struct_partial_field_type_def_meta(quote!(
                     #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]
-                    pub #field_ident_normalized: #optionalized_field_type,
+                    pub #field_ident_normalized: #optionalized_field_type
                 ))?;
 
                 self.insert_struct_partial_builder_fields_methods(
@@ -58,7 +58,7 @@ impl<'a> Codegen<'a> {
 
                 self.insert_struct_partial_field_type_def_meta(quote!(
                         #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]
-                        pub #field_ident_normalized: #optionalized_field_type,
+                        pub #field_ident_normalized: #optionalized_field_type
                 ))?;
                 self.insert_struct_partial_builder_fields_methods(inner_field_type.into())?;
             }
@@ -104,7 +104,7 @@ impl<'a> Codegen<'a> {
         // exist.
         let field_ident = fr.field_ident_normalized(&table_derive_attributes.casing()?)?;
         self.renamed_serialized_fields_kv
-            .push(quote!(pub #field_ident: &'static str, ).into());
+            .push(quote!(pub #field_ident: &'static str ).into());
         Ok(())
     }
 }
