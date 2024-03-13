@@ -164,10 +164,11 @@ impl<'a> Codegen<'a> {
                         ]
                     }
                 };
-
-                self.static_assertions.push(x);
+                db_type_static_checker
             }
         };
+        self.static_assertions
+            .extend(static_assertions.into_iter().map(Into::into));
 
         Ok(())
     }

@@ -62,16 +62,7 @@ impl ToTokens for CustomTypeNoSelf {
 #[derive(Debug, Clone)]
 pub struct CustomType(Type);
 
-#[derive(Debug, Clone)]
-pub struct CustomTypeInnerAngleBracket(CustomType);
-
-impl std::ops::Deref for CustomTypeInnerAngleBracket {
-    type Target = CustomType;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+create_custom_type_wrapper!(CustomTypeInnerAngleBracket);
 
 impl FromMeta for CustomType {
     fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
