@@ -17,7 +17,7 @@ impl<'a> Codegen<'a> {
         let crate_name = &get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let field_type = &field_receiver.ty();
+        let field_type = &field_receiver.ty().remove_lifetime_and_reference();
 
         let static_assertions = match field_receiver.to_relation_type() {
             RelationType::Relate(_relate) => {
@@ -56,7 +56,7 @@ impl<'a> Codegen<'a> {
             }
             RelationType::None | RelationType::List(_) => {
                 let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
-                let db_type_static_checker = match db_field_type.into_inner_ref() {
+                let db_type_static_checker = |db_field_type: &FieldType| match db_field_type {
                     FieldType::Any => {
                         vec![
                             quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
@@ -78,21 +78,9 @@ impl<'a> Codegen<'a> {
                         ]
                     }
                     FieldType::Union(_) => {
-                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
                         vec![quote!()]
                     }
-                    FieldType::Option(ft) => {
-                        let x = field_type.raw_type_is_optional();
-                        let ty = field_type
-                            .inner_angle_bracket_type()?
-                            .map(|x| x.remove_lifetime_and_reference());
-                        // .type_is_inferrable(field_receiver, table_derive_attrs)
-
-                        // .map(|x| x.type_is_inferrable(field_receiver, model_attributes));
-                        // .map(|x| x.type_is_inferrable(field_receiver, model_attributes));
-                        // option<bool>  => assert_impl_one!(Option<bool>: Into<Option<bool>>);
-                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
-                        // TODO: Should I do a recursive option check?
+                    FieldType::Option(_) => {
                         vec![quote!(#crate_name::validators::assert_is_option::<#field_type>;)]
                     }
                     FieldType::String => {
@@ -103,15 +91,12 @@ impl<'a> Codegen<'a> {
                     FieldType::Int => {
                         vec![quote!(
                             #crate_name::validators::is_int::<#field_type>();
-                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                         )]
                     }
                     FieldType::Float => {
                         vec![quote!(
                             #crate_name::validators::is_float::<#field_type>();
-                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                         )]
-                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                     }
                     FieldType::Bool => {
                         vec![
@@ -134,10 +119,8 @@ impl<'a> Codegen<'a> {
                         ]
                     }
                     FieldType::Decimal => {
-                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                         vec![quote!(
                             #crate_name::validators::is_number::<#field_type>();
-                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                         )]
                     }
                     FieldType::Duration => {
@@ -148,9 +131,7 @@ impl<'a> Codegen<'a> {
                     FieldType::Number => {
                         vec![quote!(
                             #crate_name::validators::is_number::<#field_type>();
-                            // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                         )]
-                        // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                     }
                     FieldType::Object => {
                         vec![
@@ -168,7 +149,33 @@ impl<'a> Codegen<'a> {
                         ]
                     }
                 };
-                db_type_static_checker
+
+                let db_field_type = db_field_type.into_inner_ref();
+                let mut top_level_check = db_type_static_checker(db_field_type);
+                if let FieldType::Option(_) = db_field_type {
+                    let ty = field_type
+                        .inner_angle_bracket_type()?
+                        .map(|x| x.remove_lifetime_and_reference());
+                    if let Some(ty) = ty {
+                        if ty.type_is_inferrable(field_receiver, table_derive_attrs) {
+                            let field_name =
+                                &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
+                            let relation_type = field_receiver.to_relation_type();
+                            let model_type = self.data_type();
+                            let ft = ty.infer_surreal_type_heuristically(
+                                field_name,
+                                &relation_type,
+                                &model_type,
+                            )?;
+
+                            if let Some(ft) = ft.field_type_db_original {
+                                let inner = db_type_static_checker(&ft);
+                                top_level_check.extend(inner);
+                            }
+                        }
+                    }
+                }
+                top_level_check
             }
         };
         self.static_assertions
