@@ -157,6 +157,18 @@ impl CustomType {
         &self.0
     }
 
+    pub fn remove_lifetime_and_reference(&self) -> Self {
+        let ty = &self.0;
+        let ty = match ty {
+            Type::Reference(type_reference) => {
+                let elem = type_reference.elem.as_ref();
+                elem
+            }
+            _ => ty,
+        };
+        Self(ty.clone())
+    }
+
     // e.g User if Option<User> or ::std::option::Option<User>
     pub fn inner_angle_bracket_type(&self) -> ExtractorResult<Option<CustomTypeInnerAngleBracket>> {
         match self.as_basic_type_ref() {
