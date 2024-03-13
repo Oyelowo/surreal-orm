@@ -83,7 +83,11 @@ impl<'a> Codegen<'a> {
                     }
                     FieldType::Option(ft) => {
                         let x = field_type.raw_type_is_optional();
-                        let xx = field_type.inner_angle_bracket_type()?;
+                        let ty = field_type
+                            .inner_angle_bracket_type()?
+                            .map(|x| x.remove_lifetime_and_reference());
+                        // .type_is_inferrable(field_receiver, table_derive_attrs)
+
                         // .map(|x| x.type_is_inferrable(field_receiver, model_attributes));
                         // .map(|x| x.type_is_inferrable(field_receiver, model_attributes));
                         // option<bool>  => assert_impl_one!(Option<bool>: Into<Option<bool>>);
