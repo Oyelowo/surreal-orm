@@ -117,13 +117,6 @@ impl std::ops::Deref for StructGenerics {
     }
 }
 
-struct PhantomDataGenericArguments {
-    colon2_token: Option<Token![::]>,
-    lt_token: Token![<],
-    args: Punctuated<GenericArgument, Token![,]>,
-    gt_token: Token![>],
-}
-
 // PhantomData<(&'a dyn std::any::Any, &'b dyn std::any::Any, T, U, V)>,
 #[derive(Clone, Debug)]
 pub struct PhantomDataType(Type);
@@ -208,7 +201,7 @@ impl<'a> GenericTypeExtractor<'a> {
             struct_generics: model_attributes.generics(),
             field_generics: Default::default(),
         };
-        generics.visit_type(field_ty.as_basic_type_ref());
+        generics.visit_type(field_ty.into_inner_ref());
         generics.field_generics.0
     }
 

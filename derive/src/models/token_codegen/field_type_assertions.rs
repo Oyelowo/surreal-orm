@@ -17,7 +17,10 @@ impl<'a> Codegen<'a> {
         let crate_name = &get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let field_type = &field_receiver.ty().remove_lifetime_and_reference();
+        let field_type = &field_receiver
+            .ty()
+            .remove_lifetime_and_reference()
+            .replace_self_with_current_struct_concrete_type(table_derive_attrs)?;
 
         let static_assertions = match field_receiver.to_relation_type() {
             RelationType::Relate(_relate) => {
@@ -46,7 +49,7 @@ impl<'a> Codegen<'a> {
                 ]
             }
             RelationType::NestArray(foreign_array_object) => {
-                let nesting_level = Self::count_vec_nesting(field_type.as_basic_type_ref());
+                let nesting_level = Self::count_vec_nesting(field_type.to_basic_type());
                 let nested_vec_type =
                     Self::generate_nested_vec_type(&foreign_array_object, nesting_level);
 
