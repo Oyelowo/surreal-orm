@@ -43,7 +43,7 @@ impl EdgeType {
         let mut common_generics = HashSet::new();
 
         for edge_type in edge_types {
-            let edge_type = &edge_type.as_basic_type_ref();
+            let edge_type = &edge_type.into_inner_ref();
             let mut visitor = UniqueTypeVisitor::default();
             visitor.visit_type(edge_type);
 

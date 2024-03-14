@@ -24,7 +24,7 @@ pub struct ReplaceSelfVisitor {
 impl ReplaceSelfVisitor {
     #[allow(dead_code)]
     pub fn replace_self(&mut self, ty: &CustomType) -> CustomTypeNoSelf {
-        let mut ty = ty.as_basic_type_ref().clone();
+        let mut ty = ty.into_inner_ref().clone();
         self.visit_type_mut(&mut ty);
         CustomTypeNoSelf::new(ty.clone())
     }
