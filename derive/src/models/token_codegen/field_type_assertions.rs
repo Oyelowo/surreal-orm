@@ -160,7 +160,7 @@ impl<'a> Codegen<'a> {
                         .inner_angle_bracket_type()?
                         .map(|x| x.remove_lifetime_and_reference());
                     if let Some(ty) = ty {
-                        if ty.type_is_inferrable(field_receiver, table_derive_attrs) {
+                        if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
                             let field_name =
                                 &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
                             let relation_type = field_receiver.to_relation_type();
@@ -172,6 +172,7 @@ impl<'a> Codegen<'a> {
                             )?;
 
                             if let Some(ft) = ft.field_type_db_original {
+                                panic!("field_name: {field_name:?}...ft: {ft:?}");
                                 let inner = db_type_static_checker(&ft);
                                 top_level_check.extend(inner);
                             }
