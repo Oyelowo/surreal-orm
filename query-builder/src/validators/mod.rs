@@ -6,7 +6,6 @@ pub use static_assertions::assert_impl_any;
 pub use static_assertions::assert_trait_sub_all;
 pub use static_assertions::assert_trait_super_all;
 // pub use static_assertions::assert_type_eq_all;
-use std::any::TypeId;
 use std::collections::BTreeSet;
 use std::collections::HashSet;
 
@@ -41,6 +40,7 @@ macro_rules! assert_fields {
 macro_rules! assert_type_eq_all {
     ($a:ty, $b:ty) => {
         let _a: $a = unimplemented!();
+        #[allow(unreachable_code)]
         let _b: $b = _a;
     };
 }
@@ -143,7 +143,7 @@ impl<T> IsOption for Option<T> {}
 impl<T> IsOption for &Option<T> {}
 
 /// Validate that type is an Option at compile time
-pub fn assert_option<T: IsOption>() {
+pub fn assert_is_option<T: IsOption>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
 
