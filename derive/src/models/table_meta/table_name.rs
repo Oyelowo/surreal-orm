@@ -8,7 +8,6 @@
 use convert_case::{Case, Casing};
 use darling::FromMeta;
 use proc_macro2::Ident;
-use quote::format_ident;
 use syn::{Expr, Lit};
 
 use crate::models::*;

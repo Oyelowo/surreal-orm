@@ -10,7 +10,7 @@ use std::ops::Deref;
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote};
+use quote::quote;
 
 use syn::{self, parse_macro_input};
 

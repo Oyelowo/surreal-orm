@@ -31,24 +31,10 @@ impl ReplaceSelfVisitor {
 }
 impl VisitMut for ReplaceSelfVisitor {
     fn visit_type_mut(&mut self, i: &mut Type) {
-        match i {
-            Type::Path(type_path) => {
-                for segment in &mut type_path.path.segments {
-                    // self.visit_path_segment_mut(segment);
-                    if segment.ident == "Self" {
-                        segment.ident = self.struct_ident.clone();
-                        if !self.generics.args.is_empty() {
-                            segment.arguments =
-                                PathArguments::AngleBracketed(self.generics.clone());
-                        }
-                    }
-                }
-            }
-            _ => visit_mut::visit_type_mut(self, i),
-        }
+        // Handle the top-level replacements and delegate deeper inspection to other visit_*_mut methods.
+        visit_mut::visit_type_mut(self, i);
     }
 
-    // Nested types and generics
     fn visit_path_segment_mut(&mut self, segment: &mut PathSegment) {
         if segment.ident == "Self" {
             segment.ident = self.struct_ident.clone();
@@ -56,12 +42,23 @@ impl VisitMut for ReplaceSelfVisitor {
                 segment.arguments = PathArguments::AngleBracketed(self.generics.clone());
             }
         } else {
-            // Handle nested generics in path segments
-            if let PathArguments::AngleBracketed(angle_bracketed_args) = &mut segment.arguments {
-                // self.visit_angle_bracketed_generic_arguments_mut(angle_bracketed_args);
-                for arg in &mut angle_bracketed_args.args {
-                    self.visit_generic_argument_mut(arg);
+            // Recursively handle the arguments of the segment.
+            match &mut segment.arguments {
+                PathArguments::AngleBracketed(angle_bracketed) => {
+                    for arg in &mut angle_bracketed.args {
+                        match arg {
+                            GenericArgument::Type(ty) => self.visit_type_mut(ty),
+                            _ => {}
+                        }
+                    }
                 }
+                PathArguments::Parenthesized(parenthesized) => {
+                    for input in &mut parenthesized.inputs {
+                        self.visit_type_mut(input);
+                    }
+                    self.visit_return_type_mut(&mut parenthesized.output);
+                }
+                _ => {}
             }
         }
     }
@@ -245,6 +242,7 @@ mod tests {
             path: Path::from(Ident::new("Self", proc_macro2::Span::call_site())),
         });
 
+        // let ty_to_replace: Type = parse_quote!(User<'a, 'b, U, V>);
         let mut replacer = ReplaceSelfVisitor {
             struct_ident,
             generics,

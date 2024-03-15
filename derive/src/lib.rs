@@ -30,6 +30,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 mod migrations;
 mod models;
+mod xz;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
 pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
