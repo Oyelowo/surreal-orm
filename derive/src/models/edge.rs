@@ -423,7 +423,7 @@ impl ToTokens for EdgeToken {
                 }
 
             #[allow(non_snake_case)]
-            fn #test_function_name() {
+            fn #test_function_name #impl_generics() {
                 #( #static_assertions) *
             }
         ));
