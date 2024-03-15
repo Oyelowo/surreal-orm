@@ -168,13 +168,9 @@ impl CustomType {
     }
 
     pub fn remove_lifetime_and_reference(&self) -> Self {
-        let ty = &self.0;
-        let ty = match ty {
-            Type::Reference(type_reference) => {
-                let elem = type_reference.elem.as_ref();
-                elem
-            }
-            _ => ty,
+        let ty = match self.into_inner_ref() {
+            Type::Reference(r) => r.elem.as_ref(),
+            _ => self.into_inner_ref(),
         };
         Self(ty.clone())
     }
@@ -928,6 +924,28 @@ impl CustomType {
             return Err(syn::Error::new(ty.span(), "Could not infer type for the field").into());
         };
         Ok(meta)
+    }
+
+    pub fn type_is_inferrable_primitive(
+        &self,
+        field_receiver: &MyFieldReceiver,
+        model_attributes: &ModelAttributes,
+    ) -> bool {
+        let is_db_field = model_attributes.casing().map_or(false, |casing| {
+            field_receiver.db_field_name(&casing).map_or(false, |dfn| {
+                dfn.is_id() || dfn.is_orig_or_dest_edge_node(&model_attributes.to_data_type())
+            })
+        });
+
+        field_receiver.to_relation_type().is_some()
+            || is_db_field
+            || self.raw_type_is_float()
+            || self.raw_type_is_integer()
+            || self.raw_type_is_string()
+            || self.raw_type_is_bool()
+            || self.raw_type_is_duration()
+            || self.raw_type_is_datetime()
+        // || self.raw_type_is_geometry()
     }
 
     pub fn type_is_inferrable(
