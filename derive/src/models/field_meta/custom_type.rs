@@ -11,12 +11,14 @@ use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
     self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
-    Lifetime, Path, PathArguments, PathSegment, Token, Type, TypeReference,
+    Lifetime, Path, PathArguments, Token, Type,
 };
 
 use crate::models::*;
 
-use super::{field_name_serialized::DbFieldName, *};
+use super::{
+    custom_type_self_replacement::ReplaceSelfVisitor, field_name_serialized::DbFieldName, *,
+};
 
 #[derive(Debug, Clone)]
 pub struct CustomTypeNoSelf(CustomType);
@@ -155,6 +157,10 @@ impl CustomType {
 
     pub fn into_inner(self) -> Type {
         self.0
+    }
+
+    pub fn to_basic_type(&self) -> &Type {
+        &self.0
     }
 
     pub fn into_inner_ref(&self) -> &Type {
@@ -302,136 +308,11 @@ impl CustomType {
         &self,
         model_attributes: &ModelAttributes,
     ) -> ExtractorResult<CustomTypeNoSelf> {
-        // TODO: Consider using the declarative replacer over the more imperative approach
-        // let replacer = ReplaceSelfVisitor {
-        //     struct_ident: model_attributes.struct_as_path_no_bounds(),
-        //     generics: model_attributes.generics().to_basic_generics(),
-        // };
-        // let x = replacer.replace_self(self.to_basic_type().clone());
-        let ty = &self.into_inner_ref();
-        let replacement_path_from_current_struct =
-            model_attributes.struct_no_bounds()?.to_path()?;
-
-        fn replace_self_in_segment(segment: &mut PathSegment, replacement_path: &Path) {
-            if segment.ident == "Self" {
-                if let Some(first_segment) = replacement_path.segments.first() {
-                    *segment = first_segment.clone();
-                }
-            } else if let PathArguments::AngleBracketed(angle_args) = &mut segment.arguments {
-                for arg in angle_args.args.iter_mut() {
-                    if let GenericArgument::Type(t) = arg {
-                        *t = replace_type(t, replacement_path);
-                    }
-                }
-            }
-        }
-
-        // handle replacement within types
-        fn replace_type(ty: &Type, replacement_path: &Path) -> Type {
-            match ty {
-                Type::Path(type_path) => {
-                    let mut new_type_path = type_path.clone();
-                    for segment in &mut new_type_path.path.segments {
-                        replace_self_in_segment(segment, replacement_path);
-                    }
-                    Type::Path(new_type_path)
-                }
-                Type::Reference(type_reference) => {
-                    let elem = Box::new(replace_type(&type_reference.elem, replacement_path));
-                    Type::Reference(TypeReference {
-                        and_token: type_reference.and_token,
-                        lifetime: type_reference.lifetime.clone(),
-                        mutability: type_reference.mutability,
-                        elem,
-                    })
-                }
-                Type::Paren(type_paren) => {
-                    let elem = Box::new(replace_type(&type_paren.elem, replacement_path));
-                    Type::Paren(syn::TypeParen {
-                        paren_token: type_paren.paren_token,
-                        elem,
-                    })
-                }
-                Type::Group(type_group) => {
-                    let elem = Box::new(replace_type(&type_group.elem, replacement_path));
-                    Type::Group(syn::TypeGroup {
-                        group_token: type_group.group_token,
-                        elem,
-                    })
-                }
-                Type::Array(type_array) => {
-                    let elem = Box::new(replace_type(&type_array.elem, replacement_path));
-                    Type::Array(syn::TypeArray {
-                        bracket_token: type_array.bracket_token,
-                        elem,
-                        semi_token: type_array.semi_token,
-                        len: type_array.len.clone(),
-                    })
-                }
-                Type::Tuple(type_tuple) => {
-                    let elems = type_tuple
-                        .elems
-                        .iter()
-                        .map(|elem| replace_type(elem, replacement_path))
-                        .collect();
-                    Type::Tuple(syn::TypeTuple {
-                        paren_token: type_tuple.paren_token,
-                        elems,
-                    })
-                }
-                // Type::BareFn(type_bare_fn) => {
-                //     let inputs = type_bare_fn
-                //         .inputs
-                //         .iter()
-                //         .map(|input| replace_type(&input.ty, replacement_path))
-                //         .collect();
-                //     let output = type_bare_fn
-                //         .output
-                //         .as_ref()
-                //         .map(|output| replace_type(output, replacement_path));
-                //     Type::BareFn(syn::TypeBareFn {
-                //         lifetimes: type_bare_fn.lifetimes.clone(),
-                //         unsafety: type_bare_fn.unsafety,
-                //         abi: type_bare_fn.abi.clone(),
-                //         fn_token: type_bare_fn.fn_token,
-                //         paren_token: type_bare_fn.paren_token,
-                //         inputs,
-                //         variadic: type_bare_fn.variadic,
-                //         output,
-                //     })
-                // }
-                // Type::Never(type_never) => Type::Never(type_never),
-                // Type::TraitObject(type_trait_object) => {
-                //     let bounds = type_trait_object
-                //         .bounds
-                //         .iter()
-                //         .map(|bound| replace_type(bound, replacement_path))
-                //         .collect();
-                //     Type::TraitObject(syn::TypeTraitObject {
-                //         dyn_token: type_trait_object.dyn_token,
-                //         bounds,
-                //     })
-                // }
-                // Type::ImplTrait(type_impl_trait) => {
-                //     let bounds = type_impl_trait
-                //         .bounds
-                //         .iter()
-                //         .map(|bound| replace_type(bound, replacement_path))
-                //         .collect();
-                //     Type::ImplTrait(syn::TypeImplTrait {
-                //         impl_token: type_impl_trait.impl_token,
-                //         bounds,
-                //     })
-                // }
-                // TODO: Extend to handle other types like Tuple, Array, etc.
-                _ => ty.clone(),
-            }
-        }
-
-        Ok(CustomTypeNoSelf::new(replace_type(
-            ty,
-            &replacement_path_from_current_struct,
-        )))
+        let mut replacer = ReplaceSelfVisitor {
+            struct_ident: model_attributes.ident().into_inner(),
+            generics: model_attributes.generics().to_angle_bracketed(),
+        };
+        Ok(replacer.replace_self(self))
     }
 
     fn _strip_bounds_from_generics(&self) -> Self {
