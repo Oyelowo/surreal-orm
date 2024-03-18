@@ -87,7 +87,7 @@ impl<'a> Codegen<'a> {
             .value
             .as_ref()
             .map_or(StaticAssertionToken::default(), |v| {
-                v.get_static_assertion(field_type)
+                v.get_default_value_static_assertion(field_type)
             });
 
         Ok(static_assertion)
