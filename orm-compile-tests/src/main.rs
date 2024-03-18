@@ -45,18 +45,22 @@ mod check3 {
 
     use surreal_orm_compile_tests::*;
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    // #[surreal_orm(table = student)]
+    #[surreal_orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        // #[surreal_orm(
-        //     ty = "int",
-        //     value = "18",
-        //     assert = assert_fn(),
-        //     permissions = permissions_fn()
-        // )]
-        // age: u8,
+        #[surreal_orm(
+            ty = "string",
+            value = 18,
+            // assert = assert_fn(),
+            permissions = permissions_fn
+            // permissions = permissions_fn2("Oyelowo Oyedayo")
+        )]
+        age: u8,
+    }
+    fn er() {
+        let x = permissions_fn();
     }
 }
 
