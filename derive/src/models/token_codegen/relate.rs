@@ -296,7 +296,7 @@ pub struct NodeEdgeMetadata<'a> {
     // /// The current struct name ident.
     // /// e.g given: struct Student {  }, value = Student
     // current_struct_ident: StructIdent,
-    table_derive_attributes: &'a ModelAttributes,
+    table_derive_attributes: &'a ModelAttributes<'a>,
     /// The database table name of the edge. Used for generating other tokens
     /// e.g "writes"
     direction: EdgeDirection,
