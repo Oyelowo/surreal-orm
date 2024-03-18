@@ -26,12 +26,12 @@ mod check1 {
     #[derive(Edge, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(
-        table_name = "likes",
+        table = likes,
         flexible,
         drop,
         schemafull,
-        as_ = "as_fn()",
-        permissions = "permissions_fn()"
+        as_ = as_fn(),
+        permissions = permissions_fn()
     )]
     pub struct Likes<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -49,7 +49,7 @@ mod check2 {
 
     #[derive(Edge, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "likes", define = "define_table_fn()")]
+    #[surreal_orm(table = likes, define = "define_table_fn()")]
     pub struct Likes<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Likes<In, Out>>,
 
@@ -66,7 +66,7 @@ mod check3 {
 
     #[derive(Edge, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "likes", define_fn = "define_table_fn")]
+    #[surreal_orm(table = likes, define = define_table_fn)]
     pub struct Likes<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Likes<In, Out>>,
 
@@ -85,13 +85,13 @@ mod check3 {
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
 ///     schemafull,
-///     as_ = "as_fn()",
-///     permissions = "permissions_fn()",
-///     define = "define_table_fn()"
+///     as_ = as_fn(),
+///     permissions = permissions_fn(),
+///     define = define_table_fn()
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -112,12 +112,12 @@ fn _no_other_attributes_when_define_attr_is_used_1() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
 ///     schemafull,
-///     as_ = "as_fn()",
-///     define = "define_table_fn()"
+///     as_ = as_fn(),
+///     define = define_table_fn()
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -138,11 +138,11 @@ fn _no_other_attributes_when_define_attr_is_used_2() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
 ///     schemafull,
-///     define = "define_table_fn()"
+///     define = define_table_fn()
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -163,10 +163,10 @@ fn _no_other_attributes_when_define_attr_is_used_3() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
-///     define = "define_table_fn()"
+///     define = define_table_fn()
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -187,7 +187,7 @@ fn _no_other_attributes_when_define_attr_is_used_4() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     define = "define_table_fn()"
 /// )]
@@ -212,13 +212,13 @@ fn _no_other_attributes_when_define_attr_is_used_5() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
 ///     schemafull,
-///     as_ = "as_fn()",
-///     permissions = "permissions_fn()",
-///     define_fn = "define_table_fn"
+///     as_ = as_fn(),
+///     permissions = permissions_fn(),
+///     define_fn = define_table_fn
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -239,12 +239,12 @@ fn _no_other_attributes_when_define_fn_attr_is_used_1() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
 ///     schemafull,
-///     as_ = "as_fn()",
-///     define_fn = "define_table_fn"
+///     as_ = as_fn(),
+///     define = define_table_fn
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -265,11 +265,11 @@ fn _no_other_attributes_when_define_fn_attr_is_used_2() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
 ///     schemafull,
-///     define_fn = "define_table_fn"
+///     define = define_table_fn
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -290,10 +290,10 @@ fn _no_other_attributes_when_define_fn_attr_is_used_3() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
 ///     drop,
-///     define_fn = "define_table_fn"
+///     define = define_table_fn
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -314,9 +314,9 @@ fn _no_other_attributes_when_define_fn_attr_is_used_4() {}
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")] // this is the only attribute that should be allowed
 /// #[surreal_orm(
-///     table_name = "likes",
+///     table = likes,
 ///     flexible,
-///     define_fn = "define_table_fn"
+///     define = define_table_fn
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -338,9 +338,8 @@ fn _no_other_attributes_when_define_fn_attr_is_used_5() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[surreal_orm(
-///     table_name = "likes",
-///     define = "define_table_fn()",
-///     define_fn = "define_table_fn"
+///     table = likes,
+///     define = define_table_fn(),
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -360,9 +359,8 @@ fn _define_and_define_fn_cannot_be_used_together_1() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[surreal_orm(
-///     table_name = "likes",
-///     permissions = "permissions_fn()",
-///     permissions_fn = "permissions_fn"
+///     table = likes,
+///     permissions = permissions_fn(),
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
@@ -382,9 +380,8 @@ fn _permissions_and_permissions_fn_cannot_be_used_together_2() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[surreal_orm(
-///     table_name = "likes",
-///     as_ = "as_fn()"
-///     as_fn = "as_fn"
+///     table = likes,
+///     as_ = as_fn()
 /// )]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
