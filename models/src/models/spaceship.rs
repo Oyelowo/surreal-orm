@@ -7,8 +7,7 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{Model, Node, SurrealId};
-use surrealdb::sql;
+use surreal_orm::{sql, Model, Node, SurrealId};
 
 // #[derive(Serialize, Deserialize)]
 // struct SpaceShipId(SurrealId<SpaceShip, String>);

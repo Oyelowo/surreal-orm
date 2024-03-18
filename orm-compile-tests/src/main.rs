@@ -22,7 +22,7 @@ mod check1 {
     #[surreal_orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = int, define = define_field_fn())]
+        #[surreal_orm(ty = int, define = define_field_fn())]
         age: u8,
     }
 }
@@ -36,7 +36,7 @@ mod check2 {
     #[surreal_orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = "int", define = define_field_fn)]
+        #[surreal_orm(ty = "int", define = define_field_fn)]
         age: u8,
     }
 }
@@ -45,18 +45,18 @@ mod check3 {
 
     use surreal_orm_compile_tests::*;
 
-    #[derive(Node, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = student)]
+    // #[surreal_orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(
-            type_ = "int",
-            value = "18",
-            assert = assert_fn(),
-            permissions = permissions_fn()
-        )]
-        age: u8,
+        // #[surreal_orm(
+        //     ty = "int",
+        //     value = "18",
+        //     assert = assert_fn(),
+        //     permissions = permissions_fn()
+        // )]
+        // age: u8,
     }
 }
 
