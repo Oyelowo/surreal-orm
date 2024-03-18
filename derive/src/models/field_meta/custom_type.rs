@@ -32,7 +32,7 @@ impl CustomTypeNoSelf {
         self.0
     }
 
-    pub fn as_custom_type_ref(&self) -> &CustomType {
+    pub fn into_inner_ref(&self) -> &CustomType {
         &self.0
     }
 

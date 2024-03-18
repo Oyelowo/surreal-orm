@@ -156,16 +156,11 @@ impl<'a> Codegen<'a> {
                 let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
                 let db_field_type = db_field_type.into_inner_ref();
                 let mut top_level_check =
-                    db_type_static_checker(field_type.into_inner(), db_field_type);
-                let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
+                    db_type_static_checker(field_type.into_inner_ref(), db_field_type);
+                // let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
                 if let FieldType::Option(_) = db_field_type {
                     let ty = field_type.inner_angle_bracket_type()?;
-                    // .map(|x| x.remove_lifetime_and_reference());
-                    // panic!(
-                    //     "fieldname: {db_field_name}...field_type:{:?} innerty: {:?}",
-                    //     field_type.to_token_stream().to_string(),
-                    //     ty.to_token_stream().to_string()
-                    // );
+
                     if let Some(ty) = ty {
                         if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
                             let field_name =
@@ -180,13 +175,13 @@ impl<'a> Codegen<'a> {
 
                             if let Some(ft) = db_type_meta.field_type_db_original {
                                 let inner = db_type_static_checker(ty.into_inner_ref(), &ft);
-                                panic!(
-                                    "field_name: {field_name:?}...ft: {ft:?}...inner: {:?}",
-                                    inner
-                                        .iter()
-                                        .map(|x| x.to_token_stream().to_string())
-                                        .collect::<Vec<String>>()
-                                );
+                                // panic!(
+                                //     "field_namex: {field_name:?}...ft: {ft:?}...inner: {:?}",
+                                //     inner
+                                //         .iter()
+                                //         .map(|x| x.to_token_stream().to_string())
+                                //         .collect::<Vec<String>>()
+                                // );
                                 top_level_check.extend(inner);
                             }
                         }
