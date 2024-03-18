@@ -86,15 +86,15 @@ pub enum ModelAttributes<'a> {
 }
 
 impl<'a> ModelAttributes<'a> {
-    pub fn from_node(node: &NodeToken) -> Self {
+    pub fn from_node(node: &'a NodeToken) -> Self {
         ModelAttributes::Node(node)
     }
 
-    pub fn from_edge(edge: &EdgeToken) -> Self {
+    pub fn from_edge(edge: &'a EdgeToken) -> Self {
         ModelAttributes::Edge(edge)
     }
 
-    pub fn from_object(object: &ObjectToken) -> Self {
+    pub fn from_object(object: &'a ObjectToken) -> Self {
         ModelAttributes::Object(object)
     }
 
