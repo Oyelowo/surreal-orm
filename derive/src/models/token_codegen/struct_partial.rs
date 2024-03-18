@@ -28,10 +28,6 @@ impl<'a> Codegen<'a> {
             return Ok(());
         }
 
-        let is_option = field_receiver
-            .field_type_db(table_derive_attributes)?
-            .into_inner()
-            .is_option();
         let maybe_fn_path = format!("{crate_name}::Maybe::is_none");
         match field_receiver.to_relation_type() {
             RelationType::None
@@ -72,7 +68,6 @@ impl<'a> Codegen<'a> {
         &mut self,
         struct_partial_field_type: StructPartialFieldType,
     ) -> ExtractorResult<()> {
-        let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let original_field_ident = field_receiver.ident()?;
         let crate_name = get_crate_name(false);

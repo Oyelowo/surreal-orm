@@ -247,7 +247,8 @@ impl<'a> Codegen<'a> {
             field_receiver.field_name_pascalized(&model_attributes.casing()?)?;
         let field_type = field_receiver.ty();
         let binding = field_type.get_generics_from_current_struct(model_attributes);
-        let (field_impl_generics, field_ty_generics, field_where_clause) = binding.split_for_impl();
+        let (field_impl_generics, _field_ty_generics, field_where_clause) =
+            binding.split_for_impl();
 
         let numeric_trait = {
             quote!(
