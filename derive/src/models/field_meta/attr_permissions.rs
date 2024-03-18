@@ -68,9 +68,10 @@ impl FromMeta for Permissions {
                     }
                 }
                 Expr::Lit(lit) => Self::from_value(&lit.lit),
-                _ => Err(darling::Error::custom(
-                    "Expected a valid Rust path or an expression",
-                )),
+                _ => Ok(Self::FnName(ExprOrPath::Expr(value.clone()))),
+                // _ => Err(darling::Error::custom(
+                //     "Expected a valid Rust path or an expression",
+                // )),
             },
             _ => Err(darling::Error::unsupported_shape(
                 "Expected a path or a name-value pair",
@@ -87,7 +88,9 @@ impl FromMeta for Permissions {
                     "full" => Ok(Self::Full),
                     _ => match syn::parse_str::<Path>(&value_str) {
                         Ok(path) => Ok(Self::FnName(ExprOrPath::Path(path))),
-                        Err(_) => Err(darling::Error::custom("Expected a valid Rust path")),
+                        Err(_) => Ok(syn::parse_str::<Expr>(&value_str)
+                            .map(ExprOrPath::Expr)
+                            .map(Self::FnName)?),
                     },
                 }
             }

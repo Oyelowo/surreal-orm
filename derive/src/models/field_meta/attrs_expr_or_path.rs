@@ -52,7 +52,9 @@ impl ToTokens for ExprOrPath {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
             ExprOrPath::Expr(expr) => expr.to_tokens(tokens),
-            ExprOrPath::Path(path) => path.to_tokens(tokens),
+            ExprOrPath::Path(path) => {
+                quote!(#path()).to_tokens(tokens);
+            }
         }
     }
 }
@@ -95,34 +97,67 @@ impl_from_expr_or_path!(AttributeAs);
 impl_from_expr_or_path!(AttributeDefine);
 
 impl AttributeValue {
-    pub fn get_static_assertion(&self, db_field_type: FieldType) -> StaticAssertionToken {
+    pub fn get_default_value_static_assertion(
+        &self,
+        db_field_type: FieldType,
+    ) -> StaticAssertionToken {
         let crate_name = &get_crate_name(false);
         let value_expr = &self;
 
         let convertible_values_to_db_type = match db_field_type {
-            FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value_expr)),
-            FieldType::Null => quote!(#crate_name::sql::Value::Null),
-            // FieldType::Union(_) => quote!(#crate_name::sql::Value::from(#value_expr)),
+            FieldType::Bytes => quote!(
+                #crate_name::validators::assert_value_is_bytes(#value_expr)
+            ),
+            FieldType::Null => quote!(
+                #crate_name::validators::assert_value_is_null(#value_expr)
+            ),
             FieldType::Union(_) => quote!(),
-            // FieldType::Option(_) => quote!(#crate_name::sql::Value::from(#value_expr)),
-            FieldType::Option(_) => quote!(),
-            FieldType::Uuid => quote!(#crate_name::sql::Uuid::from(#value_expr)),
-            FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_expr)),
-            FieldType::String => quote!(#crate_name::sql::String::from(#value_expr)),
-            FieldType::Int => quote!(#crate_name::sql::Number::from(#value_expr)),
-            FieldType::Float => quote!(#crate_name::sql::Number::from(#value_expr)),
-            FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value_expr)),
-            FieldType::Array(_, _) => quote!(),
-            FieldType::Set(_, _) => quote!(),
-            // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
-            FieldType::Datetime => quote!(#crate_name::sql::Datetime::from(#value_expr)),
-            FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value_expr)),
-            FieldType::Number => quote!(#crate_name::sql::Number::from(#value_expr)),
+            FieldType::Option(_) => quote!(
+                #crate_name::validators::assert_value_is_option(#value_expr)
+            ),
+            FieldType::Uuid => quote!(
+                #crate_name::validators::assert_value_is_uuid(#value_expr)
+            ),
+            FieldType::Duration => quote!(
+                #crate_name::validators::assert_value_is_duration(#value_expr)
+            ),
+            FieldType::String => {
+                quote!(#crate_name::validators::assert_value_is_string(#value_expr))
+            }
+            FieldType::Int => quote!(
+                    #crate_name::validators::assert_value_is_int(#value_expr)
+            ),
+            FieldType::Float => quote!(
+                    #crate_name::validators::assert_value_is_float(#value_expr)
+            ),
+            FieldType::Bool => quote!(
+                        #crate_name::validators::assert_value_is_bool(#value_expr)
+            ),
+            FieldType::Array(_, _) => quote!(
+                 #crate_name::validators::assert_value_is_array(#value_expr)
+            ),
+            FieldType::Set(_, _) => {
+                quote!(#crate_name::validators::assert_value_is_set(#value_expr))
+            }
+            FieldType::Datetime => quote!(
+                    #crate_name::validators::assert_value_is_datetime(#value_expr)
+            ),
+            FieldType::Decimal => quote!(
+                #crate_name::validators::assert_value_is_number(#value_expr)
+            ),
+            FieldType::Number => quote!(
+                #crate_name::validators::assert_value_is_number(#value_expr)
+            ),
             FieldType::Object => quote!(),
-            // FieldType::Object => quote!(#crate_name::sql::Value::from(#value_expr)),
-            FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value_expr)),
-            FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value_expr)),
-            FieldType::Any => quote!(#crate_name::sql::Value::from(#value_expr)),
+            FieldType::Record(_) => quote!(
+                #crate_name::validators::assert_value_is_thing(#value_expr)
+            ),
+            FieldType::Geometry(_) => quote!(
+                #crate_name::validators::assert_value_is_geometry(#value_expr)
+            ),
+            FieldType::Any => quote!(
+                #crate_name::validators::assert_value_is_any(#value_expr)
+            ),
         };
 
         quote!(let _ = #convertible_values_to_db_type;).into()

@@ -5,15 +5,16 @@
  * Licensed under the MIT license
  */
 
-pub mod alien;
-pub mod attributes;
-pub mod combined;
-pub mod configuration;
-pub mod planet;
-pub mod spaceship;
-pub mod user;
-pub mod visits;
-pub mod weapon;
+// pub mod alien;
+// pub mod attributes;
+// pub mod combined;
+// pub mod configuration;
+// pub mod planet;
+// pub mod spaceship;
+// pub mod user;
+// pub mod visits;
+// pub mod weapon;
+pub mod test;
 
 // pub use self::alien::*;
 // pub use self::attributes::*;
