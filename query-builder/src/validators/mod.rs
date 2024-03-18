@@ -39,7 +39,7 @@ macro_rules! assert_fields {
 /// Checks that two types are equal
 macro_rules! assert_type_eq_all {
     ($a:ty, $b:ty) => {
-        let _a: $a = unimplemented!();
+        let _a: $a = todo!();
         #[allow(unreachable_code)]
         let _b: $b = _a;
     };
@@ -62,53 +62,75 @@ pub use assert_impl_one;
 ///
 /// # Example
 /// ```
-/// # use surreal_query_builder::validators::is_number;
-/// is_number::<i8>();
-/// is_number::<i16>();
-/// is_number::<i32>();
-/// is_number::<i64>();
-/// is_number::<i128>();
-/// is_number::<isize>();
-/// is_number::<u8>();
-/// is_number::<u16>();
-/// is_number::<u32>();
-/// is_number::<u64>();
-/// is_number::<u128>();
-/// is_number::<usize>();
-/// is_number::<f32>();
-/// is_number::<f64>();
+/// # use surreal_query_builder::validators::assert_type_is_number;
+/// assert_type_is_number::<i8>();
+/// assert_type_is_number::<i16>();
+/// assert_type_is_number::<i32>();
+/// assert_type_is_number::<i64>();
+/// assert_type_is_number::<i128>();
+/// assert_type_is_number::<isize>();
+/// assert_type_is_number::<u8>();
+/// assert_type_is_number::<u16>();
+/// assert_type_is_number::<u32>();
+/// assert_type_is_number::<u64>();
+/// assert_type_is_number::<u128>();
+/// assert_type_is_number::<usize>();
+/// assert_type_is_number::<f32>();
+/// assert_type_is_number::<f64>();
 /// ```
-pub fn is_number<T: Num>() {}
+pub fn assert_type_is_number<T: Num>() {}
 
 /// Validate that type is a primitive integer at compile time
 ///
 /// # Example
 /// ```
-/// # use surreal_query_builder::validators::is_int;
-/// is_int::<i8>();
-/// is_int::<i16>();
-/// is_int::<i32>();
-/// is_int::<i64>();
-/// is_int::<i128>();
-/// is_int::<isize>();
+/// # use surreal_query_builder as surreal_orm;
+/// # use surreal_orm::assert_type_is_int;
+/// assert_type_is_int::<i8>();
+/// assert_type_is_int::<i16>();
+/// assert_type_is_int::<i32>();
+/// assert_type_is_int::<i64>();
+/// assert_type_is_int::<i128>();
+/// assert_type_is_int::<isize>();
 /// ```
-pub fn is_int<T: Int>() {}
+pub fn assert_type_is_int<T: Int>() {}
 
 /// Validate that type is a primitive float at compile time
 ///
 /// # Example
 /// ```
-/// # use surreal_query_builder::validators::is_float;
+/// # use surreal_query_builder as surreal_orm;
+/// # use surreal_orm::validators::assert_type_is_float;
 ///
-/// is_float::<f32>();
-/// is_float::<f64>();
+/// assert_type_is_float::<f32>();
+/// assert_type_is_float::<f64>();
 /// ```
-pub fn is_float<T: Float>() {}
+pub fn assert_type_is_float<T: Float>() {}
 
 /// Validate that type is iterable at compile time
 pub fn assert_is_iterable<T: IntoIterator>() {
     let _ = <T as IntoIterator>::into_iter;
 }
+
+/// Validate that type is a string at compile time
+pub trait IsString {}
+
+impl IsString for String {}
+impl IsString for &String {}
+impl IsString for &str {}
+
+/// Validate that type is a string at compile time
+pub fn assert_type_is_string<T: IsString>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is convertible to a string at compile time
+pub fn assert_type_is_stringable<T: ToString>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a string at compile time
+pub fn assert_value_is_string<T: IsString>(_value: T) {}
 
 /// This function can only be called with two arrays of the same length.
 pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T; N]) {
@@ -119,22 +141,31 @@ pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T
 pub trait IsSet {}
 
 impl<T> IsSet for HashSet<T> {}
+impl<T> IsSet for &HashSet<T> {}
 impl<T> IsSet for BTreeSet<T> {}
+impl<T> IsSet for &BTreeSet<T> {}
 
 /// Validate that type is a Set at compile time
-pub fn assert_is_set<T: IsSet>() {
+pub fn assert_type_is_set<T: IsSet>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
+
+/// Validate that value is a set at compile time
+pub fn assert_value_is_set<T: IsSet>(_value: T) {}
 
 /// Validate that type is a HashSet at compile time
 pub trait IsHashSet {}
 
 impl<T> IsHashSet for HashSet<T> {}
+impl<T> IsHashSet for &HashSet<T> {}
 
 /// Validate that type is a HashSet at compile time
-pub fn assert_is_hashset<T: IsHashSet>() {
+pub fn assert_type_is_hashset<T: IsHashSet>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
+
+/// Validate that value is a hashset at compile time
+pub fn assert_value_is_hashset<T: IsHashSet>(_value: T) {}
 
 /// check if a type is an Option
 pub trait IsOption {}
@@ -143,9 +174,12 @@ impl<T> IsOption for Option<T> {}
 impl<T> IsOption for &Option<T> {}
 
 /// Validate that type is an Option at compile time
-pub fn assert_is_option<T: IsOption>() {
+pub fn assert_type_is_option<T: IsOption>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
+
+/// Validate that value is an option at compile time
+pub fn assert_value_is_option<T: IsOption>(_value: T) {}
 
 /// Check if a type is an array
 pub trait IsArray {}
@@ -156,9 +190,12 @@ impl<T, const N: usize> IsArray for [T; N] {}
 
 /// Validate that type is an array at compile time
 /// Array can be a Vec or a slice
-pub fn assert_is_array<T: IsArray>() {
+pub fn assert_type_is_array<T: IsArray>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
+
+/// Validate that value is an array at compile time
+pub fn assert_value_is_array<T: IsArray>(_value: T) {}
 
 /// Validate that type is a vector at compile time
 pub trait IsVec {}
@@ -171,25 +208,190 @@ impl<T> IsVec for &Vec<T> {}
 ///
 /// # Example
 /// ```
-/// # use surreal_query_builder::validators::assert_is_vec;
-/// assert_is_vec::<Vec<i8>>();
-/// assert_is_vec::<Vec<String>>();
-/// assert_is_vec::<Vec<i32>>();
-/// assert_is_vec::<Vec<i64>>();
-/// assert_is_vec::<Vec<i128>>();
-/// assert_is_vec::<Vec<isize>>();
-/// assert_is_vec::<Vec<u8>>();
-/// assert_is_vec::<Vec<u16>>();
-/// assert_is_vec::<Vec<u32>>();
-/// assert_is_vec::<Vec<u64>>();
-/// assert_is_vec::<Vec<u128>>();
-/// assert_is_vec::<Vec<usize>>();
-/// assert_is_vec::<Vec<f32>>();
-/// assert_is_vec::<Vec<f64>>();
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_is_vec;
+/// assert_type_is_vec::<Vec<i8>>();
+/// assert_type_is_vec::<Vec<String>>();
+/// assert_type_is_vec::<Vec<i32>>();
+/// assert_type_is_vec::<Vec<i64>>();
+/// assert_type_is_vec::<Vec<i128>>();
+/// assert_type_is_vec::<Vec<isize>>();
+/// assert_type_is_vec::<Vec<u8>>();
+/// assert_type_is_vec::<Vec<u16>>();
+/// assert_type_is_vec::<Vec<u32>>();
+/// assert_type_is_vec::<Vec<u64>>();
+/// assert_type_is_vec::<Vec<u128>>();
+/// assert_type_is_vec::<Vec<usize>>();
+/// assert_type_is_vec::<Vec<f32>>();
+/// assert_type_is_vec::<Vec<f64>>();
 /// ```
-pub fn assert_is_vec<T: IsVec>() {
+pub fn assert_type_is_vec<T: IsVec>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
+
+/// Validate that value is a vector at compile time
+pub fn assert_value_is_vec<T: IsVec>(_value: T) {}
+
+/// Validate that type is a Duration at compile time
+pub trait IsDuration {}
+
+impl IsDuration for std::time::Duration {}
+
+/// Validate that type is a Duration at compile time
+pub fn assert_type_is_duration<T: IsDuration>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a duration at compile time
+pub fn assert_value_is_duration<T: IsDuration>(_value: T) {}
+
+/// Validate that type is a Uuid at compile time
+pub trait IsUuid {}
+
+impl IsUuid for uuid::Uuid {}
+
+/// Validate that type is a Uuid at compile time
+pub fn assert_type_is_uuid<T: IsUuid>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a Uuid at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_value_is_uuid;
+/// assert_value_is_uuid(uuid::Uuid::new_v4());
+/// ```
+pub fn assert_value_is_uuid<T: IsUuid>(_value: T) {}
+
+/// Validate that type is a Datetime at compile time
+pub trait IsDatetime {}
+
+impl IsDatetime for chrono::DateTime<chrono::Utc> {}
+
+/// Validate that type is a Datetime at compile time
+pub fn assert_type_is_datetime<T: IsDatetime>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a datetime at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_value_is_datetime;
+/// assert_value_is_datetime(chrono::Utc::now());
+/// ```
+pub fn assert_value_is_datetime<T: IsDatetime>(_value: T) {}
+
+/// Validate that type is a boolean at compile time
+pub trait IsBool {}
+
+impl IsBool for bool {}
+impl IsBool for &bool {}
+
+/// Validate that type is a bool at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_type_is_bool;
+/// assert_type_is_bool::<bool>();
+/// ```
+pub fn assert_type_is_bool<T: IsBool>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a bool at compile time
+pub fn assert_value_is_bool<T: IsBool>(_value: T) {}
+
+/// Validate that type is a Surrealdb Thing at compile time
+pub trait IsThing {}
+
+impl IsThing for crate::sql::Thing {}
+
+/// Validate that type is a Thing at compile time
+pub fn assert_type_is_thing<T: IsThing>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a thing at compile time
+pub fn assert_value_is_thing<T: IsThing>(_value: T) {}
+
+/// Validates that type is a surrealdb bytes at compile time
+pub trait IsBytes {}
+
+impl IsBytes for crate::sql::Bytes {}
+
+/// Validate that type is a Bytes at compile time
+pub fn assert_type_is_bytes<T: IsBytes>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a bytes at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_value_is_bytes;
+/// assert_value_is_bytes(crate::sql::Bytes::from("Hello, World!"));
+/// ```
+pub fn assert_value_is_bytes<T: IsBytes>(_value: T) {}
+
+/// Validates that a type is nullable at compile time
+pub trait IsNull {}
+
+impl<T> IsNull for Option<T> {}
+
+/// Validate that type is a Null at compile time
+pub fn assert_type_is_null<T: IsNull>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a null at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_value_is_null;
+/// assert_value_is_null(None::<u8>);
+/// ```
+pub fn assert_value_is_null<T: IsNull>(_value: T) {}
+
+/// Validate that type is a Geometry at compile time
+pub trait IsGeometry {}
+
+impl IsGeometry for crate::sql::Geometry {}
+impl IsGeometry for &crate::sql::Geometry {}
+
+/// Validate that type is a Geometry at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_type_is_geometry;
+/// assert_type_is_geometry::<crate::sql::Geometry>();
+/// ```
+pub fn assert_type_is_geometry<T: IsGeometry>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a geometry at compile time
+pub fn assert_value_is_geometry<T: IsGeometry>(_value: T) {}
+
+/// Validate that type is Any surrealdb field type at compile time
+pub trait IsAny {}
+
+impl IsAny for crate::sql::Value {}
+
+/// Validate that type is a Any at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_type_is_any;
+/// assert_type_is_any::<crate::sql::Any>();
+/// ```
+pub fn assert_type_is_any<T: IsAny>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that value is a any at compile time
+pub fn assert_value_is_any<T: IsAny>(_value: T) {}
 
 /// Checks that all idents are unique.
 #[macro_export]
