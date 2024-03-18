@@ -58,122 +58,135 @@ impl<'a> Codegen<'a> {
                 }]
             }
             RelationType::None | RelationType::List(_) => {
-                let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
-                let db_type_static_checker = |db_field_type: &FieldType| match db_field_type {
-                    FieldType::Any => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
-                        ]
-                    }
-                    FieldType::Null => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
-                        ]
-                    }
-                    FieldType::Uuid => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Uuid>);),
-                        ]
-                    }
-                    FieldType::Bytes => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Bytes>);),
-                        ]
-                    }
-                    FieldType::Union(_) => {
-                        vec![quote!()]
-                    }
-                    FieldType::Option(_) => {
-                        vec![quote!(#crate_name::validators::assert_is_option::<#field_type>;)]
-                    }
-                    FieldType::String => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<::std::string::String>);),
-                        ]
-                    }
-                    FieldType::Int => {
-                        vec![quote!(
-                            #crate_name::validators::is_int::<#field_type>();
-                        )]
-                    }
-                    FieldType::Float => {
-                        vec![quote!(
-                            #crate_name::validators::is_float::<#field_type>();
-                        )]
-                    }
-                    FieldType::Bool => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<::std::primitive::bool>);),
-                        ]
-                    }
-                    FieldType::Array(_, _) => {
-                        vec![quote!(
-                            #crate_name::validators::assert_is_array::<#field_type>();
-                        )]
-                    }
-                    FieldType::Set(_, _) => {
-                        vec![quote!(
-                            #crate_name::validators::assert_is_set::<#field_type>();
-                        )]
-                    }
-                    FieldType::Datetime => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Datetime>);),
-                        ]
-                    }
-                    FieldType::Decimal => {
-                        vec![quote!(
-                            #crate_name::validators::is_number::<#field_type>();
-                        )]
-                    }
-                    FieldType::Duration => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Duration>);),
-                        ]
-                    }
-                    FieldType::Number => {
-                        vec![quote!(
-                            #crate_name::validators::is_number::<#field_type>();
-                        )]
-                    }
-                    FieldType::Object => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Object>);),
-                        ]
-                    }
-                    FieldType::Record(_) => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Thing>);),
-                        ]
-                    }
-                    FieldType::Geometry(_) => {
-                        vec![
-                            quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Geometry>);),
-                        ]
-                    }
-                };
+                let db_type_static_checker =
+                    |field_type: &CustomType, db_field_type: &FieldType| match db_field_type {
+                        FieldType::Any => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
+                            ]
+                        }
+                        FieldType::Null => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
+                            ]
+                        }
+                        FieldType::Uuid => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Uuid>);),
+                            ]
+                        }
+                        FieldType::Bytes => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Bytes>);),
+                            ]
+                        }
+                        FieldType::Union(_) => {
+                            vec![quote!()]
+                        }
+                        FieldType::Option(_) => {
+                            vec![quote!(#crate_name::validators::assert_is_option::<#field_type>;)]
+                        }
+                        FieldType::String => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<::std::string::String>);),
+                            ]
+                        }
+                        FieldType::Int => {
+                            vec![quote!(
+                                #crate_name::validators::is_int::<#field_type>();
+                            )]
+                        }
+                        FieldType::Float => {
+                            vec![quote!(
+                                #crate_name::validators::is_float::<#field_type>();
+                            )]
+                        }
+                        FieldType::Bool => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<::std::primitive::bool>);),
+                            ]
+                        }
+                        FieldType::Array(_, _) => {
+                            vec![quote!(
+                                #crate_name::validators::assert_is_array::<#field_type>();
+                            )]
+                        }
+                        FieldType::Set(_, _) => {
+                            vec![quote!(
+                                #crate_name::validators::assert_is_set::<#field_type>();
+                            )]
+                        }
+                        FieldType::Datetime => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Datetime>);),
+                            ]
+                        }
+                        FieldType::Decimal => {
+                            vec![quote!(
+                                #crate_name::validators::is_number::<#field_type>();
+                            )]
+                        }
+                        FieldType::Duration => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Duration>);),
+                            ]
+                        }
+                        FieldType::Number => {
+                            vec![quote!(
+                                #crate_name::validators::is_number::<#field_type>();
+                            )]
+                        }
+                        FieldType::Object => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Object>);),
+                            ]
+                        }
+                        FieldType::Record(_) => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Thing>);),
+                            ]
+                        }
+                        FieldType::Geometry(_) => {
+                            vec![
+                                quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Geometry>);),
+                            ]
+                        }
+                    };
 
+                let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
                 let db_field_type = db_field_type.into_inner_ref();
-                let mut top_level_check = db_type_static_checker(db_field_type);
+                let mut top_level_check =
+                    db_type_static_checker(field_type.into_inner(), db_field_type);
+                let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
                 if let FieldType::Option(_) = db_field_type {
-                    let ty = field_type
-                        .inner_angle_bracket_type()?
-                        .map(|x| x.remove_lifetime_and_reference());
+                    let ty = field_type.inner_angle_bracket_type()?;
+                    // .map(|x| x.remove_lifetime_and_reference());
+                    // panic!(
+                    //     "fieldname: {db_field_name}...field_type:{:?} innerty: {:?}",
+                    //     field_type.to_token_stream().to_string(),
+                    //     ty.to_token_stream().to_string()
+                    // );
                     if let Some(ty) = ty {
                         if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
                             let field_name =
                                 &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
                             let relation_type = field_receiver.to_relation_type();
                             let model_type = self.data_type();
-                            let ft = ty.infer_surreal_type_heuristically(
+                            let db_type_meta = ty.infer_surreal_type_heuristically(
                                 field_name,
                                 &relation_type,
                                 &model_type,
                             )?;
 
-                            if let Some(ft) = ft.field_type_db_original {
-                                panic!("field_name: {field_name:?}...ft: {ft:?}");
-                                let inner = db_type_static_checker(&ft);
+                            if let Some(ft) = db_type_meta.field_type_db_original {
+                                let inner = db_type_static_checker(ty.into_inner_ref(), &ft);
+                                panic!(
+                                    "field_name: {field_name:?}...ft: {ft:?}...inner: {:?}",
+                                    inner
+                                        .iter()
+                                        .map(|x| x.to_token_stream().to_string())
+                                        .collect::<Vec<String>>()
+                                );
                                 top_level_check.extend(inner);
                             }
                         }

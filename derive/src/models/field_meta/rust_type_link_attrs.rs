@@ -31,7 +31,7 @@ macro_rules! create_custom_type_wrapper {
                 self.0
             }
 
-            pub fn as_custom_type_ref(&self) -> &CustomType {
+            pub fn into_inner_ref(&self) -> &crate::models::CustomType {
                 &self.0
             }
 
