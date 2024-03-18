@@ -163,13 +163,13 @@ impl FieldTypeDb {
             }
             FieldType::Int => {
                 quote!(
-                    #crate_name::validators::is_int::<#rust_field_type>();
+                    #crate_name::validators::assert_type_is_int::<#rust_field_type>();
                     // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                 )
             }
             FieldType::Float => {
                 quote!(
-                    #crate_name::validators::is_float::<#rust_field_type>();
+                    #crate_name::validators::assert_type_is_float::<#rust_field_type>();
                     // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                 )
                 // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
@@ -198,7 +198,7 @@ impl FieldTypeDb {
             }
             FieldType::Number => {
                 quote!(
-                    #crate_name::validators::is_number::<#rust_field_type>();
+                    #crate_name::validators::assert_type_is_number::<#rust_field_type>();
                     // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                 )
                 // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
