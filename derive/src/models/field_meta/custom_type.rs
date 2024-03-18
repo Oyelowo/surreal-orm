@@ -175,7 +175,8 @@ impl CustomType {
         Self(ty.clone())
     }
 
-    // e.g User if Option<User> or ::std::option::Option<User>
+    // e.g Option<User> or ::std::option::Option<User> to User
+    // Option<&'a str> to &'a str
     pub fn inner_angle_bracket_type(&self) -> ExtractorResult<Option<CustomTypeInnerAngleBracket>> {
         match self.into_inner_ref() {
             Type::Path(type_path) => {
