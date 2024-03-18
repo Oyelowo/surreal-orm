@@ -20,6 +20,7 @@ impl<'a> Codegen<'a> {
         let table_derive_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let field_type = field_receiver.ty();
+        let field_ident_original = field_receiver.ident()?;
         let field_ident_normalized =
             field_receiver.field_ident_normalized(&table_derive_attributes.casing()?)?;
         let db_field_name = field_receiver.db_field_name(&table_derive_attributes.casing()?)?;
@@ -39,7 +40,7 @@ impl<'a> Codegen<'a> {
                 let optionalized_field_type = quote!(#crate_name:: Maybe<#field_type>);
                 self.insert_struct_partial_field_type_def_meta(quote!(
                     #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]
-                    pub #field_ident_normalized: #optionalized_field_type
+                    pub #field_ident_original: #optionalized_field_type
                 ))?;
 
                 self.insert_struct_partial_builder_fields_methods(
@@ -54,7 +55,7 @@ impl<'a> Codegen<'a> {
 
                 self.insert_struct_partial_field_type_def_meta(quote!(
                         #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]
-                        pub #field_ident_normalized: #optionalized_field_type
+                        pub #field_ident_original: #optionalized_field_type
                 ))?;
                 self.insert_struct_partial_builder_fields_methods(inner_field_type.into())?;
             }
@@ -69,12 +70,12 @@ impl<'a> Codegen<'a> {
         struct_partial_field_type: StructPartialFieldType,
     ) -> ExtractorResult<()> {
         let field_receiver = self.field_receiver();
-        let original_field_ident = field_receiver.ident()?;
+        let field_ident_original = field_receiver.ident()?;
         let crate_name = get_crate_name(false);
 
         let ass_functions = quote! {
-            pub fn #original_field_ident(mut self, value: #struct_partial_field_type) -> Self {
-                    self.0.#original_field_ident = #crate_name::Maybe::Some(value);
+            pub fn #field_ident_original(mut self, value: #struct_partial_field_type) -> Self {
+                    self.0.#field_ident_original = #crate_name::Maybe::Some(value);
                     self
              }
         };
