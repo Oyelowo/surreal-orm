@@ -45,7 +45,7 @@ impl EdgeType {
         for edge_type in edge_types {
             let edge_type = &edge_type.into_inner_ref();
             let mut visitor = UniqueTypeVisitor::default();
-            visitor.visit_type(edge_type);
+            visitor.visit_type(edge_type.into_inner_ref());
 
             for lt in visitor.lifetimes.iter() {
                 common_lifetimes.insert(lt.to_string());
