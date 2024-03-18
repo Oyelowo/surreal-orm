@@ -78,7 +78,8 @@ impl ToTokens for EdgeToken {
             Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let table_attrs = ModelAttributes::Edge(self.clone());
+        let table_attrs = ModelAttributes::from_edge(self);
+        let explicit_generics = table_attrs.explicit_fully_qualified_generics_path();
         let code_gen = match Codegen::parse_fields(&table_attrs) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
@@ -155,11 +156,11 @@ impl ToTokens for EdgeToken {
                     type Schema = #module_name_internal::#struct_name_ident #ty_generics;
 
                     fn schema() -> #module_name_rexported::Schema {
-                        #module_name_rexported::Schema:: #ty_generics ::new()
+                        #module_name_rexported::Schema #explicit_generics ::new()
                     }
 
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
-                        #module_name_rexported::Schema:: #ty_generics ::new_prefixed(prefix)
+                        #module_name_rexported::Schema #explicit_generics ::new_prefixed(prefix)
                     }
                 }
             

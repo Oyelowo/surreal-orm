@@ -39,8 +39,9 @@ impl ToTokens for NodeToken {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = self.deref();
         let struct_name_ident = &table_derive_attributes.ident();
+        // let explicit_generics = table_derive_attributes.explicit_fully_qualified_generics_path();
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
-            table_derive_attributes.generics.split_for_impl();
+            &table_derive_attributes.generics.split_for_impl();
         let struct_marker = table_derive_attributes.generics().phantom_marker_type();
         let table_name_ident = match table_derive_attributes.table_name() {
             Ok(table_name) => table_name,
@@ -57,7 +58,8 @@ impl ToTokens for NodeToken {
             _____struct_marker_ident,
             ..
         } = VariablesModelMacro::new();
-        let table_attrs = ModelAttributes::Node(self.clone());
+        let table_attrs = ModelAttributes::from_node(self);
+        let explicit_generics = table_attrs.explicit_fully_qualified_generics_path();
         let code_gen = match Codegen::parse_fields(&table_attrs) {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
@@ -140,11 +142,11 @@ impl ToTokens for NodeToken {
                 type Schema = #module_name_rexported::Schema #struct_ty_generics;
 
                 fn schema() -> #module_name_rexported::Schema #struct_ty_generics {
-                    #module_name_rexported::Schema:: #struct_ty_generics ::new()
+                    #module_name_rexported::Schema #explicit_generics ::new()
                 }
 
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema #struct_ty_generics {
-                    #module_name_rexported::Schema:: #struct_ty_generics ::new_prefixed(prefix)
+                    #module_name_rexported::Schema #explicit_generics ::new_prefixed(prefix)
                 }
             }
             impl #struct_impl_generics #crate_name::PartialUpdater for #struct_name_ident #struct_ty_generics #struct_where_clause {
@@ -164,8 +166,8 @@ impl ToTokens for NodeToken {
                 fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
 
-                    #module_name_internal::#struct_name_ident:: #struct_ty_generics ::#__________connect_node_to_graph_traversal_string(
-                                #module_name_internal::#struct_name_ident:: #struct_ty_generics ::empty(),
+                    #module_name_internal::#struct_name_ident #explicit_generics ::#__________connect_node_to_graph_traversal_string(
+                                #module_name_internal::#struct_name_ident #explicit_generics ::empty(),
                                 clause.with_table(#table_name_str),
                     )
                 }

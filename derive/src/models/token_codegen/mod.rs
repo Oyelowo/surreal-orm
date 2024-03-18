@@ -211,7 +211,7 @@ pub struct Codegen<'a> {
 #[derive(Clone, Default)]
 struct StructAttributesData<'a> {
     field_receiver: Option<&'a MyFieldReceiver>,
-    struct_basic_model_attributes: Option<&'a ModelAttributes>,
+    struct_basic_model_attributes: Option<&'a ModelAttributes<'a>>,
 }
 
 impl<'a> Codegen<'a> {

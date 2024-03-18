@@ -76,14 +76,28 @@ use crate::models::{edge::EdgeToken, node::NodeToken, object::ObjectToken, *};
 //     }
 // }
 
+create_tokenstream_wrapper!(=>ExplicitFullyQualifiedGenericsPath);
+
 #[derive(Clone, Debug)]
-pub enum ModelAttributes {
-    Node(NodeToken),
-    Edge(EdgeToken),
-    Object(ObjectToken),
+pub enum ModelAttributes<'a> {
+    Node(&'a NodeToken),
+    Edge(&'a EdgeToken),
+    Object(&'a ObjectToken),
 }
 
-impl ModelAttributes {
+impl<'a> ModelAttributes<'a> {
+    pub fn from_node(node: &NodeToken) -> Self {
+        ModelAttributes::Node(node)
+    }
+
+    pub fn from_edge(edge: &EdgeToken) -> Self {
+        ModelAttributes::Edge(edge)
+    }
+
+    pub fn from_object(object: &ObjectToken) -> Self {
+        ModelAttributes::Object(object)
+    }
+
     pub fn fields(&self) -> ExtractorResult<Vec<&MyFieldReceiver>> {
         let fields = match self {
             ModelAttributes::Node(node) => &node.0.data,
@@ -120,6 +134,17 @@ impl ModelAttributes {
             Edge(edge) => edge.generics(),
             Object(object) => object.generics(),
         }
+    }
+
+    pub fn explicit_fully_qualified_generics_path(&self) -> ExplicitFullyQualifiedGenericsPath {
+        let (_struct_impl_generics, struct_ty_generics, _struct_where_clause) =
+            &self.generics().split_for_impl();
+        let explicit_generics = if struct_ty_generics.into_token_stream().is_empty() {
+            quote!()
+        } else {
+            quote!(::#struct_ty_generics)
+        };
+        explicit_generics.into()
     }
 
     pub fn to_data_type(&self) -> DataType {
