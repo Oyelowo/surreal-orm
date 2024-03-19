@@ -9,7 +9,7 @@ mod generics;
 mod ident;
 mod types;
 
-use darling::{FromField, FromMeta};
+use darling::FromField;
 use proc_macro2::Ident;
 use syn::Type;
 
@@ -22,8 +22,6 @@ create_ident_wrapper!(FieldIdentNormalized);
 create_ident_wrapper!(FieldNamePascalized);
 create_ident_wrapper!(FieldIdentOriginal);
 create_ident_wrapper!(OldFieldName);
-
-impl FromMeta for OldFieldName {}
 
 #[allow(dead_code)]
 #[derive(Clone, Debug, FromField)]
