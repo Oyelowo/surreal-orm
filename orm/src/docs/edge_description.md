@@ -12,7 +12,7 @@ Here's a detailed example:
 ```rust, ignore
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "alien")]
+#[surreal_orm(table = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
@@ -25,7 +25,7 @@ pub struct Alien {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "planet")]
+#[surreal_orm(table = "planet")]
 pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub population: u64,
@@ -34,7 +34,7 @@ pub struct Planet {
 // Visits
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "visits")]
+#[surreal_orm(table = "visits")]
 pub struct Visits<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]

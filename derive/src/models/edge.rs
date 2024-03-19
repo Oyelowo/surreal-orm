@@ -28,10 +28,10 @@ use crate::models::*;
 //     rename_all: ::std::option::Option<Rename>,
 //
 //     #[darling(default)]
-//     pub(crate) table_name: ::std::option::Option<String>,
+//     pub(crate) table: ::std::option::Option<String>,
 //
 //     #[darling(default)]
-//     pub(crate) relax_table_name: ::std::option::Option<bool>,
+//     pub(crate) relax_table: ::std::option::Option<bool>,
 // }
 
 #[derive(Clone, Debug, FromDeriveInput)]
@@ -54,11 +54,11 @@ impl ToTokens for EdgeToken {
         let (impl_generics, ty_generics, where_clause) =
             table_derive_attributes.generics.split_for_impl();
         let struct_marker = table_derive_attributes.generics().phantom_marker_type();
-        let table_name_ident = match table_derive_attributes.table_name() {
-            Ok(table_name) => table_name,
+        let table_ident = match table_derive_attributes.table() {
+            Ok(table) => table,
             Err(err) => return tokens.extend(err.write_errors()),
         };
-        let table_name_str = table_name_ident.as_string();
+        let table_str = table_ident.as_string();
         let VariablesModelMacro {
             __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -185,8 +185,8 @@ impl ToTokens for EdgeToken {
                     // }
 
                     #[allow(non_snake_case)]
-                    fn get_table_name() -> #crate_name::Table {
-                        #table_name_str.into()
+                    fn get_table() -> #crate_name::Table {
+                        #table_str.into()
                     }
                 }
       
@@ -221,8 +221,8 @@ impl ToTokens for EdgeToken {
                     type Id = #table_id_type;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
-                    fn table_name() -> #crate_name::Table {
-                        #table_name_str.into()
+                    fn table() -> #crate_name::Table {
+                        #table_str.into()
                     }
 
                     fn get_id(self) -> Self::Id {
@@ -286,7 +286,7 @@ impl ToTokens for EdgeToken {
                     use #crate_name::Erroneous as _;
 
                     pub struct TableNameStaticChecker {
-                        pub #table_name_ident: ::std::string::String,
+                        pub #table_ident: ::std::string::String,
                     }
 
 

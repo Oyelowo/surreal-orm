@@ -79,7 +79,7 @@ use surreal_orm::{
 
 define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
     let person = select(All)
-        .from(SpaceShip::table_name())
+        .from(SpaceShip::table())
         .where_(
             cond(SpaceShip::schema().id.equal(&first_arg))
                 .and(SpaceShip::schema().name.equal(&last_arg))

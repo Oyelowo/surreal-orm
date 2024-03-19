@@ -2,7 +2,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "animal", schemafull)]
+#[surreal_orm(table = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
@@ -20,7 +20,7 @@ impl TableResources for Animal {
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Erectus")).and(velocity.gt(545)))
-            .then(select(All).from(Crop::table_name()))
+            .then(select(All).from(Crop::table()))
             .to_raw();
 
         vec![event1]
@@ -30,7 +30,7 @@ impl TableResources for Animal {
         let animal::Schema { species, velocity, .. } = Self::schema();
 
         let idx1 = define_index("species_speed_idx".to_string())
-            .on_table(Self::table_name())
+            .on_table(Self::table())
             .fields(arr![species, velocity])
             .unique()
             .to_raw();
@@ -41,7 +41,7 @@ impl TableResources for Animal {
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "eats", schemafull)]
+#[surreal_orm(table = "eats", schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]

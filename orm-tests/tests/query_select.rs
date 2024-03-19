@@ -29,7 +29,7 @@ async fn test_subquery_in_select_statement() -> SurrealOrmResult<()> {
         .collect::<Vec<_>>();
     insert(generated_spaceships.clone()).run(db.clone()).await?;
 
-    let weapon = &Weapon::table_name();
+    let weapon = &Weapon::table();
     let weapon::Schema { ref strength, .. } = Weapon::schema();
 
     let statement = select(All)
@@ -84,7 +84,7 @@ async fn test_subquery_in_select_statement_with_order_functions() -> SurrealOrmR
         .collect::<Vec<_>>();
     insert(generated_spaceships.clone()).run(db.clone()).await?;
 
-    let weapon = &Weapon::table_name();
+    let weapon = &Weapon::table();
     let weapon::Schema { ref strength, .. } = Weapon::schema();
 
     let statement = select(All)

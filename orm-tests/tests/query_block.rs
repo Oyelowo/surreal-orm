@@ -20,7 +20,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = &Weapon::table_name();
+    let weapon = &Weapon::table();
     let weapon::Schema { ref strength, .. } = Weapon::schema();
 
     let generated_weapons = (0..=14)

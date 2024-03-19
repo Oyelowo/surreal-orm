@@ -61,23 +61,23 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
         let tables = left.union(&right);
         let mut all_tables_with_sub_resources = vec![];
 
-        for table_name in tables {
+        for table in tables {
             let mut queries = Queries::default();
-            let def_left = self.get_left().get_definition(table_name).cloned();
-            let def_right = self.get_right().get_definition(table_name).cloned();
+            let def_left = self.get_left().get_definition(table).cloned();
+            let def_right = self.get_right().get_definition(table).cloned();
 
             let events = ComparisonEvents {
-                table: &Table::from(table_name.clone()),
+                table: &Table::from(table.clone()),
                 resources: self.resources,
             };
 
             let indexes = ComparisonIndexes {
-                table: &Table::from(table_name.clone()),
+                table: &Table::from(table.clone()),
                 resources: self.resources,
             };
 
             let fields = ComparisonFields {
-                table: &Table::from(table_name.clone()),
+                table: &Table::from(table.clone()),
                 resources: self.resources,
                 codebase_resources: self.codebase_resources,
                 prompter: self.prompter,

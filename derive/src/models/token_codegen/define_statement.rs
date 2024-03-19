@@ -55,7 +55,7 @@ impl<'a> Codegen<'a> {
 
         let main_field_def = quote!(
             #crate_name::statements::define_field(#crate_name::Field::new(#db_field_name))
-            .on_table(#crate_name::Table::from(Self::table_name()))
+            .on_table(#crate_name::Table::from(Self::table()))
             #( # define_field_methods) *
             .to_raw()
         );
@@ -65,7 +65,7 @@ impl<'a> Codegen<'a> {
             let array_field_item_str = format_ident!("{field_name_serialized}.*");
             let array_item_definition = quote!(
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_item_str))
-                                        .on_table(#crate_name::Table::from(Self::table_name()))
+                                        .on_table(#crate_name::Table::from(Self::table()))
                                         #( # define_array_field_item_methods) *
                                         .to_raw()
 

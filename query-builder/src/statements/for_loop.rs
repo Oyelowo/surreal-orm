@@ -71,7 +71,7 @@ impl From<&Param> for ForParam {
 /// let query = for_(vec![param!(name), param!(age)])
 ///    .in_(vec![1, 2, 3, 4, 5]);
 ///    .block(
-///         query_turbo!(select(All).from(SpaceShip::table_name()))
+///         query_turbo!(select(All).from(SpaceShip::table()))
 ///     );
 /// ```
 pub fn for_(params: impl Into<ForParam>) -> ForIterable {

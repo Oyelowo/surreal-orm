@@ -22,7 +22,7 @@ Example struct:
 ```rust
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "alien")]
+#[surreal_orm(table = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
     // other fields
@@ -58,7 +58,7 @@ Example struct:
 ```rust
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "account")]
+#[surreal_orm(table = "account")]
 pub struct Account {
     pub id: SurrealUuid<Self>,
     // other fields
@@ -94,7 +94,7 @@ Example struct:
 ```rust
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "spaceship")]
+#[surreal_orm(table = "spaceship")]
 pub struct SpaceShip {
     pub id: SurrealUlid<Self>,
     // other fields
@@ -130,7 +130,7 @@ Example struct:
 ```rust
 #[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "weapon")]
+#[surreal_orm(table = "weapon")]
 pub struct Weapon {
     pub id: SurrealId<Self, String>,
     // other fields

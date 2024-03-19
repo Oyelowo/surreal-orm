@@ -43,11 +43,11 @@ impl ToTokens for NodeToken {
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
             &table_derive_attributes.generics.split_for_impl();
         let struct_marker = table_derive_attributes.generics().phantom_marker_type();
-        let table_name_ident = match table_derive_attributes.table_name() {
-            Ok(table_name) => table_name,
+        let table_ident = match table_derive_attributes.table() {
+            Ok(table) => table,
             Err(err) => return tokens.extend(err.write_errors()),
         };
-        let table_name_str = table_name_ident.as_string();
+        let table_str = table_ident.as_string();
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -117,7 +117,7 @@ impl ToTokens for NodeToken {
 
         // #[derive(#crate::Model, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
-        // #[surreal_orm(table_name = "student", drop, schemafull, permission, define="any_fnc")]
+        // #[surreal_orm(table = "student", drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
         //     #[serde(skip_serializing_if = "Option::is_none")]
         //     #[builder(default, setter(strip_option))]
@@ -168,7 +168,7 @@ impl ToTokens for NodeToken {
 
                     #module_name_internal::#struct_name_ident #explicit_generics ::#__________connect_node_to_graph_traversal_string(
                                 #module_name_internal::#struct_name_ident #explicit_generics ::empty(),
-                                clause.with_table(#table_name_str),
+                                clause.with_table(#table_str),
                     )
                 }
                 //
@@ -184,8 +184,8 @@ impl ToTokens for NodeToken {
                     #module_name_internal::#aliases_struct_name::new()
                 }
 
-                fn get_table_name() -> #crate_name::Table {
-                    #table_name_str.into()
+                fn get_table() -> #crate_name::Table {
+                    #table_str.into()
                 }
 
                 fn get_fields_relations_aliased() -> ::std::vec::Vec<#crate_name::Alias> {
@@ -234,8 +234,8 @@ impl ToTokens for NodeToken {
                 type Id = #table_id_type;
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
-                fn table_name() -> #crate_name::Table {
-                    #table_name_str.into()
+                fn table() -> #crate_name::Table {
+                    #table_str.into()
                 }
 
                 fn get_id(self) -> Self::Id {
@@ -298,7 +298,7 @@ impl ToTokens for NodeToken {
                 use super::*;
 
                 pub struct TableNameStaticChecker {
-                    pub #table_name_ident: ::std::string::String,
+                    pub #table_ident: ::std::string::String,
                 }
 
                #( #imports_referenced_node_schema) *

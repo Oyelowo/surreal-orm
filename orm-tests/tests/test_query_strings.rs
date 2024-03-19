@@ -31,7 +31,7 @@ fn multiplication_tests1() {
     let book::Schema { ref content, .. } = Book::schema();
 
     let mut query1 = select(arr![age, lastName, content])
-        .from(Book::get_table_name())
+        .from(Book::get_table())
         .where_(
             cond(content.like("lowo"))
                 .and(age.greater_than_or_equal(600))
@@ -51,8 +51,8 @@ fn multiplication_tests1() {
 
     insta::assert_display_snapshot!(&query1.fine_tune_params());
 
-    let student_table = &Student::get_table_name();
-    let _book_table = &Book::get_table_name();
+    let student_table = &Student::get_table();
+    let _book_table = &Book::get_table();
     let _book_id = &thing("book:1").unwrap();
 
     let mut query = select(arr![All, content, age, lastName, firstName, course])
@@ -148,11 +148,11 @@ async fn relate_query_building_for_subqueries() {
         ..Default::default()
     };
     let relation = relate(
-        Student::with(select(All).from(Student::get_table_name()))
+        Student::with(select(All).from(Student::get_table()))
             .writes__(Empty)
             .book(
                 select(All)
-                    .from(Book::get_table_name())
+                    .from(Book::get_table())
                     .where_(Book::schema().title.like("Oyelowo")),
             ),
     )

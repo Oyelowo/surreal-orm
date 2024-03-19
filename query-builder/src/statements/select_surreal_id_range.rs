@@ -21,7 +21,7 @@ where
     fn from(range: std::ops::RangeInclusive<SurrealId<T, V>>) -> Self {
         // e.g user:1..=5
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Included(range.start().to_thing().id),
             end: Bound::Included(range.end().to_thing().id),
         };
@@ -42,7 +42,7 @@ where
     fn from(range: std::ops::RangeFrom<SurrealId<T, V>>) -> Self {
         // e.g user:1..
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Included(range.start.to_thing().id),
             end: Bound::Unbounded,
         };
@@ -63,7 +63,7 @@ where
     fn from(range: std::ops::RangeTo<SurrealId<T, V>>) -> Self {
         // e.g user:..5
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Unbounded,
             end: Bound::Excluded(range.end.to_thing().id),
         };
@@ -84,7 +84,7 @@ where
     fn from(range: std::ops::RangeToInclusive<SurrealId<T, V>>) -> Self {
         // e.g user:..=5
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Unbounded,
             end: Bound::Included(range.end.to_thing().id),
         };
@@ -105,7 +105,7 @@ where
     fn from(range: std::ops::Range<SurrealId<T, V>>) -> Self {
         // e.g user:1..5
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Included(range.start.to_thing().id),
             end: Bound::Excluded(range.end.to_thing().id),
         };
@@ -125,7 +125,7 @@ where
 {
     fn from(range: std::ops::RangeInclusive<&SurrealId<T, V>>) -> Self {
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Included(range.start().to_thing().id),
             end: Bound::Included(range.end().to_thing().id),
         };
@@ -147,7 +147,7 @@ where
     fn from(range: std::ops::RangeFrom<&SurrealId<T, V>>) -> Self {
         // e.g user:1..
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Included(range.start.to_thing().id),
             end: Bound::Unbounded,
         };
@@ -168,7 +168,7 @@ where
     fn from(range: std::ops::RangeTo<&SurrealId<T, V>>) -> Self {
         // e.g user:..5
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Unbounded,
             end: Bound::Excluded(range.end.to_thing().id),
         };
@@ -189,7 +189,7 @@ where
     fn from(range: std::ops::RangeToInclusive<&SurrealId<T, V>>) -> Self {
         // e.g user:..=5
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Unbounded,
             end: Bound::Included(range.end.to_thing().id),
         };
@@ -210,7 +210,7 @@ where
     fn from(range: std::ops::Range<&SurrealId<T, V>>) -> Self {
         // e.g user:1..5
         let range = sql::Range {
-            tb: T::table_name().to_string(),
+            tb: T::table().to_string(),
             beg: Bound::Included(range.start.to_thing().id),
             end: Bound::Excluded(range.end.to_thing().id),
         };
@@ -233,7 +233,7 @@ macro_rules! create_range {
             fn from(range: std::ops::RangeInclusive<$id_type<T>>) -> Self {
                 // e.g user:1..=5
                 let range = sql::Range {
-                    tb: T::table_name().to_string(),
+                    tb: T::table().to_string(),
                     beg: Bound::Included(range.start().to_thing().id),
                     end: Bound::Included(range.end().to_thing().id),
                 };
@@ -253,7 +253,7 @@ macro_rules! create_range {
             fn from(range: std::ops::RangeFrom<$id_type<T>>) -> Self {
                 // e.g user:1..
                 let range = sql::Range {
-                    tb: T::table_name().to_string(),
+                    tb: T::table().to_string(),
                     beg: Bound::Included(range.start.to_thing().id),
                     end: Bound::Unbounded,
                 };
@@ -273,7 +273,7 @@ macro_rules! create_range {
             fn from(range: std::ops::RangeTo<$id_type<T>>) -> Self {
                 // e.g user:..5
                 let range = sql::Range {
-                    tb: T::table_name().to_string(),
+                    tb: T::table().to_string(),
                     beg: Bound::Unbounded,
                     end: Bound::Excluded(range.end.to_thing().id),
                 };
@@ -293,7 +293,7 @@ macro_rules! create_range {
             fn from(range: std::ops::RangeToInclusive<$id_type<T>>) -> Self {
                 // e.g user:..=5
                 let range = sql::Range {
-                    tb: T::table_name().to_string(),
+                    tb: T::table().to_string(),
                     beg: Bound::Unbounded,
                     end: Bound::Included(range.end.to_thing().id),
                 };
@@ -313,7 +313,7 @@ macro_rules! create_range {
             fn from(range: std::ops::Range<$id_type<T>>) -> Self {
                 // e.g user:1..5
                 let range = sql::Range {
-                    tb: T::table_name().to_string(),
+                    tb: T::table().to_string(),
                     beg: Bound::Included(range.start.to_thing().id),
                     end: Bound::Excluded(range.end.to_thing().id),
                 };

@@ -281,11 +281,11 @@ impl FieldType {
     }
 
     /// Returns true if the field_type is a record
-    pub fn is_record_of_the_table(&self, table_name: &String) -> bool {
-        if table_name.is_empty() {
+    pub fn is_record_of_the_table(&self, table: &String) -> bool {
+        if table.is_empty() {
             return false;
         }
-        matches!(self, Self::Record(t) if &t.first().map(ToString::to_string).unwrap_or_default() == table_name)
+        matches!(self, Self::Record(t) if &t.first().map(ToString::to_string).unwrap_or_default() == table)
     }
 
     /// Returns true if the field type is a primitive type

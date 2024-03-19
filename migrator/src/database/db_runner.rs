@@ -96,7 +96,7 @@ impl MigrationRunner {
             }
             RollbackStrategy::Number(count) => {
                 let migrations_from_db = select(All)
-                    .from(Migration::table_name())
+                    .from(Migration::table())
                     .order_by(Migration::schema().timestamp.desc())
                     .limit(*count)
                     .return_many::<Migration>(db.clone())
@@ -137,7 +137,7 @@ impl MigrationRunner {
                 }
 
                 let migrations_from_db = select(All)
-                    .from(Migration::table_name())
+                    .from(Migration::table())
                     .where_(cond(timestamp.gt(timestamp_value)).or(
                         cond(timestamp.eq(timestamp_value)).and(name.eq(file_cursor.to_string())),
                     ))
@@ -201,7 +201,7 @@ impl MigrationRunner {
         db: Surreal<impl Connection>,
     ) -> SurrealOrmResult<Option<Migration>> {
         select(All)
-            .from(Migration::table_name())
+            .from(Migration::table())
             .order_by(Migration::schema().timestamp.desc())
             .limit(1)
             .return_one::<Migration>(db.clone())
@@ -489,7 +489,7 @@ impl MigrationRunner {
             }
             Status::Pending => {
                 let latest_applied_migration = select(All)
-                    .from(Migration::table_name())
+                    .from(Migration::table())
                     .order_by(Migration::schema().timestamp.desc())
                     .limit(1)
                     .return_one::<Migration>(db.clone())
@@ -510,7 +510,7 @@ impl MigrationRunner {
             }
             Status::Applied => {
                 let db_migs = select(All)
-                    .from(Migration::table_name())
+                    .from(Migration::table())
                     .order_by(Migration::schema().timestamp.asc())
                     .return_many::<Migration>(db.clone())
                     .await?;

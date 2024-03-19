@@ -157,7 +157,7 @@ async fn test_find_where_complex() -> SurrealOrmResult<()> {
     assert_eq!(total_spaceships.len(), 1000);
     let total_spaceships_query = select_value(count).from(
         select(count!(strength.gte(500)))
-            .from(Weapon::table_name())
+            .from(Weapon::table())
             .group_all(),
     );
     assert_eq!(

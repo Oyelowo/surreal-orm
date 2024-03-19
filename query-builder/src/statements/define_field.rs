@@ -36,7 +36,7 @@ use super::for_permission::Permissions;
 #[derive(Clone, Debug)]
 pub struct DefineFieldStatement {
     field_name: String,
-    table_name: Option<String>,
+    table: Option<String>,
     type_: Option<String>,
     value: Option<String>,
     assert: Option<String>,
@@ -82,7 +82,7 @@ pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
     let field: Field = fieldable.into();
     DefineFieldStatement {
         field_name: field.to_string(),
-        table_name: None,
+        table: None,
         type_: None,
         value: None,
         assert: None,
@@ -97,7 +97,7 @@ impl DefineFieldStatement {
     /// Set the table where the field is defined.
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         let table: Table = table.into();
-        self.table_name = Some(table.to_string());
+        self.table = Some(table.to_string());
         self
     }
 
@@ -236,7 +236,7 @@ impl Buildable for DefineFieldStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE FIELD {}", &self.field_name);
 
-        if let Some(table) = &self.table_name {
+        if let Some(table) = &self.table {
             query = format!("{query} ON TABLE {table}");
         }
 

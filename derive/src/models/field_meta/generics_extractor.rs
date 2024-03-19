@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::borrow::BorrowMut;
+
 use crate::models::*;
 use darling::FromGenerics;
 use proc_macro2::TokenStream;
@@ -24,7 +26,38 @@ impl CustomGenerics {
     }
 
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
-        self.0.split_for_impl()
+        let (impl_gen, ty_gen, wh_clause) = self.0.split_for_impl();
+        let mut copy = self.0.clone();
+        // copy.li
+        // copy.borrow_mut().params.retain(|param| {
+        //     if let GenericParam::Lifetime(lifetime_def) = param {
+        //         if lifetime_def.lifetime == "static" {
+        //             return false;
+        //         }
+        //     }
+        //     true
+        // });
+
+        // exclude static reference from impl_gen
+        // let mut impl_gen: Generics = impl_gen.into();
+        copy.lifetimes_mut().for_each(|lt| {
+            if lt.lifetime == Lifetime::new("static", lt.lifetime.span()) {
+                lt.lifetime = Lifetime::new("", lt.lifetime.span());
+            }
+        });
+        // let x = impl_gen
+        //     .lifetimes_mut()
+        //     .filter(|lt| lt.lifetime != "static");
+        // let generics_without_static = impl_gen.params.retain(|param| {
+        //     if let GenericParam::Lifetime(lifetime_def) = param {
+        //         if lifetime_def.lifetime == "static" {
+        //             return false;
+        //         }
+        //     }
+        //     true
+        // });
+        // (impl_gen.into(), ty_gen, wh_clause)
+        (copy.split_for_impl().0, ty_gen, wh_clause)
     }
 
     pub fn to_basic_generics(&self) -> &Generics {

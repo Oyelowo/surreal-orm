@@ -71,12 +71,12 @@ mod check3 {
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student_invalid_by_default")]
+/// #[surreal_orm(table = "student_invalid_by_default")]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 /// }
 /// ```
-fn _no_table_name_should_be_snake_case_version_of_struct_name() {}
+fn _no_table_should_be_snake_case_version_of_struct_name() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
