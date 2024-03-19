@@ -39,7 +39,7 @@ impl TableResources for Animal {
     }
 }
 
-#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = "eats", schemafull)]
 pub struct Eats<In: Node, Out: Node> {
@@ -52,7 +52,6 @@ pub struct Eats<In: Node, Out: Node> {
 }
 
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
-impl TableResources for AnimalEatsCrop {}
 
 #[derive(Debug, Clone)]
 pub struct Resources;
