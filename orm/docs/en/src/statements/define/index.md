@@ -17,14 +17,14 @@ The basic syntax of the `define_index` statement is as follows:
 
 ```rust
 define_index(index_name: Index)
-    .on_table(table_name: Table)
+    .on_table(table: Table)
     .fields(arr![fields: Field])
     .columns(arr![columns: Field])
     .unique()
 ```
 
 - `index_name`: The name of the index to define.
-- `table_name`: The name of the table on which the index is defined.
+- `table`: The name of the table on which the index is defined.
 - `fields`: An array of fields to include in the index.
 - `columns`: An array of columns to include in the index.
 - `unique`: Specifies that the index should enforce uniqueness.

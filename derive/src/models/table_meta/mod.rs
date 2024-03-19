@@ -6,7 +6,7 @@
  */
 mod derive_attributes;
 mod model_attributes;
-mod table_name;
+mod table;
 
 pub use derive_attributes::*;
 pub use model_attributes::*;

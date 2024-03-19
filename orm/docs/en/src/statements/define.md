@@ -57,7 +57,7 @@ let statement = define_table(user).schemaless().permissions_full();
 
 ```rust
 let query = define_index("userEmailIndex")
-    .on_table(User::table_name())
+    .on_table(User::table())
     .fields(email)
     .unique();
 ```

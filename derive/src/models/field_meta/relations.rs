@@ -20,7 +20,7 @@ use super::*;
 
 // #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 // #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table_name = "company")]
+// #[surreal_orm(table = "company")]
 // pub struct Company<'a, 'b: 'a, T, U: Clone + Default> {
 //     pub id: SurrealSimpleId<Self>,
 //     pub name: &'b T, // &'b T RawField
@@ -156,18 +156,18 @@ create_ident_wrapper!(NodeTableName);
 #[derive(Debug, Clone)]
 pub struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
-    pub(crate) edge_table_name: EdgeTableName,
+    pub(crate) edge_table: EdgeTableName,
     /// user->writes->book // here, user is current struct, book is the foreign node
     /// book<-writes<-user // here, book is current struct, user is the foreign node
-    pub(crate) foreign_node_table_name: NodeTableName,
+    pub(crate) foreign_node_table: NodeTableName,
 }
 
 // TODO: Remove
 // impl From<RelateAttribute> for ::proc_macro2::TokenStream {
 //     fn from(relate_attrs: RelateAttribute) -> Self {
 //         let edge_direction = ::proc_macro2::TokenStream::from(relate_attrs.edge_direction);
-//         let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_table_name);
-//         let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_table_name);
+//         let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_table);
+//         let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_table);
 //         // ->action->NodeObject
 //         // <-action<-NodeObject
 //         // e.g ->manages->Project
@@ -219,8 +219,8 @@ impl TryFrom<&Relate> for RelateAttribute {
             };
 
         Ok(Self {
-            foreign_node_table_name: node_object,
-            edge_table_name: edge_action,
+            foreign_node_table: node_object,
+            edge_table: edge_action,
             edge_direction,
         })
     }

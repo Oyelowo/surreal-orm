@@ -35,7 +35,7 @@ Let's begin with a basic example. The `Student` struct below uses minimal
 annotations:
 
 ```rust
-#[surreal_orm(table_name = "student")]
+#[surreal_orm(table = "student")]
 pub struct Student {
     id: SurrealId<Student, String>,
     first_name: String,
@@ -46,7 +46,7 @@ pub struct Student {
 
 Here:
 
-- `table_name` determines the name of the table in the database that corresponds
+- `table` determines the name of the table in the database that corresponds
   to this struct.
 
 ---
@@ -58,7 +58,7 @@ The `Student` struct provides various usages:
 
 ```rust
 #[surreal_orm(
-    table_name = "student",
+    table = "student",
     permissions = "student_permissions()",
 )]
 pub struct Student {
@@ -93,7 +93,7 @@ functions. This aids in reusability and cleaner code:
 
 ```rust
 #[surreal_orm(
-    table_name = "student_with_define_fn_attr",
+    table = "student_with_define_fn_attr",
     define_fn = "define_student_with_define_attr"
 )]
 pub struct StudentWithDefineFnAttr {
@@ -297,10 +297,10 @@ a comprehensive overview of the various annotations:
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
-    table_name = "student_with_granular_attributes",
+    table = "student_with_granular_attributes",
     drop,
     schemafull,
-    as_ = "select(All).from(Student::table_name())",
+    as_ = "select(All).from(Student::table())",
     permissions = "student_permissions()",
 )]
 pub struct StudentWithGranularAttributes {

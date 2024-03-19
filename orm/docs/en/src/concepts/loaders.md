@@ -27,7 +27,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
 
     #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "alien")]
+    #[surreal_orm(table = "alien")]
     pub struct Alien {
         pub id: SurrealSimpleId<Self>,
 
@@ -49,7 +49,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
 
     #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "weapon")]
+    #[surreal_orm(table = "weapon")]
     pub struct Weapon {
         pub id: SurrealSimpleId<Self>,
         pub name: String,
@@ -65,7 +65,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
 
     #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "space_ship")]
+    #[surreal_orm(table = "space_ship")]
     pub struct SpaceShip {
         pub id: SurrealId<Self, String>,
         pub name: String,
@@ -108,7 +108,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
     assert_eq!(created_weapon.id.to_thing(), weapon1.id.to_thing());
 
     let select1: Vec<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_many(db.clone())
         .await?;
     // weapon table should have one record
@@ -121,7 +121,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
         .await?;
 
     let select2: Vec<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_many(db.clone())
         .await?;
     // weapon table should have two records after second creation

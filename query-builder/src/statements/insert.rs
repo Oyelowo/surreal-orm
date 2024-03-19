@@ -72,7 +72,7 @@ where
 ///     
 /// // You can also insert from another table. This is good for copying into a new table:
 /// insert(select(All)
-///         .from(Company::table_name())
+///         .from(Company::table())
 ///         .where_(age.greater(18))
 /// );
 /// ```
@@ -344,7 +344,7 @@ where
         //     return "".into();
         // }
 
-        let mut query = format!("INSERT INTO {}", &T::table_name());
+        let mut query = format!("INSERT INTO {}", &T::table());
 
         if let Some(query_select) = &self.select_query_string {
             query = format!("{query} ({})", &query_select.trim_end_matches(';'));

@@ -94,7 +94,7 @@ where
     /// Create a new SurrealId from a string
     pub fn new(id: Id) -> Self {
         Self(
-            Thing::from((T::table_name().to_string(), id.into())),
+            Thing::from((T::table().to_string(), id.into())),
             PhantomData,
             PhantomData,
         )
@@ -201,10 +201,10 @@ where
     type Error = SurrealOrmError;
 
     fn try_from(value: sql::Thing) -> Result<Self, Self::Error> {
-        if value.tb != T::table_name().to_string() {
+        if value.tb != T::table().to_string() {
             return Err(SurrealOrmError::IdBelongsToAnotherTable(
                 value.to_string(),
-                T::table_name().to_string(),
+                T::table().to_string(),
             ));
         }
         Ok(Self(value, PhantomData, PhantomData))
@@ -268,7 +268,7 @@ where
     /// Generates a new random nano id
     pub fn new() -> Self {
         Self(SurrealId(
-            Thing::from((T::table_name().to_string(), sql::Id::rand())),
+            Thing::from((T::table().to_string(), sql::Id::rand())),
             PhantomData,
             PhantomData,
         ))
@@ -322,7 +322,7 @@ impl<T: Model> SurrealUuid<T> {
     /// Generates a new uuid
     pub fn new() -> Self {
         Self(SurrealId(
-            Thing::from((T::table_name().to_string(), sql::Id::uuid())),
+            Thing::from((T::table().to_string(), sql::Id::uuid())),
             PhantomData,
             PhantomData,
         ))
@@ -371,7 +371,7 @@ impl<T: Model> SurrealUlid<T> {
     /// Generates a new ulid
     pub fn new() -> Self {
         Self(SurrealId(
-            Thing::from((T::table_name().to_string(), sql::Id::ulid())),
+            Thing::from((T::table().to_string(), sql::Id::ulid())),
             PhantomData,
             PhantomData,
         ))
@@ -449,7 +449,7 @@ pub type TestUserObjectId = SurrealId<TestUser, HashMap<String, String>>;
 impl Model for TestUser {
     type Id = TestUserSimpleId;
     type StructRenamedCreator = ();
-    fn table_name() -> crate::Table {
+    fn table() -> crate::Table {
         "user".into()
     }
 
@@ -582,7 +582,7 @@ mod tests {
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
-                Check that the id is in the format 'table_name:id'"
+                Check that the id is in the format 'table:id'"
             ),
             "Invalid id"
         );
@@ -594,7 +594,7 @@ mod tests {
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
-                Check that the id is in the format 'table_name:id'"
+                Check that the id is in the format 'table:id'"
             ),
             "Invalid id"
         );
@@ -606,7 +606,7 @@ mod tests {
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
-                Check that the id is in the format 'table_name:id'"
+                Check that the id is in the format 'table:id'"
             ),
             "Invalid id"
         );
@@ -618,7 +618,7 @@ mod tests {
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
-                Check that the id is in the format 'table_name:id'"
+                Check that the id is in the format 'table:id'"
             ),
             "Invalid id"
         );

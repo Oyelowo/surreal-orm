@@ -46,53 +46,53 @@ impl FullDbInfo {
         self.all_resources.users()
     }
 
-    pub fn get_table_info(&self, table_name: Table) -> Option<&TableResourcesData> {
-        self.table_resources.get(&table_name)
+    pub fn get_table_info(&self, table: Table) -> Option<&TableResourcesData> {
+        self.table_resources.get(&table)
     }
 
-    pub fn get_table_names(&self) -> Vec<Table> {
+    pub fn get_tables(&self) -> Vec<Table> {
         self.table_resources.keys().cloned().collect::<Vec<_>>()
     }
 
     pub fn get_field_def(
         &self,
-        table_name: Table,
+        table: Table,
         field_name: Field,
     ) -> Option<DefineStatementRaw> {
         self.table_resources
-            .get(&table_name)
+            .get(&table)
             .and_then(|t| t.fields().get_definition(&field_name).cloned())
     }
 
-    pub fn get_table_indexes(&self, table_name: &Table) -> Option<Indexes> {
+    pub fn get_table_indexes(&self, table: &Table) -> Option<Indexes> {
         self.table_resources
-            .get(table_name)
+            .get(table)
             .map(|t| t.indexes().clone())
     }
 
-    pub fn get_table_events(&self, table_name: &Table) -> Option<Events> {
+    pub fn get_table_events(&self, table: &Table) -> Option<Events> {
         self.table_resources
-            .get(table_name)
+            .get(table)
             .map(|t| t.events().clone())
     }
 
-    pub fn get_table_fields(&self, table_name: &Table) -> Option<Fields> {
+    pub fn get_table_fields(&self, table: &Table) -> Option<Fields> {
         self.table_resources
-            .get(table_name)
+            .get(table)
             .map(|t| t.fields().clone())
     }
 
-    pub fn get_table_field_names(&self, table_name: &Table) -> Vec<String> {
+    pub fn get_table_field_names(&self, table: &Table) -> Vec<String> {
         self.table_resources
-            .get(table_name)
+            .get(table)
             .map(|t| t.fields().clone())
             .unwrap_or_default()
             .get_names()
     }
 
-    pub fn get_table_field_names_as_set(&self, table_name: &Table) -> BTreeSet<String> {
+    pub fn get_table_field_names_as_set(&self, table: &Table) -> BTreeSet<String> {
         self.table_resources
-            .get(table_name)
+            .get(table)
             .map(|t| t.fields().clone())
             .unwrap_or_default()
             .get_names_as_set()

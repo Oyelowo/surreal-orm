@@ -111,7 +111,7 @@ where
     };
 
     CreateStatementV2::<T> {
-        target: T::table_name().to_string(),
+        target: T::table().to_string(),
         content: content_or_set,
         return_type: None,
         timeout: None,

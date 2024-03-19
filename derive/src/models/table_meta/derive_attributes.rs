@@ -11,7 +11,7 @@ use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
 
-use super::table_name::TableNameIdent;
+use super::table::TableNameIdent;
 use crate::models::*;
 
 create_ident_wrapper!(StructIdent);
@@ -53,7 +53,7 @@ pub struct TableDeriveAttributes {
     pub(crate) table: TableNameIdent,
 
     #[darling(default)]
-    pub(crate) relax_table_name: Option<bool>,
+    pub(crate) relax_table: Option<bool>,
 
     #[darling(default)]
     pub(crate) schemafull: Option<bool>,
@@ -82,12 +82,12 @@ impl TableDeriveAttributes {
         &self.generics
     }
 
-    pub fn table_name(&self) -> ExtractorResult<&TableNameIdent> {
+    pub fn table(&self) -> ExtractorResult<&TableNameIdent> {
         // TODO: Ask during alpha release if specifying table name explicitly
         // should be optional since it can be inferred from the struct name
         // as the snake case version of the struct name.
         self.table
-            .validate_and_return(&self.ident(), &self.relax_table_name)
+            .validate_and_return(&self.ident(), &self.relax_table)
     }
 
     pub fn get_table_definition_token(&self) -> ExtractorResult<TableDefinitions> {
@@ -154,7 +154,7 @@ impl TableDeriveAttributes {
         Ok(define_table
             .unwrap_or_else(|| {
                 quote!(
-                    #crate_name::statements::define_table(Self::table_name())
+                    #crate_name::statements::define_table(Self::table())
                     #( #define_table_methods) *
                     .to_raw()
                 )

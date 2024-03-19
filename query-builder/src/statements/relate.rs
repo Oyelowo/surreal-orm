@@ -45,9 +45,9 @@ use crate::{
 ///
 /// // Add a graph edge between multiple specific students and books
 /// relate(
-///     Student::with(select(All).from(Student::table_name()))
+///     Student::with(select(All).from(Student::table()))
 ///         .writes__(Empty)
-///         .book(select(All).from(Book::table_name()))
+///         .book(select(All).from(Book::table()))
 /// ).content(write)
 /// // Generates e.g RELATE (select * from student)->writes->(select * from book) CONTENT {...}
 /// ```
@@ -90,9 +90,9 @@ where
 ///
 /// // Add a graph edge between multiple specific students and books
 /// relate_only(
-///     Student::with(select(All).from(Student::table_name()))
+///     Student::with(select(All).from(Student::table()))
 ///         .writes__(Empty)
-///         .book(select(All).from(Book::table_name()))
+///         .book(select(All).from(Book::table()))
 /// ).content(write)
 /// // Generates e.g RELATE (select * from student)->writes->(select * from book) CONTENT {...}
 /// ```

@@ -265,7 +265,7 @@ impl ToTokens for ObjectToken {
                         // store: ::std::string::String,
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                         clause: impl ::std::convert::Into<#crate_name::ObjectClause>,
-                        // use_table_name: bool,
+                        // use_table: bool,
                         // existing_bindings: #crate_name::BindingsList,
                         // existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
@@ -282,8 +282,8 @@ impl ToTokens for ObjectToken {
                         schema_instance.#___________errors = errors.into();
 
 
-                    // let connection = if use_table_name {
-                    //     // format!("{}{}", store, clause.format_with_model(#table_name_str))
+                    // let connection = if use_table {
+                    //     // format!("{}{}", store, clause.format_with_model(#table_str))
                     //     format!("{}{}", store, clause)
                     // }else{
                     //     format!("{}{}", store, clause) 

@@ -838,7 +838,7 @@ impl CustomType {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Record(vec![])),
                 field_type_db_token:
-                    quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
+                    quote!(#crate_name::FieldType::Record(::std::vec![Self::table()])).into(),
                 static_assertion_token: quote!().into(),
             }
         } else if field_name.is_orig_or_dest_edge_node(model_type) {
@@ -863,12 +863,12 @@ impl CustomType {
                 }
                 RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
                     field_type_db_original: Some(FieldType::Record(vec![])),
-                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])).into(),
+                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])).into(),
                     static_assertion_token: quote!().into(),
                 },
                 RelationType::LinkSelf(_self_node) => DbFieldTypeAstMeta {
                     field_type_db_original: Some(FieldType::Record(vec![])),
-                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])).into(),
+                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table()])).into(),
                     static_assertion_token: quote!().into(),
                 },
                 RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
@@ -877,7 +877,7 @@ impl CustomType {
                         ::std::option::Option::None
                     )),
                     field_type_db_token: quote!(#crate_name::FieldType::Array(
-                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table_name()])),
+                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])),
                         ::std::option::Option::None
                     )).into(),
                     static_assertion_token: quote!().into(),

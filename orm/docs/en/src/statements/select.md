@@ -32,7 +32,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "user")]
+#[surreal_orm(table = "user")]
 pub struct User {
     pub id: SurrealSimpleId<Self>,
     pub account: String,
@@ -49,7 +49,7 @@ models. Here's a detailed example using a `Student` and a `Book`:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "student")]
+#[surreal_orm(table = "student")]
 pub struct Student {
     id: SurrealSimpleId<Self>,
     first_name: String,
@@ -70,7 +70,7 @@ pub struct Student {
 }
 
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "book")]
+#[surreal_orm(table = "book")]
 pub struct Book {
     id: SurrealSimpleId<Self>,
     content: String,
@@ -101,7 +101,7 @@ let student::Schema {
 let book::Schema { ref content, .. } = Book::schema();
 
 let mut statement = select(arr![age, last_name, content])
-    .from(Book::table_name())
+    .from(Book::table())
     .where_(
         cond(content.like("lowo"))
             .and(age.greater_than_or_equal(600))
@@ -173,12 +173,12 @@ let student::Schema {
 } = &Student::schema();
 
 let book::Schema { ref content, .. } = Book::schema();
-let ref student_table = Student::get_table_name();
-let ref book_table = Book::get_table_name();
+let ref student_table = Student::get_table();
+let ref book_table = Book::get_table();
 let ref book_id = thing("book:1").unwrap();
 
 let mut query1 = select(arr![age, lastName, content])
-    .from(Book::get_table_name())
+    .from(Book::get_table())
     .where_(
         cond(content.like("lowo"))
             .and(age.greater_than_or_equal(600))
@@ -279,7 +279,7 @@ use surreal_orm::{*, statements::{select, insert}};
 
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "weapon")]
+#[surreal_orm(table = "weapon")]
 pub struct Weapon {
     pub name: String,
     pub strength: i32,
@@ -299,7 +299,7 @@ let generated_weapons = (1..=10)
     .collect::<Vec<_>>();
 insert(generated_weapons.clone()).run(db.clone()).await?;
 
-let ref weapon = Weapon::table_name();
+let ref weapon = Weapon::table();
 let weapon::Schema { ref strength, .. } = &Weapon::schema();
 
 let statement = select(All)

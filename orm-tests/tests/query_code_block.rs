@@ -21,7 +21,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = &Weapon::table_name();
+    let weapon = &Weapon::table();
     let weapon::Schema { ref strength, .. } = Weapon::schema();
 
     let generated_weapons = (0..=14)
@@ -77,7 +77,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = &Weapon::table_name();
+    let weapon = &Weapon::table();
     let weapon::Schema { ref strength, .. } = Weapon::schema();
     let weapon_stats::Schema {
         averageStrength, ..
@@ -133,7 +133,7 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = &Weapon::table_name();
+    let weapon = &Weapon::table();
     let weapon::Schema { ref strength, .. } = Weapon::schema();
     let weapon_stats::Schema {
         averageStrength, ..
@@ -178,7 +178,7 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = &Weapon::table_name();
+    let weapon = &Weapon::table();
     let weapon::Schema { ref strength, .. } = Weapon::schema();
     let weapon_stats::Schema {
         averageStrength, ..
@@ -222,7 +222,7 @@ async fn test_code_block_with_macro() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = Weapon::table_name();
+    let weapon = Weapon::table();
     let weapon::Schema { strength, .. } = Weapon::schema();
     let weapon_stats::Schema {
         averageStrength, ..
@@ -269,7 +269,7 @@ async fn test_code_block_simplified() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = Weapon::table_name();
+    let weapon = Weapon::table();
     let weapon::Schema { strength, .. } = Weapon::schema();
     let weapon_stats::Schema {
         averageStrength, ..
@@ -322,7 +322,7 @@ async fn test_code_block() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = Weapon::table_name();
+    let weapon = Weapon::table();
     let weapon::Schema { strength, .. } = Weapon::schema();
     let generated_weapons = (0..=14)
         .map(|i| Weapon {

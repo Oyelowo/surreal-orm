@@ -18,7 +18,7 @@ The basic syntax of the `define_field` statement is as follows:
 
 ```rust
 define_field(field_name)
-    .on_table(table_name)
+    .on_table(table)
     .type_(field_type)
     .value(default_value)
     .assert(assertion)
@@ -26,7 +26,7 @@ define_field(field_name)
 ```
 
 - `field_name`: The name of the field to define.
-- `table_name`: The name of the table where the field belongs.
+- `table`: The name of the table where the field belongs.
 - `field_type`: The type of the field.
 - `default_value` (optional): The default value for the field.
 - `assertion` (optional): An assertion condition for the field.
@@ -34,7 +34,7 @@ define_field(field_name)
 
 The `define_field` statement supports the following methods:
 
-- `.on_table(table_name)`: Specifies the table where the field belongs.
+- `.on_table(table)`: Specifies the table where the field belongs.
 - `.type_(field_type)`: Specifies the type of the field.
 - `.value(default_value)`: Specifies the default value for the field.
 - `.assert(assertion)`: Specifies an assertion condition for the field.

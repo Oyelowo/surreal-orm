@@ -38,7 +38,7 @@ pub trait Model: Sized {
     /// For checking renamed struct field names
     type StructRenamedCreator;
     /// The name of the model/table
-    fn table_name() -> Table;
+    fn table() -> Table;
 
     /// Returns id of the model/table
     fn get_id(self) -> Self::Id;
@@ -75,7 +75,7 @@ pub trait Model: Sized {
 
     /// Create a new SurrealId from a string
     fn create_thing(id: impl Into<sql::Id>) -> Thing {
-        Thing::from((Self::table_name().to_string(), id.into()))
+        Thing::from((Self::table().to_string(), id.into()))
     }
 
     ///
@@ -106,7 +106,7 @@ pub trait Model: Sized {
 
     // /// Create a new surreal Thing/compound id from a Uuid
     // fn create_thing_uuid() -> Thing {
-    //     Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
+    //     Thing::from((Self::table().to_string(), Uuid::new_v4().to_string()))
     // }
 }
 
@@ -124,14 +124,14 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + Model {
 
     /// Finds records by filtering.
     fn find_where(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
-        select(All).from(Self::table_name()).where_(filter).into()
+        select(All).from(Self::table()).where_(filter).into()
     }
 
     /// Count filtered records.
     fn count_where(filter: impl Conditional + Clone) -> SelectStatementCount {
         let selection = select_value(Field::new("count")).from(
             select(count!(Filter::new(filter)))
-                .from(Self::table_name())
+                .from(Self::table())
                 .group_all(),
         );
         selection.into()
@@ -140,7 +140,7 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + Model {
     /// Count all records.
     fn count_all() -> SelectStatementCount {
         let selection = select_value(Field::new("count"))
-            .from(select(count!()).from(Self::table_name()).group_all());
+            .from(select(count!()).from(Self::table()).group_all());
         selection.into()
     }
 
@@ -156,7 +156,7 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + Model {
 
     /// Deletes records by filtering.
     fn delete_where(filter: impl Conditional + Clone) -> DeleteStatementMini<Self> {
-        delete::<Self>(Self::table_name()).where_(filter).into()
+        delete::<Self>(Self::table()).where_(filter).into()
     }
 }
 
@@ -224,7 +224,7 @@ pub trait Node: Model + Serialize + SchemaGetter {
     // // fn get_id<T: From<Thing>>(self) -> T;
     // fn get_id<T: Into<Thing>>(self) -> T;
     /// returns the table name of the node
-    fn get_table_name() -> Table;
+    fn get_table() -> Table;
     /// Useful in relate statement for attaching id or statement to a node
     /// Example:
     /// ```rust, ignore
@@ -233,11 +233,11 @@ pub trait Node: Model + Serialize + SchemaGetter {
     /// relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
     ///
     /// relate(
-    ///     Student::with(select(All).from(Student::get_table_name()))
+    ///     Student::with(select(All).from(Student::get_table()))
     ///         .writes__(Empty)
     ///         .book(
     ///             select(All)
-    ///                 .from(Book::get_table_name())
+    ///                 .from(Book::get_table())
     ///                 .where_(Book::schema().title.like("Oyelowo")),
     ///         ),
     /// )
@@ -285,7 +285,7 @@ pub trait Edge: Model + Serialize + SchemaGetter {
     // /// returns the key of the edge aka id field
     // fn get_id<T: From<Thing>>(self) -> T;
     /// returns the table name of the edge
-    fn get_table_name() -> Table;
+    fn get_table() -> Table;
 }
 
 /// Object is a trait signifying a nested object in the graph

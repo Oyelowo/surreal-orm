@@ -133,7 +133,7 @@ update::<Weapon>(id)
     .await?;
 
 let selected: Option<Weapon> = select(All)
-    .from(Weapon::table_name())
+    .from(Weapon::table())
     .return_one(db.clone())
     .await?;
 assert_eq!(selected.unwrap().strength, 923);
@@ -384,7 +384,7 @@ select the objects to update.
 ```rust
 let filter = cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
 
-let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
+let update_weapons_with_filter = update::<Weapon>(Weapon::table())
     .content(Weapon {
         name: "Oyelowo".to_string(),
         created: Utc::now(),

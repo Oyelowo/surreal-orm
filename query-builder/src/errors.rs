@@ -46,7 +46,7 @@ pub enum SurrealOrmError {
     #[error("Unable to parse data returned from the database. Check that all fields are complete and the types are able to deserialize surrealdb data types properly. {0}")]
     Deserialization(#[source] surrealdb::Error),
 
-    #[error("Invalid id. Problem deserializing string to surrealdb::sql::Thing. Check that the id is in the format 'table_name:id'. {0}")]
+    #[error("Invalid id. Problem deserializing string to surrealdb::sql::Thing. Check that the id is in the format 'table:id'. {0}")]
     InvalidId(#[source] surrealdb::Error),
 
     #[error("The id - {0} provided does not belong to the table {1}. Please ensure that the id provided is for the table you are trying to fetch from.")]

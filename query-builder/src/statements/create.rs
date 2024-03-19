@@ -65,7 +65,7 @@ where
     T: Serialize + DeserializeOwned + Node,
 {
     CreateStatementInit::<T> {
-        target: T::table_name().to_string(),
+        target: T::table().to_string(),
         is_only: false,
         content: "".to_string(),
         set: vec![],
