@@ -21,8 +21,6 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let field_type = field_receiver.ty();
         let field_ident_original = field_receiver.ident()?;
-        let field_ident_normalized =
-            field_receiver.field_ident_normalized(&table_derive_attributes.casing()?)?;
         let db_field_name = field_receiver.db_field_name(&table_derive_attributes.casing()?)?;
 
         if db_field_name.is_id() {

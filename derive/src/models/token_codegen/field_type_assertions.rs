@@ -58,11 +58,7 @@ impl<'a> Codegen<'a> {
                 }]
             }
             RelationType::None | RelationType::List(_) => {
-                let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
-                let db_field_type = db_field_type.into_inner_ref();
-                let mut top_level_check = self
-                    .get_field_type_static_assertions(field_type.into_inner_ref(), db_field_type);
-                top_level_check?
+                self.get_field_type_static_assertions()?
             }
         };
         self.static_assertions
@@ -71,11 +67,7 @@ impl<'a> Codegen<'a> {
         Ok(())
     }
 
-    fn get_field_type_static_assertions(
-        &self,
-        field_type: &CustomType,
-        db_field_type: &FieldType,
-    ) -> ExtractorResult<Vec<proc_macro2::TokenStream>> {
+    fn get_field_type_static_assertions(&self) -> ExtractorResult<Vec<proc_macro2::TokenStream>> {
         let crate_name = &get_crate_name(false);
         let get_field_type_static_assertions =
             |field_type: &CustomType, db_field_type: &FieldType| match db_field_type {
