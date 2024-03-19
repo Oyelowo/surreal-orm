@@ -200,7 +200,7 @@ impl FromMeta for Relate {
         // explicitly
         #[derive(FromMeta)]
         struct FullRelate {
-            model: Type,
+            model: EdgeType,
             connection: String,
         }
 
