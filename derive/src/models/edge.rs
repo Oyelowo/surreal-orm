@@ -155,11 +155,11 @@ impl ToTokens for EdgeToken {
                 impl #impl_generics #crate_name::SchemaGetter for #struct_name_ident #ty_generics #where_clause  {
                     type Schema = #module_name_internal::#struct_name_ident #ty_generics;
 
-                    fn schema() -> #module_name_rexported::Schema {
+                    fn schema() -> Self::Schema {
                         #module_name_rexported::Schema #explicit_generics ::new()
                     }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> Self::Schema {
                         #module_name_rexported::Schema #explicit_generics ::new_prefixed(prefix)
                     }
                 }
@@ -211,7 +211,7 @@ impl ToTokens for EdgeToken {
 
 
                 #[allow(non_snake_case)]
-                #[derive(#crate_name::serde::Serialize,  ebug, Clone)]
+                #[derive(#crate_name::serde::Serialize, Debug, Clone)]
                 pub struct #struct_with_renamed_serialized_fields {
                    #(#renamed_serialized_fields_kv), *
                 }
@@ -234,7 +234,7 @@ impl ToTokens for EdgeToken {
                     }
 
                     fn get_serializable_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                        return ::std::vec![#( #serializable_fields), *] ,
+                        return ::std::vec![#( #serializable_fields), *]
                     }
 
                     fn get_linked_fields() -> ::std::vec::Vec<#crate_name::Field> {
