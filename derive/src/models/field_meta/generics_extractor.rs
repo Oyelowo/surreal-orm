@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-use std::borrow::BorrowMut;
-
 use crate::models::*;
 use darling::FromGenerics;
 use proc_macro2::TokenStream;
@@ -18,50 +16,63 @@ use super::CustomType;
 pub struct StrippedBoundsGenerics(pub Generics);
 
 #[derive(Clone, Debug, Default)]
-pub struct CustomGenerics(pub Generics);
+pub struct CustomGenericsWithoutStaticInImpl(pub Generics);
+
+#[derive(Clone, Debug, Default)]
+pub struct CustomGenerics {
+    pub original_generics: Generics,
+    pub generics_without_static_in_impl: Generics,
+}
 
 impl CustomGenerics {
+    pub fn new(original_generics: Generics) -> Self {
+        let generics_without_static_in_impl = original_generics.clone();
+        let filter_static = |param: &GenericParam| match param {
+            GenericParam::Lifetime(lifetime_def) => lifetime_def.lifetime.ident != "static",
+            _ => true,
+        };
+
+        let generics_without_static_in_impl_params = generics_without_static_in_impl
+            .params
+            .into_iter()
+            .filter(|param| filter_static(param))
+            .collect();
+
+        let gen = Generics {
+            params: generics_without_static_in_impl_params,
+            ..original_generics.clone()
+        };
+
+        CustomGenerics {
+            original_generics,
+            generics_without_static_in_impl: gen,
+        }
+    }
+
+    pub fn into_inner(self) -> Generics {
+        self.original_generics
+    }
+
+    pub fn into_inner_ref(&self) -> &Generics {
+        &self.original_generics
+    }
+
+    pub fn into_inner_ref_mut(&mut self) -> &mut Generics {
+        &mut self.original_generics
+    }
+
     pub fn params(&self) -> &Punctuated<syn::GenericParam, Token![,]> {
-        &self.0.params
+        &self.original_generics.params
     }
 
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
-        let (impl_gen, ty_gen, wh_clause) = self.0.split_for_impl();
-        let mut copy = self.0.clone();
-        // copy.li
-        // copy.borrow_mut().params.retain(|param| {
-        //     if let GenericParam::Lifetime(lifetime_def) = param {
-        //         if lifetime_def.lifetime == "static" {
-        //             return false;
-        //         }
-        //     }
-        //     true
-        // });
-
-        // exclude static reference from impl_gen
-        // let mut impl_gen: Generics = impl_gen.into();
-        copy.lifetimes_mut().for_each(|lt| {
-            if lt.lifetime == Lifetime::new("static", lt.lifetime.span()) {
-                lt.lifetime = Lifetime::new("", lt.lifetime.span());
-            }
-        });
-        // let x = impl_gen
-        //     .lifetimes_mut()
-        //     .filter(|lt| lt.lifetime != "static");
-        // let generics_without_static = impl_gen.params.retain(|param| {
-        //     if let GenericParam::Lifetime(lifetime_def) = param {
-        //         if lifetime_def.lifetime == "static" {
-        //             return false;
-        //         }
-        //     }
-        //     true
-        // });
-        // (impl_gen.into(), ty_gen, wh_clause)
-        (copy.split_for_impl().0, ty_gen, wh_clause)
+        let (impl_gen, _, _) = self.generics_without_static_in_impl.split_for_impl();
+        let (_, ty_gen, where_clause) = self.into_inner_ref().split_for_impl();
+        (impl_gen, ty_gen, where_clause)
     }
 
     pub fn to_basic_generics(&self) -> &Generics {
-        &self.0
+        &self.into_inner_ref()
     }
 
     pub fn strip_bounds_from_generics(original_generics: &Generics) -> StrippedBoundsGenerics {
@@ -138,7 +149,7 @@ pub struct StructGenerics(pub CustomGenerics);
 
 impl FromGenerics for StructGenerics {
     fn from_generics(generics: &Generics) -> darling::Result<Self> {
-        Ok(Self(CustomGenerics(generics.clone())))
+        Ok(Self(CustomGenerics::new(generics.clone())))
     }
 }
 
@@ -195,7 +206,7 @@ impl StructGenerics {
     }
 
     pub fn to_basic_generics_ref(&self) -> &Generics {
-        &self.0 .0
+        &self.0.into_inner_ref()
     }
 
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
@@ -212,11 +223,11 @@ pub struct FieldGenerics(pub CustomGenerics);
 
 impl FieldGenerics {
     pub fn to_basic_generics_ref(&self) -> &Generics {
-        &self.0 .0
+        &self.0.into_inner_ref()
     }
 
     pub fn to_basic_generics_ref_mut(&mut self) -> &mut Generics {
-        &mut self.0 .0
+        &mut self.0.original_generics
     }
 }
 
