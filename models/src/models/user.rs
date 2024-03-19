@@ -7,13 +7,12 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
-    Edge, LinkMany, LinkOne, Model, Node, Object, Relate, SurrealId, SurrealSimpleId,
+    sql, Edge, LinkMany, LinkOne, Model, Node, Object, Relate, SurrealId, SurrealSimpleId,
 };
-use surrealdb::sql;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = user)]
+#[surreal_orm(table = user)]
 pub struct User {
     pub id: SurrealId<Self, String>,
     pub name: String,
@@ -36,7 +35,7 @@ impl Default for User {
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = like)]
+#[surreal_orm(table = like)]
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in", skip_serializing)]
@@ -50,7 +49,7 @@ pub type CompanyLikeUser = Like<Company, User>;
 
 #[derive(surreal_orm::Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = company)]
+#[surreal_orm(table = company)]
 pub struct Company {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
@@ -70,7 +69,7 @@ pub struct Time {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = organization)]
+#[surreal_orm(table = organization)]
 pub struct Organization {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
