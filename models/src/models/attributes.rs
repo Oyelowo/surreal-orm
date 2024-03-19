@@ -64,7 +64,7 @@ fn age_define_external_fn_path() -> DefineFieldStatement {
     use FieldType::*;
 
     define_field(ageDefineInline)
-        .on_table(Student::table_name())
+        .on_table(Student::table())
         .type_(Int)
         .value("oyelowo@codebreather.com")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
@@ -89,7 +89,7 @@ fn define_age_define_external_fn_path() -> DefineFieldStatement {
     // let statement = define_field(Student::schema().age)
 
     define_field(ageDefineInline)
-        .on_table(Student::table_name())
+        .on_table(Student::table())
         .type_(Int)
         .value("oyelowo@codebreather.com")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
@@ -127,7 +127,7 @@ fn get_age_by_group_default_value(group: AgeGroup) -> u8 {
 
 fn as_fn() -> SelectStatement {
     // would copy from student table to destination table.
-    select(All).from(Student::table_name())
+    select(All).from(Student::table())
 }
 
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
@@ -151,7 +151,7 @@ struct StudentFnAttrs {
     drop,
     flexible,
     schemafull,
-    as_ = select(All).from(Student::table_name()),
+    as_ = select(All).from(Student::table()),
     permissions = student_permissions()
 )]
 pub struct StudentWithGranularAttributes {
@@ -295,7 +295,7 @@ fn define_last_name() -> DefineFieldStatement {
     } = StudentWithDefineAttr::schema();
 
     define_field(lastName)
-        .on_table(StudentWithDefineAttr::table_name())
+        .on_table(StudentWithDefineAttr::table())
         .type_(FieldType::String)
         .value("Oyedayo")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
@@ -314,7 +314,7 @@ fn define_last_name_external_fn_attr() -> DefineFieldStatement {
     } = StudentWithDefineAttr::schema();
 
     define_field(lastName)
-        .on_table(StudentWithDefineAttr::table_name())
+        .on_table(StudentWithDefineAttr::table())
         .type_(FieldType::String)
         .value("Oyedayo")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
@@ -332,11 +332,11 @@ fn define_student_with_define_attr() -> DefineTableStatement {
     } = Student::schema();
     use CrudType::*;
 
-    define_table(StudentWithDefineAttr::table_name())
+    define_table(StudentWithDefineAttr::table())
         .drop()
         .as_(
             select(All)
-                .from(Student::table_name())
+                .from(Student::table())
                 .where_(firstName.is("Rust"))
                 .order_by(age.numeric().desc())
                 .limit(20)
@@ -358,7 +358,7 @@ fn define_age(field: impl Into<Field>) -> DefineFieldStatement {
     use FieldType::*;
 
     define_field(field)
-        .on_table(Student::table_name())
+        .on_table(Student::table())
         .type_(Int)
         .value("oyelowo@codebreather.com")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
@@ -384,7 +384,7 @@ pub struct StudentWithDefineAttr {
     id: SurrealId<StudentWithDefineAttr, String>,
     #[surreal_orm(
         ty = string,
-        define = define_first_name(StudentWithDefineAttr::schema().firstName, StudentWithDefineAttr::table_name())
+        define = define_first_name(StudentWithDefineAttr::schema().firstName, StudentWithDefineAttr::table())
     )]
     first_name: String,
 
@@ -396,7 +396,7 @@ pub struct StudentWithDefineAttr {
 
     #[surreal_orm(
         ty = int,
-        define = define_field(StudentWithDefineAttr::schema().ageDefineInline).on_table(Student::table_name()).type_(FieldType::Int).value("oyelowo@codebreather.com")
+        define = define_field(StudentWithDefineAttr::schema().ageDefineInline).on_table(Student::table()).type_(FieldType::Int).value("oyelowo@codebreather.com")
     )]
     age_define_inline: u8,
 
@@ -465,13 +465,13 @@ pub struct StudentWithDefineFnAttr {
     // or go even crazier
     #[surreal_orm(
         ty = string,
-        define = define_first_name(StudentWithDefineFnAttr::schema().firstName, StudentWithDefineFnAttr::table_name())
+        define = define_first_name(StudentWithDefineFnAttr::schema().firstName, StudentWithDefineFnAttr::table())
     )]
     first_name: String,
 
     #[surreal_orm(
         ty = int,
-        define = define_field(StudentWithDefineFnAttr::schema().ageDefineInline).on_table(Student::table_name()).type_(FieldType::Int).value("oyelowo@codebreather.com")
+        define = define_field(StudentWithDefineFnAttr::schema().ageDefineInline).on_table(Student::table()).type_(FieldType::Int).value("oyelowo@codebreather.com")
     )]
     age_define_inline: u8,
 

@@ -95,7 +95,7 @@ impl DbResources for Resources {
                     .create(),
                 )
                 .signin(
-                    select(All).from(UserCredentials::table_name()).where_(
+                    select(All).from(UserCredentials::table()).where_(
                         cond(email.equal("oyelowo@codebreather.com"))
                             .and(crypto::argon2::compare!(pass_input, passwordHash.deref())),
                     ),
@@ -204,7 +204,7 @@ pub mod invalid_cases {
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(
-        table_name = "user_renaming_from_currently_used_field_name_disallowed",
+        table = user_renaming_from_currently_used_field_name_disallowed,
         schemafull
     )]
     pub struct UserRenamingFromCurrentlyUsedFieldNameDisallowed {
@@ -223,7 +223,7 @@ pub mod invalid_cases {
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(
-        table_name = "user_renaming_with_same_old_field_name_disallowed",
+        table = user_renaming_with_same_old_field_name_disallowed,
         schemafull
     )]
     pub struct UserRenamingWithSameOldFieldNameDisallowed {
@@ -244,7 +244,7 @@ pub mod invalid_cases {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "user_credentials", schemafull)]
+#[surreal_orm(table = user_credentials, schemafull)]
 pub struct UserCredentials {
     pub id: SurrealId<Self, String>,
     pub email: String,
@@ -253,7 +253,7 @@ pub struct UserCredentials {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "new_stuff", schemafull)]
+#[surreal_orm(table = new_stuff, schemafull)]
 pub struct NewStuff {
     pub id: SurrealSimpleId<Self>,
     pub first_name: String,
@@ -263,7 +263,7 @@ pub struct NewStuff {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "planet", schemafull)]
+#[surreal_orm(table = planet, schemafull)]
 pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub first_name: String,
@@ -275,7 +275,7 @@ pub struct Planet {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "planet", schemafull, relax_table_name)]
+#[surreal_orm(table = planet, schemafull, relax_table)]
 pub struct PlanetV2 {
     pub id: SurrealSimpleId<Self>,
     // #[surreal_orm(old_name = "firstName")]
@@ -288,7 +288,7 @@ pub struct PlanetV2 {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "student", schemafull)]
+#[surreal_orm(table = student, schemafull)]
 pub struct Student {
     pub id: SurrealSimpleId<Self>,
     pub university: String,
@@ -301,7 +301,7 @@ pub mod snake_cases {
     use super::*;
 
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-    #[surreal_orm(table_name = "animal_snake_case", schemafull)]
+    #[surreal_orm(table = animal_snake_case, schemafull)]
     pub struct AnimalSnakeCase {
         pub id: SurrealSimpleId<Self>,
         pub species: String,
@@ -313,17 +313,17 @@ pub mod snake_cases {
 
     // We are relaxing table name, so that this serves as second version of AnimalSnakeCase
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-    #[surreal_orm(table_name = "animal_snake_case", schemafull, relax_table_name)]
+    #[surreal_orm(table = animal_snake_case, schemafull, relax_table)]
     pub struct AnimalSnakeCaseV2 {
         pub id: SurrealSimpleId<Self>,
         pub species: String,
-        #[surreal_orm(old_name = "attributes")]
+        #[surreal_orm(old_name = attributes)]
         pub characteristics: Vec<String>,
         pub velocity: u64,
     }
 
     #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-    #[surreal_orm(table_name = "eats_snake_case", schemafull)]
+    #[surreal_orm(table = eats_snake_case, schemafull)]
     pub struct EatsSnakeCase<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Self>,
         #[serde(rename = "in")]
@@ -338,7 +338,7 @@ pub mod snake_cases {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "animal", schemafull)]
+#[surreal_orm(table = animal, schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
@@ -357,13 +357,13 @@ impl TableResources for Animal {
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Erectus")).and(velocity.gt(545)))
-            .then(select(All).from(Crop::table_name()))
+            .then(select(All).from(Crop::table()))
             .to_raw();
 
         let event2 = define_event("event2".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Sapien")).and(velocity.lt(10)))
-            .then(select(All).from(AnimalEatsCrop::table_name()))
+            .then(select(All).from(AnimalEatsCrop::table()))
             .to_raw();
         vec![event1, event2]
     }
@@ -374,7 +374,7 @@ impl TableResources for Animal {
         } = Self::schema();
 
         let idx1 = define_index("species_speed_idx".to_string())
-            .on_table(Self::table_name())
+            .on_table(Self::table())
             .fields(arr![species, velocity])
             .unique()
             .to_raw();
@@ -385,11 +385,11 @@ impl TableResources for Animal {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "animal", schemafull, relax_table_name)]
+#[surreal_orm(table = animal, schemafull, relax_table)]
 pub struct AnimalV2 {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    #[surreal_orm(old_name = "attributes")]
+    #[surreal_orm(old_name = attributes)]
     pub characteristics: Vec<String>,
     pub velocity: u64,
 }
@@ -403,7 +403,7 @@ impl TableResources for AnimalV2 {
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Habillis").and(velocity.gt(545))))
-            .then(select(All).from(Crop::table_name()))
+            .then(select(All).from(Crop::table()))
             .to_raw();
 
         vec![event1]
@@ -417,7 +417,7 @@ impl TableResources for AnimalV2 {
         } = Self::schema();
 
         let idx1 = define_index("species_speed_idx".to_string())
-            .on_table(Self::table_name())
+            .on_table(Self::table())
             .fields(arr![velocity, characteristics])
             .unique()
             .to_raw();
@@ -428,7 +428,7 @@ impl TableResources for AnimalV2 {
 
 #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "eats", schemafull)]
+#[surreal_orm(table = eats, schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
@@ -441,7 +441,7 @@ pub struct Eats<In: Node, Out: Node> {
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
 
 #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-#[surreal_orm(table_name = "eats", schemafull, relax_table_name)]
+#[surreal_orm(table = "eats", schemafull, relax_table)]
 pub struct EatsV2<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
@@ -456,7 +456,7 @@ pub type AnimalEatsCropV2 = EatsV2<AnimalV2, Crop>;
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "crop", schemafull)]
+#[surreal_orm(table = crop, schemafull)]
 pub struct Crop {
     pub id: SurrealSimpleId<Self>,
     pub color: String,

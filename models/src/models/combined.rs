@@ -69,7 +69,7 @@ fn define_student() -> DefineTableStatement {
     let country = Field::new("country");
     let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
 
-    define_table(Student::table_name())
+    define_table(Student::table())
         .drop()
         .as_(
             select(All)
