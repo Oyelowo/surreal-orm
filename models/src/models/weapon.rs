@@ -26,7 +26,7 @@ type Strength = f64;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = weapon, relax_table_name)]
+#[surreal_orm(table = weapon, relax_table)]
 pub struct WeaponOld {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
