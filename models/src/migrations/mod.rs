@@ -456,7 +456,7 @@ pub type AnimalEatsCropV2 = EatsV2<AnimalV2, Crop>;
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = crop, schemafull)]
+#[surreal_orm(table = "crop", schemafull)]
 pub struct Crop {
     pub id: SurrealSimpleId<Self>,
     pub color: String,
