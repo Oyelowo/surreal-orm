@@ -602,9 +602,9 @@ pub struct Writes<In: Node, Out: Node> {
 pub type StudentWritesBook = Writes<Student, Book>;
 pub type StudentWritesBlog = Writes<Student, Blog>;
 
-#[derive( Serialize, Deserialize, Debug, Clone, Default)]
+#[derive( Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table = likes)]
+#[surreal_orm(table = likes)]
 pub struct Likes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // pub id: SurrealSimpleId<Likes<In, Out>>,
