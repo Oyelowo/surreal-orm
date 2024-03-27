@@ -1,4 +1,4 @@
-/*
+/
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2024 Oyelowo Oyedayo
@@ -64,19 +64,21 @@ impl MyFieldReceiver {
             .as_ref()
             .map_or_else(field_ident_cased, |renamed| renamed.serialize.clone());
 
-        let (field_ident_normalized, field_name_serialized) =
-            if field_ident_normalized.starts_with("r#") {
-                let field_ident_normalized = field_ident_normalized.trim_start_matches("r#");
-                (
-                    format_ident!("{field_ident_normalized}_"),
-                    format_ident!("{field_ident_normalized}"),
-                )
-            } else {
-                (
-                    format_ident!("{field_ident_normalized}"),
-                    format_ident!("{field_ident_normalized}"),
-                )
-            };
+        let (field_ident_normalized, field_name_serialized) = if field_ident_normalized
+            .starts_with("r#")
+            || RustReservedKeyword::is_keyword(field_ident_normalized)
+        {
+            let field_ident_normalized = field_ident_normalized.trim_start_matches("r#");
+            (
+                syn::Ident::new_raw(field_ident_normalized, proc_macro2::Span::call_site()),
+                format_ident!("{field_ident_normalized}"),
+            )
+        } else {
+            (
+                format_ident!("{field_ident_normalized}"),
+                format_ident!("{field_ident_normalized}"),
+            )
+        };
 
         Ok((field_ident_normalized.into(), field_name_serialized.into()))
     }
