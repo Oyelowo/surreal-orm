@@ -83,7 +83,7 @@ impl<'a> Codegen<'a> {
             quote!().into()
         };
 
-        let array_trait = if field_receiver.is_list() {
+        let array_trait = if field_receiver.is_array() || field_receiver.is_set() {
             Self::array_trait_impl(field_receiver, table_attributes)?
         } else {
             quote!().into()
@@ -188,16 +188,16 @@ impl<'a> Codegen<'a> {
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
             _ => {
-                let inferred_type = match field_receiver.ty().get_array_inner_type() {
+                let inferred_type = match field_receiver.ty().get_list_inner_type() {
                     Some(ref ty) => {
                         let generics_meta = ty.get_generics_from_current_struct(model_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
                     None => {
-                        let array_inner_field_ty = field_receiver
-                            .field_type_db
-                            .as_ref()
-                            .and_then(|db_ty| db_ty.get_array_item_type());
+                        let array_inner_field_ty =
+                            field_receiver.field_type_db.as_ref().and_then(|db_ty| {
+                                db_ty.array_item_type().or_else(|| db_ty.set_item_type())
+                            });
 
                         let array_inner_ty_db_concrete =  match array_inner_field_ty{
                         Some(ref db_array_item_ty) => (

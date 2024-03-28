@@ -50,12 +50,24 @@ impl FieldTypeDb {
         &self.0
     }
 
-    pub fn get_array_item_type(&self) -> Option<Self> {
+    pub fn array_item_type(&self) -> Option<Self> {
         match self.0 {
             FieldType::Array(ref ft, _) => Some(Self(ft.deref().clone())),
             _ => None,
         }
     }
+
+    pub fn set_item_type(&self) -> Option<Self> {
+        match self.0 {
+            FieldType::Set(ref ft, _) => Some(Self(ft.deref().clone())),
+            _ => None,
+        }
+    }
+
+    // TODO: Remove this?
+    // pub fn list_item_type(&self) -> Option<Self> {
+    //     self.array_item_type().or_else(|| self.set_item_type())
+    // }
 
     pub fn as_db_sql_value_tokenstream(&self) -> SqlValueTokenStream {
         let crate_name = get_crate_name(false);
