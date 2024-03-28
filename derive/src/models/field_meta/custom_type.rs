@@ -686,10 +686,6 @@ impl CustomType {
         Some(item_ty.clone().into())
     }
 
-    pub fn get_list_inner_type(&self) -> Option<CustomType> {
-        self.get_array_inner_type()
-            .or_else(|| self.get_set_inner_type())
-    }
     pub fn get_set_inner_type(&self) -> Option<CustomType> {
         self.get_type_inner_type(&[RustType::HashSet, RustType::BTreeSet])
     }

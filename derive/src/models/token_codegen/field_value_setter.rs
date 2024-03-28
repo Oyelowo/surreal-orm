@@ -188,7 +188,11 @@ impl<'a> Codegen<'a> {
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
             _ => {
-                let inferred_type = match field_receiver.ty().get_list_inner_type() {
+                let field_type = field_receiver.ty();
+                let inferred_type = match field_type
+                    .get_array_inner_type()
+                    .or_else(|| field_type.get_set_inner_type())
+                {
                     Some(ref ty) => {
                         let generics_meta = ty.get_generics_from_current_struct(model_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
