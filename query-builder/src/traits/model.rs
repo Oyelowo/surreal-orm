@@ -35,13 +35,10 @@ pub struct FieldMetadata {
 pub trait Model: Sized {
     /// The id of the model/table
     type Id;
-    /// Used for updating a model/table. Useful when you want to skip optional fields
-    /// when updating a model/table.
-    type NonNullUpdater;
     /// For checking renamed struct field names
     type StructRenamedCreator;
     /// The name of the model/table
-    fn table_name() -> Table;
+    fn table() -> Table;
 
     /// Returns id of the model/table
     fn get_id(self) -> Self::Id;
@@ -78,7 +75,7 @@ pub trait Model: Sized {
 
     /// Create a new SurrealId from a string
     fn create_thing(id: impl Into<sql::Id>) -> Thing {
-        Thing::from((Self::table_name().to_string(), id.into()))
+        Thing::from((Self::table().to_string(), id.into()))
     }
 
     ///
@@ -109,7 +106,7 @@ pub trait Model: Sized {
 
     // /// Create a new surreal Thing/compound id from a Uuid
     // fn create_thing_uuid() -> Thing {
-    //     Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
+    //     Thing::from((Self::table().to_string(), Uuid::new_v4().to_string()))
     // }
 }
 
@@ -127,14 +124,14 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + Model {
 
     /// Finds records by filtering.
     fn find_where(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
-        select(All).from(Self::table_name()).where_(filter).into()
+        select(All).from(Self::table()).where_(filter).into()
     }
 
     /// Count filtered records.
     fn count_where(filter: impl Conditional + Clone) -> SelectStatementCount {
         let selection = select_value(Field::new("count")).from(
             select(count!(Filter::new(filter)))
-                .from(Self::table_name())
+                .from(Self::table())
                 .group_all(),
         );
         selection.into()
@@ -143,7 +140,7 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + Model {
     /// Count all records.
     fn count_all() -> SelectStatementCount {
         let selection = select_value(Field::new("count"))
-            .from(select(count!()).from(Self::table_name()).group_all());
+            .from(select(count!()).from(Self::table()).group_all());
         selection.into()
     }
 
@@ -159,7 +156,7 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + Model {
 
     /// Deletes records by filtering.
     fn delete_where(filter: impl Conditional + Clone) -> DeleteStatementMini<Self> {
-        delete::<Self>(Self::table_name()).where_(filter).into()
+        delete::<Self>(Self::table()).where_(filter).into()
     }
 }
 
@@ -177,8 +174,6 @@ impl<T> SurrealCrudNode for T where T: Sized + Serialize + DeserializeOwned + No
 /// Node is a trait signifying a node in the graph
 #[async_trait::async_trait]
 pub trait Node: Model + Serialize + SchemaGetter {
-    /// For merge update of object
-    type NonNullUpdater;
     /// The type of the schema
     // type Schema;
     /// The type of the aliases
@@ -229,7 +224,7 @@ pub trait Node: Model + Serialize + SchemaGetter {
     // // fn get_id<T: From<Thing>>(self) -> T;
     // fn get_id<T: Into<Thing>>(self) -> T;
     /// returns the table name of the node
-    fn get_table_name() -> Table;
+    fn get_table() -> Table;
     /// Useful in relate statement for attaching id or statement to a node
     /// Example:
     /// ```rust, ignore
@@ -238,11 +233,11 @@ pub trait Node: Model + Serialize + SchemaGetter {
     /// relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
     ///
     /// relate(
-    ///     Student::with(select(All).from(Student::get_table_name()))
+    ///     Student::with(select(All).from(Student::get_table()))
     ///         .writes__(Empty)
     ///         .book(
     ///             select(All)
-    ///                 .from(Book::get_table_name())
+    ///                 .from(Book::get_table())
     ///                 .where_(Book::schema().title.like("Oyelowo")),
     ///         ),
     /// )
@@ -290,13 +285,16 @@ pub trait Edge: Model + Serialize + SchemaGetter {
     // /// returns the key of the edge aka id field
     // fn get_id<T: From<Thing>>(self) -> T;
     /// returns the table name of the edge
-    fn get_table_name() -> Table;
+    fn get_table() -> Table;
 }
 
 /// Object is a trait signifying a nested object in the graph
 pub trait Object: Serialize + SchemaGetter {
-    /// For merge update of object
-    type NonNullUpdater;
+    // For merge update of object
+    // type PartialBuilder;
+
+    // returns the partial builder of the object
+    // fn partial_builder() -> Self::PartialBuilder;
     // The type of the schema
     // type Schema;
     // returns the schema of a nested object.
@@ -311,6 +309,21 @@ pub trait SchemaGetter {
     fn schema() -> Self::Schema;
     ///
     fn schema_prefixed(prefix: impl Into<ValueLike>) -> Self::Schema;
+}
+
+/// Trait for updating a model/table. Useful when you want to skip optional fields
+pub trait PartialUpdater {
+    /// Partial state of the original model/table struct
+    type StructPartial;
+    /// Used for updating a model/table. Useful when you want to skip optional fields
+    /// when updating a model/table.
+    type PartialBuilder;
+
+    /// returns the partial builder of the model/table.
+    /// You can still set a field as null as that is a valid databse value.
+    /// To do that, you heve to explicitly set the field to None. Fields
+    /// that are not set are not updated.
+    fn partial_builder() -> Self::PartialBuilder;
 }
 
 /// List of error

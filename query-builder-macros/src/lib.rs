@@ -135,37 +135,37 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
 ///     if balance.greater_than(100) {
 ///         let first_name = "Oyelowo";
 ///         let score = 100;
-///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///         select(All).from(Account::table()).where_(acc.balance.eq(5));
 ///     } else if balance.gte(100) {
 ///         let first_name = "Oyelowo";
 ///         let score = 100;
-///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///         select(All).from(Account::table()).where_(acc.balance.eq(5));
 ///     } else {
 ///         let first_name = "Oyelowo";
 ///         let score = 100;
-///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///         select(All).from(Account::table()).where_(acc.balance.eq(5));
 ///     };
 ///
 ///     for name in vec!["Oyelowo", "Oyedayo"] {
 ///         let first = "Oyelowo";
-///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///         select(All).from(Account::table()).where_(acc.balance.eq(5));
 ///         
-///         let good_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(64));
+///         let good_stmt = select(All).from(Account::table()).where_(acc.balance.eq(64));
 ///
 ///         if balance.gt(50) {
 ///             let first_name = "Oyelowo";
 ///         };
 ///
-///         select(All).from(Account::table_name()).where_(acc.balance.eq(34));
+///         select(All).from(Account::table()).where_(acc.balance.eq(34));
 ///
 ///         let numbers = vec![23, 98];
 ///
 ///         for age in numbers {
 ///             let score = 100;
-///             let first_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///             let first_stmt = select(All).from(Account::table()).where_(acc.balance.eq(5));
 ///
-///             let second_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(25));
-///             select(All).from(Account::table_name()).where_(acc.balance.eq(923));
+///             let second_stmt = select(All).from(Account::table()).where_(acc.balance.eq(25));
+///             select(All).from(Account::table()).where_(acc.balance.eq(923));
 ///             
 ///         };
 ///     };
@@ -194,7 +194,7 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
 ///
 /// // as block.
 /// query_turbo! {
-///   let result = select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///   let result = select(All).from(Account::table()).where_(acc.balance.eq(5));
 ///
 ///   return result;
 /// };
@@ -314,7 +314,7 @@ pub fn transaction(input: TokenStream) -> TokenStream {
 ///     _very_complex_type: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>
 /// ) {
 ///     let person = select(All)
-///         .from(SpaceShip::table_name())
+///         .from(SpaceShip::table())
 ///         .where_(
 ///             cond(SpaceShip::schema().id.equal(first_arg))
 ///                 .and(SpaceShip::schema().name.equal(last_arg))

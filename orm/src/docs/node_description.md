@@ -39,7 +39,7 @@ use surreal_orm::{LinkMany, LinkOne, LinkSelf, SurrealSimpleId, Node};
 
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "alien")]
+#[surreal_orm(table = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
 
@@ -55,7 +55,7 @@ pub struct Alien {
 
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "weapon")]
+#[surreal_orm(table = "weapon")]
 pub struct Weapon {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
@@ -64,7 +64,7 @@ pub struct Weapon {
 
 #[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "space_ship")]
+#[surreal_orm(table = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealId<Self, String>,
     pub name: String,

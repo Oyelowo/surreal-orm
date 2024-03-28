@@ -35,7 +35,7 @@ pub struct Person {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "company")]
+#[surreal_orm(table = "company")]
 struct Company {
     id: SurrealId<Self, i32>,
     name: String,
@@ -57,7 +57,7 @@ struct Company {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "gen_z_company")]
+#[surreal_orm(table = "gen_z_company")]
 struct GenZCompany {
     id: SurrealSimpleId<Self>,
     name: String,
@@ -70,7 +70,7 @@ struct GenZCompany {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "test_point")]
+#[surreal_orm(table = "test_point")]
 struct TestPoint {
     id: SurrealId<Self, i32>,
     home_point: geo::Point,
@@ -78,7 +78,7 @@ struct TestPoint {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "test_linestring")]
+#[surreal_orm(table = "test_linestring")]
 struct TestLinestring {
     id: SurrealId<Self, i32>,
     home_linestring: geo::LineString,
@@ -86,7 +86,7 @@ struct TestLinestring {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "test_polygon")]
+#[surreal_orm(table = "test_polygon")]
 struct TestPolygon {
     id: SurrealId<Self, i32>,
     home_polygon: geo::Polygon,
@@ -94,7 +94,7 @@ struct TestPolygon {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "test_multilinestring")]
+#[surreal_orm(table = "test_multilinestring")]
 struct TestMultilinestring {
     id: SurrealId<Self, i32>,
     home_multilinestring: geo::MultiLineString,
@@ -102,7 +102,7 @@ struct TestMultilinestring {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "test_multipoint")]
+#[surreal_orm(table = "test_multipoint")]
 struct TestMultipoint {
     id: SurrealId<Self, i32>,
     home_multipoint: geo::MultiPoint,
@@ -110,7 +110,7 @@ struct TestMultipoint {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "test_multipolygon")]
+#[surreal_orm(table = "test_multipolygon")]
 struct TestMultipolygon {
     id: SurrealId<Self, i32>,
     home_multipolygon: geo::MultiPolygon,
@@ -118,7 +118,7 @@ struct TestMultipolygon {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "test_geometrycollection")]
+#[surreal_orm(table = "test_geometrycollection")]
 pub struct TestGeometrycollection {
     id: SurrealId<Self, i32>,
     home_geometrycollection: Vec<GeometryCollection>,
@@ -143,7 +143,7 @@ impl From<GeometryCollection> for surrealdb::sql::Geometry {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "book")]
+#[surreal_orm(table = "book")]
 pub struct Book {
     id: SurrealSimpleId<Self>,
     title: String,
@@ -491,7 +491,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
 
     let c = Company::schema();
     let select_query = &select(All)
-        .from(Company::get_table_name())
+        .from(Company::get_table())
         .where_(c.tags.any_like("foo"))
         .timeout(Duration::from_secs(20))
         .parallel();

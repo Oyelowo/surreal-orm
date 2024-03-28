@@ -131,8 +131,8 @@ pub struct DefineEventStatement(EventBuilder);
 impl Buildable for DefineEventStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE EVENT {}", &self.0.event);
-        if let Some(table_name) = &self.0.on_table {
-            query = format!("{query} ON TABLE {table_name}");
+        if let Some(table) = &self.0.on_table {
+            query = format!("{query} ON TABLE {table}");
         }
 
         if let Some(condition) = &self.0.when {

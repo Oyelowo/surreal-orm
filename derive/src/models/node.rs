@@ -5,27 +5,26 @@
 * Licensed under the MIT license
  */
 
-#![allow(dead_code)]
+use std::ops::Deref;
 
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use std::{ops::Deref, str::FromStr};
+use proc_macros_helpers::get_crate_name;
+use quote::quote;
 
-use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
-use super::{
-    attributes::TableDeriveAttributes,
-    casing::CaseString,
-    errors,
-    parser::{DataType, SchemaFieldsProperties, SchemaPropertiesArgs},
-    variables::VariablesModelMacro,
-};
+use crate::models::*;
 
-#[derive(Debug, FromDeriveInput)]
+#[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-struct NodeToken(TableDeriveAttributes);
+pub struct NodeToken(pub TableDeriveAttributes);
+
+impl NodeToken {
+    pub fn into_inner(self) -> TableDeriveAttributes {
+        self.0
+    }
+}
 
 impl Deref for NodeToken {
     type Target = TableDeriveAttributes;
@@ -37,30 +36,18 @@ impl Deref for NodeToken {
 
 impl ToTokens for NodeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let TableDeriveAttributes {
-            ident: struct_name_ident,
-            data,
-            rename_all,
-            table_name,
-            relax_table_name,
-            ..
-        } = &self.0;
-
-        let table_name_ident = &format_ident!(
-            "{}",
-            table_name
-                .as_ref()
-                .expect("table_name attribute must be provided")
-        );
-        let table_name_str =
-            errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
-
-        let struct_level_casing = rename_all.as_ref().map(|case| {
-            CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
-        });
-
-        let crate_name = super::get_crate_name(false);
-
+        let crate_name = get_crate_name(false);
+        let table_derive_attributes = self.deref();
+        let struct_name_ident = &table_derive_attributes.ident();
+        // let explicit_generics = table_derive_attributes.explicit_fully_qualified_generics_path();
+        let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
+            &table_derive_attributes.generics.split_for_impl();
+        let struct_marker = table_derive_attributes.generics().phantom_marker_type();
+        let table_ident = match table_derive_attributes.table() {
+            Ok(table) => table,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+        let table_str = table_ident.as_string();
         let VariablesModelMacro {
             __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -68,16 +55,17 @@ impl ToTokens for NodeToken {
             ___________errors,
             _____field_names,
             schema_instance,
+            _____struct_marker_ident,
             ..
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {
-            data,
-            struct_level_casing,
-            struct_name_ident,
-            table_name: table_name_str.to_string(),
+        let table_attrs = ModelAttributes::from_node(self);
+        let explicit_generics = table_attrs.explicit_fully_qualified_generics_path();
+        let code_gen = match Codegen::parse_fields(&table_attrs) {
+            Ok(props) => props,
+            Err(err) => return tokens.extend(err.write_errors()),
         };
 
-        let Ok(SchemaFieldsProperties {
+        let Codegen {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -90,7 +78,7 @@ impl ToTokens for NodeToken {
             record_link_fields_methods,
             node_edge_metadata,
             schema_struct_fields_names_kv_empty,
-            serializable_fields,
+            serialized_fmt_db_field_names_instance: serializable_fields,
             linked_fields,
             link_one_fields,
             link_self_fields,
@@ -98,58 +86,38 @@ impl ToTokens for NodeToken {
             link_many_fields,
             field_definitions,
             fields_relations_aliased,
-            non_null_updater_fields,
-            renamed_serialized_fields,
+            struct_partial_fields,
+            struct_partial_associated_functions,
+            renamed_serialized_fields_kv,
             table_id_type,
             field_metadata,
             ..
-        }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Node)
-        else {
-            return tokens.extend(
-                syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),
-            );
-        };
+        } = &code_gen;
 
-        let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
-        // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
-        let imports_referenced_node_schema = imports_referenced_node_schema
-            .into_iter()
-            .collect::<Vec<_>>();
+        let imports_referenced_node_schema =
+            imports_referenced_node_schema.iter().collect::<Vec<_>>();
 
-        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions();
+        let CommonIdents {
+            module_name_internal,
+            module_name_rexported,
+            aliases_struct_name,
+            test_function_name,
+            struct_with_renamed_serialized_fields,
+            _____schema_def,
+        } = code_gen.common_idents();
 
-        // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
+        let struct_partial_ident = struct_name_ident.partial_ident();
+        let struct_partial_builder_ident = struct_name_ident.partial_builder_ident();
 
-        let module_name_internal = format_ident!(
-            "________internal_{}_schema",
-            struct_name_ident.to_string().to_case(Case::Snake)
-        );
-        let module_name_rexported =
-            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
-
-        let aliases_struct_name = format_ident!("{struct_name_ident}Aliases");
-        let test_function_name =
-            format_ident!("_________test_{module_name_internal}_edge_name__________");
-        let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");
-        let struct_with_renamed_serialized_fields =
-            format_ident!("{struct_name_ident}RenamedCreator");
-        let _____schema_def = format_ident!("_____schema_def");
         let serializable_fields_count = serializable_fields.len();
-        let serializable_fields_as_str = serializable_fields
-            .iter()
-            .map(|f| f.to_string())
-            .collect::<Vec<_>>();
-
-        let Ok(table_definitions) = self.get_table_definition_token() else {
-            return tokens.extend(
-                syn::Error::new_spanned(self, "Problem getting table definition.")
-                    .to_compile_error(),
-            );
+        let table_definitions = match self.get_table_definition_token() {
+            Ok(table_definitions) => table_definitions,
+            Err(err) => return tokens.extend(err.write_errors()),
         };
 
         // #[derive(#crate::Model, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
-        // #[surreal_orm(table_name = "student", drop, schemafull, permission, define="any_fnc")]
+        // #[surreal_orm(table = "student", drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
         //     #[serde(skip_serializing_if = "Option::is_none")]
         //     #[builder(default, setter(strip_option))]
@@ -167,33 +135,40 @@ impl ToTokens for NodeToken {
         //     written_blogs: Relate<Blog>,
         // }
         tokens.extend(quote!(
-            use #crate_name::{ToRaw as _};
+            use #crate_name::ToRaw as _;
             use #crate_name::Aliasable as _;
 
-            impl #crate_name::SchemaGetter for #struct_name_ident {
-                type Schema = #module_name_rexported::Schema;
+            impl #struct_impl_generics #crate_name::SchemaGetter for #struct_name_ident #struct_ty_generics #struct_where_clause {
+                type Schema = #module_name_rexported::Schema #struct_ty_generics;
 
-                fn schema() -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new()
+                fn schema() -> #module_name_rexported::Schema #struct_ty_generics {
+                    #module_name_rexported::Schema #explicit_generics ::new()
                 }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new_prefixed(prefix)
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema #struct_ty_generics {
+                    #module_name_rexported::Schema #explicit_generics ::new_prefixed(prefix)
+                }
+            }
+            impl #struct_impl_generics #crate_name::PartialUpdater for #struct_name_ident #struct_ty_generics #struct_where_clause {
+                type StructPartial = #struct_partial_ident #struct_ty_generics;
+                type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
+
+                fn partial_builder() -> Self::PartialBuilder {
+                    #struct_partial_builder_ident::default()
                 }
             }
 
-            impl #crate_name::Node for #struct_name_ident {
+            impl #struct_impl_generics #crate_name::Node for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type TableNameChecker = #module_name_internal::TableNameStaticChecker;
                 // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name_internal::#aliases_struct_name;
-                type NonNullUpdater = #non_null_updater_struct_name;
 
                 fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
 
-                    #module_name_internal::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
-                                #module_name_internal::#struct_name_ident::empty(),
-                                clause.with_table(#table_name_str),
+                    #module_name_internal::#struct_name_ident #explicit_generics ::#__________connect_node_to_graph_traversal_string(
+                                #module_name_internal::#struct_name_ident #explicit_generics ::empty(),
+                                clause.with_table(#table_str),
                     )
                 }
                 //
@@ -209,12 +184,11 @@ impl ToTokens for NodeToken {
                     #module_name_internal::#aliases_struct_name::new()
                 }
 
-
-                fn get_table_name() -> #crate_name::Table {
-                    #table_name_str.into()
+                fn get_table() -> #crate_name::Table {
+                    #table_str.into()
                 }
 
-                fn get_fields_relations_aliased() -> Vec<#crate_name::Alias> {
+                fn get_fields_relations_aliased() -> ::std::vec::Vec<#crate_name::Alias> {
                     vec![
                        #( #fields_relations_aliased), *
                     ]
@@ -223,37 +197,45 @@ impl ToTokens for NodeToken {
             }
 
             #[allow(non_snake_case)]
-            #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-            pub struct #non_null_updater_struct_name {
-               #(
-                    #[serde(skip_serializing_if = "Option::is_none")]
-                    #non_null_updater_fields
-                ) *
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+            pub struct  #struct_partial_ident #struct_impl_generics #struct_where_clause {
+                #[serde(skip)]
+                #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>,
+               #(#struct_partial_fields), * 
             }
+
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+            pub struct #struct_partial_builder_ident #struct_impl_generics (#struct_partial_ident #struct_ty_generics) #struct_where_clause;
+
+            impl #struct_impl_generics #struct_partial_builder_ident #struct_ty_generics #struct_where_clause {
+                #( #struct_partial_associated_functions) *
+
+                pub fn build(self) -> #struct_partial_ident #struct_ty_generics {
+                    self.0
+                }
+            }
+        
 
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
             pub struct #struct_with_renamed_serialized_fields {
-               #(
-                    #renamed_serialized_fields
-                ) *
+               #(#renamed_serialized_fields_kv), *
             }
 
-            impl #struct_name_ident {
+            impl #struct_impl_generics #struct_name_ident #struct_ty_generics #struct_where_clause {
                   // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
 
                 pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
-                    [#( #serializable_fields_as_str), *]
+                    unimplemented!()
                 }
             }
 
-            impl #crate_name::Model for #struct_name_ident {
+            impl #struct_impl_generics #crate_name::Model for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type Id = #table_id_type;
-                type NonNullUpdater = #non_null_updater_struct_name;
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
 
-                fn table_name() -> #crate_name::Table {
-                    #table_name_str.into()
+                fn table() -> #crate_name::Table {
+                    #table_str.into()
                 }
 
                 fn get_id(self) -> Self::Id {
@@ -316,7 +298,7 @@ impl ToTokens for NodeToken {
                 use super::*;
 
                 pub struct TableNameStaticChecker {
-                    pub #table_name_ident: ::std::string::String,
+                    pub #table_ident: ::std::string::String,
                 }
 
                #( #imports_referenced_node_schema) *
@@ -334,14 +316,15 @@ impl ToTokens for NodeToken {
 
                     #[allow(non_snake_case)]
                     #[derive(Debug, Clone)]
-                    pub struct Schema {
+                    pub struct Schema #struct_ty_generics #struct_where_clause {
                        #( #schema_struct_fields_types_kv) *
                         pub(super) #___________graph_traversal_string: ::std::string::String,
                         pub(super) #___________bindings: #crate_name::BindingsList,
                         pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
+                        pub(super) #_____struct_marker_ident: #struct_marker
                     }
                 }
-                pub type #struct_name_ident = #_____schema_def::Schema;
+                pub type #struct_name_ident #struct_ty_generics = #_____schema_def::Schema #struct_ty_generics;
 
 
                 #[derive(Debug, Clone)]
@@ -357,65 +340,66 @@ impl ToTokens for NodeToken {
                     }
                 }
 
-                impl #crate_name::Aliasable for #struct_name_ident {}
+                impl #struct_impl_generics #crate_name::Aliasable for #struct_name_ident #struct_ty_generics #struct_where_clause {}
 
-                impl From<#struct_name_ident> for #crate_name::ValueLike {
-                    fn from(node: #struct_name_ident) -> Self {
+                impl #struct_impl_generics From<#struct_name_ident #struct_ty_generics> for #crate_name::ValueLike #struct_where_clause {
+                    fn from(node: #struct_name_ident #struct_ty_generics) -> Self {
                        Self::new(node)
                     }
                 }
 
-                impl #crate_name::Parametric for #struct_name_ident {
+                impl #struct_impl_generics #crate_name::Parametric for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for #struct_name_ident {
+                impl #struct_impl_generics #crate_name::Buildable for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for #struct_name_ident {
+                impl #struct_impl_generics #crate_name::Erroneous for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl ::std::fmt::Display for #struct_name_ident {
+                impl #struct_impl_generics ::std::fmt::Display for #struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
 
-                impl #crate_name::Aliasable for &#struct_name_ident {}
+                impl #struct_impl_generics #crate_name::Aliasable for &#struct_name_ident #struct_ty_generics #struct_where_clause {}
 
-                impl #crate_name::Parametric for &#struct_name_ident {
+                impl #struct_impl_generics #crate_name::Parametric for &#struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for &#struct_name_ident {
+                impl #struct_impl_generics #crate_name::Buildable for &#struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for &#struct_name_ident {
+                impl #struct_impl_generics #crate_name::Erroneous for &#struct_name_ident #struct_ty_generics #struct_where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl #struct_name_ident {
+                impl #struct_impl_generics #struct_name_ident #struct_ty_generics #struct_where_clause {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
-                            #___________bindings: vec![],
-                            #___________errors: vec![],
+                            #___________bindings: ::std::vec![],
+                            #___________errors: ::std::vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -426,7 +410,8 @@ impl ToTokens for NodeToken {
                            #( #schema_struct_fields_names_kv_prefixed) *
                             #___________graph_traversal_string: prefix.build(),
                             #___________bindings: prefix.get_bindings(),
-                            #___________errors: vec![],
+                            #___________errors: ::std::vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -434,14 +419,15 @@ impl ToTokens for NodeToken {
                         Self {
                            #( #schema_struct_fields_names_kv_empty) *
                             #___________graph_traversal_string: "".into(),
-                            #___________bindings: vec![],
-                            #___________errors: vec![],
+                            #___________bindings: ::std::vec![],
+                            #___________errors: ::std::vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
                     pub fn #__________connect_node_to_graph_traversal_string(
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
-                        clause: impl Into<#crate_name::NodeClause>,
+                        clause: impl ::std::convert::Into<#crate_name::NodeClause>,
                     ) -> Self {
                         let mut #schema_instance = Self::new();
                         let clause: #crate_name::NodeClause = clause.into();
@@ -467,26 +453,21 @@ impl ToTokens for NodeToken {
 
                 }
 
-                #node_edge_metadata_tokens
+                #node_edge_metadata
             }
 
 
             // #[test] // Comment out to make compiler tests fail in doctests. 25th August, 2023.
             #[allow(non_snake_case)]
-            fn #test_function_name() {
+            fn #test_function_name #struct_impl_generics() {
                 #( #static_assertions) *
-                #node_edge_metadata_static_assertions
-
             }
 ));
     }
 }
 
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    // Construct a representation of Rust code as a syntax tree
-    // that we can manipulate
     let input = parse_macro_input!(input);
-    // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
     let output = match NodeToken::from_derive_input(&input) {
         Ok(out) => out,
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),

@@ -121,10 +121,11 @@ impl Display for GeometryType {
 }
 
 #[allow(missing_docs)]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Default, Debug, PartialEq)]
 pub enum FieldType {
     /// Use this when you explicitly don't want to specify the field's data type. The field will
     /// allow any data type supported by SurrealDB.
+    #[default]
     Any,
     Null,
     /// true of false
@@ -254,8 +255,23 @@ impl FieldType {
     /// Returns a list of all the variants of the enum
     pub fn variants() -> Vec<&'static str> {
         vec![
-            "any", "null", "array", "set", "bool", "datetime", "decimal", "duration", "float",
-            "int", "number", "object", "string", "record", "geometry", "option", "union",
+            "any",
+            "null",
+            "array<string>",
+            "set<string>",
+            "bool",
+            "datetime",
+            "decimal",
+            "duration",
+            "float",
+            "int",
+            "number",
+            "object",
+            "string",
+            "record<user>",
+            "geometry<point>",
+            "option<string>",
+            "union<string | number>",
         ]
     }
 
@@ -265,20 +281,19 @@ impl FieldType {
     }
 
     /// Returns true if the field_type is a record
-    pub fn is_record_of_the_table(&self, table_name: &String) -> bool {
-        if table_name.is_empty() {
+    pub fn is_record_of_the_table(&self, table: &String) -> bool {
+        if table.is_empty() {
             return false;
         }
-        matches!(self, Self::Record(t) if &t.first().map(ToString::to_string).unwrap_or_default() == table_name)
+        matches!(self, Self::Record(t) if &t.first().map(ToString::to_string).unwrap_or_default() == table)
     }
 
     /// Returns true if the field type is a primitive type
     pub fn is_primitive(&self) -> bool {
         matches!(
             self,
-            FieldType::Any
-                | FieldType::Null
-                | FieldType::Bool
+            // FieldType::Any
+            |FieldType::Null| FieldType::Bool
                 | FieldType::Bytes
                 | FieldType::Datetime
                 | FieldType::Decimal

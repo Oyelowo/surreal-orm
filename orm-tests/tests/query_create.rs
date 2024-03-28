@@ -221,7 +221,7 @@ async fn test_create_alien_with_links() -> SurrealOrmResult<()> {
     assert_eq!(created_weapon.id.to_thing(), weapon1.id.to_thing());
 
     let select1: Vec<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_many(db.clone())
         .await?;
     // weapon table should have one record
@@ -234,7 +234,7 @@ async fn test_create_alien_with_links() -> SurrealOrmResult<()> {
         .await?;
 
     let select2: Vec<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_many(db.clone())
         .await?;
     // weapon table should have two records after second creation
@@ -629,7 +629,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         .await?;
 
     let selected_aliens: Option<Alien> = select(All)
-        .from(Alien::table_name())
+        .from(Alien::table())
         .return_first(db.clone())
         .await?;
     let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
@@ -660,7 +660,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 3);
 
     let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
-        .from(Alien::table_name())
+        .from(Alien::table())
         // record link - spaceships can also be fetched this way rather than using all.all i.e *.*
         // .fetch(Alien::schema().spaceShips)
         .return_first(db.clone())
@@ -880,7 +880,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
     assert!(!alien_spaceships.keys_truthy().is_empty());
 
     let selected_aliens: Option<Alien> = select(All)
-        .from(Alien::table_name())
+        .from(Alien::table())
         .return_first(db.clone())
         .await?;
 
@@ -893,7 +893,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
 
     // We are fetching all fields and all values in space_ships array.
     let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
-        .from(Alien::table_name())
+        .from(Alien::table())
         .return_first(db.clone())
         .await?;
     let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
@@ -1011,7 +1011,7 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
     assert_eq!(alien_spaceships.keys_truthy().len(), 2);
 
     let selected_aliens: Option<Alien> = select(All)
-        .from(Alien::table_name())
+        .from(Alien::table())
         .fetch(Alien::schema().spaceShips)
         .return_first(db.clone())
         .await?;
@@ -1040,7 +1040,7 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
     assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 2);
 
     let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
-        .from(Alien::table_name())
+        .from(Alien::table())
         .return_first(db.clone())
         .await?;
     let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
@@ -1087,7 +1087,7 @@ async fn test_create_set_object_and_array_statement() -> SurrealOrmResult<()> {
     assert_eq!(space_ship2.name, "SpaceShip2");
 
     let selected_spaceships: Vec<SpaceShip> = select(All)
-        .from(SpaceShip::table_name())
+        .from(SpaceShip::table())
         .order_by(order(created).desc())
         .return_many(db.clone())
         .await?;

@@ -22,7 +22,7 @@ define_function!(get_or_create_spaceship(
     _very_complex_type: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>
 ) {
     let person = select(All)
-        .from(SpaceShip::table_name())
+        .from(SpaceShip::table())
         .where_(
             cond(SpaceShip::schema().id.equal(first_arg))
                 .and(SpaceShip::schema().name.equal(last_arg))
@@ -95,7 +95,7 @@ fn test_function_definition_with_idiomatic_if_statement() {
 
 define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
     let person = select(All)
-        .from(SpaceShip::table_name())
+        .from(SpaceShip::table())
         .where_(
             cond(SpaceShip::schema().id.equal(first_arg))
                 .and(SpaceShip::schema().name.equal(last_arg))

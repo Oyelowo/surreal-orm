@@ -147,7 +147,7 @@ async fn test_delete_many_query_by_condition() -> SurrealOrmResult<()> {
     let weapons_count = || async { Weapon::count_all().get(db.clone()).await.unwrap() };
     assert_eq!(weapons_count().await, 1000);
 
-    delete::<Weapon>(Weapon::table_name())
+    delete::<Weapon>(Weapon::table())
         .where_(cond(strength.gte(500)).and(strength.lt(600)))
         .run(db.clone())
         .await?;

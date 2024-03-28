@@ -1,6 +1,12 @@
 use crate::{Field, Model, Raw, Table};
 
-///
+/// Provides the ability to gather all the resources
+/// of a table in a single place. Fields definitions,
+/// and table definitions are using automatically
+/// generated methods from the `Model` trait.
+/// Events and indexes definitions are manually
+/// implemented using the statements or query macro
+/// provided by the crate.
 pub trait TableResources
 where
     Self: Model,
@@ -56,7 +62,7 @@ macro_rules! create_table_resources {
         fn tables_fields_meta(&self) -> ::std::collections::HashMap<$crate::Table, ::std::vec::Vec<$crate::FieldMetadata>> {
             let mut meta = ::std::collections::HashMap::<$crate::Table, ::std::vec::Vec<$crate::FieldMetadata>>::new();
             $(
-                meta.insert(<$struct_table as $crate::Model>::table_name(), <$struct_table as $crate::Model>::get_field_meta());
+                meta.insert(<$struct_table as $crate::Model>::table(), <$struct_table as $crate::Model>::get_field_meta());
             )*
             meta
         }

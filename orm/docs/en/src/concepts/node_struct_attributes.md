@@ -67,15 +67,15 @@ DEFINE TABLE alien;
 
 ### Explicit Table Name
 
-You can explicitly set the table name using the `table_name` attribute. By
+You can explicitly set the table name using the `table` attribute. By
 default, the table name should be the snake case of the struct name. This is to
 ensure consistency and uniqueness of table model struct. If you want a name
 other than the snake case version, you need to add the attribute -
-`relax_table_name`:
+`relax_table`:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "student_test")]
+#[surreal_orm(table = "student_test")]
 pub struct StudentTest {
     id: SurrealSimpleId<Self>,
 }
@@ -94,7 +94,7 @@ inline expression or an invoked external function.
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "student_test_4", as_ = "select(All).from(Student::table_name())", define = "define_student()")]
+#[surreal_orm(table = "student_test_4", as_ = "select(All).from(Student::table())", define = "define_student()")]
 pub struct StudentTest4 {
     id: SurrealSimpleId<Self>,
 }
@@ -107,7 +107,7 @@ define the table:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "student_test_7", define_fn = "define_student")]
+#[surreal_orm(table = "student_test_7", define_fn = "define_student")]
 pub struct StudentTest7 {
     id: SurrealSimpleId<Self>,
 }
@@ -122,7 +122,7 @@ passed in:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "student_test_5", permissions = "student_permissions()")]
+#[surreal_orm(table = "student_test_5", permissions = "student_permissions()")]
 pub struct StudentTest5 {
     id: SurrealSimpleId<Self>,
 }
@@ -147,7 +147,7 @@ and checks enforced by the ORM to avoid pitfalls:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "student_test_6", define_fn = "define_student", define = "define_student()")]
+#[surreal_orm(table = "student_test_6", define_fn = "define_student", define = "define_student()")]
 pub struct StudentTest6 {
     id: SurrealSimpleId<Self>,
 }
@@ -170,14 +170,14 @@ preventing conflicts.
 ### **Avoid Excessive Attributes with `define` or `define_fn`**:
 
 When using `define` or `define_fn`, ensure no other attributes are present
-except `table_name` and `relax_table_name`.
+except `table` and `relax_table`.
 
 ### **Consistent Table Naming**:
 
 By default, the table name should be the snake case of the struct name. This is
 to ensure consistency and uniqueness of table model struct. If you want a name
 other than the snake case version, you need to add the attribute -
-`relax_table_name`.
+`relax_table`.
 
 ### **Using Functions for Attributes**:
 

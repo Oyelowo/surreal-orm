@@ -18,19 +18,19 @@ The basic syntax of the `define_event` statement is as follows:
 
 ```rust
 define_event(event_name)
-    .on_table(table_name)
+    .on_table(table)
     .when(condition)
     .then(action);
 ```
 
 - `event_name`: The name of the event to define.
-- `table_name`: The name of the table where the event occurs.
+- `table`: The name of the table where the event occurs.
 - `condition`: The condition that triggers the event.
 - `action`: The action to perform when the event is triggered.
 
 The `define_event` statement supports the following methods:
 
-- `.on_table(table_name)`: Specifies the table where the event occurs.
+- `.on_table(table)`: Specifies the table where the event occurs.
 - `.when(condition)`: Specifies the condition that triggers the event.
 - `.then(action)`: Specifies the action to perform when the event is triggered.
 

@@ -78,9 +78,9 @@ impl MigratorDatabase {
         Ok(info)
     }
 
-    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<TableResourcesData> {
+    pub async fn get_table_info(&self, table: String) -> MigrationResult<TableResourcesData> {
         let info = info_for()
-            .table(table_name)
+            .table(table)
             .get_data::<TableResourcesData>(self.db())
             .await?
             .expect("Table not found");
@@ -90,9 +90,9 @@ impl MigratorDatabase {
     pub async fn get_all_resources(&self) -> MigrationResult<FullDbInfo> {
         let top_level_resources = self.get_db_info().await?;
         let mut fields_by_table = BTreeMap::new();
-        for table_name in top_level_resources.tables().get_names() {
-            let table_info = self.get_table_info(table_name.clone()).await?;
-            fields_by_table.insert(table_name.into(), table_info);
+        for table in top_level_resources.tables().get_names() {
+            let table_info = self.get_table_info(table.clone()).await?;
+            fields_by_table.insert(table.into(), table_info);
         }
         let all_resources = FullDbInfo {
             all_resources: top_level_resources,

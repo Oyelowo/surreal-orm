@@ -55,7 +55,7 @@ Once the `define_param` statement has been executed, you can use the defined par
 You can then reference the parameter name in your queries to utilize the stored value.
 
 ```rust
-let query = select(All).from(User::table_name()).where_(endpoint_base().equal_to("https://dummyjson.com"));
+let query = select(All).from(User::table()).where_(endpoint_base().equal_to("https://dummyjson.com"));
 ```
 
 ---

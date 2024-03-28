@@ -46,16 +46,16 @@ pub fn delete<T>(targettables: impl Into<TargettablesForUpdate>) -> DeleteStatem
 where
     T: Serialize + DeserializeOwned + Model,
 {
-    let table_name = T::table_name();
+    let table = T::table();
     let targettables: TargettablesForUpdate = targettables.into();
     let mut bindings = vec![];
     let mut errors = vec![];
     let param = match targettables {
         TargettablesForUpdate::Table(table) => {
             let table = table.to_string();
-            if table != table_name.to_string() {
+            if table != table.to_string() {
                 errors.push(format!(
-                    "table name -{table} does not match the surreal model struct type which belongs to {table_name} table"
+                    "table name -{table} does not match the surreal model struct type which belongs to {table} table"
                 ));
             }
             table
@@ -63,10 +63,10 @@ where
         TargettablesForUpdate::SurrealId(id) => {
             if !id
                 .to_string()
-                .starts_with(format!("{table_name}:").as_str())
+                .starts_with(format!("{table}:").as_str())
             {
                 errors.push(format!(
-                    "id - {id} does not belong to {table_name} table from the surreal model struct provided"
+                    "id - {id} does not belong to {table} table from the surreal model struct provided"
                 ));
             }
             let binding = Binding::new(id);

@@ -7,7 +7,7 @@
 
 use quote::format_ident;
 
-pub(crate) struct VariablesModelMacro {
+pub struct VariablesModelMacro {
     /// This joins present model to the currently built graph.
     /// e.g Account->likes->Book.name
     /// For Node, this is usually just concatenating dot and the model fields i.e
@@ -27,6 +27,7 @@ pub(crate) struct VariablesModelMacro {
     pub ___________in_marker: syn::Ident,
     pub ___________out_marker: syn::Ident,
     pub _____field_names: syn::Ident,
+    pub _____struct_marker_ident: syn::Ident,
 }
 
 impl VariablesModelMacro {
@@ -56,6 +57,7 @@ impl VariablesModelMacro {
         Self {
             ___________graph_traversal_string,
             schema_instance,
+            _____struct_marker_ident: format_ident!("_____struct_marker_ident"),
             ___________model,
             ___________in_marker,
             ___________out_marker,

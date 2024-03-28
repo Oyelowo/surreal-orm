@@ -10,8 +10,7 @@ use geo::{line_string, point, polygon};
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surreal_models::{
-    alien, weapon, weapon_old, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
-    WeaponNonNullUpdater, WeaponOld,
+    alien, weapon, weapon_old, Alien, Rocket, SpaceShip, Weapon, WeaponOld,
 };
 use surreal_orm::{
     statements::{create, insert, select, update},
@@ -80,7 +79,7 @@ async fn test_increment_and_decrement_update_set_with_object_partial() -> Surrea
         .await?;
 
     let selected: Option<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_one(db.clone())
         .await?;
     assert_eq!(updated.unwrap().strength, 8.0);
@@ -93,7 +92,7 @@ async fn test_increment_and_decrement_update_set_with_object_partial() -> Surrea
         .await?;
 
     let selected: Option<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_one(db.clone())
         .await?;
     assert_eq!(updated.unwrap().strength, 923.0);
@@ -136,7 +135,7 @@ async fn test_increment_and_decrement_update() -> SurrealOrmResult<()> {
         .await?;
 
     let selected: Option<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_one(db.clone())
         .await?;
     assert_eq!(updated.unwrap().strength, 8.0);
@@ -149,7 +148,7 @@ async fn test_increment_and_decrement_update() -> SurrealOrmResult<()> {
         .await?;
 
     let selected: Option<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .return_one(db.clone())
         .await?;
     assert_eq!(updated.unwrap().strength, 923.0);
@@ -238,7 +237,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealOrmResult
     // Select all aliens with weapon strength 5
     let select_weak_aliens = || async {
         let weak_aliens: Vec<Alien> = select(All)
-            .from(Alien::table_name())
+            .from(Alien::table())
             .where_(cond(alien.weapon().strength.equal_to(5f64)).and(age.greater_than(3)))
             .return_many(db.clone())
             .await
@@ -261,7 +260,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealOrmResult
         .iter()
         .all(|alien| alien.tags.len() == 2));
 
-    let weak_aliens = update::<Alien>(Alien::table_name())
+    let weak_aliens = update::<Alien>(Alien::table())
         .set([name.equal_to("Rook"), tags.append("street")])
         .where_(cond(alien.weapon().strength.equal_to(5f64)).and(age.greater_than(3)))
         .return_many(db.clone())
@@ -288,7 +287,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealOrmResult
         .iter()
         .all(|alien| alien.tags.len() == 3));
 
-    let weak_aliens = update::<Alien>(Alien::table_name())
+    let weak_aliens = update::<Alien>(Alien::table())
         .set([name.equal_to("Kiwi"), tags.remove("street")])
         .where_(cond(alien.weapon().strength.equal_to(5f64)).and(age.greater_than(3)))
         .return_many(db.clone())
@@ -429,7 +428,7 @@ async fn test_add_and_remove_to_array() -> SurrealOrmResult<()> {
         .await?;
 
     let selected: Option<Alien> = select(All)
-        .from(Alien::table_name())
+        .from(Alien::table())
         .where_(Alien::schema().id.equal(alien_id.to_owned()))
         .return_one(db.clone())
         .await?;
@@ -487,7 +486,7 @@ async fn test_update_single_id_content() -> SurrealOrmResult<()> {
 
     let get_selected_weapon = || async {
         let selected_weapon: Option<Weapon> = select(All)
-            .from(Weapon::table_name())
+            .from(Weapon::table())
             .where_(id.equal(created_weapon.id.to_owned()))
             .return_one(db.clone())
             .await
@@ -534,7 +533,7 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
 
     let get_selected_weapons = || async {
         let selected_weapons: Vec<Weapon> = select(All)
-            .from(Weapon::table_name())
+            .from(Weapon::table())
             .where_(filter)
             .return_many(db.clone())
             .await
@@ -544,7 +543,7 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
     assert_eq!(get_selected_weapons().await.len(), 10);
 
     // Test update with CONTENT keyoword and not using updater
-    let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
+    let update_weapons_with_filter = update::<Weapon>(Weapon::table())
         .content(Weapon {
             name: "Oyelowo".to_string(),
             created: Utc::now(),
@@ -572,7 +571,7 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
 
     // Test update with CONTENT keyoword and using updater and default values which sets null
     // values for Options
-    let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
+    let update_weapons_with_filter = update::<Weapon>(Weapon::table())
         .content(Weapon {
             name: "Oyelowo".to_string(),
             created: Utc::now(),
@@ -621,7 +620,7 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
 
     let get_selected_weapons = || async {
         let selected_weapons: Vec<Weapon> = select(All)
-            .from(Weapon::table_name())
+            .from(Weapon::table())
             .where_(filter)
             .return_many(db.clone())
             .await
@@ -631,21 +630,17 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
     assert_eq!(get_selected_weapons().await.len(), 10);
 
     // Test update with MERGE keyoword and using updater
-    let rocket_update_object = RocketNonNullUpdater {
-        name: Some("Bruno".to_string()),
-        ..Default::default()
-    };
-    let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
-        .merge(WeaponNonNullUpdater {
-            name: Some("Oyelowo".to_string()),
-            strength: Some(16.0),
-            rocket: Some(rocket_update_object),
-            ..Default::default()
-        })
+    let update_weapons_with_filter = update::<Weapon>(Weapon::table())
+        .merge(
+            Weapon::partial_builder()
+                .name("Oyelowo".into())
+                .strength(16.0)
+                .rocket(Rocket::partial_builder().name("Bruno".into()).build()
+                .build(),
+        )
         .where_(filter)
         .return_many(db.clone())
         .await?;
-
     assert_eq!(update_weapons_with_filter.len(), 10);
     assert!(
         update_weapons_with_filter
@@ -694,7 +689,7 @@ async fn test_update_single_id_merge_no_fields_skip() -> SurrealOrmResult<()> {
 
     let get_selected_weapon = || async {
         let selected_weapon: Option<Weapon> = select(All)
-            .from(Weapon::table_name())
+            .from(Weapon::table())
             .where_(Weapon::schema().id.equal(created_weapon.id.to_owned()))
             .return_one(db.clone())
             .await
@@ -734,10 +729,7 @@ async fn test_update_single_id_merge_skips_fields() -> SurrealOrmResult<()> {
         ..Default::default()
     };
     // Will only override the name
-    let weapon_to_update = WeaponNonNullUpdater {
-        name: Some("Oyelowo".to_string()),
-        ..Default::default()
-    };
+    let weapon_to_update = Weapon::partial_builder().name("Oyelowo".to_string());
 
     // Create weapon
     let created_weapon = create().content(weapon.clone()).get_one(db.clone()).await?;
@@ -748,7 +740,7 @@ async fn test_update_single_id_merge_skips_fields() -> SurrealOrmResult<()> {
 
     let get_selected_weapon = || async {
         let selected_weapon: Option<Weapon> = select(All)
-            .from(Weapon::table_name())
+            .from(Weapon::table())
             .where_(Weapon::schema().id.equal(created_weapon.id.to_owned()))
             .return_one(db.clone())
             .await
@@ -810,7 +802,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
         .await?);
 
     let selected_weapon: Option<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .where_(Weapon::schema().id.equal(weapon_id.clone()))
         .return_one(db.clone())
         .await
@@ -865,7 +857,7 @@ async fn test_update_single_id_patch_replace_change() -> SurrealOrmResult<()> {
 
     let get_selected_weapon = || async {
         let selected_weapon: Option<Weapon> = select(All)
-            .from(Weapon::table_name())
+            .from(Weapon::table())
             .where_(Weapon::schema().id.equal(created_weapon.id.to_owned()))
             .return_one(db.clone())
             .await
@@ -948,7 +940,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
     );
 
     let selected_weapon: Option<WeaponOld> = select(All)
-        .from(WeaponOld::table_name())
+        .from(WeaponOld::table())
         .where_(WeaponOld::schema().id.equal(old_weapon.id.to_owned()))
         .return_one(db.clone())
         .await
@@ -1002,7 +994,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
         .await?);
 
     let selected_weapon: Option<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .where_(Weapon::schema().id.equal(old_weapon.id.to_owned()))
         .return_one(db.clone())
         .await?;
@@ -1067,7 +1059,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
     );
 
     let selected_weapon: Option<Weapon> = select(All)
-        .from(Weapon::table_name())
+        .from(Weapon::table())
         .where_(Weapon::schema().id.equal(old_weapon.id.to_owned()))
         .return_one(db.clone())
         .await
@@ -1089,7 +1081,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
         ..
     } = WeaponOld::schema();
     let selected_weapon = select(All)
-        .from(WeaponOld::table_name())
+        .from(WeaponOld::table())
         .where_(Weapon::schema().id.equal(old_weapon.id.to_owned()))
         .return_one::<WeaponOld>(db.clone())
         .await;
@@ -1112,7 +1104,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
         .await?);
 
     let selected_weapon: Option<WeaponOld> = select(All)
-        .from(WeaponOld::table_name())
+        .from(WeaponOld::table())
         .where_(WeaponOld::schema().id.equal(old_weapon.id.to_owned()))
         .return_one(db.clone())
         .await?;

@@ -7,6 +7,7 @@
 
 pub(crate) mod alias;
 pub(crate) mod arithmetic;
+pub(crate) mod arrow;
 pub(crate) mod bracket;
 pub(crate) mod clause;
 pub(crate) mod crud_type;
@@ -21,6 +22,7 @@ pub(crate) mod geometry;
 pub(crate) mod idiom;
 pub(crate) mod interval;
 pub(crate) mod links;
+pub(crate) mod maybe;
 pub(crate) mod object;
 pub(crate) mod ordinal;
 pub(crate) mod param;
@@ -32,6 +34,7 @@ pub(crate) mod token_target;
 pub(crate) mod value_like;
 
 pub use alias::*;
+pub use arrow::*;
 pub use bracket::*;
 pub use clause::*;
 pub use crud_type::*;
@@ -45,6 +48,7 @@ pub use geometry::*;
 pub use idiom::*;
 pub use interval::*;
 pub use links::*;
+pub use maybe::*;
 pub use ordinal::*;
 pub use param::*;
 pub use params_standard::*;

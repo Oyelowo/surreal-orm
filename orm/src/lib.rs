@@ -200,6 +200,10 @@ pub use surreal_derive::Node;
 #[doc = include_str!("docs/object_field_attributes.md")]
 pub use surreal_derive::Object;
 
+// TODO: document
+// #[doc = include_str!("docs/table_resources.md")]
+pub use surreal_derive::TableResources;
+
 /// #[doc = include_str!("docs/query_description.md")]
 pub use query_builder_macros::query;
 

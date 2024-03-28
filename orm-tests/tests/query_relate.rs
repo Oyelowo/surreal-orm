@@ -153,7 +153,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
 
     let result: Vec<StudentWritesBook> = select(All)
-        .from(StudentWritesBook::table_name())
+        .from(StudentWritesBook::table())
         .order_by(order(timeWritten).asc())
         .return_many(db.clone())
         .await?;
@@ -239,7 +239,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
     let from_statement = select_value(&users).from_only(codebreather.id);
     // select devs
     let devs_statement = select(All)
-        .from(User::table_name())
+        .from(User::table())
         .where_(tags.contains("developer"))
         .order_by(order(id).desc());
 
@@ -265,7 +265,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
     assert_eq!(result[0].time.connected, dt);
 
     let result = select(All)
-        .from(CompanyLikeUser::table_name())
+        .from(CompanyLikeUser::table())
         .order_by(order(in_).desc())
         // .order_by(order(time.connected).desc())
         .return_many::<CompanyLikeUser>(db.clone())
@@ -314,8 +314,8 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
 
     let student_id = Student::create_id("oyelowo");
     let book_id = Book::create_id("2");
-    let likes = StudentLiksBook::table_name();
-    let writes = StudentWritesBook::table_name();
+    let likes = StudentLiksBook::table();
+    let writes = StudentWritesBook::table();
     let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
 
     let aliased_connection = Student::with(student_id)
@@ -344,8 +344,8 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
 fn test_any_edge_filter() {
     let student_id = Student::create_id("oye");
     let book_id = Book::create_id("mars");
-    let likes = StudentLiksBook::table_name();
-    let visits = AlienVisitsPlanet::table_name();
+    let likes = StudentLiksBook::table();
+    let visits = AlienVisitsPlanet::table();
     let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
 
     let aliased_connection = Student::with(student_id)
@@ -485,10 +485,10 @@ async fn relate_query_with_sub_query() -> surreal_orm::SurrealOrmResult<()> {
         ..Default::default()
     };
     let statement = relate(
-        Student::with(select(All).from(Student::get_table_name()))
+        Student::with(select(All).from(Student::get_table()))
             .writes__(E)
             .book(
-                select(All).from(Book::get_table_name()), // .where_(Book::schema().title.like("Oyelowo")),
+                select(All).from(Book::get_table()), // .where_(Book::schema().title.like("Oyelowo")),
             ),
     )
     .content(write.clone());

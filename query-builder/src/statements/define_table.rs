@@ -36,7 +36,7 @@ use crate::{
 
 /// Define the API for the Table builder
 pub struct DefineTableStatement {
-    table_name: String,
+    table: String,
     drop: Option<bool>,
     flexible: Option<bool>,
     schema_type: Option<SchemaType>,
@@ -90,10 +90,10 @@ pub struct DefineTableStatement {
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
-pub fn define_table(table_name: impl Into<Table>) -> DefineTableStatement {
-    let table: Table = table_name.into();
+pub fn define_table(table: impl Into<Table>) -> DefineTableStatement {
+    let table: Table = table.into();
     DefineTableStatement {
-        table_name: table.to_string(),
+        table: table.to_string(),
         drop: None,
         flexible: None,
         schema_type: None,
@@ -251,7 +251,7 @@ impl DefineTableStatement {
 // 	] ]
 impl Buildable for DefineTableStatement {
     fn build(&self) -> String {
-        let mut query = format!("DEFINE TABLE {}", &self.table_name);
+        let mut query = format!("DEFINE TABLE {}", &self.table);
 
         if self.drop.unwrap_or_default() {
             query = format!("{query} DROP");

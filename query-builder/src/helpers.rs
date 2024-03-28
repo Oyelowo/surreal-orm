@@ -14,5 +14,3 @@ macro_rules! array {
         ]
     }};
 }
-
-

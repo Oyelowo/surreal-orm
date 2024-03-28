@@ -80,10 +80,10 @@ let write = StudentWritesBook {
 };
 
 let statement = relate(
-    Student::with(select(All).from(Student::get_table_name()))
+    Student::with(select(All).from(Student::get_table()))
         .writes__(E)
         .book(
-            select(All).from(Book::get_table_name()),
+            select(All).from(Book::get_table()),
         ),
 )
 .content(write.clone());
@@ -134,10 +134,10 @@ queries. Here's an example:
 
 ```rust
 let statement = relate(
-    Student::with(select(All).from(Student::get_table_name()))
+    Student::with(select(All).from(Student::get_table()))
         .writes__(E)
         .book(
-            select(All).from(Book::get_table_name()),
+            select(All).from(Book::get_table()),
         ),
 )
 .content(write.clone());

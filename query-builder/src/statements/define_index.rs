@@ -72,7 +72,7 @@ pub fn define_index(index_name: impl Into<TableIndex>) -> DefineIndexStatement {
 
     DefineIndexStatement {
         index_name,
-        table_name: None,
+        table: None,
         fields: vec![],
         columns: vec![],
         unique: None,
@@ -158,7 +158,7 @@ impl Parametric for Columns {
 /// A statement for defining a database Index.
 pub struct DefineIndexStatement {
     index_name: String,
-    table_name: Option<String>,
+    table: Option<String>,
     fields: Vec<Field>,
     columns: Vec<Field>,
     unique: Option<bool>,
@@ -173,7 +173,7 @@ impl DefineIndexStatement {
         let table: TableLike = table.into();
         self.bindings.extend(table.get_bindings());
         self.errors.extend(table.get_errors());
-        self.table_name = Some(table.build());
+        self.table = Some(table.build());
         self
     }
 
@@ -235,7 +235,7 @@ impl Buildable for DefineIndexStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE INDEX {}", self.index_name);
 
-        if let Some(table) = &self.table_name {
+        if let Some(table) = &self.table {
             query = format!("{query} ON TABLE {table}");
         }
 

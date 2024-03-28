@@ -30,10 +30,10 @@ mod check1 {
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "student")]
+    #[surreal_orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = "int", define = "define_field_fn()")]
+        #[surreal_orm(ty = "int", define = define_field_fn())]
         age: u8,
     }
 }
@@ -41,12 +41,13 @@ mod check1 {
 mod check2 {
     use crate::*;
 
+    // Ordinary path should also work for define attribute
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "student")]
+    #[surreal_orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = "int", define_fn = "define_field_fn")]
+        #[surreal_orm(ty = "int", define = define_field_fn)]
         age: u8,
     }
 }
@@ -56,14 +57,14 @@ mod check3 {
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table_name = "student")]
+    #[surreal_orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
         #[surreal_orm(
-            type_ = "int",
+            ty = "int",
             value = "18",
-            assert = "assert_fn()",
-            permissions = "permissions_fn()"
+            assert = assert_fn(),
+            permissions = permissions_fn()
         )]
         age: u8,
     }
@@ -75,15 +76,15 @@ mod check3 {
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         assert = "assert_fn()",
-///         permissions = "permissions_fn()",
-///         define = "define_field_fn()"
+///         assert = assert_fn(),
+///         permissions = permissions_fn(),
+///         define = define_field_fn()
 ///     )]
 ///     age: u8,
 /// }
@@ -96,13 +97,13 @@ fn _no_other_attributes_when_define_attr_is_used_1() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         define = "define_field_fn()"
+///         define = define_field_fn()
 ///     )]
 ///     age: u8,
 /// }
@@ -116,13 +117,13 @@ fn _no_other_attributes_when_define_attr_is_used_2() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
-///         assert = "assert_fn()",
-///         define = "define_field_fn()"
+///         ty = "int",
+///         assert = assert_fn(),
+///         define = define_field_fn()
 ///     )]
 ///     age: u8,
 /// }
@@ -136,13 +137,13 @@ fn _no_other_attributes_when_define_attr_is_used_3() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
-///         permissions = "permissions_fn()",
-///         define = "define_field_fn()"
+///         ty = "int",
+///         permissions = permissions_fn(),
+///         define = define_field_fn()
 ///     )]
 ///     age: u8,
 /// }
@@ -155,14 +156,14 @@ fn _no_other_attributes_when_define_attr_is_used_4() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         assert = "assert_fn()",
-///         define = "define_field_fn()"
+///         assert = assert_fn(),
+///         define = define_field_fn()
 ///     )]
 ///     age: u8,
 /// }
@@ -176,14 +177,14 @@ fn _no_other_attributes_when_define_attr_is_used_5() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
-///         assert = "assert_fn()",
-///         permissions = "permissions_fn()",
-///         define = "define_field_fn()"
+///         ty = "int",
+///         assert = assert_fn(),
+///         permissions = permissions_fn(),
+///         define = define_field_fn()
 ///     )]
 ///     age: u8,
 /// }
@@ -195,14 +196,14 @@ fn _no_other_attributes_when_define_attr_is_used_7() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         permissions = "permissions_fn()",
-///         define = "define_field_fn()"
+///         permissions = permissions_fn(),
+///         define = define_field_fn()
 ///     )]
 ///     age: u8,
 /// }
@@ -216,15 +217,15 @@ fn _no_other_attributes_when_define_attr_is_used_8() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         assert = "assert_fn()",
-///         permissions = "permissions_fn()",
-///         define_fn = "define_field_fn"
+///         assert = assert_fn(),
+///         permissions = permissions_fn(),
+///         define = define_field_fn
 ///     )]
 ///     age: u8,
 /// }
@@ -236,13 +237,13 @@ fn _no_other_attributes_when_define_fn_attr_is_used_1() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         define_fn = "define_field_fn"
+///         define = define_field_fn
 ///     )]
 ///     age: u8,
 /// }
@@ -255,13 +256,13 @@ fn _no_other_attributes_when_define_fn_attr_is_used_2() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
-///         assert = "assert_fn()",
-///         define_fn = "define_field_fn"
+///         ty = "int",
+///         assert = assert_fn(),
+///         define = define_field_fn
 ///     )]
 ///     age: u8,
 /// }
@@ -273,13 +274,13 @@ fn _no_other_attributes_when_define_fn_attr_is_used_3() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
-///         permissions = "permissions_fn()",
-///         define_fn = "define_field_fn"
+///         ty = "int",
+///         permissions = permissions_fn(),
+///         define = define_field_fn
 ///     )]
 ///     age: u8,
 /// }
@@ -291,14 +292,14 @@ fn _no_other_attributes_when_define_fn_attr_is_used_4() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         assert = "assert_fn",
-///         define_fn = "define_field_fn"
+///         assert = assert_fn,
+///         define = define_field_fn
 ///     )]
 ///     age: u8,
 /// }
@@ -310,14 +311,14 @@ fn _no_other_attributes_when_define_fn_attr_is_used_5() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
-///         assert = "assert_fn()",
-///         permissions = "permissions_fn()",
-///         define_fn = "define_field_fn"
+///         ty = "int",
+///         assert = assert_fn(),
+///         permissions = permissions_fn(),
+///         define = define_field_fn
 ///     )]
 ///     age: u8,
 /// }
@@ -329,14 +330,14 @@ fn _no_other_attributes_when_define_fn_attr_is_used_7() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
-///         type_ = "int",
+///         ty = "int",
 ///         value = "18",
-///         permissions = "permissions_fn()",
-///         define_fn = "define_field_fn"
+///         permissions = permissions_fn(),
+///         define = define_field_fn
 ///     )]
 ///     age: u8,
 /// }
@@ -350,14 +351,10 @@ fn _no_other_attributes_when_define_fn_attr_is_used_8() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(
-///         type_ = "int",
-///         define = "define_field_fn()",
-///         define_fn = "define_field_fn"
-///     )]
+///     #[surreal_orm(ty = "int", define = define_field_fn())]
 ///     age: u8,
 /// }
 /// ```
@@ -371,14 +368,10 @@ fn _define_and_define_fn_attrs_should_not_be_used_together_1() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(
-///         type_ = "int",
-///         value = "value_fn()",
-///         value_fn = "value_fn"
-///     )]
+///     #[surreal_orm(ty = "int", value = value_fn())]
 ///     age: u8,
 /// }
 /// ```
@@ -390,14 +383,10 @@ fn _value_and_value_fn_attrs_should_not_be_used_together() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(
-///         type_ = "int",
-///         assert = "assert_fn()",
-///         assert_fn = "assert_fn"
-///     )]
+///     #[surreal_orm(ty = "int", assert = assert_fn())]
 ///     age: u8,
 /// }
 /// ```
@@ -409,14 +398,10 @@ fn _assert_and_assert_fn_attrs_should_not_be_used_together() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(
-///         type_ = "int",
-///         permissions = "permissions_fn()",
-///         permissions_fn = "permissions_fn",
-///     )]
+///     #[surreal_orm(ty = "int", permissions = permissions_fn())]
 ///     age: u8,
 /// }
 /// ```
@@ -428,10 +413,10 @@ fn _permissions_and_permissions_fn_attrs_should_not_be_used_together() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(type_ = "string")]
+///     #[surreal_orm(ty = "string")]
 ///     age: u8,
 /// }
 /// ```
@@ -443,10 +428,10 @@ fn _type_mismatch_age_int_is_not_string() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(type_ = "int")]
+///     #[surreal_orm(ty = "int")]
 ///     age: String,
 /// }
 /// ```
@@ -458,10 +443,10 @@ fn _type_mismatch_age_string_is_not_int() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(type_ = "float")]
+///     #[surreal_orm(ty = "float")]
 ///     age: u8,
 /// }
 /// ```
@@ -473,10 +458,10 @@ fn _type_mismatch_age_int_is_not_float() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(type_ = "int")]
+///     #[surreal_orm(ty = "int")]
 ///     age: f64,
 /// }
 /// ```
@@ -488,10 +473,10 @@ fn _type_mismatch_age_float_is_not_int() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(type_ = "string")]
+///     #[surreal_orm(ty = "string")]
 ///     age: f64,
 /// }
 /// ```
@@ -503,10 +488,10 @@ fn _type_mismatch_age_float_is_not_string() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
-///     #[surreal_orm(type_ = "float")]
+///     #[surreal_orm(ty = "float")]
 ///     age: String,
 /// }
 /// ```
@@ -517,10 +502,10 @@ fn _type_mismatch_age_string_is_not_float() {}
 /// use surreal_compile_tests::*;
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///    id: SurrealSimpleId<Self>,
-///   #[surreal_orm(type_ = "int")]
+///   #[surreal_orm(ty = "int")]
 ///    age: bool,
 /// }
 /// ```
@@ -531,10 +516,10 @@ fn _type_mismatch_age_boolean_is_not_int() {}
 /// use surreal_compile_tests::*;
 ///  #[derive(Node, Serialize, Deserialize)]
 ///  #[serde(rename_all = "camelCase")]
-///  #[surreal_orm(table_name = "student")]
+///  #[surreal_orm(table = student)]
 ///  pub struct Student {
 ///      id: SurrealSimpleId<Self>,
-///      #[surreal_orm(type_ = "string")]
+///      #[surreal_orm(ty = "string")]
 ///      age: bool,
 ///  }
 /// ```
@@ -545,10 +530,10 @@ fn _type_mismatch_age_boolean_is_not_string() {}
 /// use surreal_compile_tests::*;
 ///  #[derive(Node, Serialize, Deserialize)]
 ///  #[serde(rename_all = "camelCase")]
-///  #[surreal_orm(table_name = "student")]
+///  #[surreal_orm(table = student)]
 ///  pub struct Student {
 ///      id: SurrealSimpleId<Self>,
-///      #[surreal_orm(type_ = "float")]
+///      #[surreal_orm(ty = "float")]
 ///      age: bool,
 ///  }
 /// ```
@@ -559,10 +544,10 @@ fn _type_mismatch_age_boolean_is_not_float() {}
 /// use surreal_compile_tests::*;
 ///  #[derive(Node, Serialize, Deserialize)]
 ///  #[serde(rename_all = "camelCase")]
-///  #[surreal_orm(table_name = "student")]
+///  #[surreal_orm(table = student)]
 ///  pub struct Student {
 ///      id: SurrealSimpleId<Self>,
-///      #[surreal_orm(type_ = "decimal")]
+///      #[surreal_orm(ty = "decimal")]
 ///      age: bool,
 ///  }
 /// ```
@@ -573,10 +558,10 @@ fn _type_mismatch_age_boolean_is_not_decimal() {}
 /// use surreal_compile_tests::*;
 ///  #[derive(Node, Serialize, Deserialize)]
 ///  #[serde(rename_all = "camelCase")]
-///  #[surreal_orm(table_name = "student")]
+///  #[surreal_orm(table = student)]
 ///  pub struct Student {
 ///      id: SurrealSimpleId<Self>,
-///      #[surreal_orm(type_ = "datetime")]
+///      #[surreal_orm(ty = "datetime")]
 ///      age: bool,
 ///  }
 /// ```
@@ -587,10 +572,10 @@ fn _type_mismatch_age_boolean_is_not_datetime() {}
 /// use surreal_compile_tests::*;
 ///  #[derive(Node, Serialize, Deserialize)]
 ///  #[serde(rename_all = "camelCase")]
-///  #[surreal_orm(table_name = "student")]
+///  #[surreal_orm(table = student)]
 /// pub struct Student {
 ///    id: SurrealSimpleId<Self>,
-///   #[surreal_orm(type_ = "duration")]
+///   #[surreal_orm(ty = "duration")]
 ///   age: bool,
 /// }
 /// ```
@@ -601,10 +586,10 @@ fn _type_mismatch_age_boolean_is_not_duration() {}
 /// use surreal_compile_tests::*;
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table_name = "student")]
+/// #[surreal_orm(table = student)]
 /// pub struct Student {
 ///   id: SurrealSimpleId<Self>,
-///  #[surreal_orm(type_ = "geometry(line)")]
+///  #[surreal_orm(ty = "geometry(line)")]
 /// age: bool,
 /// }
 /// ```

@@ -51,7 +51,7 @@ let token_def = define_scope("oyelowo_scope")
             ])
     )
     .signin(
-        select(All).from(User::table_name()).where_(
+        select(All).from(User::table()).where_(
             cond(email.equal(email))
                 .and(crypto::argon2::compare!(pass, password)),
         ),

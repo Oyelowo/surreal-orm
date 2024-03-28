@@ -56,13 +56,13 @@ impl RightDatabase {
     }
 
     pub fn find_field_with_oldname_attr(
-        table_name: Table,
+        table: Table,
         field_name: Field,
         resources: impl DbResources,
     ) -> Option<FieldMetadata> {
         resources
             .tables_fields_meta()
-            .get(&table_name)
+            .get(&table)
             .unwrap_or(&vec![])
             .clone()
             .into_iter()
@@ -71,12 +71,12 @@ impl RightDatabase {
 
     pub fn find_field_has_old_name(
         resources: &impl DbResources,
-        table_name: &Table,
+        table: &Table,
         by: By,
     ) -> Option<FieldMetadata> {
         resources
             .tables_fields_meta()
-            .get(table_name)
+            .get(table)
             .unwrap_or(&vec![])
             .clone()
             .into_iter()

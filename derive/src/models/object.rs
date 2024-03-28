@@ -5,32 +5,22 @@
  * Licensed under the MIT license
  */
 
-#![allow(dead_code)]
-
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use std::str::FromStr;
+use quote::quote;
+use syn::Ident;
 
-use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
-use super::{
-    attributes::{MyFieldReceiver, Rename},
-    casing::CaseString,
-    parser::{DataType, SchemaFieldsProperties, SchemaPropertiesArgs},
-    variables::VariablesModelMacro,
-};
+use crate::models::*;
 
-// #[derive(Debug, FromDeriveInput)]
-// #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-// struct ObjectToken(TableDeriveAttributes);
-#[derive(Debug, FromDeriveInput)]
+#[derive(Debug, Clone, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct ObjectToken {
-    pub(crate) ident: syn::Ident,
+    pub(crate) ident: Ident,
+    #[allow(dead_code)]
     pub(crate) attrs: Vec<syn::Attribute>,
-    pub(crate) generics: syn::Generics,
+    pub(crate) generics: StructGenerics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
     pub data: ast::Data<util::Ignored, MyFieldReceiver>,
@@ -39,21 +29,22 @@ pub struct ObjectToken {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 }
 
+impl ObjectToken {
+    pub fn ident(&self) -> StructIdent {
+        self.ident.clone().into()
+    }
+
+    pub fn generics(&self) -> &StructGenerics {
+        &self.generics
+    }
+}
+
 impl ToTokens for ObjectToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let ObjectToken {
-            ident: struct_name_ident,
-            data,
-            rename_all,
-            ..
-        } = &self;
-
-        let struct_level_casing = rename_all.as_ref().map(|case| {
-            CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
-        });
-
-        let crate_name = super::get_crate_name(false);
-
+        let crate_name = get_crate_name(false);
+        let struct_name_ident = &self.ident();
+        let (impl_generics, ty_generics, where_clause) = self.generics().split_for_impl();
+        let struct_marker = self.generics().phantom_marker_type();
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
@@ -61,16 +52,16 @@ impl ToTokens for ObjectToken {
             ___________errors,
             _____field_names,
             schema_instance,
+            _____struct_marker_ident,
             ..
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {
-            data,
-            struct_level_casing,
-            struct_name_ident,
-            table_name: "".to_string(), // table_name_ident,
+        let table_attrs = ModelAttributes::from_object(self);
+        let explicit_generics = table_attrs.explicit_fully_qualified_generics_path();
+        let code_gen = match Codegen::parse_fields(&table_attrs) {
+            Ok(props) => props,
+            Err(err) => return tokens.extend(err.write_errors()),
         };
-
-        let Ok(SchemaFieldsProperties {
+        let Codegen {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -80,32 +71,22 @@ impl ToTokens for ObjectToken {
             connection_with_field_appended,
             record_link_fields_methods,
             schema_struct_fields_names_kv_empty,
-            non_null_updater_fields,
+            struct_partial_fields,
+            struct_partial_associated_functions,
             ..
-        }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Object)
-        else {
-            // panic!("Error in parsing struct fields");
-            // return syn::Error::new_spanned(self, "Error in parsing struct fields")
-            //     .to_compile_error();
-            // return tokens.extend(
-            //     syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),
-            // );
-            panic!("Error in parsing struct fields");
-        };
-        // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
-        let imports_referenced_node_schema = imports_referenced_node_schema
-            .into_iter()
-            .collect::<Vec<_>>();
+        } = &code_gen;
 
-        let module_name_internal = format_ident!(
-            "________internal_{}_schema",
-            struct_name_ident.to_string().to_case(Case::Snake)
-        );
-        let module_name_rexported =
-            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
-        let test_function_name = format_ident!("test_{module_name_internal}_edge_name");
-        let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
-        let _____schema_def = format_ident!("_____schema_def");
+        let imports_referenced_node_schema =
+            imports_referenced_node_schema.iter().collect::<Vec<_>>();
+        let CommonIdents {
+            module_name_internal,
+            module_name_rexported,
+            test_function_name,
+            _____schema_def,
+            ..
+        } = code_gen.common_idents();
+        let struct_partial_ident = struct_name_ident.partial_ident();
+        let struct_partial_builder_ident = struct_name_ident.partial_builder_ident();
 
         // #[derive(Object, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
@@ -117,22 +98,29 @@ impl ToTokens for ObjectToken {
         tokens.extend(quote!(
             use #crate_name::{ToRaw as _};
 
-            impl #crate_name::SchemaGetter for #struct_name_ident {
-                type Schema = #module_name_internal::#struct_name_ident;
+            impl #impl_generics #crate_name::SchemaGetter for #struct_name_ident #ty_generics #where_clause {
+                type Schema = #module_name_internal::#struct_name_ident #ty_generics;
 
-                fn schema() -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new()
+                fn schema() -> #module_name_rexported::Schema #ty_generics #where_clause {
+                    #module_name_rexported::Schema #explicit_generics ::new()
                 }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
-                    #module_name_rexported::Schema::new_prefixed(prefix)
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema #ty_generics #where_clause {
+                    #module_name_rexported::Schema #explicit_generics ::new_prefixed(prefix)
+                }
+            }
+        
+            impl #impl_generics #crate_name::PartialUpdater for #struct_name_ident #ty_generics #where_clause {
+                type StructPartial = #struct_partial_ident #ty_generics;
+                type PartialBuilder = #struct_partial_builder_ident #ty_generics;
+
+                fn partial_builder() -> Self::PartialBuilder {
+                    #struct_partial_builder_ident::default()
                 }
             }
 
-            impl #crate_name::Object for #struct_name_ident {
+            impl #impl_generics #crate_name::Object for #struct_name_ident #ty_generics #where_clause {
                 // type Schema = #module_name::#struct_name_ident;
-                // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
-                type NonNullUpdater = #non_null_updater_struct_name;
 
                 // fn schema() -> Self::Schema {
                 //     #module_name::#struct_name_ident::new()
@@ -140,12 +128,22 @@ impl ToTokens for ObjectToken {
             }
 
             #[allow(non_snake_case)]
-            #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
-            pub struct #non_null_updater_struct_name {
-               #(
-                    #[serde(skip_serializing_if = "Option::is_none")]
-                    #non_null_updater_fields
-                ) *
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+            pub struct  #struct_partial_ident #impl_generics #where_clause {
+                #[serde(skip)]
+                #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>,
+               #(#struct_partial_fields), * 
+            }
+
+            #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
+            pub struct #struct_partial_builder_ident #impl_generics (#struct_partial_ident #ty_generics) #where_clause;
+
+            impl #impl_generics #struct_partial_builder_ident #ty_generics #where_clause {
+                #( #struct_partial_associated_functions) *
+
+                pub fn build(self) -> #struct_partial_ident #ty_generics {
+                    self.0
+                }
             }
 
             #[allow(non_snake_case)]
@@ -159,6 +157,7 @@ impl ToTokens for ObjectToken {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
+                use super::*;
 
                #( #imports_referenced_node_schema) *
 
@@ -175,68 +174,69 @@ impl ToTokens for ObjectToken {
 
                     #[allow(non_snake_case)]
                     #[derive(Debug, Clone)]
-                    pub struct Schema {
+                    pub struct Schema #ty_generics #where_clause {
                        #( #schema_struct_fields_types_kv) *
                         pub(super) #___________graph_traversal_string: ::std::string::String,
                         pub(super) #___________bindings: #crate_name::BindingsList,
                         pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
+                        pub(super) #_____struct_marker_ident: #struct_marker,
                     }
                 }
-                pub type #struct_name_ident = #_____schema_def::Schema;
+                pub type #struct_name_ident #ty_generics = #_____schema_def::Schema #ty_generics;
 
-
-                impl #crate_name::Parametric for #struct_name_ident {
+                impl #impl_generics #crate_name::Parametric for #struct_name_ident #ty_generics #where_clause{
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for #struct_name_ident {
+                impl #impl_generics #crate_name::Buildable for #struct_name_ident #ty_generics #where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for #struct_name_ident {
+                impl #impl_generics #crate_name::Erroneous for #struct_name_ident #ty_generics #where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
-                impl ::std::fmt::Display for #struct_name_ident {
+                impl #impl_generics ::std::fmt::Display for #struct_name_ident #ty_generics #where_clause {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
 
-                impl #crate_name::Aliasable for &#struct_name_ident {}
+                impl #impl_generics #crate_name::Aliasable for &#struct_name_ident #ty_generics #where_clause {}
 
-                impl #crate_name::Parametric for &#struct_name_ident {
+                impl #impl_generics #crate_name::Parametric for &#struct_name_ident #ty_generics #where_clause {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
 
-                impl #crate_name::Buildable for &#struct_name_ident {
+                impl #impl_generics #crate_name::Buildable for &#struct_name_ident #ty_generics #where_clause {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
 
-                impl #crate_name::Erroneous for &#struct_name_ident {
+                impl #impl_generics #crate_name::Erroneous for &#struct_name_ident #ty_generics #where_clause {
                     fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
 
 
-                impl #struct_name_ident {
+                impl #impl_generics #struct_name_ident #ty_generics #where_clause {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -247,6 +247,7 @@ impl ToTokens for ObjectToken {
                             #___________graph_traversal_string: prefix.build(),
                             #___________bindings: prefix.get_bindings(),
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -256,6 +257,7 @@ impl ToTokens for ObjectToken {
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
                             #___________errors: vec![],
+                            #_____struct_marker_ident: ::std::marker::PhantomData,
                         }
                     }
 
@@ -263,7 +265,7 @@ impl ToTokens for ObjectToken {
                         // store: ::std::string::String,
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                         clause: impl ::std::convert::Into<#crate_name::ObjectClause>,
-                        // use_table_name: bool,
+                        // use_table: bool,
                         // existing_bindings: #crate_name::BindingsList,
                         // existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
@@ -280,8 +282,8 @@ impl ToTokens for ObjectToken {
                         schema_instance.#___________errors = errors.into();
 
 
-                    // let connection = if use_table_name {
-                    //     // format!("{}{}", store, clause.format_with_model(#table_name_str))
+                    // let connection = if use_table {
+                    //     // format!("{}{}", store, clause.format_with_model(#table_str))
                     //     format!("{}{}", store, clause)
                     // }else{
                     //     format!("{}{}", store, clause) 
@@ -304,7 +306,7 @@ impl ToTokens for ObjectToken {
 
             // #[test]
             #[allow(non_snake_case)]
-            fn #test_function_name() {
+            fn #test_function_name #impl_generics() {
                 #( #static_assertions) *
             }
         ));
@@ -312,10 +314,7 @@ impl ToTokens for ObjectToken {
 }
 
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    // Construct a representation of Rust code as a syntax tree
-    // that we can manipulate
     let input = parse_macro_input!(input);
-    // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
     let output = match ObjectToken::from_derive_input(&input) {
         Ok(out) => out,
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),

@@ -16,14 +16,14 @@ The `define_table` statement is used to define a table in SurrealDB. It allows y
 The basic syntax of the `define_table` statement is as follows:
 
 ```rust
-define_table(table_name)
+define_table(table)
     .drop()
     .as_(select_statement)
     .schemafull()
     .permissions(permission_statements);
 ```
 
-- `table_name`: The name of the table to define.
+- `table`: The name of the table to define.
 
 The `define_table` statement supports the following methods:
 

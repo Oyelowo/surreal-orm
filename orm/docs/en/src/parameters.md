@@ -19,7 +19,7 @@ calculate the average strength of weapons, for instance:
 # let db = Surreal::new::<Mem>(()).await.unwrap();
 # db.use_ns("test").use_db("test").await.unwrap();
 #
-# let ref weapon = Weapon::table_name();
+# let ref weapon = Weapon::table();
 # let weapon::Schema { ref strength, .. } = Weapon::schema();
 # let weapon_stats::Schema {
 #     averageStrength, ..

@@ -17,7 +17,7 @@ use surreal_orm::{SurrealSimpleId, Node};
 
 #[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "alien")]
+#[surreal_orm(table = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
 

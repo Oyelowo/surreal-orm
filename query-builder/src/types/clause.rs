@@ -9,7 +9,7 @@ use std::ops::Deref;
 
 use crate::{
     statements::{LetStatement, Subquery},
-    Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Model, Operatable,
+    Arrow, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Model, Operatable,
     Operation, Param, Parametric, Setter, Table,
 };
 
@@ -57,7 +57,7 @@ enum ModelOrFieldName {
 #[derive(Debug, Clone)]
 pub struct Clause {
     kind: ClauseType,
-    arrow: Option<String>,
+    arrow: Option<Arrow>,
     model_or_field_name: Option<ModelOrFieldName>,
     query_string: String,
     bindings: BindingsList,
@@ -144,13 +144,13 @@ impl Erroneous for NodeClause {
 impl NodeClause {
     /// Create a new NodeClause with arrow. This is used in the macro for building a graph query.
     /// Sometimes, nodes need to be appended with arrow if buinding e.g node->edge->node
-    pub fn with_arrow(self, arrow: impl Into<String>) -> Self {
+    pub fn with_arrow(self, arrow: impl Into<Arrow>) -> Self {
         Self(self.0.with_arrow(arrow))
     }
 
     /// attach the table name to the clause as metadata. Useful for doing some checks.
-    pub fn with_table(self, table_name: impl Into<String>) -> Self {
-        Self(self.0.with_table(table_name))
+    pub fn with_table(self, table: impl Into<String>) -> Self {
+        Self(self.0.with_table(table))
     }
 
     /// attach the field name to the clause as metadata.
@@ -247,13 +247,13 @@ impl Erroneous for EdgeClause {
 
 impl EdgeClause {
     /// Create a new EdgeClause with arrow. This is used in the macro for building a graph query.
-    pub fn with_arrow(self, arrow: impl Into<String>) -> Self {
+    pub fn with_arrow(self, arrow: impl Into<Arrow>) -> Self {
         Self(self.0.with_arrow(arrow))
     }
 
     /// attach the table name to the clause as metadata. Useful for doing some checks.
-    pub fn with_table(self, table_name: impl Into<String>) -> Self {
-        Self(self.0.with_table(table_name))
+    pub fn with_table(self, table: impl Into<String>) -> Self {
+        Self(self.0.with_table(table))
     }
 }
 
@@ -274,13 +274,13 @@ pub struct ObjectClause(Clause);
 impl ObjectClause {
     /// Create a new ObjectClause with arrow. This is used in the macro for building a graph
     /// query.
-    pub fn with_arrow(self, arrow: String) -> Self {
+    pub fn with_arrow(self, arrow: impl Into<Arrow>) -> Self {
         Self(self.0.with_arrow(arrow))
     }
 
     /// attach the table name to the clause as metadata. Useful for doing some checks.
-    pub fn with_table(self, table_name: &str) -> Self {
-        Self(self.0.with_table(table_name))
+    pub fn with_table(self, table: &str) -> Self {
+        Self(self.0.with_table(table))
     }
 
     /// attach the field name to the clause as metadata.
@@ -407,16 +407,16 @@ impl Clause {
     }
 
     /// Create a new Clause with arrow. This is used in the macro for building a graph query.
-    pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
+    pub fn with_arrow(mut self, arrow: impl Into<Arrow>) -> Self {
         self.arrow = Some(arrow.into());
         self
     }
 
     /// attach the table name to the clause as metadata. Useful for doing some checks.
-    pub fn with_table(self, table_name: impl Into<String>) -> Self {
-        let table_name: String = table_name.into();
-        let mut updated_clause = self.update_errors(&table_name);
-        updated_clause.model_or_field_name = Some(ModelOrFieldName::Model(table_name));
+    pub fn with_table(self, table: impl Into<String>) -> Self {
+        let table: String = table.into();
+        let mut updated_clause = self.update_errors(&table);
+        updated_clause.model_or_field_name = Some(ModelOrFieldName::Model(table));
         updated_clause
     }
 
@@ -426,15 +426,15 @@ impl Clause {
         self
     }
 
-    fn update_errors(mut self, table_name: &str) -> Self {
+    fn update_errors(mut self, table: &str) -> Self {
         let mut errors = vec![];
         if let ClauseType::Id(id) = &self.kind {
             if !id
                 .to_string()
-                .starts_with(format!("{table_name}:").as_str())
+                .starts_with(format!("{table}:").as_str())
             {
                 errors.push(format!(
-                    "invalid id {id}. Id does not belong to table {table_name}"
+                    "invalid id {id}. Id does not belong to table {table}"
                 ))
             }
         }
@@ -679,7 +679,7 @@ impl From<AnyEdgeFilter> for EdgeClause {
 /// # let student_id = SurrealId::try_from("student:1").unwrap();
 /// # let book_id = SurrealId::try_from("book:2").unwrap();
 /// # let likes = Table::new("likes");
-/// # let writes = StudentWritesBook::table_name();
+/// # let writes = StudentWritesBook::table();
 /// # let timeWritten = Field::new("timeWritten");
 ///  Student::with(student_id)
 ///     .writes__(Empty)

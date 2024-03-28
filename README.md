@@ -57,7 +57,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "space_ship")]
+#[surreal_orm(table = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
@@ -66,7 +66,7 @@ pub struct SpaceShip {
 ```
 
 In this example, we define a `SpaceShip` struct and annotate it with the `Node`
-derive macro. The `table_name` attribute specifies the name of the corresponding
+derive macro. The `table` attribute specifies the name of the corresponding
 database table.
 
 ## Querying Data
@@ -79,7 +79,7 @@ chain various methods to build the query. Here's an example:
 use surreal_orm::statements::{select, All};
 
 let space_ship::Schema { name, age, .. } = SpaceShip::schema();
-let space_ship = SpaceShip::table_name();
+let space_ship = SpaceShip::table();
 
 let statement = select(All)
     .from(space_ship)
@@ -126,7 +126,7 @@ We can also use `object!` and `object_partial!` macros for a much more flexbible
 and robust insertion supporting fields and parameter assignment e.g:
 
 ```rust
-let weapon = &Weapon::table_name();
+let weapon = &Weapon::table();
 let weapon::Schema { ref strength, .. } = Weapon::schema();
 
 let created_stats_statement = create::<WeaponStats>().set(object_partial!(WeaponStats {
@@ -147,7 +147,7 @@ the updated data as a struct. Here's an example:
 ```rust
 use surreal_orm::statements::update;
 
-let space_ship = SpaceShip::table_name();
+let space_ship = SpaceShip::table();
 
 update::<SpaceShip>(space_ship)
     .content(SpaceShip {
@@ -174,7 +174,7 @@ the condition for deletion. Here's an example:
 use surreal_orm::{*, statements::{delete}};
 
 let space_ship::Schema { name, age, .. } = SpaceShip::schema();
-let space_ship = SpaceShip::table_name();
+let space_ship = SpaceShip::table();
 
 delete(space_ship)
     .where_(cond(name.equal("Millennium Falcon")).and(age.less_then(50)))
@@ -223,41 +223,41 @@ let query_chain = query_turbo! {
     if balance.greater_than(100) {
         let first_name = "Oyelowo";
         let score = 100;
-        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        select(All).from(Account::table()).where_(acc.balance.eq(5));
     } else if balance.less_than(100) {
         let first_name = "Oyelowo";
         let score = 100;
-        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        select(All).from(Account::table()).where_(acc.balance.eq(5));
     } else if balance.gte(100) {
         let first_name = "Oyelowo";
         let score = 100;
-        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        select(All).from(Account::table()).where_(acc.balance.eq(5));
     } else {
         let first_name = "Oyelowo";
         let score = 100;
-        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        select(All).from(Account::table()).where_(acc.balance.eq(5));
     };
 
     for name in vec!["Oyelowo", "Oyedayo"] {
         let first = "Oyelowo";
-        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        select(All).from(Account::table()).where_(acc.balance.eq(5));
 
-        let good_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(64));
+        let good_stmt = select(All).from(Account::table()).where_(acc.balance.eq(64));
 
         if balance.gt(50) {
             let first_name = "Oyelowo";
         };
 
-        select(All).from(Account::table_name()).where_(acc.balance.eq(34));
+        select(All).from(Account::table()).where_(acc.balance.eq(34));
 
         let numbers = vec![23, 98];
 
         for age in numbers {
           let score = 100;
-          let first_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+          let first_stmt = select(All).from(Account::table()).where_(acc.balance.eq(5));
 
-          let second_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(25));
-          select(All).from(Account::table_name()).where_(acc.balance.eq(923));
+          let second_stmt = select(All).from(Account::table()).where_(acc.balance.eq(25));
+          select(All).from(Account::table()).where_(acc.balance.eq(923));
 
         };
     };
@@ -304,7 +304,7 @@ db.use_ns("test").use_db("test").await.unwrap();
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "account")]
+#[surreal_orm(table = "account")]
 pub struct Account {
     pub id: SurrealId<Self, String>,
     pub balance: f64,
@@ -312,7 +312,7 @@ pub struct Account {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "balance")]
+#[surreal_orm(table = "balance")]
 pub struct Balance {
     pub id: SurrealId<Self, String>,
     pub amount: f64,
@@ -441,7 +441,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "animal", schemafull)]
+#[surreal_orm(table = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
@@ -459,7 +459,7 @@ impl TableResources for Animal {
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Erectus")).and(velocity.gt(545)))
-            .then(select(All).from(Crop::table_name()))
+            .then(select(All).from(Crop::table()))
             .to_raw();
 
         vec![event1]
@@ -469,7 +469,7 @@ impl TableResources for Animal {
         let animal::Schema { species, velocity, .. } = Self::schema();
 
         let idx1 = define_index("species_speed_idx".to_string())
-            .on_table(Self::table_name())
+            .on_table(Self::table())
             .fields(arr![species, velocity])
             .unique()
             .to_raw();
@@ -480,7 +480,7 @@ impl TableResources for Animal {
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "eats", schemafull)]
+#[surreal_orm(table = "eats", schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]

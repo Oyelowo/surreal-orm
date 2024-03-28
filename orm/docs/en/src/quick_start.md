@@ -58,7 +58,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "space_ship")]
+#[surreal_orm(table = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
@@ -67,7 +67,7 @@ pub struct SpaceShip {
 ```
 
 In this example, we define a `SpaceShip` struct and annotate it with the `Model`
-derive macro. The `table_name` attribute specifies the name of the corresponding
+derive macro. The `table` attribute specifies the name of the corresponding
 database table.
 
 ## Querying Data

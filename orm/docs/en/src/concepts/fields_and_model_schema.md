@@ -59,8 +59,8 @@ SurrealDB also allows the pattern-like selection of entities:
 ```rust
 let student_id = Student::create_id("oyelowo");
 let book_id = Book::create_id("2");
-let likes = StudentLiksBook::table_name();
-let writes = StudentWritesBook::table_name();
+let likes = StudentLiksBook::table();
+let writes = StudentWritesBook::table();
 let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
 
 let aliased_connection = Student::with(student_id)
@@ -95,7 +95,7 @@ let updated = update::<Weapon>(id)
     .await?;
 
 let selected: Option<Weapon> = select(All)
-    .from(Weapon::table_name())
+    .from(Weapon::table())
     .return_one(db.clone())
     .await?;
 assert_eq!(updated.unwrap().strength, 8);

@@ -21,7 +21,7 @@ use crate::*;
 // #[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 // #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table_name = "migration", schemafull)]
+// #[surreal_orm(table = "migration", schemafull)]
 pub struct Migration {
     // pub id: SurrealId<Self, String>,
     pub id: Thing,
@@ -92,7 +92,7 @@ pub struct MigrationSchema {
 impl Migration {
     pub fn create_id(filename: &MigrationFilename) -> Thing {
         Thing {
-            tb: Migration::table_name().to_string(),
+            tb: Migration::table().to_string(),
             id: filename.to_string().into(),
         }
     }
@@ -158,20 +158,20 @@ impl Migration {
         }
     }
 
-    pub fn table_name() -> Table {
+    pub fn table() -> Table {
         Table::new("migration")
     }
 
     pub fn define_table() -> DefineTableStatement {
-        define_table(Migration::table_name()).schemafull()
+        define_table(Migration::table()).schemafull()
     }
 
     pub fn remove_table() -> RemoveTableStatement {
-        remove_table(Self::table_name())
+        remove_table(Self::table())
     }
 
     pub fn delete_all() -> Raw {
-        Raw::new(format!("DELETE {};", Self::table_name()))
+        Raw::new(format!("DELETE {};", Self::table()))
     }
 
     pub fn define_fields(migration_type: MigrationFlag) -> Vec<Raw> {
@@ -183,30 +183,30 @@ impl Migration {
             checksum_down,
         } = Migration::schema();
         let id = define_field(id)
-            .type_(FieldType::Record(vec![Self::table_name()]))
-            .on_table(Self::table_name())
+            .type_(FieldType::Record(vec![Self::table()]))
+            .on_table(Self::table())
             .to_raw();
 
         let name = define_field(name)
             .type_(FieldType::String)
-            .on_table(Self::table_name())
+            .on_table(Self::table())
             .to_raw();
 
         let timestamp = define_field(timestamp)
             .type_(FieldType::Int)
-            .on_table(Migration::table_name())
+            .on_table(Migration::table())
             .to_raw();
 
         let checksum_up = define_field(checksum_up)
             .type_(FieldType::String)
-            .on_table(Migration::table_name())
+            .on_table(Migration::table())
             .to_raw();
 
         let mut fields = vec![id, name, timestamp, checksum_up];
 
         let checksum_down = define_field(checksum_down)
             .type_(FieldType::String)
-            .on_table(Migration::table_name())
+            .on_table(Migration::table())
             .to_raw();
 
         if migration_type.is_twoway() {
@@ -220,7 +220,7 @@ impl Migration {
         let migration::Schema { timestamp, .. } = Self::schema();
 
         select(All)
-            .from(Self::table_name())
+            .from(Self::table())
             .order_by(order(timestamp).desc())
             .limit(1)
             .return_one::<Self>(db.clone())
@@ -232,7 +232,7 @@ impl Migration {
         let migration::Schema { name, .. } = Self::schema();
 
         select(All)
-            .from(Self::table_name())
+            .from(Self::table())
             .where_(name.equal(filename.to_string()))
             .return_one::<Self>(db.clone())
             .await
@@ -243,7 +243,7 @@ impl Migration {
         let migration::Schema { timestamp, .. } = Self::schema();
 
         select(All)
-            .from(Self::table_name())
+            .from(Self::table())
             .order_by(order(timestamp).desc())
             .return_many::<Self>(db.clone())
             .await
