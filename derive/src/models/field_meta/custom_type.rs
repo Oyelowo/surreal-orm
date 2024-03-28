@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::fmt::Display;
+
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
@@ -519,27 +521,7 @@ impl CustomType {
     }
 
     pub fn is_list(&self) -> bool {
-        let ty = self.into_inner_ref();
-        match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
-                    {
-                        return false;
-                    }
-                    last_seg.ident == "Vec"
-                } else {
-                    false
-                }
-            }
-            syn::Type::Array(_) => true,
-            _ => false,
-        }
+        self.is_array() || self.is_set()
     }
 
     pub fn raw_type_is_optional(&self) -> bool {
@@ -556,7 +538,7 @@ impl CustomType {
                     {
                         return false;
                     }
-                    last_seg.ident == "Option"
+                    last_seg.ident == RustType::Option.to_string()
                 } else {
                     false
                 }
@@ -566,7 +548,7 @@ impl CustomType {
         }
     }
 
-    pub fn raw_type_is_hash_set(&self) -> bool {
+    pub fn raw_type_is_set(&self) -> bool {
         let ty = self.into_inner_ref();
         match ty {
             syn::Type::Path(path) => {
@@ -580,7 +562,8 @@ impl CustomType {
                     {
                         return false;
                     }
-                    last_seg.ident == "HashSet"
+                    last_seg.ident == RustType::HashSet.to_string()
+                        || last_seg.ident == RustType::BTreeSet.to_string()
                 } else {
                     false
                 }
@@ -604,7 +587,8 @@ impl CustomType {
                     {
                         return false;
                     }
-                    last_seg.ident == "HashMap" || last_seg.ident == "BTreeMap"
+                    last_seg.ident == RustType::HashMap.to_string()
+                        || last_seg.ident == RustType::BTreeMap.to_string()
                 } else {
                     false
                 }
@@ -623,7 +607,8 @@ impl CustomType {
                     .segments
                     .last()
                     .expect("Must have at least one segment");
-                last_segment.ident.to_string().to_lowercase() == "datetime"
+                last_segment.ident.to_string().to_lowercase()
+                    == RustType::DateTime.to_string().to_lowercase()
             }
             _ => false,
         }
@@ -667,7 +652,7 @@ impl CustomType {
         }
     }
 
-    pub fn get_array_inner_type(&self) -> Option<CustomType> {
+    fn get_type_inner_type(&self, potential_type_idents: &[RustType]) -> Option<CustomType> {
         let ty = &self.into_inner_ref();
 
         let item_ty = match ty {
@@ -677,7 +662,10 @@ impl CustomType {
                     .segments
                     .last()
                     .expect("Must have at least one segment");
-                if last_segment.ident != "Vec" {
+                if potential_type_idents
+                    .iter()
+                    .any(|type_ident| type_ident.to_string() == last_segment.ident.to_string())
+                {
                     return None;
                 }
                 let item_ty = match last_segment.arguments {
@@ -697,31 +685,21 @@ impl CustomType {
         Some(item_ty.clone().into())
     }
 
-    pub fn get_option_item_type(&self) -> Option<Type> {
-        let ty = &self.into_inner_ref();
+    pub fn get_list_inner_type(&self) -> Option<CustomType> {
+        self.get_array_inner_type()
+            .or_else(|| self.get_set_inner_type())
+    }
+    pub fn get_set_inner_type(&self) -> Option<CustomType> {
+        self.get_type_inner_type(&[RustType::HashSet, RustType::BTreeSet])
+    }
 
-        let item_ty = match ty {
-            syn::Type::Path(type_path) => {
-                let last_segment = type_path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                if last_segment.ident != "Option" {
-                    return None;
-                }
-                let item_ty = match last_segment.arguments {
-                    syn::PathArguments::AngleBracketed(ref args) => args.args.first(),
-                    _ => None,
-                };
-                match item_ty {
-                    Some(syn::GenericArgument::Type(ty)) => ty,
-                    _ => return None,
-                }
-            }
-            _ => return None,
-        };
-        Some(item_ty.clone())
+    pub fn get_array_inner_type(&self) -> Option<CustomType> {
+        // TODO: Do for const array also and array slice?
+        self.get_type_inner_type(&[RustType::Vec])
+    }
+
+    pub fn get_option_item_type(&self) -> Option<CustomType> {
+        self.get_type_inner_type(&[RustType::Option])
     }
 
     pub fn infer_surreal_type_heuristically(
@@ -764,7 +742,7 @@ impl CustomType {
                 .as_ref()
                 .map(|ct| {
                     let ty = ct.clone();
-                    let item = Self::new(ty);
+                    let item = Self::new(ty.into_inner());
 
                     item.infer_surreal_type_heuristically(field_name, relation_type, model_type)
                 })
@@ -810,7 +788,7 @@ impl CustomType {
                             #inner_static_assertion
                 ).into(),
             }
-        } else if self.raw_type_is_hash_set() {
+        } else if self.raw_type_is_set() {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Set(Box::new(FieldType::Any), None)),
                 field_type_db_token: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)).into(),
@@ -953,7 +931,6 @@ impl CustomType {
             || self.raw_type_is_bool()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
-        // || self.raw_type_is_geometry()
     }
 
     pub fn type_is_inferrable(
@@ -974,11 +951,68 @@ impl CustomType {
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
             || self.is_list()
-            || self.raw_type_is_hash_set()
+            || self.raw_type_is_set()
             || self.raw_type_is_object()
             || self.raw_type_is_optional()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
             || self.raw_type_is_geometry()
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+enum RustType {
+    Vec,
+    Option,
+    HashSet,
+    BTreeSet,
+    HashMap,
+    BTreeMap,
+    Bool,
+    U8,
+    U16,
+    U32,
+    U64,
+    U128,
+    F32,
+    F64,
+    USize,
+    I8,
+    I16,
+    I32,
+    I64,
+    I128,
+    Duration,
+    DateTime,
+}
+
+impl Display for RustType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let ty = match self {
+            RustType::Bool => "bool",
+            RustType::Vec => "Vec",
+            RustType::Option => "Option",
+            RustType::HashSet => "HashSet",
+            RustType::BTreeSet => "BTreeSet",
+            RustType::HashMap => "HashMap",
+            RustType::BTreeMap => "BTreeMap",
+            RustType::U8 => "u8",
+            RustType::U16 => "u16",
+            RustType::U32 => "u32",
+            RustType::U64 => "u64",
+            RustType::U128 => "u128",
+            RustType::F32 => "f32",
+            RustType::F64 => "f64",
+            RustType::Duration => "Duration",
+            RustType::DateTime => "DateTime",
+            RustType::USize => "usize",
+            RustType::I8 => "i8",
+            RustType::I16 => "i16",
+            RustType::I32 => "i32",
+            RustType::I64 => "i64",
+            RustType::I128 => "i128",
+        };
+        write!(f, "{ty}")
     }
 }
