@@ -1,4 +1,4 @@
-/
+/*
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2024 Oyelowo Oyedayo
@@ -30,10 +30,7 @@ impl MyFieldReceiver {
         Ok(self.ident_meta(struct_casing)?.0)
     }
 
-    pub fn db_field_name(
-        &self,
-        struct_casing: &StructLevelCasing,
-    ) -> ExtractorResult<DbFieldName> {
+    pub fn db_field_name(&self, struct_casing: &StructLevelCasing) -> ExtractorResult<DbFieldName> {
         Ok(self.ident_meta(struct_casing)?.1)
     }
 
@@ -45,7 +42,10 @@ impl MyFieldReceiver {
 
         let field_name_pascalized = format_ident!(
             "__{}__",
-            field_name_normalized.to_string().to_case(Case::Pascal)
+            field_name_normalized
+                .to_string()
+                .trim_start_matches("r#")
+                .to_case(Case::Pascal)
         );
 
         Ok(field_name_pascalized.into())
@@ -70,13 +70,13 @@ impl MyFieldReceiver {
         {
             let field_ident_normalized = field_ident_normalized.trim_start_matches("r#");
             (
-                syn::Ident::new_raw(field_ident_normalized, proc_macro2::Span::call_site()),
-                format_ident!("{field_ident_normalized}"),
+                syn::Ident::new_raw(field_ident_normalized, field_ident_original.span()),
+                syn::Ident::new(field_ident_normalized, field_ident_original.span()),
             )
         } else {
             (
-                format_ident!("{field_ident_normalized}"),
-                format_ident!("{field_ident_normalized}"),
+                syn::Ident::new(field_ident_normalized, field_ident_original.span()),
+                syn::Ident::new(field_ident_normalized, field_ident_original.span()),
             )
         };
 
