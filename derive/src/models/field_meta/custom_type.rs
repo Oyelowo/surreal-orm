@@ -520,9 +520,10 @@ impl CustomType {
         }
     }
 
-    pub fn is_list(&self) -> bool {
-        self.is_array() || self.is_set()
-    }
+    // TODO: Remove this?
+    // pub fn is_list(&self) -> bool {
+    //     self.is_array() || self.is_set()
+    // }
 
     pub fn raw_type_is_optional(&self) -> bool {
         let ty = self.into_inner_ref();
@@ -699,7 +700,30 @@ impl CustomType {
     }
 
     pub fn get_option_item_type(&self) -> Option<CustomType> {
-        self.get_type_inner_type(&[RustType::Option])
+        let ty = &self.into_inner_ref();
+
+        let item_ty = match ty {
+            syn::Type::Path(type_path) => {
+                let last_segment = type_path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
+                if last_segment.ident != RustType::Option.to_string() {
+                    return None;
+                }
+                let item_ty = match last_segment.arguments {
+                    syn::PathArguments::AngleBracketed(ref args) => args.args.first(),
+                    _ => None,
+                };
+                match item_ty {
+                    Some(syn::GenericArgument::Type(ty)) => ty,
+                    _ => return None,
+                }
+            }
+            _ => return None,
+        };
+        Some(item_ty.clone().into())
     }
 
     pub fn infer_surreal_type_heuristically(
@@ -767,7 +791,7 @@ impl CustomType {
                 )
                 .into(),
             }
-        } else if self.is_list() {
+        } else if self.is_array() {
             let inner_type = self.get_array_inner_type();
             let inner_item = inner_type
                 .map(|ct| {
@@ -950,7 +974,7 @@ impl CustomType {
             || self.raw_type_is_integer()
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
-            || self.is_list()
+            || self.is_array()
             || self.raw_type_is_set()
             || self.raw_type_is_object()
             || self.raw_type_is_optional()

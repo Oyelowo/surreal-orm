@@ -78,18 +78,19 @@ impl MyFieldReceiver {
             || self.field_type_db.as_ref().map_or(false, |t| t.is_set())
     }
 
-    pub fn is_list(&self) -> bool {
-        let field_type = self
-            .field_type_db
-            .as_ref()
-            .map_or(&FieldType::Any, |t| t.into_inner_ref());
-        let explicit_ty_is_list =
-            matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
-        explicit_ty_is_list
-            || self.ty().is_list()
-            || self.field_type_db.as_ref().map_or(false, |t| t.is_list())
-            || self.link_many.is_some()
-    }
+    // TODO: Remove this?
+    // pub fn is_list(&self) -> bool {
+    //     let field_type = self
+    //         .field_type_db
+    //         .as_ref()
+    //         .map_or(&FieldType::Any, |t| t.into_inner_ref());
+    //     let explicit_ty_is_list =
+    //         matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
+    //     explicit_ty_is_list
+    //         || self.ty().is_list()
+    //         || self.field_type_db.as_ref().map_or(false, |t| t.is_list())
+    //         || self.link_many.is_some()
+    // }
 
     pub fn ty(&self) -> CustomType {
         CustomType::new(self.ty.clone())
