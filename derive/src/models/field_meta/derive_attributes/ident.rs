@@ -14,7 +14,7 @@ use quote::format_ident;
 use super::{FieldIdentNormalized, FieldNamePascalized, IdentCased, MyFieldReceiver};
 
 impl MyFieldReceiver {
-    pub(crate) fn ident(&self) -> ExtractorResult<FieldIdentOriginal> {
+    pub fn ident(&self) -> ExtractorResult<FieldIdentOriginal> {
         Ok(self
             .ident
             .as_ref()
@@ -23,14 +23,14 @@ impl MyFieldReceiver {
             .into())
     }
 
-    pub(crate) fn field_ident_normalized(
+    pub fn field_ident_normalized(
         &self,
         struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<FieldIdentNormalized> {
         Ok(self.ident_meta(struct_casing)?.0)
     }
 
-    pub(crate) fn db_field_name(
+    pub fn db_field_name(
         &self,
         struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<DbFieldName> {
