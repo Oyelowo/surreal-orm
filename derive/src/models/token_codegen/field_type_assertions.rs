@@ -19,7 +19,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver
             .ty()
-            .remove_lifetime_and_reference()
+            .remove_non_static_lifetime_and_reference()
             .replace_self_with_current_struct_concrete_type(table_derive_attrs)?;
 
         let static_assertions = match field_receiver.to_relation_type() {
@@ -157,7 +157,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver
             .ty()
-            .remove_lifetime_and_reference()
+            .remove_non_static_lifetime_and_reference()
             .replace_self_with_current_struct_concrete_type(table_derive_attrs)?;
 
         let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;

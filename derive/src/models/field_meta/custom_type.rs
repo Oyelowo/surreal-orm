@@ -11,7 +11,7 @@ use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
     self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
-    Lifetime, Path, PathArguments, Token, Type,
+    Lifetime, Path, PathArguments, Token, Type, TypeReference,
 };
 
 use crate::models::*;
@@ -167,9 +167,16 @@ impl CustomType {
         &self.0
     }
 
-    pub fn remove_lifetime_and_reference(&self) -> Self {
+    pub fn remove_non_static_lifetime_and_reference(&self) -> Self {
         let ty = match self.into_inner_ref() {
-            Type::Reference(r) => r.elem.as_ref(),
+            Type::Reference(TypeReference { elem, lifetime, .. }) => match lifetime {
+                // Dont remove static lifetime for "str" from &'static would be
+                // invalid thus, a compile error. We could potentially keep this restriction only
+                // for str and not other type but leaving as is for now.
+                // 28th March, 2024. Oyelowo Oyedayo
+                Some(lt) if lt.ident == "static" => self.into_inner_ref(),
+                _ => elem.as_ref(),
+            },
             _ => self.into_inner_ref(),
         };
         Self(ty.clone())

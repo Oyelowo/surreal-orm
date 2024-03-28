@@ -18,10 +18,17 @@ pub struct StrippedBoundsGenerics(pub Generics);
 #[derive(Clone, Debug, Default)]
 pub struct CustomGenericsWithoutStaticInImpl(pub Generics);
 
+create_tokenstream_wrapper!(=>ImplGenerics);
+create_tokenstream_wrapper!(=>TypeGenerics);
+create_tokenstream_wrapper!(=>WhereClause);
+
+#[derive(Clone, Debug)]
+struct GenericsMeta(ImplGenerics, TypeGenerics, Option<WhereClause>);
+
 #[derive(Clone, Debug, Default)]
 pub struct CustomGenerics {
-    pub original_generics: Generics,
-    pub generics_without_static_in_impl: Generics,
+    original_generics: Generics,
+    generics_without_static_in_impl: Generics,
 }
 
 impl CustomGenerics {
@@ -65,10 +72,55 @@ impl CustomGenerics {
         &self.original_generics.params
     }
 
-    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
-        let (impl_gen, _, _) = self.generics_without_static_in_impl.split_for_impl();
-        let (_, ty_gen, where_clause) = self.into_inner_ref().split_for_impl();
-        (impl_gen, ty_gen, where_clause)
+    pub fn remove_static_lifetime(&mut self) {
+        let filter_static = |param: &GenericParam| match param {
+            GenericParam::Lifetime(lifetime_def) => lifetime_def.lifetime.ident != "static",
+            _ => true,
+        };
+
+        let generics_without_static_in_impl_params = self
+            .original_generics
+            .params
+            .iter()
+            .filter(|param| filter_static(param))
+            .cloned()
+            .collect();
+
+        self.original_generics.params = generics_without_static_in_impl_params;
+    }
+
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, WhereClause) {
+        let binding = self.strip_static_from_generics();
+        let (impl_gen, ty_gen, wh) = binding.generics_without_static_in_impl.split_for_impl();
+        (
+            quote!(#impl_gen).into(),
+            quote!(#ty_gen).into(),
+            quote!(#wh).into(),
+        )
+    }
+
+    pub fn strip_static_from_generics(&self) -> Self {
+        let generics_without_static_in_impl = self.original_generics.clone();
+        let filter_static = |param: &GenericParam| match param {
+            GenericParam::Lifetime(lifetime_def) => lifetime_def.lifetime.ident != "static",
+            _ => true,
+        };
+
+        let generics_without_static_in_impl_params = generics_without_static_in_impl
+            .params
+            .into_iter()
+            .filter(|param| filter_static(param))
+            .collect();
+
+        let gen = Generics {
+            params: generics_without_static_in_impl_params,
+            ..self.original_generics.clone()
+        };
+
+        Self {
+            original_generics: self.original_generics.clone(),
+            generics_without_static_in_impl: gen,
+        }
     }
 
     pub fn to_basic_generics(&self) -> &Generics {
@@ -209,7 +261,7 @@ impl StructGenerics {
         &self.0.into_inner_ref()
     }
 
-    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, WhereClause) {
         self.0.split_for_impl()
     }
 
@@ -246,7 +298,7 @@ impl<'a> GenericTypeExtractor<'a> {
             field_generics: Default::default(),
         };
         generics.visit_type(field_ty.into_inner_ref());
-        generics.field_generics.0
+        generics.field_generics.0.strip_static_from_generics()
     }
 
     fn add_lifetime_if_not_exists(&mut self, lt: &Lifetime) {
