@@ -113,10 +113,10 @@ impl ToTokens for EdgeToken {
         let has_in_and_out_fields = || {
             !serialized_field_names_normalised
                 .iter()
-                .any(|this| this.to_string() == "in")
+                .any(|this| this.to_string().trim_start_matches("r#") == "in")
                 || !serialized_field_names_normalised
                     .iter()
-                    .any(|this| this.to_string() == "out")
+                    .any(|this| this.to_string().trim_start_matches("r#") == "out")
         };
 
         if has_in_and_out_fields() {
