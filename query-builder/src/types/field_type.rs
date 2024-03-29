@@ -271,7 +271,7 @@ impl FieldType {
             "record<user>",
             "geometry<point>",
             "option<string>",
-            "union<string | number>",
+            "string | number",
         ]
     }
 
