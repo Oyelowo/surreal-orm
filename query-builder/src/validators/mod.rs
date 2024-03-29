@@ -107,6 +107,10 @@ pub fn assert_type_is_int<T: Int>() {}
 /// ```
 pub fn assert_type_is_float<T: Float>() {}
 
+// Reusing float static check for now
+/// Validate that type is a primitive decimal at compile time
+pub use assert_type_is_float as assert_type_is_decimal;
+
 /// Validate that type is iterable at compile time
 pub fn assert_is_iterable<T: IntoIterator>() {
     let _ = <T as IntoIterator>::into_iter;
