@@ -236,24 +236,8 @@ impl<'a> Codegen<'a> {
                 return Ok(());
             }
 
-            match db_field_type {
+            let inner = match db_field_type {
                 FieldType::Option(inner) => {
-                    static_assertions_for_inner_type(
-                        inner_rust_field_type,
-                        inner,
-                        assertion_accumulator,
-                    )?;
-
-                    static_check_inner_type(
-                        inner_rust_field_type
-                            .map(|ft| ft.inner_angle_bracket_type().ok())
-                            .flatten()
-                            .flatten()
-                            .as_ref(),
-                        inner,
-                        assertion_accumulator,
-                    )?;
-
                     // let inner_rust_ty = rust_field_type.inner_angle_bracket_type()?;
 
                     // static_assertions_for_inner_type(
@@ -261,15 +245,29 @@ impl<'a> Codegen<'a> {
                     //     inner,
                     //     assertion_accumulator,
                     // )?;
+                    inner
                 }
                 FieldType::Set(inner, _) => {
-                    todo!()
+                    // todo!()
+                    inner
                 }
                 FieldType::Array(inner, _) => {
-                    todo!()
+                    // todo!()
+                    inner
                 }
                 _ => return Ok(()),
             };
+            static_assertions_for_inner_type(inner_rust_field_type, inner, assertion_accumulator)?;
+
+            static_check_inner_type(
+                inner_rust_field_type
+                    .map(|ft| ft.inner_angle_bracket_type().ok())
+                    .flatten()
+                    .flatten()
+                    .as_ref(),
+                inner,
+                assertion_accumulator,
+            )?;
 
             Ok(())
         }

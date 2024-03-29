@@ -152,7 +152,8 @@ impl FieldTypeDb {
 
         let static_assertion = match self.0 {
             FieldType::Any => {
-                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                // quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: #crate_name::serde::Serialize);)
             }
             FieldType::Null => {
                 quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Value>);)
@@ -271,7 +272,7 @@ impl FromMeta for FieldTypeDb {
                 "Invalid db_field_type: {field_type}. Must be one of these: {}",
                 FieldType::variants().join(", ")
             ))
-            .with_span(&field_type.span())
+            .with_span(&expr.span())
         })?;
         Ok(Self(field_type))
     }
