@@ -343,9 +343,10 @@ impl FieldType {
     }
 
     /// Returns true if the field type is a list type
-    pub fn is_list(&self) -> bool {
-        matches!(self, FieldType::Array(_, _) | FieldType::Set(_, _))
-    }
+    // TODO: Remove this?
+    // pub fn is_list(&self) -> bool {
+    //     matches!(self, FieldType::Array(_, _) | FieldType::Set(_, _))
+    // }
 
     /// Returns true if the field type is a numeric type
     pub fn is_numeric(&self) -> bool {

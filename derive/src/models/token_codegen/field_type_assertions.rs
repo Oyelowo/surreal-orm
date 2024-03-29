@@ -126,7 +126,7 @@ impl<'a> Codegen<'a> {
                 }
                 FieldType::Decimal => {
                     vec![quote!(
-                        #crate_name::validators::assert_type_is_number::<#field_type>();
+                        #crate_name::validators::assert_type_is_float::<#field_type>();
                     )]
                 }
                 FieldType::Duration => {
@@ -162,29 +162,70 @@ impl<'a> Codegen<'a> {
 
         let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
         let db_field_type = db_field_type.into_inner_ref();
+
         let mut top_level_check =
             get_field_type_static_assertions(field_type.into_inner_ref(), db_field_type);
-        if let FieldType::Option(_) = db_field_type {
-            let ty = field_type.inner_angle_bracket_type()?;
 
-            if let Some(ty) = ty {
-                if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
-                    let field_name =
-                        &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
-                    let relation_type = field_receiver.to_relation_type();
-                    let model_type = self.data_type();
-                    let db_type_meta = ty.infer_surreal_type_heuristically(
-                        field_name,
-                        &relation_type,
-                        &model_type,
-                    )?;
-
-                    if let Some(ft) = db_type_meta.field_type_db_original {
-                        let inner = get_field_type_static_assertions(ty.into_inner_ref(), &ft);
-                        top_level_check.extend(inner);
-                    }
+        match db_field_type {
+            FieldType::Array(element, _) => {
+                let ty = field_type.inner_angle_bracket_type()?;
+                if let Some(ty) = ty {
+                    let inner = get_field_type_static_assertions(ty.into_inner_ref(), element);
+                    top_level_check.extend(inner);
                 }
             }
+            _ => {}
+        }
+
+        let inner_rust_ty = field_type.inner_angle_bracket_type()?;
+        let static_assertions_for_inner_type =
+            |inner_db_field_type: &FieldType| -> ExtractorResult<()> {
+                if let Some(inner_rust_ty) = inner_rust_ty.clone() {
+                    let inner = get_field_type_static_assertions(
+                        inner_rust_ty.into_inner_ref(),
+                        inner_db_field_type,
+                    );
+                    top_level_check.extend(inner);
+                }
+
+                // This latter part may be unnecessary
+                if let Some(ty) = inner_rust_ty {
+                    if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
+                        let field_name =
+                            &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
+                        let relation_type = field_receiver.to_relation_type();
+                        let model_type = self.data_type();
+                        let db_type_meta = ty.infer_surreal_type_heuristically(
+                            field_name,
+                            &relation_type,
+                            &model_type,
+                        )?;
+
+                        if let Some(ft) = db_type_meta.field_type_db_original {
+                            let inner = get_field_type_static_assertions(ty.into_inner_ref(), &ft);
+                            // if field_receiver.ident()?.to_string() == "must_number" {
+                            //     panic!("xxxty: {}", inner.first().unwrap().to_string());
+                            // }
+                            top_level_check.extend(inner);
+                        }
+                    }
+                }
+                Ok(())
+            };
+
+        // match
+
+        match db_field_type {
+            FieldType::Option(inner) => {
+                static_assertions_for_inner_type(inner)?;
+            }
+            FieldType::Set(inner, _) => {
+                static_assertions_for_inner_type(inner)?;
+            }
+            FieldType::Array(inner, _) => {
+                static_assertions_for_inner_type(inner)?;
+            }
+            _ => {}
         }
         Ok(top_level_check)
     }
