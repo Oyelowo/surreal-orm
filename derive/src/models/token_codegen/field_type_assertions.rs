@@ -77,22 +77,16 @@ impl<'a> Codegen<'a> {
         ) -> Vec<TokenStream> {
             match db_field_type {
                 FieldType::Any => {
-                    vec![
-                        quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
-                    ]
+                    vec![quote!(#crate_name::validators::assert_type_is_any::<#field_type>;)]
                 }
                 FieldType::Null => {
-                    vec![quote!()]
+                    vec![quote!(#crate_name::validators::assert_type_is_null::<#field_type>;)]
                 }
                 FieldType::Uuid => {
-                    vec![
-                        quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Uuid>);),
-                    ]
+                    vec![quote!(#crate_name::validators::assert_type_is_uuid::<#field_type>;)]
                 }
                 FieldType::Bytes => {
-                    vec![
-                        quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Bytes>);),
-                    ]
+                    vec![quote!(#crate_name::validators::assert_type_is_bytes::<#field_type>;)]
                 }
                 FieldType::Union(_) => {
                     vec![quote!()]
@@ -104,58 +98,40 @@ impl<'a> Codegen<'a> {
                     vec![quote!(#crate_name::validators::assert_type_is_string::<#field_type>();)]
                 }
                 FieldType::Int => {
-                    vec![quote!(
-                        #crate_name::validators::assert_type_is_int::<#field_type>();
-                    )]
+                    vec![quote!(#crate_name::validators::assert_type_is_int::<#field_type>();)]
                 }
                 FieldType::Float => {
-                    vec![quote!(
-                        #crate_name::validators::assert_type_is_float::<#field_type>();
-                    )]
+                    vec![quote!(#crate_name::validators::assert_type_is_float::<#field_type>();)]
                 }
                 FieldType::Bool => {
                     vec![quote!(#crate_name::validators::assert_type_is_bool::<#field_type>();)]
                 }
                 FieldType::Array(_, _) => {
-                    vec![quote!(
-                        #crate_name::validators::assert_type_is_array::<#field_type>();
-                    )]
+                    vec![quote!(#crate_name::validators::assert_type_is_array::<#field_type>();)]
                 }
                 FieldType::Set(_, _) => {
-                    vec![quote!(
-                        #crate_name::validators::assert_type_is_set::<#field_type>();
-                    )]
+                    vec![quote!(#crate_name::validators::assert_type_is_set::<#field_type>();)]
                 }
                 FieldType::Datetime => {
                     vec![quote!(#crate_name::validators::assert_type_is_datetime::<#field_type>();)]
                 }
                 FieldType::Decimal => {
-                    vec![quote!(
-                        #crate_name::validators::assert_type_is_decimal::<#field_type>();
-                    )]
+                    vec![quote!(#crate_name::validators::assert_type_is_decimal::<#field_type>();)]
                 }
                 FieldType::Duration => {
                     vec![quote!(#crate_name::validators::assert_type_is_duration::<#field_type>();)]
                 }
                 FieldType::Number => {
-                    vec![quote!(
-                        #crate_name::validators::assert_type_is_number::<#field_type>();
-                    )]
+                    vec![quote!(#crate_name::validators::assert_type_is_number::<#field_type>();)]
                 }
                 FieldType::Object => {
-                    vec![
-                        quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Object>);),
-                    ]
+                    vec![quote!(#crate_name::validators::assert_type_is_object::<#field_type>();)]
                 }
                 FieldType::Record(_) => {
-                    vec![
-                        quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Thing>);),
-                    ]
+                    vec![quote!(#crate_name::validators::assert_type_is_thing::<#field_type>();)]
                 }
                 FieldType::Geometry(_) => {
-                    vec![
-                        quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Geometry>);),
-                    ]
+                    vec![quote!(#crate_name::validators::assert_type_is_geometry::<#field_type>();)]
                 }
             }
         }
