@@ -25,9 +25,8 @@ impl<'a> Codegen<'a> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
         let casing = table_derive_attrs.casing()?;
-        let field_name_serialized = field_receiver.db_field_name(&casing)?;
+        let db_field_name = field_receiver.db_field_name(&casing)?;
 
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
@@ -62,7 +61,7 @@ impl<'a> Codegen<'a> {
         all_field_defintions.push(main_field_def.into());
 
         if !define_array_field_item_methods.is_empty() {
-            let array_field_item_str = format_ident!("{field_name_serialized}.*");
+            let array_field_item_str = quote!(#db_field_name.*).to_string();
             let array_item_definition = quote!(
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_item_str))
                                         .on_table(#crate_name::Table::from(Self::table()))
