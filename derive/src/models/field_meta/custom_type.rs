@@ -774,26 +774,29 @@ impl CustomType {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Bool),
                 field_type_db_token: quote!(#crate_name::FieldType::Bool).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);).into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_bool::<#ty>();).into(),
             }
         } else if self.raw_type_is_float() {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Float),
                 field_type_db_token: quote!(#crate_name::FieldType::Float).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);).into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_float::<#ty>();).into(),
             }
         } else if self.raw_type_is_integer() {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Int),
                 field_type_db_token: quote!(#crate_name::FieldType::Int).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);).into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_int::<#ty>();).into(),
             }
         } else if self.raw_type_is_string() {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::String),
                 field_type_db_token: quote!(#crate_name::FieldType::String).into(),
-                // TODO: Use my custom validator assertions
-                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);).into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_string::<#ty>();).into(),
             }
         } else if self.raw_type_is_optional() {
             let get_option_item_type = self.get_option_item_type();
@@ -903,27 +906,31 @@ impl CustomType {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Duration),
                 field_type_db_token: quote!(#crate_name::FieldType::Duration).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);).into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_duration::<#ty>();).into(),
             }
         } else if self.raw_type_is_datetime() {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Datetime),
                 field_type_db_token: quote!(#crate_name::FieldType::Datetime).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);).into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_datetime::<#ty>();).into(),
             }
         } else if self.raw_type_is_geometry() {
             DbFieldTypeAstMeta {
                 // TODO: check if to auto-infer more speicific geometry type?
                 field_type_db_original: Some(FieldType::Geometry(vec![])),
                 field_type_db_token: quote!(#crate_name::FieldType::Geometry(::std::vec![])).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);).into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_geometry::<#ty>();).into(),
             }
         } else if field_name.is_id() {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Record(vec![])),
                 field_type_db_token:
                     quote!(#crate_name::FieldType::Record(::std::vec![Self::table()])).into(),
-                static_assertion_token: quote!().into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_thing::<#ty>();).into(),
             }
         } else if field_name.is_orig_or_dest_edge_node(model_type) {
             // An edge might be shared by multiple In/Out nodes. So, default to any type of
@@ -931,7 +938,8 @@ impl CustomType {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Record(vec![])),
                 field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![])).into(),
-                static_assertion_token: quote!().into(),
+                static_assertion_token:
+                    quote!(#crate_name::validators::assert_type_is_thing::<#ty>();).into(),
             }
         } else if relation_type.is_some() {
             match relation_type {
@@ -969,7 +977,8 @@ impl CustomType {
                 RelationType::NestObject(_ref_object) => DbFieldTypeAstMeta {
                     field_type_db_original: Some(FieldType::Object),
                     field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
-                    static_assertion_token: quote!().into(),
+                    static_assertion_token:
+                        quote!(#crate_name::validators::assert_type_is_object::<#ty>();).into(),
                 },
                 RelationType::NestArray(_ref_array) => DbFieldTypeAstMeta {
                     // provide the inner type for when the array part start recursing
@@ -980,6 +989,8 @@ impl CustomType {
                     //     ::std::option::Option::None
                     // )),
                     static_assertion_token: quote!().into(),
+                    // static_assertion_token:
+                    //     quote!(#crate_name::validators::assert_type_is_array::<#ty>();).into(),
                 },
                 // We already did for list/array/set earlier. 
                 // TODO: Consider removing the concept of list altogether to 
