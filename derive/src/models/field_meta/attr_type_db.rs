@@ -71,7 +71,7 @@ impl FieldTypeDb {
         let value = quote!(#crate_name::FieldType::from_str(#value).unwrap());
         value.into()
     }
-
+}
 
 impl Display for FieldTypeDb {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -94,16 +94,22 @@ impl FromMeta for FieldTypeDb {
                 if let syn::Lit::Str(lit_str) = &expr_lit.lit {
                     lit_str.value()
                 } else {
-                    return Err(darling::Error::custom("Expected a string literal for ty"));
+                    return Err(darling::Error::custom("Expected a string literal for ty")
+                        .with_span(&expr.span()));
                 }
             }
             syn::Expr::Path(expr_path) => expr_path
                 .path
                 .get_ident()
                 .map(|ident| ident.to_string())
-                .ok_or_else(|| darling::Error::custom("Expected an identifier for ty"))?,
+                .ok_or_else(|| {
+                    darling::Error::custom("Expected an identifier for ty").with_span(&expr.span())
+                })?,
             syn::Expr::Verbatim(expr_verbatim) => expr_verbatim.to_string(),
-            _ => return Err(darling::Error::custom("Expected a string literal for ty")),
+            _ => {
+                return Err(darling::Error::custom("Expected a string literal for ty")
+                    .with_span(&expr.span()))
+            }
         };
         let field_type = FieldType::from_str(&field_type).map_err(|_| {
             darling::Error::custom(format!(
