@@ -65,78 +65,10 @@ impl FieldTypeDb {
         }
     }
 
-    // TODO: Remove this?
-    // pub fn list_item_type(&self) -> Option<Self> {
-    //     self.array_item_type().or_else(|| self.set_item_type())
-    // }
-
     pub fn as_db_sql_value_tokenstream(&self) -> SqlValueTokenStream {
         let crate_name = get_crate_name(false);
-        let value = match self.into_inner_ref() {
-            FieldType::Any => {
-                quote!(#crate_name::sql::Value)
-            }
-            FieldType::Null => {
-                quote!(#crate_name::sql::Value)
-            }
-            FieldType::Uuid => {
-                quote!(#crate_name::sql::Uuid)
-            }
-            FieldType::Bytes => {
-                quote!(#crate_name::sql::Bytes)
-            }
-            FieldType::Union(_) => {
-                quote!(#crate_name::sql::Value)
-            }
-            FieldType::Option(ft) => {
-                let val = Self(ft.deref().clone()).as_db_sql_value_tokenstream();
-                quote!(::std::option::Option<#val>)
-            }
-            FieldType::String => {
-                quote!(::std::string::String)
-            }
-            FieldType::Int => {
-                // quote!(#crate_name::validators::Int)
-                quote!(#crate_name::sql::Number)
-            }
-            FieldType::Float => {
-                // quote!(#crate_name::validators::Float)
-                quote!(#crate_name::sql::Number)
-            }
-            FieldType::Bool => {
-                quote!(::std::convert::Into<::std::primitive::bool>)
-            }
-            FieldType::Array(_, _) => {
-                // quote!(::std::iter::IntoIterator)
-                // quote!(::std::convert::Into<#crate_name::sql::Array>)
-                quote!(::std::vec::Vec<#crate_name::sql::Value>)
-            }
-            FieldType::Set(_, _) => {
-                quote!(::std::collections::HashSet<#crate_name::sql::Value>)
-            }
-            FieldType::Datetime => {
-                quote!(#crate_name::sql::Datetime)
-            }
-            FieldType::Decimal => {
-                quote!(#crate_name::validators::Float)
-            }
-            FieldType::Duration => {
-                quote!(#crate_name::sql::Duration)
-            }
-            FieldType::Number => {
-                // quote!(#crate_name::validators::Num)
-                quote!(#crate_name::sql::Number)
-            }
-            FieldType::Object => {
-                quote!(#crate_name::sql::Object)
-            }
-            FieldType::Record(_) => {
-                quote!(#crate_name::sql::Thing)
-            }
-            FieldType::Geometry(_) => {
-                quote!(#crate_name::sql::Geometry)
-            }
-        };
+        let value = self.into_inner_ref().clone().to_string();
+        let value = quote!(#crate_name::FieldType::from_str(#value).unwrap());
         value.into()
     }
 
