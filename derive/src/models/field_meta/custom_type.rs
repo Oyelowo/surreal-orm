@@ -5,15 +5,15 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::Display;
+use std::{fmt::Display, ops::Deref};
 
 use darling::FromMeta;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
-    self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, GenericArgument, Ident,
-    Lifetime, Path, PathArguments, Token, Type, TypeReference,
+    self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, Expr, GenericArgument,
+    Ident, Lifetime, Path, PathArguments, Token, Type, TypeReference,
 };
 
 use crate::models::*;
@@ -203,6 +203,14 @@ impl CustomType {
                 } else {
                     Ok(None)
                 }
+            }
+            Type::Array(array) => {
+                let elem = array.elem.as_ref();
+                Ok(Some(elem.clone().into()))
+            }
+            Type::Reference(r) => {
+                let elem = r.elem.as_ref();
+                Ok(Some(elem.clone().into()))
             }
             _ => {
                 Err(syn::Error::new(self.to_token_stream().span(), "Expected a struct type").into())
@@ -496,7 +504,7 @@ impl CustomType {
         }
     }
 
-    pub fn is_array(&self) -> bool {
+    pub fn is_vec(&self) -> bool {
         let ty = &self.into_inner_ref();
         match ty {
             syn::Type::Path(path) => {
@@ -515,9 +523,20 @@ impl CustomType {
                     false
                 }
             }
-            syn::Type::Array(_) => true,
             _ => false,
         }
+    }
+
+    pub fn is_array_const(&self) -> bool {
+        let ty = &self.into_inner_ref();
+        match ty {
+            Type::Array(_type_array) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_array(&self) -> bool {
+        self.is_array_const() || self.is_vec()
     }
 
     // TODO: Remove this?
@@ -544,7 +563,6 @@ impl CustomType {
                     false
                 }
             }
-            syn::Type::Array(_) => true,
             _ => false,
         }
     }
@@ -691,8 +709,28 @@ impl CustomType {
     }
 
     pub fn get_array_inner_type(&self) -> Option<CustomType> {
-        // TODO: Do for const array also and array slice?
+        self.get_vec_inner_type()
+            .or_else(|| self.get_array_const_inner_type())
+    }
+
+    pub fn get_array_const_length(&self) -> Option<Expr> {
+        let ty = &self.into_inner_ref();
+        match ty {
+            syn::Type::Array(array) => Some(array.len.clone()),
+            _ => None,
+        }
+    }
+
+    pub fn get_vec_inner_type(&self) -> Option<CustomType> {
         self.get_type_inner_type(&[RustType::Vec])
+    }
+
+    pub fn get_array_const_inner_type(&self) -> Option<CustomType> {
+        let ty = &self.into_inner_ref();
+        match ty {
+            syn::Type::Array(array) => Some(array.elem.deref().clone().into()),
+            _ => None,
+        }
     }
 
     pub fn get_option_item_type(&self) -> Option<CustomType> {
@@ -753,6 +791,7 @@ impl CustomType {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::String),
                 field_type_db_token: quote!(#crate_name::FieldType::String).into(),
+                // TODO: Use my custom validator assertions
                 static_assertion_token: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);).into(),
             }
         } else if self.raw_type_is_optional() {
@@ -768,7 +807,7 @@ impl CustomType {
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),
-                    "Could not infer type for the field",
+                    "Could not infer type for the optional field",
                 ))??;
 
             let inner_type = item.field_type_db_token;
@@ -789,22 +828,44 @@ impl CustomType {
             }
         } else if self.is_array() {
             let inner_type = self.get_array_inner_type();
+            let array_len_token_stream = self.get_array_const_length().map(|expr| {
+                if expr.to_token_stream().is_empty() {
+                    quote!(::std::option::Option::None)
+                } else {
+                    quote!(::std::option::Option::Some(#expr))
+                }
+            });
+            let array_len_token = self.get_array_const_length();
+            let array_len_token_as_int = array_len_token
+                .as_ref()
+                .map(|expr| {
+                    if let Expr::Lit(lit) = expr {
+                        if let syn::Lit::Int(int) = &lit.lit {
+                            Some(int.base10_parse::<u64>().unwrap())
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .flatten();
             let inner_item = inner_type
                 .map(|ct| {
                     ct.infer_surreal_type_heuristically(field_name, relation_type, model_type)
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),
-                    "Could not infer type for the field",
+                    "Could not infer type for the array field",
                 ))??;
 
             let inner_type = inner_item.field_type_db_token;
             let inner_static_assertion = inner_item.static_assertion_token;
             DbFieldTypeAstMeta {
-                field_type_db_original: Some(FieldType::Array(Box::new(inner_item.field_type_db_original.unwrap_or(FieldType::Any)), None)),
-                field_type_db_token: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)).into(),
+                field_type_db_original: Some(FieldType::Array(Box::new(inner_item.field_type_db_original.unwrap_or(FieldType::Any)), array_len_token_as_int)),
+                field_type_db_token: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), #array_len_token_stream)).into(),
                 static_assertion_token: quote!(
-                            #crate_name::validators::assert_type_is_vec::<#ty>();
+                            #crate_name::validators::assert_type_is_array::<#ty>();
                             #inner_static_assertion
                 ).into(),
             }
@@ -921,13 +982,17 @@ impl CustomType {
                 RelationType::None => {
                     return Err(syn::Error::new(
                         ty.span(),
-                        "Could not infer type for the field",
+                        "Could not infer type for the foreign field",
                     )
                     .into())
                 }
             }
         } else {
-            return Err(syn::Error::new(ty.span(), "Could not infer type for the field").into());
+            return Err(syn::Error::new(
+                ty.span(),
+                "Could not infer type for the field. Specify by using e.g ty = \"array\"",
+            )
+            .into());
         };
         Ok(meta)
     }
