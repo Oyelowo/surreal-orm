@@ -16,6 +16,7 @@ use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use surreal_query_builder::FieldType;
+use syn::spanned::Spanned;
 
 use crate::models::*;
 
@@ -222,7 +223,7 @@ impl FieldTypeDb {
                 if model_type.is_edge() {
                     quote!()
                 } else {
-                    quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#rust_field_type: ::std::convert::Into<#crate_name::sql::Thing>);)
                 }
             }
             FieldType::Geometry(_) => {
@@ -270,6 +271,7 @@ impl FromMeta for FieldTypeDb {
                 "Invalid db_field_type: {field_type}. Must be one of these: {}",
                 FieldType::variants().join(", ")
             ))
+            .with_span(&field_type.span())
         })?;
         Ok(Self(field_type))
     }
