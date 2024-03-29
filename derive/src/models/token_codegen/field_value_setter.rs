@@ -212,7 +212,7 @@ impl<'a> Codegen<'a> {
                         None => {
                             return Err(syn::Error::new(
                                 field_receiver.ident()?.span(),
-                                "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
+                                "Could not infer array or set type. Explicitly specify the type e.g ty = array<string>",
                             ).into())
                         }
                     };
