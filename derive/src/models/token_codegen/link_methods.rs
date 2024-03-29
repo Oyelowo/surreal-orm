@@ -90,7 +90,7 @@ impl<'a> Codegen<'a> {
 
                 let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<::std::vec::Vec<_>>();
 
-                let field = #crate_name::Field::new(format!("{field_name_serialized}{}", clause.build()))
+                let field = #crate_name::Field::new(format!("{}{}", #db_field_name, clause.build()))
                             .with_bindings(bindings)
                             .with_errors(errors);
                 field
