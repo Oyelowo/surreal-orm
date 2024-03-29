@@ -118,7 +118,7 @@ impl<'a> Codegen<'a> {
                 }
                 FieldType::Set(_, _) => {
                     vec![quote!(
-                        #crate_name::validators::assert_type_assert_is_set::<#field_type>();
+                        #crate_name::validators::assert_type_is_set::<#field_type>();
                     )]
                 }
                 FieldType::Datetime => {
