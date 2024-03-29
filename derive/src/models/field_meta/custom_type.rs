@@ -782,7 +782,7 @@ impl CustomType {
                     quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type)))
                         .into(),
                 static_assertion_token: quote!(
-                    #crate_name::validators::assert_option::<#ty>();
+                    #crate_name::validators::assert_type_is_option::<#ty>();
                     #item_static_assertion
                 )
                 .into(),
@@ -804,7 +804,7 @@ impl CustomType {
                 field_type_db_original: Some(FieldType::Array(Box::new(inner_item.field_type_db_original.unwrap_or(FieldType::Any)), None)),
                 field_type_db_token: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)).into(),
                 static_assertion_token: quote!(
-                            #crate_name::validators::assert_is_vec::<#ty>();
+                            #crate_name::validators::assert_type_is_vec::<#ty>();
                             #inner_static_assertion
                 ).into(),
             }
@@ -812,7 +812,7 @@ impl CustomType {
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Set(Box::new(FieldType::Any), None)),
                 field_type_db_token: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_is_vec::<#ty>();).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_type_is_set::<#ty>();).into(),
             }
         } else if self.raw_type_is_object() {
             DbFieldTypeAstMeta {
