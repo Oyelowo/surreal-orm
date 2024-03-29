@@ -6,7 +6,7 @@
  */
 
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote, ToTokens};
+use quote::{quote, ToTokens};
 
 use super::Codegen;
 use crate::models::*;
