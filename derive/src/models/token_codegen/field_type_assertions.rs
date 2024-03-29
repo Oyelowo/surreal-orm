@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use proc_macro2::TokenStream;
 use quote::quote;
 use surreal_query_builder::FieldType;
 
@@ -69,8 +70,12 @@ impl<'a> Codegen<'a> {
 
     fn get_field_type_static_assertions(&self) -> ExtractorResult<Vec<proc_macro2::TokenStream>> {
         let crate_name = &get_crate_name(false);
-        let get_field_type_static_assertions =
-            |field_type: &CustomType, db_field_type: &FieldType| match db_field_type {
+        fn get_field_type_static_assertions(
+            field_type: &CustomType,
+            db_field_type: &FieldType,
+            crate_name: &TokenStream,
+        ) -> Vec<TokenStream> {
+            match db_field_type {
                 FieldType::Any => {
                     vec![
                         quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Value>);),
@@ -152,7 +157,8 @@ impl<'a> Codegen<'a> {
                         quote!(#crate_name::validators::assert_impl_one!(#field_type: ::std::convert::Into<#crate_name::sql::Geometry>);),
                     ]
                 }
-            };
+            }
+        }
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver
@@ -163,54 +169,121 @@ impl<'a> Codegen<'a> {
         let db_field_type = field_receiver.field_type_db(table_derive_attrs)?;
         let db_field_type = db_field_type.into_inner_ref();
 
-        let mut top_level_check =
-            get_field_type_static_assertions(field_type.into_inner_ref(), db_field_type);
+        let mut top_level_check = get_field_type_static_assertions(
+            field_type.into_inner_ref(),
+            db_field_type,
+            crate_name,
+        );
 
-        let inner_rust_ty = field_type.inner_angle_bracket_type()?;
-        let static_assertions_for_inner_type =
-            |inner_db_field_type: &FieldType| -> ExtractorResult<()> {
-                if let Some(inner_rust_ty) = inner_rust_ty.clone() {
-                    let inner = get_field_type_static_assertions(
-                        inner_rust_ty.into_inner_ref(),
-                        inner_db_field_type,
-                    );
-                    top_level_check.extend(inner);
+        fn static_assertions_for_inner_type(
+            inner_rust_ty: Option<&CustomTypeInnerAngleBracket>,
+            inner_db_field_type: &FieldType,
+            assertion_accumulator: &mut Vec<TokenStream>,
+        ) -> ExtractorResult<()> {
+            let crate_name = &get_crate_name(false);
+
+            if let Some(inner_rust_ty) = inner_rust_ty.clone() {
+                let inner = get_field_type_static_assertions(
+                    inner_rust_ty.into_inner_ref(),
+                    inner_db_field_type,
+                    crate_name,
+                );
+                assertion_accumulator.extend(inner);
+            }
+
+            // This latter part may be unnecessary
+            // if let Some(ty) = inner_rust_ty {
+            //     if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
+            //         let field_name =
+            //             &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
+            //         let relation_type = field_receiver.to_relation_type();
+            //         let model_type = self.data_type();
+            //         let db_type_meta = ty.infer_surreal_type_heuristically(
+            //             field_name,
+            //             &relation_type,
+            //             &model_type,
+            //         )?;
+            //
+            //         if let Some(ft) = db_type_meta.field_type_db_original {
+            //             let inner = get_field_type_static_assertions(ty.into_inner_ref(), &ft);
+            //             top_level_check.extend(inner);
+            //         }
+            //     }
+            // }
+            Ok(())
+        };
+
+        // match db_field_type {
+        //     FieldType::Option(inner) => {
+        //         static_assertions_for_inner_type(inner)?;
+        //     }
+        //     FieldType::Set(inner, _) => {
+        //         static_assertions_for_inner_type(inner)?;
+        //     }
+        //     FieldType::Array(inner, _) => {
+        //         static_assertions_for_inner_type(inner)?;
+        //     }
+        //     _ => {}
+        // }
+
+        // static check inner type recursively
+        fn static_check_inner_type(
+            inner_rust_field_type: Option<&CustomTypeInnerAngleBracket>,
+            db_field_type: &FieldType,
+            assertion_accumulator: &mut Vec<TokenStream>,
+        ) -> ExtractorResult<()> {
+            if inner_rust_field_type.is_none() {
+                return Ok(());
+            }
+
+            match db_field_type {
+                FieldType::Option(inner) => {
+                    static_assertions_for_inner_type(
+                        inner_rust_field_type,
+                        inner,
+                        assertion_accumulator,
+                    )?;
+
+                    static_check_inner_type(
+                        inner_rust_field_type
+                            .map(|ft| ft.inner_angle_bracket_type().ok())
+                            .flatten()
+                            .flatten()
+                            .as_ref(),
+                        inner,
+                        assertion_accumulator,
+                    )?;
+
+                    // let inner_rust_ty = rust_field_type.inner_angle_bracket_type()?;
+
+                    // static_assertions_for_inner_type(
+                    //     rust_field_type,
+                    //     inner,
+                    //     assertion_accumulator,
+                    // )?;
                 }
-
-                // This latter part may be unnecessary
-                if let Some(ty) = inner_rust_ty {
-                    if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
-                        let field_name =
-                            &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
-                        let relation_type = field_receiver.to_relation_type();
-                        let model_type = self.data_type();
-                        let db_type_meta = ty.infer_surreal_type_heuristically(
-                            field_name,
-                            &relation_type,
-                            &model_type,
-                        )?;
-
-                        if let Some(ft) = db_type_meta.field_type_db_original {
-                            let inner = get_field_type_static_assertions(ty.into_inner_ref(), &ft);
-                            top_level_check.extend(inner);
-                        }
-                    }
+                FieldType::Set(inner, _) => {
+                    todo!()
                 }
-                Ok(())
+                FieldType::Array(inner, _) => {
+                    todo!()
+                }
+                _ => return Ok(()),
             };
 
-        match db_field_type {
-            FieldType::Option(inner) => {
-                static_assertions_for_inner_type(inner)?;
-            }
-            FieldType::Set(inner, _) => {
-                static_assertions_for_inner_type(inner)?;
-            }
-            FieldType::Array(inner, _) => {
-                static_assertions_for_inner_type(inner)?;
-            }
-            _ => {}
+            Ok(())
         }
+
+        static_check_inner_type(
+            field_type
+                .inner_angle_bracket_type()
+                .ok()
+                .flatten()
+                .as_ref(),
+            db_field_type,
+            &mut top_level_check,
+        )?;
+
         Ok(top_level_check)
     }
 
