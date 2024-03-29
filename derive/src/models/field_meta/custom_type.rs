@@ -683,9 +683,9 @@ impl CustomType {
                     .last()
                     .expect("Must have at least one segment");
 
-                if potential_type_idents
+                if !potential_type_idents
                     .iter()
-                    .any(|type_ident| type_ident.to_string() != last_segment.ident.to_string())
+                    .any(|type_ident| type_ident.to_string() == last_segment.ident.to_string())
                 {
                     return None;
                 }
@@ -861,7 +861,7 @@ impl CustomType {
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),
-                    "Could not infer type for the array or set type",
+                    "Could not infer type for the array inner type",
                 ))??;
 
             let inner_type = inner_item.field_type_db_token;
@@ -875,11 +875,26 @@ impl CustomType {
                 ).into(),
             }
         } else if self.raw_type_is_set() {
-            // TODO: Consider recursively checking HashSet and BTreeSet inner types
+            let inner_type = self.get_set_inner_type();
+
+            let inner_item = inner_type
+                .map(|ct| {
+                    ct.infer_surreal_type_heuristically(field_name, relation_type, model_type)
+                })
+                .ok_or(syn::Error::new(
+                    ty.span(),
+                    "Could not infer type for the set inner type",
+                ))??;
+            let inner_type = inner_item.field_type_db_token;
+            let inner_static_assertion = inner_item.static_assertion_token;
+
             DbFieldTypeAstMeta {
-                field_type_db_original: Some(FieldType::Set(Box::new(FieldType::Any), None)),
-                field_type_db_token: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_type_is_set::<#ty>();).into(),
+                field_type_db_original: Some(FieldType::Set(Box::new(inner_item.field_type_db_original.unwrap_or(FieldType::Any)), None)),
+                field_type_db_token: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)).into(),
+                static_assertion_token: quote!(
+                    #crate_name::validators::assert_type_is_set::<#ty>();
+                    #inner_static_assertion
+                ).into(),
             }
         } else if self.raw_type_is_object() {
             DbFieldTypeAstMeta {
