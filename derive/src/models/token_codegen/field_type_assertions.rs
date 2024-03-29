@@ -166,17 +166,6 @@ impl<'a> Codegen<'a> {
         let mut top_level_check =
             get_field_type_static_assertions(field_type.into_inner_ref(), db_field_type);
 
-        match db_field_type {
-            FieldType::Array(element, _) => {
-                let ty = field_type.inner_angle_bracket_type()?;
-                if let Some(ty) = ty {
-                    let inner = get_field_type_static_assertions(ty.into_inner_ref(), element);
-                    top_level_check.extend(inner);
-                }
-            }
-            _ => {}
-        }
-
         let inner_rust_ty = field_type.inner_angle_bracket_type()?;
         let static_assertions_for_inner_type =
             |inner_db_field_type: &FieldType| -> ExtractorResult<()> {
@@ -203,17 +192,12 @@ impl<'a> Codegen<'a> {
 
                         if let Some(ft) = db_type_meta.field_type_db_original {
                             let inner = get_field_type_static_assertions(ty.into_inner_ref(), &ft);
-                            // if field_receiver.ident()?.to_string() == "must_number" {
-                            //     panic!("xxxty: {}", inner.first().unwrap().to_string());
-                            // }
                             top_level_check.extend(inner);
                         }
                     }
                 }
                 Ok(())
             };
-
-        // match
 
         match db_field_type {
             FieldType::Option(inner) => {
