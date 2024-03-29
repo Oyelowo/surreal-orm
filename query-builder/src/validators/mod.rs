@@ -1,3 +1,4 @@
+use crate::Object;
 pub use num_traits::{Float, Num, PrimInt as Int};
 // pub use static_assertions::assert_fields;
 pub use static_assertions::assert_impl_all;
@@ -252,7 +253,7 @@ pub fn assert_value_is_duration<T: IsDuration>(_value: T) {}
 /// Validate that type is a Uuid at compile time
 pub trait IsUuid {}
 
-impl IsUuid for uuid::Uuid {}
+impl<T> IsUuid for T where T: Into<uuid::Uuid> {}
 
 /// Validate that type is a Uuid at compile time
 pub fn assert_type_is_uuid<T: IsUuid>() {
@@ -310,7 +311,7 @@ pub fn assert_value_is_bool<T: IsBool>(_value: T) {}
 /// Validate that type is a Surrealdb Thing at compile time
 pub trait IsThing {}
 
-impl IsThing for crate::sql::Thing {}
+impl<T> IsThing for T where T: Into<crate::sql::Thing> {}
 
 /// Validate that type is a Thing at compile time
 pub fn assert_type_is_thing<T: IsThing>() {
@@ -361,8 +362,9 @@ pub fn assert_value_is_null<T: IsNull>(_value: T) {}
 /// Validate that type is a Geometry at compile time
 pub trait IsGeometry {}
 
-impl IsGeometry for crate::sql::Geometry {}
-impl IsGeometry for &crate::sql::Geometry {}
+// impl IsGeometry for crate::sql::Geometry {}
+// impl IsGeometry for &crate::sql::Geometry {}
+impl<T: Into<crate::sql::Geometry>> IsGeometry for T {}
 
 /// Validate that type is a Geometry at compile time
 /// # Example
@@ -381,7 +383,7 @@ pub fn assert_value_is_geometry<T: IsGeometry>(_value: T) {}
 /// Validate that type is Any surrealdb field type at compile time
 pub trait IsAny {}
 
-impl IsAny for crate::sql::Value {}
+impl<T> IsAny for T where T: crate::serde::Serialize {}
 
 /// Validate that type is a Any at compile time
 /// # Example
@@ -396,6 +398,22 @@ pub fn assert_type_is_any<T: IsAny>() {
 
 /// Validate that value is a any at compile time
 pub fn assert_value_is_any<T: IsAny>(_value: T) {}
+
+/// Validate that type is a surreald orm Object at compile time
+pub trait IsObject {}
+
+impl<T: Object> IsObject for T {}
+
+/// Validate that type is an embedded surreal orm Object at compile time
+/// # Example
+/// ```rust,ignore
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_type_is_object;
+/// assert_type_is_object::<AnEmbeddedObject>();
+/// ```
+pub fn assert_type_is_object<T: IsObject>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
 
 /// Checks that all idents are unique.
 #[macro_export]
