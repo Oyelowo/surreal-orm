@@ -178,6 +178,9 @@ impl<'a> Codegen<'a> {
         fn static_assertions_for_inner_type(
             inner_rust_ty: Option<&CustomTypeInnerAngleBracket>,
             inner_db_field_type: &FieldType,
+            field_receiver: &MyFieldReceiver,
+            table_derive_attrs: &ModelAttributes,
+            model_type: &DataType,
             assertion_accumulator: &mut Vec<TokenStream>,
         ) -> ExtractorResult<()> {
             let crate_name = &get_crate_name(false);
@@ -192,44 +195,40 @@ impl<'a> Codegen<'a> {
             }
 
             // This latter part may be unnecessary
-            // if let Some(ty) = inner_rust_ty {
-            //     if ty.type_is_inferrable_primitive(field_receiver, table_derive_attrs) {
-            //         let field_name =
-            //             &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
-            //         let relation_type = field_receiver.to_relation_type();
-            //         let model_type = self.data_type();
-            //         let db_type_meta = ty.infer_surreal_type_heuristically(
-            //             field_name,
-            //             &relation_type,
-            //             &model_type,
-            //         )?;
-            //
-            //         if let Some(ft) = db_type_meta.field_type_db_original {
-            //             let inner = get_field_type_static_assertions(ty.into_inner_ref(), &ft);
-            //             top_level_check.extend(inner);
-            //         }
-            //     }
-            // }
+            if field_receiver.field_type_db.is_none() {
+                if let Some(inner_rust_ty) = inner_rust_ty {
+                    if inner_rust_ty
+                        .type_is_inferrable_primitive(field_receiver, table_derive_attrs)
+                    {
+                        let field_name =
+                            &field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
+                        let relation_type = field_receiver.to_relation_type();
+                        let db_type_meta = inner_rust_ty.infer_surreal_type_heuristically(
+                            field_name,
+                            &relation_type,
+                            &model_type,
+                        )?;
+
+                        if let Some(ft) = db_type_meta.field_type_db_original {
+                            let inner = get_field_type_static_assertions(
+                                inner_rust_ty.into_inner_ref(),
+                                &ft,
+                                crate_name,
+                            );
+                            assertion_accumulator.extend(inner);
+                        }
+                    }
+                }
+            }
             Ok(())
-        };
+        }
 
-        // match db_field_type {
-        //     FieldType::Option(inner) => {
-        //         static_assertions_for_inner_type(inner)?;
-        //     }
-        //     FieldType::Set(inner, _) => {
-        //         static_assertions_for_inner_type(inner)?;
-        //     }
-        //     FieldType::Array(inner, _) => {
-        //         static_assertions_for_inner_type(inner)?;
-        //     }
-        //     _ => {}
-        // }
-
-        // static check inner type recursively
         fn static_check_inner_type(
             inner_rust_field_type: Option<&CustomTypeInnerAngleBracket>,
             db_field_type: &FieldType,
+            field_receiver: &MyFieldReceiver,
+            table_derive_attrs: &ModelAttributes,
+            model_type: &DataType,
             assertion_accumulator: &mut Vec<TokenStream>,
         ) -> ExtractorResult<()> {
             if inner_rust_field_type.is_none() {
@@ -237,27 +236,19 @@ impl<'a> Codegen<'a> {
             }
 
             let inner = match db_field_type {
-                FieldType::Option(inner) => {
-                    // let inner_rust_ty = rust_field_type.inner_angle_bracket_type()?;
-
-                    // static_assertions_for_inner_type(
-                    //     rust_field_type,
-                    //     inner,
-                    //     assertion_accumulator,
-                    // )?;
-                    inner
-                }
-                FieldType::Set(inner, _) => {
-                    // todo!()
-                    inner
-                }
-                FieldType::Array(inner, _) => {
-                    // todo!()
-                    inner
-                }
+                FieldType::Option(inner) => inner,
+                FieldType::Set(inner, _) => inner,
+                FieldType::Array(inner, _) => inner,
                 _ => return Ok(()),
             };
-            static_assertions_for_inner_type(inner_rust_field_type, inner, assertion_accumulator)?;
+            static_assertions_for_inner_type(
+                inner_rust_field_type,
+                inner,
+                field_receiver,
+                table_derive_attrs,
+                model_type,
+                assertion_accumulator,
+            )?;
 
             static_check_inner_type(
                 inner_rust_field_type
@@ -266,6 +257,9 @@ impl<'a> Codegen<'a> {
                     .flatten()
                     .as_ref(),
                 inner,
+                field_receiver,
+                table_derive_attrs,
+                model_type,
                 assertion_accumulator,
             )?;
 
@@ -279,6 +273,9 @@ impl<'a> Codegen<'a> {
                 .flatten()
                 .as_ref(),
             db_field_type,
+            self.field_receiver(),
+            table_derive_attrs,
+            &self.data_type(),
             &mut top_level_check,
         )?;
 

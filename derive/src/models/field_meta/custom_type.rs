@@ -496,6 +496,7 @@ impl CustomType {
                         return false;
                     }
                     last_seg.ident.to_string().to_lowercase() == "hashset"
+                        || last_seg.ident.to_string().to_lowercase() == "btreeset"
                 } else {
                     false
                 }
@@ -612,7 +613,7 @@ impl CustomType {
                     false
                 }
             }
-            syn::Type::Array(_) => true,
+            syn::Type::Array(_) => false,
             _ => false,
         }
     }
@@ -681,9 +682,10 @@ impl CustomType {
                     .segments
                     .last()
                     .expect("Must have at least one segment");
+
                 if potential_type_idents
                     .iter()
-                    .any(|type_ident| type_ident.to_string() == last_segment.ident.to_string())
+                    .any(|type_ident| type_ident.to_string() != last_segment.ident.to_string())
                 {
                     return None;
                 }
@@ -691,6 +693,7 @@ impl CustomType {
                     syn::PathArguments::AngleBracketed(ref args) => args.args.first(),
                     _ => None,
                 };
+
                 match item_ty {
                     Some(syn::GenericArgument::Type(ty)) => ty,
                     _ => return None,
@@ -701,6 +704,7 @@ impl CustomType {
             // },
             _ => return None,
         };
+
         Some(item_ty.clone().into())
     }
 
@@ -850,13 +854,14 @@ impl CustomType {
                     }
                 })
                 .flatten();
+
             let inner_item = inner_type
                 .map(|ct| {
                     ct.infer_surreal_type_heuristically(field_name, relation_type, model_type)
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),
-                    "Could not infer type for the array field",
+                    "Could not infer type for the array or set type",
                 ))??;
 
             let inner_type = inner_item.field_type_db_token;
@@ -870,6 +875,7 @@ impl CustomType {
                 ).into(),
             }
         } else if self.raw_type_is_set() {
+            // TODO: Consider recursively checking HashSet and BTreeSet inner types
             DbFieldTypeAstMeta {
                 field_type_db_original: Some(FieldType::Set(Box::new(FieldType::Any), None)),
                 field_type_db_token: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)).into(),
@@ -963,26 +969,13 @@ impl CustomType {
                     // )),
                     static_assertion_token: quote!().into(),
                 },
-                RelationType::List(_list_simple) => DbFieldTypeAstMeta {
-                    // provide the inner type for when the array part start recursing
-                    field_type_db_original: Some(FieldType::Array(
-                        ::std::boxed::Box::new(FieldType::Any),
-                        ::std::option::Option::None
-                    )),
-                    field_type_db_token: quote!(#crate_name::FieldType::Array(
-                        ::std::boxed::Box::new(#crate_name::FieldType::Any),
-                        ::std::option::Option::None
-                    )).into(),
-                    // db_field_type: quote!(#crate_name::FieldType::Array(
-                    //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
-                    //     ::std::option::Option::None
-                    // )),
-                    static_assertion_token: quote!().into(),
-                },
-                RelationType::None => {
+                // We already did for list/array/set earlier. 
+                // TODO: Consider removing the concept of list altogether to 
+                // avoid confusion/ambiguity
+                RelationType::List(_) | RelationType::None => {
                     return Err(syn::Error::new(
                         ty.span(),
-                        "Could not infer type for the foreign field",
+                        format!("Could not infer type for the field. Specify explicitly by using e.g ty = \"array<any>\". You can choose from one of these types: {}", FieldType::variants().join(", ")),
                     )
                     .into())
                 }
