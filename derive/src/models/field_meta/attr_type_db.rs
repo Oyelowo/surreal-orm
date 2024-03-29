@@ -142,6 +142,7 @@ impl FieldTypeDb {
 
     // Even if db type provided, it is still checked against the rust type
     // to make sure it's compatible
+    // TODO: Remove this?
     pub fn generate_static_assertions(
         &self,
         rust_field_type: &CustomType,
