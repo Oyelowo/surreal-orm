@@ -200,9 +200,10 @@ impl<'a> Codegen<'a> {
                     }
                     None => {
                         let array_inner_field_ty =
-                            field_receiver.field_type_db.as_ref().and_then(|db_ty| {
-                                db_ty.array_item_type().or_else(|| db_ty.set_item_type())
-                            });
+                            field_receiver.field_type_db(model_attributes)?;
+                        let array_inner_field_ty = array_inner_field_ty
+                            .array_item_type()
+                            .or_else(|| array_inner_field_ty.set_item_type());
 
                         let array_inner_ty_db_concrete =  match array_inner_field_ty{
                         Some(ref db_array_item_ty) => (

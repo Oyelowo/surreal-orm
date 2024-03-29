@@ -194,7 +194,7 @@ impl<'a> Codegen<'a> {
                 assertion_accumulator.extend(inner);
             }
 
-            // This latter part may be unnecessary
+            // Checks inner type when autoinferring the field type
             if field_receiver.field_type_db.is_none() {
                 if let Some(inner_rust_ty) = inner_rust_ty {
                     if inner_rust_ty

@@ -29,6 +29,7 @@ impl MyFieldReceiver {
                         &model_attributes.to_data_type(),
                     )
                     .map(|ft_db| ft_db.field_type_db_original)?;
+
                 inferred.map(FieldTypeDb).ok_or(
                     darling::Error::custom(format!(
                         "Could not infer the field type for field: {field_name}",
