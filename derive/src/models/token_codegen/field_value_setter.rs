@@ -7,6 +7,7 @@
 
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
+use syn::spanned::Spanned;
 
 use crate::models::*;
 
@@ -209,8 +210,8 @@ impl<'a> Codegen<'a> {
                             Some(db_array_item_ty.as_db_sql_value_tokenstream().to_token_stream()),
                         ),
                         None => {
-                            return Err(syn::Error::new_spanned(
-                                field_receiver.field_type_db.as_ref(),
+                            return Err(syn::Error::new(
+                                field_receiver.ident()?.span(),
                                 "Could not infer array type. Explicitly specify the type e.g ty = array<string>",
                             ).into())
                         }
