@@ -74,7 +74,6 @@ create_custom_type_wrapper!(CustomTypeInnerAngleBracket);
 
 impl FromMeta for CustomType {
     fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
-        // panic!("Item: {:?}", item);
         // Type::from_meta(item).map(Self)
         let ty = match item {
             syn::Meta::Path(ref path) => {
@@ -85,12 +84,10 @@ impl FromMeta for CustomType {
                 ty
             }
             syn::Meta::NameValue(ref name_value) => {
-                // panic!("Name value: {:?}", name_value);
                 let ty = match &name_value.value {
                     syn::Expr::Lit(lit_str) => match lit_str.lit {
                         syn::Lit::Str(ref lit_str) => {
                             let ty = syn::parse_str::<Type>(&lit_str.value())?;
-                            // panic!("Parsed type: {:?}", ty);
                             ty
                         }
                         _ => {

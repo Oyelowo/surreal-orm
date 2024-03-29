@@ -1,5 +1,5 @@
 use core::num;
-use std::marker::PhantomData;
+use std::{collections::HashSet, marker::PhantomData};
 
 use chrono::{DateTime, Utc};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -48,8 +48,9 @@ pub struct Weapon<'a, T: Serialize + Default + Clone + surreal_orm::validators::
     // #[surreal_orm(reff = Rocket<'a, T>)]
     pub rocket: Rocket<'a, T>,
 
-    #[surreal_orm(ty = "option<float>")]
-    pub score: Option<Option<f64>>,
+    // #[surreal_orm(ty = "option<array<float>>")]
+    // #[surreal_orm(ty = "option<array<float>>")]
+    pub score: Option<Vec<f64>>,
 }
 type Strength = f64;
 
@@ -61,8 +62,30 @@ pub struct Rocket<'a, T: Serialize + Default + Clone + surreal_orm::validators::
 
     #[surreal_orm(ty = "option<string>")]
     something2: Option<&'a str>,
+
+    nana: &'static str,
+    fav_number: Option<i32>,
+    #[surreal_orm(ty = "set<int>")]
+    field_set: HashSet<i32>,
+
+    // #[surreal_orm(ty = "array<any>")]
+    #[surreal_orm(ty = "array<float>")]
+    must_number: [Strength; 3],
 }
 
+// fn test_partial_ob() {
+//     let rocket = Rocket::partial_builder()
+//         // .name("Sugar".to_string())
+//         .something(43)
+//         // .something2(None)
+//         // .fav_number(Some(1919))
+//         // .must_number(1919)
+//         .nana("ewe")
+//         .build();
+//
+//     let x = Weapon::partial_builder().rocket(rocket).build();
+// }
+//
 // type Lala<'a, T> = <Weapon<'a, T> as PartialUpdater>::StructPartial;
 // fn xfd(arg1: String) -> DefineFieldStatement {
 //     let x = &mut Weapon::partial_builder()
@@ -75,10 +98,14 @@ pub struct Rocket<'a, T: Serialize + Default + Clone + surreal_orm::validators::
 //     define_field("strength").permissions_full()
 // }
 
-#[derive(Deserialize)]
-struct User<'a> {
-    id: u32,
-    name: &'a str,
-    screen_name: &'a str,
-    location: &'a str,
-}
+// #[derive(Deserialize)]
+// struct User<'a> {
+//     id: u32,
+//     name: &'a str,
+//     screen_name: &'a str,
+//     location: &'a str,
+// }
+//
+//
+//
+//
