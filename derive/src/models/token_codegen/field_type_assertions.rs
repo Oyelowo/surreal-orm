@@ -131,7 +131,7 @@ impl<'a> Codegen<'a> {
                 }
                 FieldType::Decimal => {
                     vec![quote!(
-                        #crate_name::validators::assert_type_is_float::<#field_type>();
+                        #crate_name::validators::assert_type_is_decimal::<#field_type>();
                     )]
                 }
                 FieldType::Duration => {
