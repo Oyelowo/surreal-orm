@@ -110,19 +110,21 @@ impl ToTokens for EdgeToken {
             ..
         } = &code_gen;
 
-        let has_in_and_out_fields = || {
-            !serialized_field_names_normalised
+        let has_in_and_out_fields = serialized_field_names_normalised
                 .iter()
-                .any(|this| this.to_string().trim_start_matches("r#") == "in")
-                || !serialized_field_names_normalised
-                    .iter()
-                    .any(|this| this.to_string().trim_start_matches("r#") == "out")
-        };
+                .map(|this|{
+                    let this = this.to_string();
+                     this.trim_start_matches("r#").replace("\"", "")
+                })
+                .filter(|this|{
+                    this  == "in" || this == "out"
+                }).count() == 2;
 
-        if has_in_and_out_fields() {
+
+        if !has_in_and_out_fields {
             tokens.extend(
                 ExtractorError::Darling(darling::Error::custom(
-                    "Edge struct must include 'in' and 'out'",
+                    "Edge model struct must include 'in' and 'out'",
                 ))
                 .write_errors(),
             );
