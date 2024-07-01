@@ -23,7 +23,7 @@ impl<'a> Codegen<'a> {
         let field_ident_original = field_receiver.ident()?;
         let db_field_name = field_receiver.db_field_name(&table_derive_attributes.casing()?)?;
 
-        if db_field_name.is_id() {
+        if !db_field_name.is_updateable_by_default(&self.data_type()) {
             return Ok(());
         }
 
@@ -44,6 +44,8 @@ impl<'a> Codegen<'a> {
                 self.insert_struct_partial_builder_fields_methods(
                     field_type.to_token_stream().into(),
                 )?;
+
+                self.insert_renamed_serialized_fields_kv()?
             }
             RelationType::NestObject(nested_object) => {
                 let inner_field_type =
@@ -56,6 +58,7 @@ impl<'a> Codegen<'a> {
                         pub #field_ident_original: #optionalized_field_type
                 ))?;
                 self.insert_struct_partial_builder_fields_methods(inner_field_type.into())?;
+                self.insert_renamed_serialized_fields_kv()?
             }
             RelationType::Relate(_) => {}
         }
@@ -77,7 +80,6 @@ impl<'a> Codegen<'a> {
                     self
              }
         };
-
         self.struct_partial_associated_functions
             .push(ass_functions.into());
         Ok(())
@@ -87,12 +89,13 @@ impl<'a> Codegen<'a> {
         &mut self,
         updater_field_token: TokenStream,
     ) -> ExtractorResult<()> {
+        self.struct_partial_fields.push(updater_field_token.into());
+        Ok(())
+    }
+
+    fn insert_renamed_serialized_fields_kv(&mut self) -> Result<(), ExtractorError> {
         let table_derive_attributes = self.table_derive_attributes();
         let fr = self.field_receiver();
-        let db_field_name = fr.db_field_name(&table_derive_attributes.casing()?)?;
-        if db_field_name.is_updateable_by_default(&self.data_type()) {
-            self.struct_partial_fields.push(updater_field_token.into());
-        }
         // We dont care about the field type. We just use this struct to check for
         // renamed serialized field names at compile time by asserting that the a field
         // exist.
