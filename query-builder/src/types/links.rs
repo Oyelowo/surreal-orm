@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Model, Node, SurrealId};
+use crate::{validators::{IsArray, IsLink, IsLinkMany, IsLinkOne, IsLinkSelf}, Model, Node, SurrealId};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
@@ -149,6 +149,8 @@ impl<V: Node> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
 /// A reference to a foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkOne<V: Node>(Reference<V>);
+impl<V: Node> IsLinkOne for LinkOne<V> {}
+impl<V: Node> IsLink for LinkOne<V> {}
 
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
@@ -187,6 +189,9 @@ impl<V: Node> LinkOne<V> {
 /// It is similar to `LinkOne` is boxed to avoid infinite recursion.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkSelf<V: Node>(Box<Reference<V>>);
+
+impl<V: Node> IsLinkSelf for LinkSelf<V> {}
+impl<V: Node> IsLink for LinkSelf<V> {}
 
 impl<V: Node> From<LinkSelf<V>> for Option<sql::Thing> {
     fn from(link: LinkSelf<V>) -> Self {
@@ -315,6 +320,10 @@ macro_rules! impl_utils_for_ref_vec {
 /// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: Node>(Vec<Reference<V>>);
+
+impl<V: Node> IsLinkMany for LinkMany<V> {}
+impl<V: Node> IsArray for LinkMany<V> {}
+impl<V: Node> IsLink for LinkMany<V> {}
 
 impl<V: Node> IntoIterator for LinkMany<V> {
     type Item = Reference<V>;

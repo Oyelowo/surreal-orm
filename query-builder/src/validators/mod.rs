@@ -321,6 +321,45 @@ pub fn assert_type_is_thing<T: IsThing>() {
 /// Validate that value is a thing at compile time
 pub fn assert_value_is_thing<T: IsThing>(_value: T) {}
 
+
+// Links
+/// check if a type is a link
+pub trait IsLink {}
+
+/// Validate that type is a link type at compile time
+pub fn assert_type_is_link<T: IsLink>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+///
+/// check if a type is a link one or one-to-one relationship type
+pub trait IsLinkOne {}
+///
+/// Validate that type is a link one or one-to-one relationship type at compile time
+pub fn assert_type_is_link_one<T: IsLinkOne>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+
+///
+/// check if a type is a link self or self-referential relationship type
+pub trait IsLinkSelf {}
+/// check if a type is a link self or self-referential relationship type
+pub fn assert_type_is_link_self<T: IsLinkSelf>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+
+///
+/// check if a type is a link many or one-to-many relationship type
+pub trait IsLinkMany {}
+/// check if a type is a link many or one-to-many relationship type
+pub fn assert_type_is_link_many<T: IsLinkMany>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+
+
 /// Validates that type is a surrealdb bytes at compile time
 pub trait IsBytes {}
 
