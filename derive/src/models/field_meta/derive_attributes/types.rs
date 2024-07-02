@@ -7,9 +7,9 @@
 
 use crate::models::*;
 use surreal_query_builder::FieldType;
-use syn::spanned::Spanned;
 
 use super::MyFieldReceiver;
+// use super::FieldTypeIn;
 
 impl MyFieldReceiver {
     pub fn field_type_db(
@@ -21,23 +21,22 @@ impl MyFieldReceiver {
             None => {
                 let casing = model_attributes.casing()?;
                 let field_name = &self.db_field_name(&casing)?;
-                let inferred = self
-                    .ty()
-                    .infer_surreal_type_heuristically(
-                        field_name,
-                        &self.to_relation_type(),
-                        &model_attributes.to_data_type(),
-                    )
-                    .map(|ft_db| ft_db.field_type_db_original)?;
 
-                inferred.map(FieldTypeDb).ok_or(
-                    darling::Error::custom(format!(
-                        "Could not infer the field type for field: {field_name}",
-                    ))
-                    .with_span(&self.ty().span()),
-                )?
+                let inferred = FieldTypeInference {
+                    db_field_name: field_name,
+                    field_ty: &self.ty(),
+                    model_attrs: model_attributes,
+                }.infer_type().map(|ft_db| ft_db.field_type_db_original)?;
+
+                let error_msg = format!(
+                        "Could not infer the field type for field: {field_name}. Provide field type explicitly e.g ty = 'int'",
+                    );
+
+                inferred.map(FieldTypeDb).ok_or(darling::Error::custom(error_msg))?
             }
         };
+
+
         Ok(db_type)
     }
 
