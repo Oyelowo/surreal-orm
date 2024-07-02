@@ -20,14 +20,24 @@ use syn::spanned::Spanned;
 
 use crate::models::*;
 
-create_tokenstream_wrapper!(=> FieldTypeDbToken);
+// create_tokenstream_wrapper!(=> FieldTypeDbToken);
 
 #[derive(Debug, Clone)]
 pub struct DbFieldTypeAstMeta {
     pub field_type_db_original: Option<FieldType>,
-    pub field_type_db_token: FieldTypeDbToken,
+    pub field_type_db_token: FieldTypeDb,
     pub static_assertion_token: StaticAssertionToken,
 }
+
+// impl DbFieldTypeAstMeta {
+//     pub fn field_type_db(&self) -> FieldTypeDb {
+//         self.field_type_db_token.clone()
+//     }
+//
+//     pub fn static_assertion(&self) -> TokenStream {
+//         self.static_assertion_token.clone()
+//     }
+// }
 
 #[derive(Debug, Clone, Default)]
 pub struct FieldTypeDb(pub FieldType);
@@ -41,6 +51,16 @@ impl ToTokens for FieldTypeDb {
         as_token.to_tokens(tokens);
     }
 }
+
+
+impl From<TokenStream> for FieldTypeDb {
+    fn from(token: TokenStream) -> Self {
+        let field_type_str = token.to_string();
+        let field_type = FieldType::from_str(&field_type_str).unwrap();
+        Self(field_type)
+    }
+}
+
 
 impl FieldTypeDb {
     pub fn into_inner(self) -> FieldType {
@@ -70,6 +90,36 @@ impl FieldTypeDb {
         let value = self.into_inner_ref().clone().to_string();
         let value = quote!(#crate_name::FieldType::from_str(#value).unwrap());
         value.into()
+    }
+
+
+    pub fn generate_static_assertion(
+        &self,
+        field_type: &CustomType,
+    ) -> TokenStream {
+        let crate_name = get_crate_name(false);
+
+        match self.0 {
+            FieldType::Any => quote!(#crate_name::validators::assert_type_is_any::<#field_type>();),
+            FieldType::Null => quote!(#crate_name::validators::assert_type_is_null::<#field_type>();),
+            FieldType::Uuid => quote!(#crate_name::validators::assert_type_is_uuid::<#field_type>();),
+            FieldType::Bytes => quote!(#crate_name::validators::assert_type_is_bytes::<#field_type>();),
+            FieldType::Union(_) => quote!(),
+            FieldType::Option(_) => quote!(#crate_name::validators::assert_type_is_option::<#field_type>();),
+            FieldType::String => quote!(#crate_name::validators::assert_type_is_string::<#field_type>();),
+            FieldType::Int => quote!(#crate_name::validators::assert_type_is_int::<#field_type>();),
+            FieldType::Float => quote!(#crate_name::validators::assert_type_is_float::<#field_type>();),
+            FieldType::Bool => quote!(#crate_name::validators::assert_type_is_bool::<#field_type>();),
+            FieldType::Array(_, _) => quote!(#crate_name::validators::assert_type_is_array::<#field_type>();),
+            FieldType::Set(_, _) => quote!(#crate_name::validators::assert_type_is_set::<#field_type>();),
+            FieldType::Datetime => quote!(#crate_name::validators::assert_type_is_datetime::<#field_type>();),
+            FieldType::Decimal => quote!(#crate_name::validators::assert_type_is_decimal::<#field_type>();),
+            FieldType::Duration => quote!(#crate_name::validators::assert_type_is_duration::<#field_type>();),
+            FieldType::Number => quote!(#crate_name::validators::assert_type_is_number::<#field_type>();),
+            FieldType::Object => quote!(#crate_name::validators::assert_type_is_object::<#field_type>();),
+            FieldType::Record(_) => quote!(#crate_name::validators::assert_type_is_thing::<#field_type>();),
+            FieldType::Geometry(_) => quote!(#crate_name::validators::assert_type_is_geometry::<#field_type>();),
+        }
     }
 }
 

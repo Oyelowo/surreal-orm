@@ -52,6 +52,7 @@ pub struct FieldTypeInference<'a> {
     // field_receiver: &'a MyFieldReceiver,
     pub db_field_name: &'a DbFieldName,
     pub field_ty: &'a CustomType,
+    pub relation_type: &'a RelationType,
     // table_attrs: &'a TableDeriveAttributes,
     pub model_attrs: &'a ModelAttributes<'a>,
 }
@@ -74,9 +75,10 @@ impl<'a> FieldTypeInference<'a> {
     }
 
     pub fn infer_type_by(&self, approach: &InferenceApproach) -> ExtractorResult<DbFieldTypeAstMeta> {
-        let relation_type = self.field_receiver.to_relation_type();
+        let relation_type = self.relation_type;
+        // let relation_type = self.field_receiver.to_relation_type();
         let model_attrs = self.model_attrs;
-        let ty = self.field_ty;;
+        let ty = self.field_ty;
         // let field_type = self.field_receiver.ty();
         let field_name = self.db_field_name;
         // let field_name = self.field_receiver.db_field_name(&model_attrs.casing()?)?;
