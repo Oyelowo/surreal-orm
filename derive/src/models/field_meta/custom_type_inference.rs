@@ -99,8 +99,7 @@ impl<'a> FieldTypeInference<'a> {
         let binding = field_ty
             .remove_non_static_lifetime_and_reference()
             .replace_self_with_current_struct_concrete_type(self.model_attrs)?;
-        let ty = &binding
-            .into_inner_ref();
+        let ty = &binding.into_inner_ref();
 
         let meta = if field_ty.raw_type_is_bool() {
             DbFieldTypeAstMeta {
@@ -324,7 +323,7 @@ impl<'a> FieldTypeInference<'a> {
                       "This is a readonly field. It cannot be stored in the database, therefore, no database type needed. Use it for deserialization only",
                   ))?
                 }
-            RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
+    RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Record(vec![]),
                 field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])).into(),
                 static_assertion_token: quote!(
@@ -353,7 +352,7 @@ impl<'a> FieldTypeInference<'a> {
                     ::std::option::Option::None
                 )).into(),
                 static_assertion_token: quote!(
-#crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkMany<#ref_node>);
+                    #crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkMany<#ref_node>);
             ).into(),
             },
             RelationType::NestObject(_ref_object) => DbFieldTypeAstMeta {
@@ -376,7 +375,7 @@ impl<'a> FieldTypeInference<'a> {
                             //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
                             //     ::std::option::Option::None
                             // )),
-                            static_assertion_token: quote!().into(),
+                            static_assertion_token: quote!(#crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);).into(),
                             // static_assertion_token:
                             //     quote!(#crate_name::validators::assert_type_is_array::<#ty>();).into(),
                         }
