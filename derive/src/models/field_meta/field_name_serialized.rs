@@ -48,7 +48,7 @@ impl DbFieldName {
         model_type.is_edge() && self.0 == "out"
     }
 
-    pub fn is_orig_or_dest_edge_node(&self, model_type: &DataType) -> bool {
+    pub fn is_in_or_out_edge_node(&self, model_type: &DataType) -> bool {
         model_type.is_edge() && (self.0 == "in" || self.0 == "out")
     }
 
@@ -57,7 +57,7 @@ impl DbFieldName {
     // in edge tables and id field in all tables(i doubt we should be able to for id field but
     // maybe for in and out).
     pub fn is_updateable_by_default(&self, model_type: &DataType) -> bool {
-        let not_updateable = self.is_id() || self.is_orig_or_dest_edge_node(model_type);
+        let not_updateable = self.is_id() || self.is_in_or_out_edge_node(model_type);
         !not_updateable
     }
 }
