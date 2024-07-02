@@ -24,7 +24,7 @@ use crate::models::*;
 
 #[derive(Debug, Clone)]
 pub struct DbFieldTypeAstMeta {
-    pub field_type_db_original: Option<FieldType>,
+    pub field_type_db_original: FieldType,
     pub field_type_db_token: FieldTypeDb,
     pub static_assertion_token: StaticAssertionToken,
 }
@@ -41,6 +41,12 @@ pub struct DbFieldTypeAstMeta {
 
 #[derive(Debug, Clone, Default)]
 pub struct FieldTypeDb(pub FieldType);
+
+impl From<FieldType> for FieldTypeDb {
+    fn from(field_type: FieldType) -> Self {
+        Self(field_type)
+    }
+}
 
 impl ToTokens for FieldTypeDb {
     fn to_tokens(&self, tokens: &mut TokenStream) {

@@ -9,20 +9,25 @@ use crate::models::*;
 use surreal_query_builder::FieldType;
 
 use super::MyFieldReceiver;
-// use super::FieldTypeIn;
 
 impl MyFieldReceiver {
+    pub fn field_type_db(
+        &self,
+        model_attributes: &ModelAttributes,
+    ) -> ExtractorResult<FieldTypeDb> {
+        self.field_type_db_with_static_assertions(model_attributes)
+            .map(|x| x.field_type_db_original.into())
+    }
+
     pub fn field_type_db_with_static_assertions(
         &self,
         model_attributes: &ModelAttributes,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let db_type = match self.field_type_db {
-            Some(ref db_type) => {
-                DbFieldTypeAstMeta {
-                    field_type_db_original: Some(db_type.clone().into_inner()),
-                    field_type_db_token: db_type.clone(),
-                    static_assertion_token: db_type.generate_static_assertion(&self.ty()).into(),
-                }
+            Some(ref db_type) => DbFieldTypeAstMeta {
+                field_type_db_original: db_type.clone().into_inner(),
+                field_type_db_token: db_type.clone(),
+                static_assertion_token: db_type.generate_static_assertion(&self.ty()).into(),
             },
             None => {
                 let casing = model_attributes.casing()?;
@@ -33,33 +38,15 @@ impl MyFieldReceiver {
                     relation_type: &self.to_relation_type(),
                     field_ty: &self.ty(),
                     model_attrs: model_attributes,
-                }.infer_type().map(|ft_db| ft_db)?;
+                }
+                .infer_type()
+                .map(|ft_db| ft_db)?;
 
                 inferred
-                // let error_msg = format!(
-                //         "Could not infer the field type for field: {field_name}. Provide field type explicitly e.g ty = 'int'",
-                //     );
-                //
-                // let x = inferred.map(FieldTypeDb).ok_or(darling::Error::custom(error_msg))?
-                // DbFieldTypeAstMeta {
-                //     // field_type_db_original: Some(x.into_inner()),
-                //     field_type_db_token: x,
-                //     static_assertion_token: StaticAssertionToken::default(),
-                // }
             }
         };
 
-
         Ok(db_type)
-    }
-
-
-    pub fn field_type_db(
-        &self,
-        model_attributes: &ModelAttributes,
-    ) -> ExtractorResult<FieldTypeDb> {
-        self.field_type_db_with_static_assertions(model_attributes)
-            .map(|x| x.field_type_db_original)
     }
 
     pub fn to_relation_type(&self) -> RelationType {
