@@ -49,6 +49,11 @@ pub enum RelationType {
     LinkOne(LinkOneAttrType),
     LinkSelf(LinkSelfAttrType),
     LinkMany(LinkManyAttrType),
+    // These are in and out nodes in edge tables and 
+    // we usually dont want to do much code gen for it beyond compile-time check codegen but
+    // have it for deserialization and serialization, to enjoy
+    // the benefits that `LinkMany` helper wrapper struct provides.
+    LinkManyInAndOutEdgeNodesInert(LinkManyAttrType),
     NestObject(NestObjectAttrType),
     NestArray(NestArrayAttrType),
     List(ListSimple),

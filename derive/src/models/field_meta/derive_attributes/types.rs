@@ -16,18 +16,31 @@ impl MyFieldReceiver {
         model_attributes: &ModelAttributes,
     ) -> ExtractorResult<FieldTypeDb> {
         self.field_type_db_with_static_assertions(model_attributes)
-            .map(|x| x.field_type_db_original.into())
+            // TODO: Crosscheck if using default makes sense here.
+            // A relate field is an example of where we should not 
+            // have a db field as that is a readonly derived field.
+            .map(|x| x.unwrap_or_default().field_type_db_original.into())
     }
 
     pub fn field_type_db_with_static_assertions(
         &self,
         model_attributes: &ModelAttributes,
-    ) -> ExtractorResult<DbFieldTypeAstMeta> {
+    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
+        let field_ty = self
+            .ty()
+            .remove_non_static_lifetime_and_reference()
+            .replace_self_with_current_struct_concrete_type(model_attributes)?;
+
         let db_type = match self.field_type_db {
-            Some(ref db_type) => DbFieldTypeAstMeta {
-                field_type_db_original: db_type.clone().into_inner(),
-                field_type_db_token: db_type.clone(),
-                static_assertion_token: db_type.generate_static_assertion(&self.ty()).into(),
+            Some(ref db_type) => {
+                let db_field_type_ast_meta = DbFieldTypeAstMeta {
+                            field_type_db_original: db_type.clone().into_inner(),
+                            static_assertion_token: db_type
+                                .generate_static_assertion(&field_ty.into_inner())
+                                .into(),
+                            field_type_db_token: db_type.into_token_stream().into(),
+                        };
+                Some(db_field_type_ast_meta)
             },
             None => {
                 let casing = model_attributes.casing()?;
@@ -35,8 +48,8 @@ impl MyFieldReceiver {
 
                 let inferred = FieldTypeInference {
                     db_field_name: field_name,
-                    relation_type: &self.to_relation_type(),
-                    field_ty: &self.ty(),
+                    relation_type: &self.to_relation_type(model_attributes),
+                    field_ty: &field_ty.into_inner(),
                     model_attrs: model_attributes,
                 }
                 .infer_type()
@@ -49,8 +62,58 @@ impl MyFieldReceiver {
         Ok(db_type)
     }
 
-    pub fn to_relation_type(&self) -> RelationType {
-        self.into()
+    pub fn is_in_or_out_edge_node_field(&self, model_attributes: &ModelAttributes) -> bool {
+        let is_in_or_out_edge_node = self
+            .db_field_name(
+                &model_attributes
+                    .casing()
+                    .expect("Failed to get the casing. Please, provide one."),
+            )
+            .expect("Failed to get the database field name")
+            .is_in_or_out_edge_node(&model_attributes.to_data_type());
+
+        model_attributes.to_data_type().is_edge() && is_in_or_out_edge_node
+    }
+
+    pub fn to_relation_type(&self, model_attributes: &ModelAttributes) -> RelationType {
+        let field_receiver = self;
+
+        match field_receiver {
+            MyFieldReceiver {
+                relate: Some(relation),
+                ..
+            } => RelationType::Relate(relation.to_owned()),
+            MyFieldReceiver {
+                link_one: Some(link_one),
+                ..
+            } => RelationType::LinkOne(link_one.to_owned()),
+            MyFieldReceiver {
+                link_self: Some(link_self),
+                ..
+            } => RelationType::LinkSelf(link_self.to_owned()),
+            MyFieldReceiver {
+                link_many: Some(link_many),
+                ..
+            } => RelationType::LinkMany(link_many.to_owned()),
+            MyFieldReceiver {
+                link_many: Some(link_many),
+                ..
+            } if self.is_in_or_out_edge_node_field(&model_attributes) => {
+                RelationType::LinkManyInAndOutEdgeNodesInert(link_many.to_owned())
+            }
+            MyFieldReceiver {
+                nest_object: Some(nest_object),
+                ..
+            } => RelationType::NestObject(nest_object.to_owned()),
+            MyFieldReceiver {
+                nest_array: Some(nest_array),
+                ..
+            } => RelationType::NestArray(nest_array.to_owned()),
+            _ if field_receiver.is_array() || field_receiver.is_set() => {
+                RelationType::List(ListSimple)
+            }
+            _ => RelationType::None,
+        }
     }
 
     pub fn is_numeric(&self) -> bool {

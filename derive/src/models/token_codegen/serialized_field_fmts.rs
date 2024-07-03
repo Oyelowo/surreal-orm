@@ -25,7 +25,7 @@ impl<'a> Codegen<'a> {
         let serialized_field_fmt = || quote!(#crate_name::Field::new(#db_field_name));
 
         if !field_receiver.skip_serializing && !field_receiver.skip {
-            match field_receiver.to_relation_type() {
+            match field_receiver.to_relation_type(table_derive_attrs) {
                 RelationType::LinkOne(_) => {
                     self.link_one_fields.push(serialized_field_fmt().into());
                     self.link_one_and_self_fields

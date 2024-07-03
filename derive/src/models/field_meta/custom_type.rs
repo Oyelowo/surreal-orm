@@ -775,7 +775,7 @@ impl CustomType {
             })
         });
 
-        field_receiver.to_relation_type().is_some()
+        field_receiver.to_relation_type(model_attributes).is_some()
             || is_db_field
             || self.raw_type_is_float()
             || self.raw_type_is_integer()
@@ -796,7 +796,7 @@ impl CustomType {
             })
         });
 
-        field_receiver.to_relation_type().is_some()
+        field_receiver.to_relation_type(model_attributes).is_some()
             || is_db_field
             || self.raw_type_is_float()
             || self.raw_type_is_integer()

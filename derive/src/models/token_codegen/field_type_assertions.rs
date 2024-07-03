@@ -21,7 +21,7 @@ impl<'a> Codegen<'a> {
 
         let field_type_meta = field_receiver.field_type_db_with_static_assertions(table_derive_attrs)?;
         self.static_assertions
-            .extend(vec![field_type_meta.static_assertion_token]);
+            .extend(vec![field_type_meta.unwrap_or_default().static_assertion_token]);
 
         Ok(())
     }

@@ -28,12 +28,13 @@ impl<'a> Codegen<'a> {
         }
 
         let maybe_fn_path = format!("{crate_name}::Maybe::is_none");
-        match field_receiver.to_relation_type() {
+        match field_receiver.to_relation_type(table_derive_attributes) {
             RelationType::None
             | RelationType::NestArray(_)
             | RelationType::LinkOne(_)
             | RelationType::LinkSelf(_)
             | RelationType::LinkMany(_)
+            | RelationType::LinkManyInAndOutEdgeNodesInert(_)
             | RelationType::List(_) => {
                 let optionalized_field_type = quote!(#crate_name:: Maybe<#field_type>);
                 self.insert_struct_partial_field_type_def_meta(quote!(

@@ -28,7 +28,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let db_field_name = field_receiver.db_field_name(&table_derive_attributes.casing()?)?;
 
-        if let RelationType::Relate(ref relate) = field_receiver.to_relation_type() {
+        if let RelationType::Relate(ref relate) = field_receiver.to_relation_type(table_derive_attributes) {
             self.static_assertions
                 .push(self.create_static_assertions(relate)?);
             self.relate(relate)?;
@@ -559,7 +559,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 }
 
                 impl #edge_type_impl_generics #crate_name::Erroneous for &#edge_name_as_struct_with_direction_ident #edge_type_ty_generics #edge_type_where_clause{
-                    fn get_errors(&self) -> ::std::vec:Vec<::std::string::String> {
+                    fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.0.get_errors()
                     }
                 }
