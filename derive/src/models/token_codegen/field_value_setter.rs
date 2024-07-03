@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::sync::Arc;
+
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
@@ -199,25 +201,44 @@ impl<'a> Codegen<'a> {
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
                     None => {
-                        let array_inner_field_ty =
-                            field_receiver.field_type_db(model_attributes)?;
-                        let array_inner_field_ty = array_inner_field_ty
-                            .array_item_type()
-                            .or_else(|| array_inner_field_ty.set_item_type());
+                        // impl surreal_orm::SetterArray<surreal_orm::FieldType::from_str("record<any>")
+                        // .unwrap()>for self::__Out__{}
+                        // #[derive(Debug,Clone)]
+                        let array_inner_field_ty = field_receiver
+                            .field_type_db_with_static_assertions(model_attributes)?;
+                        // let type_set = array_inner_field_ty.clone()
+                        //             .map(|this| this.set_item_type_path());
 
-                        let array_inner_ty_db_concrete =  match array_inner_field_ty{
-                        Some(ref db_array_item_ty) => (
-                            None,
-                            Some(db_array_item_ty.as_db_sql_value_tokenstream().to_token_stream()),
-                        ),
-                        None => {
-                            return Err(syn::Error::new(
-                                field_receiver.ident()?.span(),
-                                "Could not infer array or set type. Explicitly specify the type e.g ty = array<string>",
-                            ).into())
-                        }
-                    };
-                        array_inner_ty_db_concrete
+                        // let array_inner_ty_db_concrete = array_inner_field_ty.clone()
+                        //     .map(|this| this.array_item_type_path())
+                        //     .flatten()
+                        //     .unwrap_or(
+                        //         type_set
+                        //             .flatten()
+                        //             .unwrap_or(
+                        //                 return Err(syn::Error::new(
+                        //                     field_receiver.ident()?.span(),
+                        //                     "Could not infer array or set type. Explicitly specify the type e.g ty = array<string>",
+                        //                 )
+                        //                 .into(),
+                        //             ),
+                        //             ),
+                        //     );
+                        //
+                        // let array_inner_ty_db_concrete =  match array_inner_field_ty{
+                        // Some(ref db_array_item_ty) => (
+                        //     None,
+                        //     Some(db_array_item_ty.as_db_sql_value_tokenstream().to_token_stream()),
+                        // ),
+                        // None => {
+                        //     return Err(syn::Error::new(
+                        //         field_receiver.ident()?.span(),
+                        //         "Could not infer array or set type. Explicitly specify the type e.g ty = array<string>",
+                        //     ).into())
+                        // }
+                    // };
+                        // (None, Some(array_inner_ty_db_concrete.to_token_stream()))
+                        (None, Some(quote!(#crate_name::FieldType)))
                     }
                 };
                 inferred_type
@@ -235,7 +256,7 @@ impl<'a> Codegen<'a> {
 
                     quote!(
                         impl #field_impl_generics #crate_name::SetterArray<#item_type> for
-                        self::#field_name_as_pascalized #field_ty_generics #field_where_clause {}
+                        self::#field_name_as_pascalized #field_where_clause {}
                     )
                 },
             )

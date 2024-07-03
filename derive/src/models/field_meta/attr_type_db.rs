@@ -22,11 +22,34 @@ use crate::models::*;
 
 create_tokenstream_wrapper!(=> FieldTypeDbToken);
 
+impl Default for FieldTypeDbToken {
+    fn default() -> Self {
+        let crate_name = get_crate_name(false);
+        quote!(#crate_name::FieldType::Any).into()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct DbFieldTypeAstMeta {
     pub field_type_db_original: FieldType,
     pub field_type_db_token: FieldTypeDbToken,
     pub static_assertion_token: StaticAssertionToken,
+}
+
+impl DbFieldTypeAstMeta {
+    pub fn array_item_type_path<'a>(&'a self) -> Option<&'a FieldTypeDbToken> {
+        if self.field_type_db_original.is_array() {
+            return Some(&self.field_type_db_token);
+        }
+        return None
+    }
+
+    pub fn set_item_type_path<'a>(&'a self) -> Option<&'a FieldTypeDbToken> {
+        if self.field_type_db_original.is_set() {
+            return Some(&self.field_type_db_token);
+        }
+        return None
+    }
 }
 
 impl Default for DbFieldTypeAstMeta {

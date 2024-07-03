@@ -67,9 +67,8 @@ impl<'a> Codegen<'a> {
             ForeignNodeSchemaIdent::from_node_table(foreign_node_table);
         let foreign_node_schema_type_alias_with_generics =
             ForeignNodeTypeAliasWithGenerics(quote!(#foreign_node_schema_ident #edge_ty_generics));
-
-        let foreign_node_schema_type_alias_with_generics_turbofishized =
-            ForeignNodeTypeAliasWithGenerics(quote!(#foreign_node_schema_ident :: #edge_ty_generics));
+        let foreign_node_schema_type_alias_with_generics_turbofishied = 
+            ForeignNodeTypeAliasWithGenerics(quote!(#foreign_node_schema_ident:: #edge_ty_generics));
 
         // Meant to represent the variable of struct model(node) itself.
         // Within edge generics, there is usually In and Out associated types, this is used to
@@ -83,7 +82,7 @@ impl<'a> Codegen<'a> {
         let foreign_node_schema_one = || {
             ForeignNodeSchema(quote!(
                 type #foreign_node_schema_type_alias_with_generics =
-                            <<super::super::#edge_type as #crate_name::Edge>::#foreign_node_in_or_out
+                            <<super::super::#edge_type #edge_ty_generics as #crate_name::Edge>::#foreign_node_in_or_out
                         as #crate_name::SchemaGetter>::Schema;
             ))
         };
@@ -95,7 +94,7 @@ impl<'a> Codegen<'a> {
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_str);
 
-                    #foreign_node_schema_type_alias_with_generics_turbofishized::#__________connect_node_to_graph_traversal_string(
+                    #foreign_node_schema_type_alias_with_generics_turbofishied::#__________connect_node_to_graph_traversal_string(
                                 self,
                                 clause,
                     )
@@ -104,8 +103,7 @@ impl<'a> Codegen<'a> {
         };
 
         // let imports =|| quote!(use super::StudentWritesBook;);
-        let edge_type_name = edge_type.type_name()?;
-        let import = || EdgeImport(quote!(use super::#edge_type_name;));
+        let import = || EdgeImport(quote!(use super::#edge_type;));
 
         let node_edge_meta = NodeEdgeMetadata {
             edge_table: edge_table.to_owned(),
@@ -569,7 +567,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 }
 
                 impl #edge_type_impl_generics ::std::ops::Deref for #edge_name_as_struct_with_direction_ident #edge_type_ty_generics #edge_type_where_clause {
-                    type Target = #edge_name_as_struct_with_direction_ident #edge_type_ty_generics;
+                    type Target = #edge_name_as_struct_original_ident;
 
                     fn deref(&self) -> &Self::Target {
                         &self.0

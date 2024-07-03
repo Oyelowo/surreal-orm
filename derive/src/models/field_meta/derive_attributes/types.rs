@@ -91,16 +91,21 @@ impl MyFieldReceiver {
                 link_self: Some(link_self),
                 ..
             } => RelationType::LinkSelf(link_self.to_owned()),
-            MyFieldReceiver {
-                link_many: Some(link_many),
-                ..
-            } => RelationType::LinkMany(link_many.to_owned()),
+            // This is a special case where we have a link_many field
+            // that is used to link many in and out edge nodes.
+            // In this case, we may not want to do any codegen with the field
+            // directly due to the complexities and alternate approaches 
+            // already used.
             MyFieldReceiver {
                 link_many: Some(link_many),
                 ..
             } if self.is_in_or_out_edge_node_field(&model_attributes) => {
                 RelationType::LinkManyInAndOutEdgeNodesInert(link_many.to_owned())
             }
+            MyFieldReceiver {
+                link_many: Some(link_many),
+                ..
+            } => RelationType::LinkMany(link_many.to_owned()),
             MyFieldReceiver {
                 nest_object: Some(nest_object),
                 ..
