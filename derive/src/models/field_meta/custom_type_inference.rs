@@ -50,7 +50,7 @@ pub struct FieldTypeInference<'a> {
 }
 
 impl<'a> FieldTypeInference<'a> {
-    pub fn infer_type(&self) -> ExtractorResult<DbFieldTypeAstMeta> {
+    pub fn infer_type(&self) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
         let inferred = InferenceApproach::all().iter().find_map(|approach| {
             self.infer_type_by(approach)
                 .map(|res| Some(res))
@@ -70,7 +70,7 @@ impl<'a> FieldTypeInference<'a> {
     pub fn infer_type_by(
         &self,
         approach: &InferenceApproach,
-    ) -> ExtractorResult<DbFieldTypeAstMeta> {
+    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
         let relation_type = self.relation_type;
         // let relation_type = self.field_receiver.to_relation_type();
         let model_attrs = self.model_attrs;
@@ -79,13 +79,15 @@ impl<'a> FieldTypeInference<'a> {
         let field_name = self.db_field_name;
         // let field_name = self.field_receiver.db_field_name(&model_attrs.casing()?)?;
 
+        // TODO: Consider removing lifetime except static here rather than doing it 
+        // within the helper functions.
         let res = match approach {
-            InferenceApproach::BasedOnTypePathToken => self.based_on_type_path_token(&ty)?,
+            InferenceApproach::BasedOnTypePathToken => Some(self.based_on_type_path_token(&ty)?),
             InferenceApproach::BasedOnRelationTypeFieldAttr => {
                 self.based_on_field_relation_type(&ty, &relation_type)?
             }
             InferenceApproach::BasedOnDbFieldName => {
-                self.based_on_db_field_name(&ty, &field_name, &model_attrs.to_data_type())?
+                Some(self.based_on_db_field_name(&ty, &field_name, &model_attrs.to_data_type())?)
             }
         };
         Ok(res)
@@ -309,7 +311,7 @@ impl<'a> FieldTypeInference<'a> {
         &self,
         field_ty: &CustomType,
         relation_type: &RelationType,
-    ) -> ExtractorResult<DbFieldTypeAstMeta> {
+    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
         let crate_name = get_crate_name(false);
         let ty = &field_ty.into_inner_ref();
 
@@ -318,11 +320,9 @@ impl<'a> FieldTypeInference<'a> {
                     // Relation are not stored on nodes, but
                     // on edges. Just used on nodes for convenience
                     // during deserialization
-                  return Err(syn::Error::new(
-                      ty.span(),
-                      "This is a readonly field. It cannot be stored in the database, therefore, no database type needed. Use it for deserialization only",
-                  ))?
+                  return Ok(None)
                 }
+            
     RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Record(vec![]),
                 field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])).into(),
@@ -342,7 +342,7 @@ impl<'a> FieldTypeInference<'a> {
                         ).into(),
                         }
             },
-            RelationType::LinkMany(ref_node) => DbFieldTypeAstMeta {
+            RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Array(
                     ::std::boxed::Box::new(FieldType::Record(vec![])),
                     ::std::option::Option::None
@@ -392,7 +392,7 @@ impl<'a> FieldTypeInference<'a> {
                 }
             };
 
-        Ok(meta)
+        Ok(Some(meta))
     }
 
     fn generate_nested_vec_type(

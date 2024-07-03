@@ -25,7 +25,7 @@ impl<'a> Codegen<'a> {
             ..
         } = VariablesModelMacro::new();
 
-        if field_receiver.to_relation_type().is_relate_graph() {
+        if field_receiver.to_relation_type(table_derive_attrs).is_relate_graph() {
             // Relate graph fields are readonly and derived and only used in
             // our rust code but not in the database schema
             return Ok(());

@@ -20,24 +20,26 @@ use syn::spanned::Spanned;
 
 use crate::models::*;
 
-// create_tokenstream_wrapper!(=> FieldTypeDbToken);
+create_tokenstream_wrapper!(=> FieldTypeDbToken);
 
 #[derive(Debug, Clone)]
 pub struct DbFieldTypeAstMeta {
     pub field_type_db_original: FieldType,
-    pub field_type_db_token: FieldTypeDb,
+    pub field_type_db_token: FieldTypeDbToken,
     pub static_assertion_token: StaticAssertionToken,
 }
 
-// impl DbFieldTypeAstMeta {
-//     pub fn field_type_db(&self) -> FieldTypeDb {
-//         self.field_type_db_token.clone()
-//     }
-//
-//     pub fn static_assertion(&self) -> TokenStream {
-//         self.static_assertion_token.clone()
-//     }
-// }
+impl Default for DbFieldTypeAstMeta {
+    fn default() -> Self {
+        let crate_name = get_crate_name(false);
+        Self {
+            field_type_db_original: Default::default(),
+            field_type_db_token: quote!(#crate_name::FieldType::Any).into(),
+            static_assertion_token: Default::default(),
+        }
+    }
+}
+
 
 #[derive(Debug, Clone, Default)]
 pub struct FieldTypeDb(pub FieldType);
@@ -52,21 +54,11 @@ impl ToTokens for FieldTypeDb {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let field_type_str = self.0.to_string();
         let crate_name = get_crate_name(false);
-        let as_token = quote!(#crate_name::FieldTypeDb::from_str(#field_type_str).unwrap());
+        let as_token = quote!(#crate_name::FieldTypeDb::from_str(#field_type_str).expect("Failed to parse field type during tokenization. This is a bug. Please report it."));
 
         as_token.to_tokens(tokens);
     }
 }
-
-
-impl From<TokenStream> for FieldTypeDb {
-    fn from(token: TokenStream) -> Self {
-        let field_type_str = token.to_string();
-        let field_type = FieldType::from_str(&field_type_str).unwrap();
-        Self(field_type)
-    }
-}
-
 
 impl FieldTypeDb {
     pub fn into_inner(self) -> FieldType {
@@ -98,33 +90,61 @@ impl FieldTypeDb {
         value.into()
     }
 
-
-    pub fn generate_static_assertion(
-        &self,
-        field_type: &CustomType,
-    ) -> TokenStream {
+    pub fn generate_static_assertion(&self, field_type: &CustomType) -> TokenStream {
         let crate_name = get_crate_name(false);
 
         match self.0 {
             FieldType::Any => quote!(#crate_name::validators::assert_type_is_any::<#field_type>();),
-            FieldType::Null => quote!(#crate_name::validators::assert_type_is_null::<#field_type>();),
-            FieldType::Uuid => quote!(#crate_name::validators::assert_type_is_uuid::<#field_type>();),
-            FieldType::Bytes => quote!(#crate_name::validators::assert_type_is_bytes::<#field_type>();),
+            FieldType::Null => {
+                quote!(#crate_name::validators::assert_type_is_null::<#field_type>();)
+            }
+            FieldType::Uuid => {
+                quote!(#crate_name::validators::assert_type_is_uuid::<#field_type>();)
+            }
+            FieldType::Bytes => {
+                quote!(#crate_name::validators::assert_type_is_bytes::<#field_type>();)
+            }
             FieldType::Union(_) => quote!(),
-            FieldType::Option(_) => quote!(#crate_name::validators::assert_type_is_option::<#field_type>();),
-            FieldType::String => quote!(#crate_name::validators::assert_type_is_string::<#field_type>();),
+            FieldType::Option(_) => {
+                quote!(#crate_name::validators::assert_type_is_option::<#field_type>();)
+            }
+            FieldType::String => {
+                quote!(#crate_name::validators::assert_type_is_string::<#field_type>();)
+            }
             FieldType::Int => quote!(#crate_name::validators::assert_type_is_int::<#field_type>();),
-            FieldType::Float => quote!(#crate_name::validators::assert_type_is_float::<#field_type>();),
-            FieldType::Bool => quote!(#crate_name::validators::assert_type_is_bool::<#field_type>();),
-            FieldType::Array(_, _) => quote!(#crate_name::validators::assert_type_is_array::<#field_type>();),
-            FieldType::Set(_, _) => quote!(#crate_name::validators::assert_type_is_set::<#field_type>();),
-            FieldType::Datetime => quote!(#crate_name::validators::assert_type_is_datetime::<#field_type>();),
-            FieldType::Decimal => quote!(#crate_name::validators::assert_type_is_decimal::<#field_type>();),
-            FieldType::Duration => quote!(#crate_name::validators::assert_type_is_duration::<#field_type>();),
-            FieldType::Number => quote!(#crate_name::validators::assert_type_is_number::<#field_type>();),
-            FieldType::Object => quote!(#crate_name::validators::assert_type_is_object::<#field_type>();),
-            FieldType::Record(_) => quote!(#crate_name::validators::assert_type_is_thing::<#field_type>();),
-            FieldType::Geometry(_) => quote!(#crate_name::validators::assert_type_is_geometry::<#field_type>();),
+            FieldType::Float => {
+                quote!(#crate_name::validators::assert_type_is_float::<#field_type>();)
+            }
+            FieldType::Bool => {
+                quote!(#crate_name::validators::assert_type_is_bool::<#field_type>();)
+            }
+            FieldType::Array(_, _) => {
+                quote!(#crate_name::validators::assert_type_is_array::<#field_type>();)
+            }
+            FieldType::Set(_, _) => {
+                quote!(#crate_name::validators::assert_type_is_set::<#field_type>();)
+            }
+            FieldType::Datetime => {
+                quote!(#crate_name::validators::assert_type_is_datetime::<#field_type>();)
+            }
+            FieldType::Decimal => {
+                quote!(#crate_name::validators::assert_type_is_decimal::<#field_type>();)
+            }
+            FieldType::Duration => {
+                quote!(#crate_name::validators::assert_type_is_duration::<#field_type>();)
+            }
+            FieldType::Number => {
+                quote!(#crate_name::validators::assert_type_is_number::<#field_type>();)
+            }
+            FieldType::Object => {
+                quote!(#crate_name::validators::assert_type_is_object::<#field_type>();)
+            }
+            FieldType::Record(_) => {
+                quote!(#crate_name::validators::assert_type_is_thing::<#field_type>();)
+            }
+            FieldType::Geometry(_) => {
+                quote!(#crate_name::validators::assert_type_is_geometry::<#field_type>();)
+            }
         }
     }
 }

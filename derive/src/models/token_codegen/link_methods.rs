@@ -18,12 +18,19 @@ ListSimpleTraversalMethod
 use super::{Codegen, RelationType};
 
 impl<'a> Codegen<'a> {
+    pub fn is_in_or_out_edge_node(&self) -> ExtractorResult<bool> {
+        Ok(self
+            .field_receiver()
+            .db_field_name(&self.table_derive_attributes().casing()?)?
+            .is_in_or_out_edge_node(&self.data_type()))
+    }
+
     pub fn create_link_methods(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
 
         let mut metas = vec![];
-        match field_receiver.to_relation_type() {
+        match field_receiver.to_relation_type(table_derive_attrs) {
             RelationType::LinkSelf(link_self) => {
                 let link_one = link_self.to_linkone_attr_type(table_derive_attrs);
                 let meta = self.link_one(link_one?)?;
@@ -36,6 +43,15 @@ impl<'a> Codegen<'a> {
             RelationType::LinkMany(link_many) => {
                 let meta = self.link_many(&link_many)?;
                 metas.push(meta);
+            }
+            RelationType::LinkManyInAndOutEdgeNodesInert(_link_many) => {
+                // Do nothing as we dont want to generate code for in and out nodes
+                // fields in the edge tables. That is handled other ways using the aliased
+                // type to the edge table. e.g Like<In: Node + Default, Out: Node + Default>
+                // where In and Out are the nodes in the edge table
+                // we could use type StudentLikeBook = Like<Student, Book>;
+                // StudentLikeBook already handles most of what we need but we can
+                // revisit this later to see if we can generate more code for this
             }
             RelationType::NestArray(nest_array) => {
                 let meta = self.nest_array(&nest_array)?;

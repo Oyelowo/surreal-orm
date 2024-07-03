@@ -39,7 +39,7 @@ impl<'a> Codegen<'a> {
     pub fn create_field_setter_impl(&mut self) -> ExtractorResult<()> {
         let field_receiver = self.field_receiver();
 
-        match field_receiver.to_relation_type() {
+        match field_receiver.to_relation_type(self.table_derive_attributes()) {
             // Relate fields are readonly and mainly for aliasing connections in select statements
             // To create a relation, we typically use a separate relation statement
             RelationType::Relate(_) => {}
@@ -175,7 +175,7 @@ impl<'a> Codegen<'a> {
         let field_name_as_pascalized =
             field_receiver.field_name_pascalized(&model_attributes.casing()?)?;
 
-        let (generics, array_item_type) = match field_receiver.to_relation_type() {
+        let (generics, array_item_type) = match field_receiver.to_relation_type(model_attributes) {
             RelationType::LinkMany(foreign_node) => {
                 let generics_meta = foreign_node.get_generics_from_current_struct(model_attributes);
                 (
