@@ -149,13 +149,13 @@ use surreal_orm::statements::update;
 
 let space_ship = SpaceShip::table();
 
-update::<SpaceShip>(space_ship)
+update(space_ship)
     .content(SpaceShip {
         name: "Oyelowo".to_string(),
         age: 90,
         ..Default::default()
     })
-    .where_(cond(strength.greater_than(5)).and(strength.less_than_or_equal(15)))
+    .where_(cond(strength.gt(5)).and(strength.lte(15)))
     .return_many(db.clone())
     .await?;
 ```
@@ -177,7 +177,7 @@ let space_ship::Schema { name, age, .. } = SpaceShip::schema();
 let space_ship = SpaceShip::table();
 
 delete(space_ship)
-    .where_(cond(name.equal("Millennium Falcon")).and(age.less_then(50)))
+    .where_(cond(name.eq("Millennium Falcon")).and(age.lt(50)))
     .run(db.clone())
     .await?;
 ```

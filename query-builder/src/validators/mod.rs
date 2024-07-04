@@ -1,4 +1,6 @@
+use crate::function;
 use crate::Object;
+// pub use crate::assert_fields;
 pub use num_traits::{Float, Num, PrimInt as Int};
 // pub use static_assertions::assert_fields;
 pub use static_assertions::assert_impl_all;
@@ -35,6 +37,7 @@ macro_rules! assert_fields {
         }
     };
 }
+pub use assert_fields;
 
 #[macro_export]
 /// Checks that two types are equal
@@ -120,9 +123,10 @@ pub fn assert_is_iterable<T: IntoIterator>() {
 /// Validate that type is a string at compile time
 pub trait IsString {}
 
-impl IsString for String {}
-impl IsString for &String {}
-impl IsString for &str {}
+// impl IsString for String {}
+// impl IsString for &String {}
+// impl IsString for &str {}
+impl<T> IsString for T where T: Into<String> {}
 
 /// Validate that type is a string at compile time
 pub fn assert_type_is_string<T: IsString>() {
@@ -321,7 +325,6 @@ pub fn assert_type_is_thing<T: IsThing>() {
 /// Validate that value is a thing at compile time
 pub fn assert_value_is_thing<T: IsThing>(_value: T) {}
 
-
 // Links
 /// check if a type is a link
 pub trait IsLink {}
@@ -340,7 +343,6 @@ pub fn assert_type_is_link_one<T: IsLinkOne>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
 
-
 ///
 /// check if a type is a link self or self-referential relationship type
 pub trait IsLinkSelf {}
@@ -349,7 +351,6 @@ pub fn assert_type_is_link_self<T: IsLinkSelf>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
 
-
 ///
 /// check if a type is a link many or one-to-many relationship type
 pub trait IsLinkMany {}
@@ -357,8 +358,6 @@ pub trait IsLinkMany {}
 pub fn assert_type_is_link_many<T: IsLinkMany>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
-
-
 
 /// Validates that type is a surrealdb bytes at compile time
 pub trait IsBytes {}
