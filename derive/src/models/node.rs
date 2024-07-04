@@ -78,6 +78,7 @@ impl ToTokens for NodeToken {
             record_link_fields_methods,
             node_edge_metadata,
             schema_struct_fields_names_kv_empty,
+            serialized_ident_struct_partial_init_fields,
             serialized_fmt_db_field_names_instance: serializable_fields,
             linked_fields,
             link_one_fields,
@@ -154,7 +155,7 @@ impl ToTokens for NodeToken {
                 type PartialBuilder = #struct_partial_builder_ident #struct_ty_generics;
 
                 fn partial_builder() -> Self::PartialBuilder {
-                    #struct_partial_builder_ident::default()
+                    #struct_partial_builder_ident::new()
                 }
             }
 
@@ -208,6 +209,13 @@ impl ToTokens for NodeToken {
             pub struct #struct_partial_builder_ident #struct_impl_generics (#struct_partial_ident #struct_ty_generics) #struct_where_clause;
 
             impl #struct_impl_generics #struct_partial_builder_ident #struct_ty_generics #struct_where_clause {
+                pub fn new() ->Self {
+                    Self(#struct_partial_ident { 
+                        _____struct_marker_ident: #crate_name::Maybe::None, 
+                        #( #serialized_ident_struct_partial_init_fields: #crate_name::Maybe::None), *
+                    })
+                } 
+
                 #( #struct_partial_associated_functions) *
 
                 pub fn build(self) -> #struct_partial_ident #struct_ty_generics {

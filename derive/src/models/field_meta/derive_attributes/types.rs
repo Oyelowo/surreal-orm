@@ -28,7 +28,7 @@ impl MyFieldReceiver {
     ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
         let field_ty = self
             .ty()
-            .remove_non_static_lifetime_and_reference()
+            // .remove_non_static_lifetime_and_reference()
             .replace_self_with_current_struct_concrete_type(model_attributes)?;
 
         let db_type = match self.field_type_db {

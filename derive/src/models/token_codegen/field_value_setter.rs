@@ -185,12 +185,23 @@ impl<'a> Codegen<'a> {
                     Some(quote!(<#foreign_node as #crate_name::Model>::Id)),
                 )
             }
+             RelationType::LinkManyInAndOutEdgeNodesInert(foreign_node_generics) => {
+                (
+                    None,
+                    Some(quote!(#crate_name::sql::Thing))
+                )
+            }
             RelationType::NestArray(foreign_object) => {
                 let generics_meta =
                     foreign_object.get_generics_from_current_struct(model_attributes);
                 (Some(generics_meta), Some(quote!(#foreign_object)))
             }
-            _ => {
+            RelationType::Relate(_)
+            | RelationType::LinkOne(_)
+            | RelationType::LinkSelf(_)
+            | RelationType::NestObject(_)
+            | RelationType::List(_)
+            | RelationType::None => {
                 let field_type = field_receiver.ty();
                 let inferred_type = match field_type
                     .get_array_inner_type()
@@ -206,6 +217,14 @@ impl<'a> Codegen<'a> {
                         // #[derive(Debug,Clone)]
                         let array_inner_field_ty = field_receiver
                             .field_type_db_with_static_assertions(model_attributes)?;
+                        panic!(
+                            "xxx{:?}",
+                            array_inner_field_ty
+                                .unwrap_or_default()
+                                .field_type_db_original
+                                // .to_token_stream()
+                                .to_string()
+                        );
                         // let type_set = array_inner_field_ty.clone()
                         //             .map(|this| this.set_item_type_path());
 
@@ -236,7 +255,7 @@ impl<'a> Codegen<'a> {
                         //         "Could not infer array or set type. Explicitly specify the type e.g ty = array<string>",
                         //     ).into())
                         // }
-                    // };
+                        // };
                         // (None, Some(array_inner_ty_db_concrete.to_token_stream()))
                         (None, Some(quote!(#crate_name::FieldType)))
                     }

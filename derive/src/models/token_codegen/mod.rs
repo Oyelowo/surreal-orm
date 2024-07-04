@@ -48,7 +48,23 @@ pub(crate) struct CommonIdents {
 
 #[derive(Default, Clone)]
 pub struct Codegen<'a> {
-    /// list of fields names that are actually serialized and not skipped.
+    /// list of fields names that are actually serialized and not skipped as ident
+    /// used for partial udpater struct. We stick to the original field name,
+    /// to stay consistent with rust struct declaration within the code but 
+    /// handle the renaming automatically for the user.
+    /// Personally, I think this is better than using the serialized field name in this specific
+    /// context. 
+    /// NOTE: Currently, I am skipping id field since it's immutable and should not be updated.
+    /// And considering same for in and out fields of edge tables if surrealdb 2.0 does not support
+    /// that.
+    /// e.g pub time_written: Time,
+    ///
+    /// However, when trying to get database name for doing query-building, I typically
+    /// use he serialized field name since this is how it would appear in the database and I want
+    /// to be as close at possible to the actual database field name to avoid confusion in this
+    /// other scenario.
+    pub serialized_ident_struct_partial_init_fields: Vec<SerializedIdentStructPartialInitFields>,
+    /// list of fields names that are actually serialized and not skipped as string.
     pub serialized_fmt_db_field_names_instance: Vec<SerializableField>,
     /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
     pub linked_fields: Vec<LinkedField>,
@@ -196,6 +212,7 @@ pub struct Codegen<'a> {
     pub field_metadata: Vec<FieldMetadataToken>,
     pub node_edge_metadata: NodeEdgeMetadataLookupTable<'a>,
     pub fields_relations_aliased: Vec<FieldsRelationsAliased>,
+    /// e.g pub time: surreal_orm::Maybe<<Time as surreal_orm::PartialUpdater>::StructPartial>,
     pub struct_partial_fields: Vec<StructPartialFields>,
     //     pub fn #field_name(mut self, value: #original_field_type) -> Self {
     //     self.0.#field_name = value;

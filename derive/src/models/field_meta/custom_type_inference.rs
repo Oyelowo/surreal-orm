@@ -99,7 +99,7 @@ impl<'a> FieldTypeInference<'a> {
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let crate_name = get_crate_name(false);
         let binding = field_ty
-            .remove_non_static_lifetime_and_reference()
+            // .remove_non_static_lifetime_and_reference()
             .replace_self_with_current_struct_concrete_type(self.model_attrs)?;
         let ty = &binding.into_inner_ref();
 
