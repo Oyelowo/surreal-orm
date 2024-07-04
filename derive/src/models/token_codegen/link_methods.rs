@@ -94,6 +94,7 @@ impl<'a> Codegen<'a> {
         let struct_casing = table_derive_attrs.casing()?;
         let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
         let db_field_name = field_receiver.db_field_name(&struct_casing)?;
+        let db_field_name_with_foregin_access = format!(".{db_field_name}");
 
         let record_link_default_alias_as_method = quote!(
             pub fn #field_ident_normalized(&self, clause: impl ::std::convert::Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
@@ -102,9 +103,9 @@ impl<'a> Codegen<'a> {
 
             // NOTE: Confirm this
                 let normalized_field_name_str = if self.build().is_empty(){
-                    #db_field_name.to_string()
+                    #db_field_name
                 }else {
-                    format!(".{}", #db_field_name)
+                    #db_field_name_with_foregin_access 
                 };
 
                 let clause: #crate_name::NodeClause = clause.into();
@@ -138,6 +139,7 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let db_field_name = field_receiver.db_field_name(&struct_casing)?;
         let db_field_name_as_ident = db_field_name.as_ident();
+        let db_field_name_with_foregin_access = format!(".{db_field_name}");
         let link_one_turbo_fished = link_one.turbo_fishize()?;
         let VariablesModelMacro {
             ___________graph_traversal_string,
@@ -160,7 +162,7 @@ impl<'a> Codegen<'a> {
                 let normalized_field_name_str = if self.build().is_empty(){
                     #db_field_name
                 } else {
-                    format!(".{}", #db_field_name)
+                    #db_field_name_with_foregin_access
                 };
 
                 #link_one_turbo_fished::#__________connect_node_to_graph_traversal_string(
@@ -242,7 +244,8 @@ impl<'a> Codegen<'a> {
         let struct_casing = table_derive_attrs.casing()?;
         let field_receiver = self.field_receiver();
         let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = field_receiver.db_field_name(&struct_casing)?;
+        let db_field_name = field_receiver.db_field_name(&struct_casing)?;
+        let db_field_name_with_foregin_access = format!(".{db_field_name}");
         let embedded_object_turbo_fished = embedded_object.turbo_fishize()?;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
@@ -266,9 +269,9 @@ impl<'a> Codegen<'a> {
                 let clause = #crate_name::Clause::from(#crate_name::Empty);
 
                 let normalized_field_name_str = if self.build().is_empty(){
-                    #field_name_serialized.to_string()
+                    #db_field_name
                 }else {
-                    format!(".{}", #field_name_serialized)
+                    #db_field_name_with_foregin_access
                 };
 
                 #embedded_object_turbo_fished::#__________connect_object_to_graph_traversal_string(
@@ -296,7 +299,8 @@ impl<'a> Codegen<'a> {
         let struct_casing = table_derive_attrs.casing()?;
         let field_receiver = self.field_receiver();
         let field_ident_normalized = field_receiver.field_ident_normalized(&struct_casing)?;
-        let field_name_serialized = field_receiver.db_field_name(&struct_casing)?;
+        let db_field_name = field_receiver.db_field_name(&struct_casing)?;
+        let db_field_name_with_foregin_access = format!(".{db_field_name}");
         let nest_array_turbo_fished = nested_array.turbo_fishize()?;
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
@@ -322,9 +326,9 @@ impl<'a> Codegen<'a> {
             ) -> #nested_array {
                 let clause: #crate_name::ObjectClause = clause.into();
                 let normalized_field_name_str = if self.build().is_empty(){
-                    #field_name_serialized.to_string()
+                    #db_field_name
                 }else {
-                    format!(".{}", #field_name_serialized)
+                    #db_field_name_with_foregin_access
                 };
 
                 #nest_array_turbo_fished::#__________connect_object_to_graph_traversal_string(
