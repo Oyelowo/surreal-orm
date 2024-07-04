@@ -157,7 +157,7 @@ impl ToTokens for ObjectToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                pub use super::#module_name_internal::#_____schema_def::Schema;
+                pub use super::#module_name_internal::#_____schema_def::__Schema__ as Schema;
             }
 
 
@@ -180,10 +180,11 @@ impl ToTokens for ObjectToken {
 
                 pub mod #_____schema_def {
                     use super::#_____field_names;
+                    use super::super::*;
 
                     #[allow(non_snake_case)]
                     #[derive(Debug, Clone)]
-                    pub struct Schema #ty_generics #where_clause {
+                    pub struct __Schema__ #ty_generics #where_clause {
                        #( #schema_struct_fields_types_kv) *
                         pub(super) #___________graph_traversal_string: ::std::string::String,
                         pub(super) #___________bindings: #crate_name::BindingsList,
@@ -191,7 +192,7 @@ impl ToTokens for ObjectToken {
                         pub(super) #_____struct_marker_ident: #struct_marker,
                     }
                 }
-                pub type #struct_name_ident #ty_generics = #_____schema_def::Schema #ty_generics;
+                pub type #struct_name_ident #ty_generics = #_____schema_def::__Schema__ #ty_generics;
 
                 impl #impl_generics #crate_name::Parametric for #struct_name_ident #ty_generics #where_clause{
                     fn get_bindings(&self) -> #crate_name::BindingsList {
