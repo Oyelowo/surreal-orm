@@ -315,6 +315,7 @@ impl ToTokens for ObjectToken {
 
             // #[test]
             #[allow(non_snake_case)]
+            #[allow(unreachable_code)]
             fn #test_function_name #impl_generics() {
                 #( #static_assertions) *
             }
