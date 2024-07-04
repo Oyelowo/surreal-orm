@@ -140,7 +140,7 @@ fn define_age() -> DefineFieldStatement {
 }
 
 // #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node,  Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table = "student"
@@ -165,7 +165,7 @@ pub struct Student {
         // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
         // permissions = "perm()",
         // define = "define_age()",
-        define_fn = "define_age"
+        define = define_age
     )]
     age: u8,
 
@@ -183,9 +183,9 @@ pub struct Student {
 
     #[surreal_orm(
         link_many = Book,
-        type_ = "array<record<book>>",
+        ty = "array<record<book>>",
         // item_type = "record(book)",
-        item_assert_fn = erer
+        item_assert = erer
     )]
     #[serde(rename = "semesterCourses")]
     all_semester_courses: LinkMany<Book>,
@@ -227,9 +227,12 @@ pub struct Writes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Writes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
-    pub in_: LinkOne<In>,
+    #[surreal_orm(link_many = "In")]
+    pub in_: LinkMany<In>,
+
     #[serde(skip_serializing)]
-    pub out: LinkOne<Out>,
+    #[surreal_orm(link_many = "Out")]
+    pub out: LinkMany<Out>,
     pub time_written: Duration,
     pub count: i32,
 }
@@ -244,8 +247,11 @@ pub struct Likes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Likes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
+    #[surreal_orm(link_many = "In")]
     pub in_: LinkOne<In>,
+
     #[serde(skip_serializing)]
+    #[surreal_orm(link_many = "Out")]
     pub out: LinkOne<Out>,
     pub likes_count: u64,
 }
@@ -296,6 +302,7 @@ impl WhiteSpaceRemoval for &str {}
 impl WhiteSpaceRemoval for String {}
 
 use serde_json::{Map, Value};
+
 
 // fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String {
 //     let value: Value = serde_json::from_str(json_string).expect("Invalid JSON string");
