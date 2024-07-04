@@ -248,11 +248,11 @@ pub struct Likes<In: Node, Out: Node> {
 
     #[serde(rename = "in", skip_serializing)]
     #[surreal_orm(link_many = "In")]
-    pub in_: LinkOne<In>,
+    pub in_: LinkMany<In>,
 
     #[serde(skip_serializing)]
     #[surreal_orm(link_many = "Out")]
-    pub out: LinkOne<Out>,
+    pub out: LinkMany<Out>,
     pub likes_count: u64,
 }
 pub type StudentLiksBook = Likes<Student, Book>;
