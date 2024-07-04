@@ -28,7 +28,9 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let db_field_name = field_receiver.db_field_name(&table_derive_attributes.casing()?)?;
 
-        if let RelationType::Relate(ref relate) = field_receiver.to_relation_type(table_derive_attributes) {
+        if let RelationType::Relate(ref relate) =
+            field_receiver.to_relation_type(table_derive_attributes)
+        {
             self.static_assertions
                 .push(self.create_static_assertions(relate)?);
             self.relate(relate)?;
@@ -63,13 +65,23 @@ impl<'a> Codegen<'a> {
         let edge_name_with_direction_as_method_ident =
             &(|| Self::add_direction_indication_to_ident(edge_table, edge_direction));
 
-        let foreign_node_schema_ident =
-            ForeignNodeSchemaIdent::from_node_table(foreign_node_table);
+        let foreign_node_schema_ident = ForeignNodeSchemaIdent::from_node_table(foreign_node_table);
         let foreign_node_schema_type_alias_with_generics =
             ForeignNodeTypeAliasWithGenerics(quote!(#foreign_node_schema_ident #edge_ty_generics));
 
         let foreign_node_schema_type_alias_with_generics_turbofishized =
-            ForeignNodeTypeAliasWithGenerics(quote!(#foreign_node_schema_ident :: #edge_ty_generics));
+            if edge_ty_generics.is_empty() {
+                quote!(#foreign_node_schema_ident)
+            } else {
+            // NOTE: This may  not really be needed as the return type
+            // should help to auto-infer the type or generics as we call the
+            // connect method on the struct.
+                (quote!(#foreign_node_schema_ident :: #edge_ty_generics))
+            };
+        let foreign_node_schema_type_alias_with_generics_turbofishized =
+            ForeignNodeTypeAliasWithGenerics(
+                foreign_node_schema_type_alias_with_generics_turbofishized,
+            );
 
         // Meant to represent the variable of struct model(node) itself.
         // Within edge generics, there is usually In and Out associated types, this is used to
@@ -474,8 +486,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 "{}",
                 Codegen::add_direction_indication_to_ident(
                     // edge_name_as_struct_original_ident.deref(),
-                    edge_table,
-                    direction,
+                    edge_table, direction,
                 )
                 .to_string()
             ));
