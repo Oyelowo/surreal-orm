@@ -28,11 +28,11 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
     #[surreal_orm(ty = "record<visits_explicit>")]
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(ty = "record")]
-    pub in_: LinkOne<In>,
-    #[surreal_orm(ty = "record")]
+    #[surreal_orm(link_many="In", ty = "array<record>")]
+    pub in_: LinkMany<In>,
     // #[surreal_orm(type_ = "record<planet>")]
-    pub out: LinkOne<Out>,
+    #[surreal_orm(link_many="Out", ty = "array<record>")]
+    pub out: LinkMany<Out>,
     #[surreal_orm(ty = "duration")]
     pub time_visited: Duration,
 }
