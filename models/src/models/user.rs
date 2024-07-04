@@ -17,29 +17,14 @@ pub struct User<'a> {
     pub id: SurrealId<Self, String>,
     pub name: String,
     pub created: DateTime<Utc>,
-    pub company: String,
-    pub tags: Vec<&'a String>,
+    pub company: &'a str,
+    pub tags: Vec<String>,
 }
 
-
-
-
-impl<'a> Default for User<'a> {
-    fn default() -> Self {
-        Self {
-            id: User::create_id(sql::Id::rand().to_string()),
-            name: Default::default(),
-            created: Default::default(),
-            company: Default::default(),
-            tags: Default::default(),
-        }
-    }
-}
-
-#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = like)]
-pub struct Like<In: Node + Default, Out: Node + Default> {
+pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // #[surreal_orm(ty = "option<array<float>>")]
     // pub score: Option<Vec<f64>>,
@@ -54,16 +39,14 @@ pub struct Like<In: Node + Default, Out: Node + Default> {
 }
 pub type CompanyLikeUser<'a> = Like<Company<'a>, User<'a>>;
 
-type Mana<'a> = <User<'a> as surreal_orm::Model>::Id;
-type Manaa<In: Node> = <In as surreal_orm::Model>::Id;
-
-
-#[derive( Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = company)]
 pub struct Company<'b> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
+    pub namex: &'b str,
+
     #[surreal_orm(link_many = "User<'b>")]
     pub users: LinkMany<User<'b>>,
 
@@ -71,14 +54,14 @@ pub struct Company<'b> {
     pub devs: Relate<User<'b>>,
 }
 
-#[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Object, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Time {
     // pub name: String,
     pub connected: DateTime<Utc>,
 }
 
-#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = organization)]
 pub struct Organization<'a> {
@@ -90,5 +73,3 @@ pub struct Organization<'a> {
     pub time: Time,
     pub age: u8,
 }
-
-
