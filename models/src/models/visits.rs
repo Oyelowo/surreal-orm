@@ -9,7 +9,9 @@ use std::time::Duration;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{Edge, LinkMany, LinkOne, Model, Node, Relate, SurrealSimpleId};
+use surreal_orm::*;
+
+use crate::{Alien, SpaceShip, Weapon};
 
 use super::planet::Planet;
 
@@ -38,18 +40,21 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
 // Connects Alien to Planet via Visits
 pub type AlienVisitsPlanetExplicit = VisitsExplicit<Alien, Planet<u64>>;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Edge, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = visits_with_explicit_attributes)]
 pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     // #[surreal_orm(ty = "record<visits_with_explicit_attributes>")]
     pub id: SurrealSimpleId<Self>,
 
-    #[serde(rename = "in")]
+    #[serde(rename = "in", skip_serializing)]
+    #[surreal_orm(link_many = "In")]
+    pub in_: LinkMany<In>,
+
+    #[serde(skip_serializing)]
+    #[surreal_orm(link_many = "Out")]
     // #[surreal_orm(ty = "record")]
-    pub in_: LinkOne<In>,
-    // #[surreal_orm(ty = "record")]
-    pub out: LinkOne<Out>,
+    pub out: LinkMany<Out>,
 
     // #[surreal_orm(ty = "string")]
     name: String,
@@ -73,41 +78,38 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     tags: Vec<String>,
 
     // #[surreal_orm(link_one = "Weapon", ty = "record<weapon>")]
-    weapon: LinkOne<Weapon>,
+    #[surreal_orm(link_many = "Weapon")]
+    weapon: LinkMany<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
     // #[surreal_orm(link_many = "SpaceShip", ty = "array<record<space_ship>>")]
+    #[surreal_orm(link_many = "SpaceShip")]
     space_ships: LinkMany<SpaceShip>,
 }
 
 pub type AlienVisitsPlanetWithExplicitAttributes = VisitsWithExplicitAttributes<Alien, Planet<u64>>;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Nma<'a> {
-    // pub id: SurrealSimpleId<Self>,
-    pub time_visited: Duration,
-    pub dfd: &'static str,
-    pub age: &'a str,
-}
-
 #[derive(Edge, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = visits)]
-pub struct Visits<'a, In: Node, Out>
+pub struct Visits<In: Node, Out>
 where
     Out: Node,
 {
     pub id: SurrealSimpleId<Self>,
     // pub id: SurrealSimpleId<Self>,
-    // #[serde(rename = "in")]
-    pub in_: LinkOne<In>,
-    pub out: LinkOne<Out>,
-    pub name: &'a str,
-    pub hair_color: Option<&'a str>,
+    #[serde(skip_serializing)]
+    #[surreal_orm(link_many = "In")]
+    pub r#in: LinkMany<In>,
+
+    #[serde(skip_serializing)]
+    #[surreal_orm(link_many = "Out")]
+    pub out: LinkMany<Out>,
+    pub name: String,
+    pub hair_color: Option<&'static str>,
     #[surreal_orm(ty = "duration")]
     pub time_visited: Duration,
-    // #[surreal_orm(link_one = "Planet")]
+    #[surreal_orm(link_one = "Planet<u64>")]
     pub mana: LinkOne<Planet<u64>>,
     // pub age: &'a u8,
     // pub zdf: &'static u8,
@@ -130,3 +132,5 @@ where
     // #[serde(skip_serializing, default)]
     // pub planets_to_visit: Relate<Planet<u64>>,
 }
+
+

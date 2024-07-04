@@ -599,16 +599,19 @@ pub struct Writes<In: Node, Out: Node> {
 pub type StudentWritesBook = Writes<Student, Book>;
 pub type StudentWritesBlog = Writes<Student, Blog>;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table = likes)]
+#[surreal_orm(table = likes)]
 pub struct Likes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // pub id: SurrealSimpleId<Likes<In, Out>>,
     #[serde(rename = "in", skip_serializing)]
-    pub in_: LinkOne<In>,
+    #[surreal_orm(link_many = In)]
+    pub in_: LinkMany<In>,
+
     #[serde(skip_serializing)]
-    pub out: LinkOne<Out>,
+    #[surreal_orm(link_many = Out)]
+    pub out: LinkMany<Out>,
     pub likes_count: u64,
 }
 pub type StudentLiksBook = Likes<Student, Book>;
@@ -631,11 +634,11 @@ pub struct Blog {
     content: String,
 }
 
-#[derive(Object, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
-// #[surreal_orm(table = rocket)]
-pub struct Rocket {
-    // id: SurrealSimpleId<Rocket>,
-    name: String,
-    sama: &'static str,
-}
+// #[derive(Object, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+// #[serde(rename_all = "camelCase")]
+// // #[surreal_orm(table = rocket)]
+// pub struct Rocket {
+//     // id: SurrealSimpleId<Rocket>,
+//     name: String,
+//     sama: &'static str,
+// }

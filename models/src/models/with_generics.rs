@@ -2,10 +2,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use surreal_orm::*;
 
+
+
 #[derive(Node, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = planet)]
-pub struct Planet<'a, T: Serialize + Default + Clone + surreal_orm::validators::Int> {
+#[surreal_orm(table = planet_with_generics)]
+pub struct PlanetWithGenerics<'a, T: Serialize + Default + Clone + surreal_orm::validators::Int> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     #[surreal_orm(ty = "float")]
@@ -14,8 +16,8 @@ pub struct Planet<'a, T: Serialize + Default + Clone + surreal_orm::validators::
     #[surreal_orm(ty = int)]
     pub something: T,
 
-    #[surreal_orm(nest_object = "Rocket<'a, T>")]
-    pub rocket: Rocket<'a, T>,
+    #[surreal_orm(nest_object = "RocketWithGenerics<'a, T>")]
+    pub rocket: RocketWithGenerics<'a, T>,
 
     #[surreal_orm(ty = "option<array<float>>")]
     pub score: Option<Vec<f64>>,
@@ -24,7 +26,7 @@ type Strength = f64;
 
 #[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]
 // #[serde(rename_all = "camelCase")]
-pub struct Rocket<'a, T: Serialize + Default + Clone + surreal_orm::validators::Int> {
+pub struct RocketWithGenerics<'a, T: Serialize + Default + Clone + surreal_orm::validators::Int> {
     name: String,
     #[surreal_orm(ty = "int")]
     something: T,
@@ -48,7 +50,7 @@ fn cere() {
 }
 fn test_partial_ob() {
     // Rocket::schema().
-    let rocket = Rocket::partial_builder()
+    let rocket = RocketWithGenerics::partial_builder()
         // .name("Sugar".to_string())
         .something(43)
         .fav_number(None)
@@ -58,7 +60,7 @@ fn test_partial_ob() {
         .nana("ewe")
         .build();
 
-    let x = Planet::partial_builder().rocket(rocket).build();
+    let x = PlanetWithGenerics::partial_builder().rocket(rocket).build();
 }
 //
 // type Lala<'a, T> = <Weapon<'a, T> as PartialUpdater>::StructPartial;
