@@ -1,14 +1,11 @@
-use surreal_models::spaceship::SpaceShip;
-use surreal_models::user;
-use surreal_models::Rocket;
+use surreal_models::{RocketWithGenerics, SpaceShip};
 use surreal_orm::*;
-// use surreal_orm::PartialUpdater;
 //
 // type Lala<'a, T> = <Weapon<'a, T> as PartialUpdater>::StructPartial;
 //
 fn main() {
     let x = 5;
-    let rocket = Rocket::partial_builder()
+    let rocket = RocketWithGenerics::partial_builder()
         .something(907)
         .something2(Some("Mars"))
         .build();

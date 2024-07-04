@@ -323,7 +323,7 @@ impl<'a> FieldTypeInference<'a> {
                   return Ok(None)
                 }
             
-    RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
+            RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Record(vec![]),
                 field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])).into(),
                 static_assertion_token: quote!(#crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkOne<#ref_node>);).into()

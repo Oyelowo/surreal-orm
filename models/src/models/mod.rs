@@ -16,7 +16,7 @@ pub mod user_with_generics;
 pub mod visits;
 pub mod weapon;
 pub mod with_generics;
-// pub use with_generics::*;
+pub use with_generics::*;
 
 // pub use self::alien::*;
 // pub use self::attributes::*;
