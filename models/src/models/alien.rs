@@ -112,3 +112,5 @@ pub struct Alien2 {
     #[surreal_orm(link_many = SpaceShip, ty = "array<record<space_ship>>")]
     pub space_ships: LinkMany<SpaceShip>,
 }
+
+
