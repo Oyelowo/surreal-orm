@@ -527,7 +527,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
 
 
                 impl #edge_type_impl_generics ::std::convert::From<#edge_name_as_struct_original_ident #edge_type_ty_generics> for #edge_name_as_struct_with_direction_ident #edge_type_ty_generics #edge_type_where_clause {
-                    fn from(value: #edge_name_as_struct_original_ident) -> Self {
+                    fn from(value: #edge_name_as_struct_original_ident #edge_type_ty_generics) -> Self {
                         Self(value)
                     }
                 }
