@@ -61,7 +61,7 @@ pub struct Time {
     pub connected: DateTime<Utc>,
 }
 
-#[derive(Node, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = organization)]
 pub struct Organization<'a> {
@@ -73,3 +73,4 @@ pub struct Organization<'a> {
     pub time: Time,
     pub age: u8,
 }
+
