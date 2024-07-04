@@ -569,7 +569,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 }
 
                 impl #edge_type_impl_generics ::std::ops::Deref for #edge_name_as_struct_with_direction_ident #edge_type_ty_generics #edge_type_where_clause {
-                    type Target = #edge_name_as_struct_with_direction_ident #edge_type_ty_generics;
+                    type Target = #edge_name_as_struct_original_ident #edge_type_ty_generics;
 
                     fn deref(&self) -> &Self::Target {
                         &self.0

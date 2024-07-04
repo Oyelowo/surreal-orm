@@ -34,6 +34,7 @@ create_tokenstream_wrapper!(=> LinkSelfField);
 create_tokenstream_wrapper!(=> LinkOneAndSelfField);
 create_tokenstream_wrapper!(=> LinkManyField);
 create_tokenstream_wrapper!(=> SerializableField);
+create_tokenstream_wrapper!(=> SerializedIdentStructPartialInitFields);
 
 create_tokenstream_wrapper!(=> ConnectionWithFieldAppended);
 
