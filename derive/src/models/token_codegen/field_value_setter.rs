@@ -202,12 +202,12 @@ impl<'a> Codegen<'a> {
             | RelationType::List(_)
             | RelationType::None => {
                 let field_type = field_receiver.ty();
-                let array_item_ty_specified = &field_receiver.item_ty;
                 let guessed_arrayish_item_type = field_type
                     .get_array_inner_type()
                     .or_else(|| field_type.get_set_inner_type());
 
-                let inner_list_type = array_item_ty_specified
+                let inner_list_type = field_receiver
+                    .array_item_ty_specified
                     .as_ref()
                     .map(|ty| ty.into_inner_ref())
                     .or(guessed_arrayish_item_type.as_ref());
@@ -229,7 +229,8 @@ impl<'a> Codegen<'a> {
                     impl #crate_name::SetterArray<#item_type> for self::#field_name_as_pascalized {}
                 ),
                 |this| {
-                    let (field_impl_generics, field_ty_generics, field_where_clause) =
+                    // TODO: Cross-Check that the item_ty would for sure include the ty generics
+                    let (field_impl_generics, _field_ty_generics, field_where_clause) =
                         this.split_for_impl();
 
                     quote!(
