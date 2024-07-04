@@ -68,6 +68,16 @@ impl RelationType {
     pub fn is_some(&self) -> bool {
         !matches!(self, RelationType::None)
     }
+
+    pub fn is_link(&self) -> bool {
+        matches!(
+            self,
+            RelationType::LinkOne(_)
+                | RelationType::LinkSelf(_)
+                | RelationType::LinkMany(_)
+                | RelationType::LinkManyInAndOutEdgeNodesInert(_)
+        )
+    }
 }
 
 impl From<&MyFieldReceiver> for RelationType {

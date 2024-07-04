@@ -17,7 +17,7 @@ impl MyFieldReceiver {
     ) -> ExtractorResult<FieldTypeDb> {
         self.field_type_db_with_static_assertions(model_attributes)
             // TODO: Crosscheck if using default makes sense here.
-            // A relate field is an example of where we should not 
+            // A relate field is an example of where we should not
             // have a db field as that is a readonly derived field.
             .map(|x| x.unwrap_or_default().field_type_db_original.into())
     }
@@ -26,6 +26,7 @@ impl MyFieldReceiver {
         &self,
         model_attributes: &ModelAttributes,
     ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
+        let crate_name = get_crate_name(false);
         let field_ty = self
             .ty()
             // .remove_non_static_lifetime_and_reference()
@@ -33,15 +34,28 @@ impl MyFieldReceiver {
 
         let db_type = match self.field_type_db {
             Some(ref db_type) => {
+                let relation = self.to_relation_type(model_attributes);
+
+                let static_assertion_token = if relation.is_link() {
+                    quote!(
+                        #crate_name::validators::assert_type_is_link::<#field_ty>();
+                    )
+                } else if relation.is_relate_graph() {
+                    quote! {
+                        // #crate_name::validators::assert_type_is_relate::<#field_ty>();
+                    }
+                } else {
+                    db_type
+                        .generate_static_assertion(&field_ty.into_inner())
+                }.into();
+
                 let db_field_type_ast_meta = DbFieldTypeAstMeta {
-                            field_type_db_original: db_type.clone().into_inner(),
-                            static_assertion_token: db_type
-                                .generate_static_assertion(&field_ty.into_inner())
-                                .into(),
-                            field_type_db_token: db_type.into_token_stream().into(),
-                        };
+                    field_type_db_original: db_type.clone().into_inner(),
+                    static_assertion_token,
+                    field_type_db_token: db_type.into_token_stream().into(),
+                };
                 Some(db_field_type_ast_meta)
-            },
+            }
             None => {
                 let casing = model_attributes.casing()?;
                 let field_name = &self.db_field_name(&casing)?;
@@ -94,7 +108,7 @@ impl MyFieldReceiver {
             // This is a special case where we have a link_many field
             // that is used to link many in and out edge nodes.
             // In this case, we may not want to do any codegen with the field
-            // directly due to the complexities and alternate approaches 
+            // directly due to the complexities and alternate approaches
             // already used.
             MyFieldReceiver {
                 link_many: Some(link_many),

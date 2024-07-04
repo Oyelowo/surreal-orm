@@ -87,6 +87,7 @@ impl TableDeriveAttributes {
         // should be optional since it can be inferred from the struct name
         // as the snake case version of the struct name.
         self.table
+            // .unwrap_or_else(|| self.ident().to_string().to_case(Case::Snake))
             .validate_and_return(&self.ident(), &self.relax_table)
     }
 

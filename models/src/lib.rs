@@ -10,7 +10,7 @@
 //     pub use surreal_query_builder::*;
 // }
 
-// pub mod migrations;
+pub mod migrations;
 mod models;
 // pub use migrations::*;
 pub use models::alien::*;
