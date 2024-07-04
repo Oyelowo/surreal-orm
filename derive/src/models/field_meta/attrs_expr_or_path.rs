@@ -47,6 +47,8 @@ impl FromMeta for ExprOrPath {
 
     fn from_value(value: &Lit) -> darling::Result<Self> {
         match value {
+            Lit::Byte(_) | Lit::Char(_) |
+            Lit::Int(_) | Lit::Float(_) | Lit::Bool(_) => Ok(ExprOrPath::Expr(syn::parse2(quote!(#value))?)),
             Lit::Str(str_lit) => {
                 let value_str = str_lit.value();
 
