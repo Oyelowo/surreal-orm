@@ -429,10 +429,7 @@ impl Clause {
     fn update_errors(mut self, table: &str) -> Self {
         let mut errors = vec![];
         if let ClauseType::Id(id) = &self.kind {
-            if !id
-                .to_string()
-                .starts_with(format!("{table}:").as_str())
-            {
+            if !id.to_string().starts_with(format!("{table}:").as_str()) {
                 errors.push(format!(
                     "invalid id {id}. Id does not belong to table {table}"
                 ))

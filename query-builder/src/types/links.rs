@@ -5,7 +5,10 @@
  * Licensed under the MIT license
  */
 
-use crate::{validators::{IsArray, IsLink, IsLinkMany, IsLinkOne, IsLinkSelf}, Model, Node, SurrealId};
+use crate::{
+    validators::{IsArray, IsLink, IsLinkMany, IsLinkOne, IsLinkSelf},
+    Model, Node, SurrealId,
+};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
