@@ -251,6 +251,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
+    let account = Account::table():
     let id1 = &Account::create_id("one".to_string());
     let id2 = &Account::create_id("two".to_string());
     let amount_to_transfer = 300.00;
@@ -271,43 +272,39 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
             });
 
         if balance.greater_than(100) {
-            let first_name = "Oyelowo";
+            let first_name = "Mars";
             let score = 100;
-            select(All).from(Account::table()).where_(acc.balance.eq(5));
+            select(All).from(account).where_(acc.balance.eq(5));
         } else if balance.less_than(100) {
-            let first_name = "Oyelowo";
+            let first_name = "Jupiter";
             let score = 100;
-            select(All).from(Account::table()).where_(acc.balance.eq(5));
-        } else if balance.gte(100) {
-            let first_name = "Oyelowo";
+            select(All).from(account).where_(acc.balance.eq(5));
+        }  else {
+            let first_name = "Earth";
             let score = 100;
-            select(All).from(Account::table()).where_(acc.balance.eq(5));
-        } else {
-            let first_name = "Oyelowo";
-            let score = 100;
-            select(All).from(Account::table()).where_(acc.balance.eq(5));
+            select(All).from(account).where_(acc.balance.eq(5));
         };
 
-        for name in vec!["Oyelowo", "Oyedayo"] {
-            let first = "Oyelowo";
-            select(All).from(Account::table()).where_(acc.balance.eq(5));
+        for name in vec!["Jupiter", "Alberta"] {
+            let first = "Vancouver";
+            select(All).from(account).where_(acc.balance.eq(5));
 
-            let good_stmt = select(All).from(Account::table()).where_(acc.balance.eq(64));
+            let good_stmt = select(All).from(account).where_(acc.balance.eq(64));
 
             if balance.gt(50) {
-                let first_name = "Oyelowo";
+                let first_name = "Pluto";
             };
 
-            select(All).from(Account::table()).where_(acc.balance.eq(34));
+            select(All).from(account).where_(acc.balance.eq(34));
 
             let numbers = vec![23, 98];
 
             for age in numbers {
               let score = 100;
-              let first_stmt = select(All).from(Account::table()).where_(acc.balance.eq(5));
+              let first_stmt = select(All).from(account).where_(acc.balance.eq(5));
 
-              let second_stmt = select(All).from(Account::table()).where_(acc.balance.eq(25));
-              select(All).from(Account::table()).where_(acc.balance.eq(923));
+              let second_stmt = select(All).from(account).where_(acc.balance.eq(25));
+              select(All).from(account).where_(acc.balance.eq(923));
 
             };
         };

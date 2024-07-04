@@ -11,7 +11,6 @@ fn main() {
     let x = Weapon::partial_builder()
         .name("Oyelowo".into())
         .something(45)
-        // .strength(2.0)
         .rocket(rocket)
         .build();
     // Weapon::pa

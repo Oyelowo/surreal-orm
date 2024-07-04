@@ -440,8 +440,8 @@ pub struct Eats<In: Node, Out: Node> {
 
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
 
-#[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-#[surreal_orm(table = "eats", schemafull, relax_table)]
+#[derive(TableResources, Serialize, Deserialize, Debug, Clone, Default)]
+#[surreal_orm(schemafull, relax_table)]
 pub struct EatsV2<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]

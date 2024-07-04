@@ -6,15 +6,16 @@
  */
 
 // pub mod alien;
-pub mod attributes;
+// pub mod attributes;
 // pub mod combined;
 // pub mod configuration;
-// pub mod planet;
-// pub mod spaceship;
-// pub mod user;
+pub mod planet;
+pub mod spaceship;
+pub mod user;
 // pub mod visits;
 // pub mod weapon;
-// pub mod with_generics;
+pub mod with_generics;
+pub use with_generics::*;
 
 // pub use self::alien::*;
 // pub use self::attributes::*;

@@ -451,7 +451,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealOrmRes
     db.use_ns("test").use_db("test").await.unwrap();
 
     let space_ship = SpaceShip {
-        id: SpaceShip::create_id("gbanda".into()),
+        id: SpaceShip::create_id("banff".into()),
         name: "SpaceShip1".to_string(),
         created: Utc::now(),
     };

@@ -76,4 +76,5 @@ pub use surrealdb::sql;
 #[doc(hidden)]
 pub mod internal_tools {
     pub use paste::paste;
+    pub use typed_builder;
 }

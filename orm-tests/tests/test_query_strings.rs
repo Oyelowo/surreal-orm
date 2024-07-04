@@ -25,27 +25,28 @@ fn multiplication_tests1() {
         unoBook,
         course,
         semesterCourses,
-        ref age,
+        age,
         ..
     } = &Student::schema();
-    let book::Schema { ref content, .. } = Book::schema();
+    let book::Schema { content, .. } = &Book::schema();
+    let duration = Duration::from_secs(9);
 
     let mut query1 = select(arr![age, lastName, content])
-        .from(Book::get_table())
+        .from(Book::table())
         .where_(
             cond(content.like("lowo"))
-                .and(age.greater_than_or_equal(600))
-                .or(firstName.equal_to("Oyelowo"))
-                .and(lastName.equal_to("Oyedayo")),
+                .and(age.gte(600))
+                .or(firstName.eq("Jupiter"))
+                .and(lastName.eq("Pluto")),
         )
         .order_by(lastName.desc())
         .limit(50)
         .start(20)
-        .timeout(Duration::from_secs(9))
+        .timeout(duration)
         .parallel();
 
-    let is_lowo = true;
-    if is_lowo {
+    let is_true = true;
+    if is_true {
         query1 = query1.limit(55).order_by(order(age).desc());
     }
 
