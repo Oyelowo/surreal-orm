@@ -6,9 +6,7 @@
  */
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{
-    sql, Edge, LinkMany, LinkOne, Model, Node, Object, Relate, SurrealId, SurrealSimpleId,
-};
+use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -26,8 +24,10 @@ pub struct User<'a> {
 #[surreal_orm(table = like)]
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(ty = "option<array<float>>")]
-    // pub score: Option<Vec<f64>>,
+    #[surreal_orm(ty = "option<float>")]
+    pub score: Option<f64>,
+    #[surreal_orm(ty = "array<array<float>>")]
+    pub scores_plural: Vec<Vec<f64>>,
     #[serde(rename = "in", skip_serializing)]
     #[surreal_orm(link_many = "In")]
     pub in_: LinkMany<In>,
@@ -73,4 +73,3 @@ pub struct Organization<'a> {
     pub time: Time,
     pub age: u8,
 }
-

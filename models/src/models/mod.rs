@@ -13,7 +13,7 @@ pub mod planet;
 pub mod spaceship;
 pub mod user;
 // pub mod visits;
-// pub mod weapon;
+pub mod weapon;
 pub mod with_generics;
 pub use with_generics::*;
 
