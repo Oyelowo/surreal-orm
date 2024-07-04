@@ -21,6 +21,7 @@ pub use models::spaceship::*;
 pub use models::user::*;
 pub use models::visits::*;
 pub use models::weapon::*;
+pub use models::with_generics::*;
 // pub use models::*;
 
 // use surreal_orm::{
