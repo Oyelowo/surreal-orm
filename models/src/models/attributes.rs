@@ -19,8 +19,9 @@ use surreal_orm::{
 use typed_builder::TypedBuilder;
 use CrudType::*;
 
+
 fn age_permissions() -> Permissions {
-    let StudentWithGranularAttributes::Schema {
+    let student_with_granular_attributes::Schema {
         ageInlineExpr,
         firstName,
         ..
@@ -34,7 +35,7 @@ fn age_permissions() -> Permissions {
 }
 
 fn student_permissions() -> Permissions {
-    let StudentWithGranularAttributes::Schema {
+    let student_with_granular_attributes::Schema {
         ageInlineExpr,
         firstName,
         ..
@@ -52,7 +53,7 @@ fn default_duration_value() -> Duration {
 }
 
 fn age_define_external_fn_path() -> DefineFieldStatement {
-    let StudentWithDefineFnAttr::Schema {
+    let student_with_define_fn_attr::Schema {
         ref ageDefineInline,
         ref firstName,
         ..
@@ -134,7 +135,7 @@ fn as_fn() -> SelectStatement {
     drop,
     flexible,
     schemafull,
-    as_ = as_fn,
+    as_ = as_fn(),
     permissions = student_permissions
 )]
 struct StudentFnAttrs {
@@ -157,7 +158,7 @@ pub struct StudentWithGranularAttributes {
     last_name: String,
     #[surreal_orm(
         ty = int,
-        value = 18,
+        value = "18",
         assert = cond(value().is_not(NONE)).and(value().gte(18)),
         permissions = for_permission([CrudType::Create, CrudType::Delete]).where_(StudentWithGranularAttributes::schema().firstName.is("Oyelowo"))
     )]
@@ -528,7 +529,7 @@ pub struct Student {
     last_name: String,
     #[surreal_orm(
         ty = int,
-        value = 18,
+        value = "18",
         assert = cond(value().is_not(NONE)).and(value().gte(18)),
         permissions = age_permissions
     )]
@@ -643,3 +644,4 @@ pub struct Blog {
 //     name: String,
 //     sama: &'static str,
 // }
+//
