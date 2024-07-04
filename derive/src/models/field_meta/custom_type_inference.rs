@@ -326,9 +326,7 @@ impl<'a> FieldTypeInference<'a> {
     RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Record(vec![]),
                 field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])).into(),
-                static_assertion_token: quote!(
-#crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkOne<#ref_node>);
-            ).into(),
+                static_assertion_token: quote!(#crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkOne<#ref_node>);).into()
             },
             RelationType::LinkSelf(self_node) => {
                 let current_struct_type = self.model_attrs.struct_no_bounds()?;
@@ -336,10 +334,9 @@ impl<'a> FieldTypeInference<'a> {
                             field_type_db_original: FieldType::Record(vec![]),
                             field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table()])).into(),
                             static_assertion_token: quote!(
-                    quote!(#crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#self_node>);),
-                    quote!(#crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkSelf<#self_node>);),
-
-                        ).into(),
+                                    #crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#self_node>);
+                                    #crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkSelf<#self_node>);
+                                ).into(),
                         }
             },
             RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => DbFieldTypeAstMeta {
