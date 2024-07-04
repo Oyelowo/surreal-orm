@@ -158,7 +158,7 @@ pub struct StudentWithGranularAttributes {
     last_name: String,
     #[surreal_orm(
         ty = int,
-        value = "18",
+        value = 18,
         assert = cond(value().is_not(NONE)).and(value().gte(18)),
         permissions = for_permission([CrudType::Create, CrudType::Delete]).where_(StudentWithGranularAttributes::schema().firstName.is("Oyelowo"))
     )]

@@ -334,7 +334,7 @@ impl<'a> FieldTypeInference<'a> {
                             field_type_db_original: FieldType::Record(vec![]),
                             field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table()])).into(),
                             static_assertion_token: quote!(
-                                    #crate_name::validators::assert_type_eq_all!(#current_struct_type, #crate_name::LinkSelf<#self_node>);
+                                    #crate_name::validators::assert_type_eq_all!(#crate_name::LinkSelf<#current_struct_type>, #crate_name::LinkSelf<#self_node>);
                                     #crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkSelf<#self_node>);
                                 ).into(),
                         }
