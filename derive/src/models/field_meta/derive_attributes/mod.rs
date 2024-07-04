@@ -34,9 +34,15 @@ pub struct MyFieldReceiver {
     ty: Type,
     attrs: Vec<syn::Attribute>,
 
+    /// Explicity specify the array or set item/element rust type
+    #[darling(default)]
+    pub(crate) item_ty: Option<ArrayItemType>,
+
+    /// Old name of field when renaming
     #[darling(default)]
     pub(crate) old_name: Option<OldFieldName>,
 
+    /// New name of field when renaming
     #[darling(default)]
     pub(crate) rename: Option<Rename>,
 

@@ -169,6 +169,8 @@ impl<'a> Codegen<'a> {
         Ok(FieldSetterImplTokens(field_setter_impls))
     }
 
+    // For Setters trait implementations for setting, and appending to array/set fields.
+    // So, this should probably not exist for other non list fields
     fn array_trait_impl(
         field_receiver: &MyFieldReceiver,
         model_attributes: &ModelAttributes,
@@ -185,11 +187,8 @@ impl<'a> Codegen<'a> {
                     Some(quote!(<#foreign_node as #crate_name::Model>::Id)),
                 )
             }
-             RelationType::LinkManyInAndOutEdgeNodesInert(foreign_node_generics) => {
-                (
-                    None,
-                    Some(quote!(#crate_name::sql::Thing))
-                )
+            RelationType::LinkManyInAndOutEdgeNodesInert(_foreign_node_generics) => {
+                (None, Some(quote!(#crate_name::sql::Thing)))
             }
             RelationType::NestArray(foreign_object) => {
                 let generics_meta =
@@ -203,62 +202,22 @@ impl<'a> Codegen<'a> {
             | RelationType::List(_)
             | RelationType::None => {
                 let field_type = field_receiver.ty();
-                let inferred_type = match field_type
+                let array_item_ty_specified = &field_receiver.item_ty;
+                let guessed_arrayish_item_type = field_type
                     .get_array_inner_type()
-                    .or_else(|| field_type.get_set_inner_type())
-                {
+                    .or_else(|| field_type.get_set_inner_type());
+
+                let inner_list_type = array_item_ty_specified
+                    .as_ref()
+                    .map(|ty| ty.into_inner_ref())
+                    .or(guessed_arrayish_item_type.as_ref());
+
+                let inferred_type = match inner_list_type {
                     Some(ref ty) => {
                         let generics_meta = ty.get_generics_from_current_struct(model_attributes);
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
-                    None => {
-                        // impl surreal_orm::SetterArray<surreal_orm::FieldType::from_str("record<any>")
-                        // .unwrap()>for self::__Out__{}
-                        // #[derive(Debug,Clone)]
-                        let array_inner_field_ty = field_receiver
-                            .field_type_db_with_static_assertions(model_attributes)?;
-                        panic!(
-                            "xxx{:?}",
-                            array_inner_field_ty
-                                .unwrap_or_default()
-                                .field_type_db_original
-                                // .to_token_stream()
-                                .to_string()
-                        );
-                        // let type_set = array_inner_field_ty.clone()
-                        //             .map(|this| this.set_item_type_path());
-
-                        // let array_inner_ty_db_concrete = array_inner_field_ty.clone()
-                        //     .map(|this| this.array_item_type_path())
-                        //     .flatten()
-                        //     .unwrap_or(
-                        //         type_set
-                        //             .flatten()
-                        //             .unwrap_or(
-                        //                 return Err(syn::Error::new(
-                        //                     field_receiver.ident()?.span(),
-                        //                     "Could not infer array or set type. Explicitly specify the type e.g ty = array<string>",
-                        //                 )
-                        //                 .into(),
-                        //             ),
-                        //             ),
-                        //     );
-                        //
-                        // let array_inner_ty_db_concrete =  match array_inner_field_ty{
-                        // Some(ref db_array_item_ty) => (
-                        //     None,
-                        //     Some(db_array_item_ty.as_db_sql_value_tokenstream().to_token_stream()),
-                        // ),
-                        // None => {
-                        //     return Err(syn::Error::new(
-                        //         field_receiver.ident()?.span(),
-                        //         "Could not infer array or set type. Explicitly specify the type e.g ty = array<string>",
-                        //     ).into())
-                        // }
-                        // };
-                        // (None, Some(array_inner_ty_db_concrete.to_token_stream()))
-                        (None, Some(quote!(#crate_name::FieldType)))
-                    }
+                    None => (None, None),
                 };
                 inferred_type
             }
