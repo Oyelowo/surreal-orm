@@ -70,6 +70,11 @@ impl<'a> Codegen<'a> {
         }
 
         for meta in metas {
+        // We dont want to import generics In and Out nodes in the edge table
+        // as they are not concrete types
+            if self.is_in_or_out_edge_node()? {
+                continue;
+            }
             self.imports_referenced_node_schema
                 .insert(meta.foreign_node_schema_import);
 
@@ -95,6 +100,7 @@ impl<'a> Codegen<'a> {
                 let clause: #crate_name::NodeAliasClause = clause.into();
                 let clause: #crate_name::NodeClause = clause.into_inner();
 
+            // NOTE: Confirm this
                 let normalized_field_name_str = if self.build().is_empty(){
                     #db_field_name.to_string()
                 }else {
@@ -106,7 +112,7 @@ impl<'a> Codegen<'a> {
 
                 let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<::std::vec::Vec<_>>();
 
-                let field = #crate_name::Field::new(format!("{}{}", #db_field_name, clause.build()))
+                let field = #crate_name::Field::new(format!("{}{}", normalized_field_name_str, clause.build()))
                             .with_bindings(bindings)
                             .with_errors(errors);
                 field
@@ -151,7 +157,7 @@ impl<'a> Codegen<'a> {
             pub fn #db_field_name_as_ident(&self) -> #link_one {
                 let clause = #crate_name::Clause::from(#crate_name::Empty);
 
-                let db_field_name = if self.build().is_empty(){
+                let normalized_field_name_str = if self.build().is_empty(){
                     #db_field_name
                 } else {
                     format!(".{}", #db_field_name)
@@ -183,13 +189,6 @@ impl<'a> Codegen<'a> {
         let field_ident_normalized = field_attr.field_ident_normalized(&struct_casing)?;
         let db_field_name = field_attr.db_field_name(&struct_casing)?;
         let link_many_node_type_turbo_fished = link_many_node_type.turbo_fishize()?;
-
-        let binding = link_many_node_type.get_generics_from_current_struct(table_derive_attrs);
-        let (field_impl_generics, _field_ty_generics, field_where_clause) =
-            binding.split_for_impl();
-        // link_many_node_type.extract_generics_for_complex_type(model_attributes)
-        // link_many_node_type.get_generics_from_current_struct(model_attributes)
-        //
         let VariablesModelMacro {
             ___________graph_traversal_string,
             __________connect_node_to_graph_traversal_string,
