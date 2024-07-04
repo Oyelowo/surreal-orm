@@ -99,6 +99,19 @@ pub fn assert_type_is_number<T: Num>() {}
 /// ```
 pub fn assert_type_is_int<T: Int>() {}
 
+/// Validate that value is an integer at compile time
+///
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// # use surreal_orm::assert_value_is_int;
+/// assert_value_is_int(1);
+/// assert_value_is_int(1u8);
+/// assert_value_is_int(1u16);
+/// assert_value_is_int(1u32);
+/// ```
+pub fn assert_value_is_int<T: Int>(_value: T) {}
+
 /// Validate that type is a primitive float at compile time
 ///
 /// # Example
@@ -115,8 +128,20 @@ pub fn assert_type_is_float<T: Float>() {}
 /// Validate that type is a primitive decimal at compile time
 pub use assert_type_is_float as assert_type_is_decimal;
 
+/// Validate that value is a float at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_value_is_float;
+///
+/// assert_value_is_float(1.0);
+/// assert_value_is_float(1.0f32);
+/// assert_value_is_float(1.0f64);
+/// ```
+pub fn assert_value_is_float<T: Float>(_value: T) {}
+
 /// Validate that type is iterable at compile time
-pub fn assert_is_iterable<T: IntoIterator>() {
+pub fn assert_type_is_iterable<T: IntoIterator>() {
     let _ = <T as IntoIterator>::into_iter;
 }
 
