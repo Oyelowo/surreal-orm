@@ -76,7 +76,7 @@ impl<'a> Codegen<'a> {
             // NOTE: This may  not really be needed as the return type
             // should help to auto-infer the type or generics as we call the
             // connect method on the struct.
-                (quote!(#foreign_node_schema_ident :: #edge_ty_generics))
+                quote!(#foreign_node_schema_ident :: #edge_ty_generics)
             };
         let foreign_node_schema_type_alias_with_generics_turbofishized =
             ForeignNodeTypeAliasWithGenerics(
