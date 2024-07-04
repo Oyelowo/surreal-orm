@@ -469,7 +469,7 @@ impl ToTokens for NodeToken {
             // #[test] // Comment out to make compiler tests fail in doctests. 25th August, 2023.
             #[allow(non_snake_case)]
             #[allow(unreachable_code)]
-            fn #test_function_name #struct_impl_generics() {
+            fn #test_function_name #struct_impl_generics() #struct_where_clause {
                 #( #static_assertions) *
             }
 ));
