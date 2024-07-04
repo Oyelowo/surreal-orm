@@ -25,6 +25,7 @@ num-traits = { workspace = true }
 insta = { workspace = true }
 nom = { workspace = true }
 pretty_assertions = { workspace = true }
+typed-builder = { workspace = true }
 
 [lib]
 doctest = true

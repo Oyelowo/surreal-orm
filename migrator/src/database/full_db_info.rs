@@ -54,32 +54,22 @@ impl FullDbInfo {
         self.table_resources.keys().cloned().collect::<Vec<_>>()
     }
 
-    pub fn get_field_def(
-        &self,
-        table: Table,
-        field_name: Field,
-    ) -> Option<DefineStatementRaw> {
+    pub fn get_field_def(&self, table: Table, field_name: Field) -> Option<DefineStatementRaw> {
         self.table_resources
             .get(&table)
             .and_then(|t| t.fields().get_definition(&field_name).cloned())
     }
 
     pub fn get_table_indexes(&self, table: &Table) -> Option<Indexes> {
-        self.table_resources
-            .get(table)
-            .map(|t| t.indexes().clone())
+        self.table_resources.get(table).map(|t| t.indexes().clone())
     }
 
     pub fn get_table_events(&self, table: &Table) -> Option<Events> {
-        self.table_resources
-            .get(table)
-            .map(|t| t.events().clone())
+        self.table_resources.get(table).map(|t| t.events().clone())
     }
 
     pub fn get_table_fields(&self, table: &Table) -> Option<Fields> {
-        self.table_resources
-            .get(table)
-            .map(|t| t.fields().clone())
+        self.table_resources.get(table).map(|t| t.fields().clone())
     }
 
     pub fn get_table_field_names(&self, table: &Table) -> Vec<String> {

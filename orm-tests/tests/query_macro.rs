@@ -30,7 +30,7 @@ async fn test_complex_multiple_queries() {
         db,
         [
             "SELECT * FROM users WHERE id = $id",
-            "CREATE user:oyelowo SET name = $name, company = 'Codebreather', skills = $skills"
+            "CREATE user:oyelowo SET name = $name, planet = 'Codebreather', skills = $skills"
         ],
         {
             id: 1,

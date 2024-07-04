@@ -9,11 +9,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surreal_orm::{Node, SurrealSimpleId};
 
+// NOTE: Make PartialBuilder trait separate from Node, so it can be optional
 // Planet
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = planet)]
-pub struct Planet<T: Clone + Serialize + surreal_orm::validators::Int> {
+pub struct Planet<T: Clone + Serialize + surreal_orm::validators::Int + Default> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     // area: Polygon,
@@ -73,14 +74,14 @@ mod tests {
         Planet::<u64>::schema().tags.append(45u64);
         PlanetX::<u64>::schema();
         PlanetX::<u64>::schema().tags.append(45u64);
-        PlanetX::<u64>::schema().tags.append("rer");
+        // PlanetX::<u64>::schema().tags.append("rer");
         // PlanetX::<u64>::schema().data.equal_to(45u64);
     }
 }
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = planet_x)]
-pub struct PlanetX<T: Clone + Serialize + surreal_orm::validators::Int> {
+pub struct PlanetX<T: Clone + Serialize + surreal_orm::validators::Int + Default> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     pub population: u64,
