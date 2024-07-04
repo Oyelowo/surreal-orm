@@ -588,10 +588,11 @@ impl Default for Student {
 pub struct Writes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // pub id: SurrealSimpleId<Writes<In, Out>>,
-    #[serde(rename = "in", skip_serializing)]
-    pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
-    pub out: LinkOne<Out>,
+    #[surreal_orm(link_many="In")]
+    pub r#in: LinkMany<In>,
+    #[surreal_orm(link_many="Out")]
+    pub out: LinkMany<Out>,
     pub time_written: Duration,
     pub count: i32,
 }
