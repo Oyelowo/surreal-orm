@@ -28,7 +28,7 @@ impl<'a> Codegen<'a> {
         let casing = table_derive_attrs.casing()?;
         let db_field_name = field_receiver.db_field_name(&casing)?;
         let field_type_in_db = field_receiver.field_type_db_original(table_derive_attrs)?;
-        let field_type_in_db_token = field_receiver.field_type_in_db_token(table_derive_attrs)?;
+        let field_type_in_db_token = field_receiver.field_type_db_token(table_derive_attrs)?;
 
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];

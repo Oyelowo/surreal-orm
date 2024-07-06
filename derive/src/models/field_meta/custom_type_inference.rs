@@ -72,12 +72,12 @@ impl<'a> FieldTypeInference<'a> {
         let ty = self.field_ty;
         let field_name = self.db_field_name;
 
-        let based_on_name = self.based_on_db_field_name(&ty, &field_name, &model_attrs.to_data_type());
+        let based_on_name = self.based_on_db_field_name(&ty, &field_name, &model_attrs);
         let db_type = if let Ok(db_ty) = based_on_name {
             Some(db_ty)
         } else if let Ok(Some(db_ty)) =  self.based_on_field_relation_type(&ty, &relation_type) {
              Some(db_ty)
-        }else if let Ok(db_ty) = self.based_on_type_path_token(&ty) {
+        }else if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty) {
              Some(db_ty)
         }else {
             None
@@ -98,18 +98,18 @@ impl<'a> FieldTypeInference<'a> {
         // TODO: Consider removing lifetime except static here rather than doing it 
         // within the helper functions.
         let db_type = match approach {
-            InferenceApproach::BasedOnTypePathToken => Some(self.based_on_type_path_token(&ty)?),
+            InferenceApproach::BasedOnTypePathToken => Some(self.based_on_type_path_token_structure(&ty)?),
             InferenceApproach::BasedOnRelationTypeFieldAttr => {
                 self.based_on_field_relation_type(&ty, &relation_type)?
             }
             InferenceApproach::BasedOnDbFieldName => {
-                Some(self.based_on_db_field_name(&ty, &field_name, &model_attrs.to_data_type())?)
+                Some(self.based_on_db_field_name(&ty, &field_name, &model_attrs)?)
             }
         };
         Ok(db_type)
     }
 
-    fn based_on_type_path_token(
+    fn based_on_type_path_token_structure(
         &self,
         field_ty: &CustomType,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
@@ -158,7 +158,7 @@ impl<'a> FieldTypeInference<'a> {
                     // let item = CustomType::new(ty.into_inner());
                     let item = ty.into_inner();
 
-                    self.based_on_type_path_token(&item)
+                    self.based_on_type_path_token_structure(&item)
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),
@@ -182,13 +182,16 @@ impl<'a> FieldTypeInference<'a> {
         } else if field_ty.is_array() {
             // let inner_type = field_ty.get_array_inner_type();
             let inner_type = field_ty.inner_angle_bracket_type()?;
-            let array_len_token_stream = field_ty.get_array_const_length().map(|expr| {
+            let none_opt_token =|| quote!(::std::option::Option::None);
+
+            let array_len_token_stream = field_ty.get_array_const_length().map_or(none_opt_token(), |expr| {
                 if expr.to_token_stream().is_empty() {
-                    quote!(::std::option::Option::None)
+                    none_opt_token()
                 } else {
                     quote!(::std::option::Option::Some(#expr))
                 }
             });
+
             let array_len_token = field_ty.get_array_const_length();
             let array_len_token_as_int = array_len_token
                 .as_ref()
@@ -206,7 +209,7 @@ impl<'a> FieldTypeInference<'a> {
                 .flatten();
 
             let inner_item = inner_type
-                .map(|ct| self.based_on_type_path_token(&ct))
+                .map(|ct| self.based_on_type_path_token_structure(&ct))
                 .ok_or(syn::Error::new(
                     ty.span(),
                     "Could not infer type for the array inner type",
@@ -227,7 +230,7 @@ impl<'a> FieldTypeInference<'a> {
             let inner_type = field_ty.inner_angle_bracket_type()?;
 
             let inner_item = inner_type
-                .map(|ct| self.based_on_type_path_token(&ct))
+                .map(|ct| self.based_on_type_path_token_structure(&ct))
                 .ok_or(syn::Error::new(
                     ty.span(),
                     "Could not infer type for the set inner type",
@@ -387,8 +390,10 @@ impl<'a> FieldTypeInference<'a> {
 
                         DbFieldTypeAstMeta {
                                     // provide the inner type for when the array part start recursing
-                                    field_type_db_original: FieldType::Object,
-                                    field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
+                                    field_type_db_original: FieldType::Array(Box::new(FieldType::Any), None),
+                                    field_type_db_token: quote!(#crate_name::FieldType::Array(#crate_name::FieldType::Any, std::option::Option::None)).into(),
+                                    // field_type_db_original: FieldType::Object,
+                                    // field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                                     // db_field_type: quote!(#crate_name::FieldType::Array(
                                     //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
                                     //     ::std::option::Option::None

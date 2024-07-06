@@ -136,14 +136,14 @@ impl<'a> ModelAttributes<'a> {
         }
     }
 
-    // Objects don't have a table
     pub fn table(&self) -> ExtractorResult<Option<&TableNameIdent>> {
         let table_name: Option<&table_meta::table::TableNameIdent> = match self {
             ModelAttributes::Node(node) => Some(node.table()?),
             ModelAttributes::Edge(edge) => Some(edge.table()?),
+            // Objects don't have a table
             ModelAttributes::Object(object) => None,
         };
-        table_name
+        Ok(table_name)
     }
 
     pub fn explicit_fully_qualified_generics_path(&self) -> ExplicitFullyQualifiedGenericsPath {
