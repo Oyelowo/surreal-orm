@@ -402,17 +402,14 @@ impl<'a> FieldTypeInference<'a> {
                         DbFieldTypeAstMeta {
                                     // provide the inner type for when the array part start recursing
                                     field_type_db_original: FieldType::Array(Box::new(FieldType::Any), None),
-                                    field_type_db_token: quote!(#crate_name::FieldType::Array(#crate_name::FieldType::Any, std::option::Option::None)).into(),
-                                    // field_type_db_original: FieldType::Object,
-                                    // field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
-                                    // db_field_type: quote!(#crate_name::FieldType::Array(
-                                    //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
-                                    //     ::std::option::Option::None
-                                    // )),
+                                    field_type_db_token: quote!(#crate_name::FieldType::Array(
+                                        ::std::boxed::Box::new(#crate_name::FieldType::Any),
+                                        ::std::option::Option::None
+                                    )).into(),
                                     static_assertion_token: quote!(
-            // #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
-            #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #field_ty);
-                                ).into(),
+                                        // #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
+                                        #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #field_ty);
+                                    ).into(),
                                     // static_assertion_token:
                                     //     quote!(#crate_name::validators::assert_type_is_array::<#ty>();).into(),
                                 }
