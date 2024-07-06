@@ -48,8 +48,8 @@ fn student_permissions() -> Permissions {
 }
 
 // use Duration;
-fn default_duration_value() -> Duration {
-    Duration::from_secs(60 * 60 * 24 * 7)
+fn default_duration_value() -> sql::Duration {
+    Duration::from_secs(60 * 60 * 24 * 7).into()
 }
 
 fn age_define_external_fn_path() -> DefineFieldStatement {
@@ -224,7 +224,7 @@ pub struct StudentWithGranularAttributes {
 
     #[surreal_orm(
         ty = "duration",
-        value = Duration::from_secs(60 * 60 * 24 * 7),
+        value = sql::Duration(Duration::from_secs(60 * 60 * 24 * 7)),
         assert = value().is_not(NONE)
     )]
     time_to_kelowna_inline: Duration,
@@ -645,3 +645,5 @@ pub struct Blog {
 //     sama: &'static str,
 // }
 //
+//
+
