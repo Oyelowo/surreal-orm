@@ -83,6 +83,23 @@ pub use assert_impl_one;
 /// ```
 pub fn assert_type_is_number<T: Num>() {}
 
+/// Validate that value is a number at compile time
+/// # Example
+/// ```
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_value_is_number;
+/// assert_value_is_number(1);
+/// assert_value_is_number(1u8);
+/// assert_value_is_number(1u16);
+/// assert_value_is_number(1u32);
+/// assert_value_is_number(1u64);
+/// assert_value_is_number(1u128);
+/// assert_value_is_number(1usize);
+/// assert_value_is_number(1.0);
+/// ```
+pub fn assert_value_is_number<T: Num>(_value: T) {}
+
+
 /// Validate that type is a primitive integer at compile time
 ///
 /// # Example
@@ -138,6 +155,8 @@ pub use assert_type_is_float as assert_type_is_decimal;
 /// assert_value_is_float(1.0f64);
 /// ```
 pub fn assert_value_is_float<T: Float>(_value: T) {}
+
+
 
 /// Validate that type is iterable at compile time
 pub fn assert_type_is_iterable<T: IntoIterator>() {
