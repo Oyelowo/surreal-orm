@@ -294,6 +294,7 @@ impl ToTokens for EdgeToken {
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;
+                    use ::std::str::FromStr as _;
 
                     pub struct TableNameStaticChecker {
                         pub #table_ident: ::std::string::String,
