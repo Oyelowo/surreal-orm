@@ -284,7 +284,7 @@ impl ObjectClause {
     }
 
     /// attach the field name to the clause as metadata.
-    pub fn with_field(self, field_name: String) -> Self {
+    pub fn with_field(self, field_name: impl Into<String>) -> Self {
         Self(self.0.with_field(field_name))
     }
 }
