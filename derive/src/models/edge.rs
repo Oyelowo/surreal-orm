@@ -146,6 +146,7 @@ impl ToTokens for EdgeToken {
 
         tokens.extend(quote!(
                 use #crate_name::{ToRaw as _};
+                use ::std::str::FromStr as _;
 
                 impl #impl_generics #struct_name_ident #ty_generics #where_clause {
                       // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
@@ -294,7 +295,6 @@ impl ToTokens for EdgeToken {
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;
-                    use ::std::str::FromStr as _;
 
                     pub struct TableNameStaticChecker {
                         pub #table_ident: ::std::string::String,
