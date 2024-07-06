@@ -44,7 +44,7 @@ struct Company {
     #[surreal_orm(nest_array = "Person")]
     founders: Vec<Person>,
 
-    // #[surreal_orm(nest_array = "Person", type_ = "array<array<object>>")]
+    // #[surreal_orm(nest_array = "Person", ty = "array<array<object>>")]
     #[surreal_orm(nest_array = "Person")]
     founders_multiple_nesting: Vec<Vec<Person>>,
 
@@ -531,3 +531,6 @@ fn test_company_field_definitions() {
 
     insta::assert_snapshot!(company_defs);
 }
+
+
+
