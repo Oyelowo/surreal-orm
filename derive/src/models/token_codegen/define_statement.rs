@@ -27,6 +27,8 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let casing = table_derive_attrs.casing()?;
         let db_field_name = field_receiver.db_field_name(&casing)?;
+        let field_type_in_db = field_receiver.field_type_db_original(table_derive_attrs)?;
+        let field_type_in_db_token = field_receiver.field_type_in_db_token(table_derive_attrs)?;
 
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
@@ -55,6 +57,7 @@ impl<'a> Codegen<'a> {
         let main_field_def = quote!(
             #crate_name::statements::define_field(#crate_name::Field::new(#db_field_name))
             .on_table(#crate_name::Table::from(Self::table()))
+            .type_(#field_type_in_db_token)
             #( # define_field_methods) *
             .to_raw()
         );
@@ -80,7 +83,7 @@ impl<'a> Codegen<'a> {
         model_attrs: &ModelAttributes,
     ) -> ExtractorResult<StaticAssertionToken> {
         let field_receiver = self.field_receiver();
-        let field_type = field_receiver.field_type_db(model_attrs)?.into_inner();
+        let field_type = field_receiver.field_type_db_original(model_attrs)?.into_inner();
 
         let static_assertion = field_receiver
             .value

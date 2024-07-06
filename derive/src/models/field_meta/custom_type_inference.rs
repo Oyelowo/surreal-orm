@@ -51,15 +51,12 @@ pub struct FieldTypeInference<'a> {
 
 impl<'a> FieldTypeInference<'a> {
     pub fn infer_type(&self) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
-        let inferred = InferenceApproach::all().iter().find_map(|approach| {
-            self.infer_type_by(approach)
-                .map(|res| Some(res))
-                .unwrap_or_else(|_| None)
-        });
+        let inferred = self.infer_type_by_priority()
+            .map(|res| Some(res))
+            .unwrap_or_else(|_| None);
 
         inferred.ok_or_else(|| {
             syn::Error::new(
-                // self.field_receiver.ty().span(),
                 self.field_ty.span(),
                 "Could not infer the field type for the field",
             )
@@ -67,21 +64,40 @@ impl<'a> FieldTypeInference<'a> {
         })
     }
 
-    pub fn infer_type_by(
+    pub fn infer_type_by_priority(
         &self,
-        approach: &InferenceApproach,
     ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
         let relation_type = self.relation_type;
-        // let relation_type = self.field_receiver.to_relation_type();
         let model_attrs = self.model_attrs;
         let ty = self.field_ty;
-        // let field_type = self.field_receiver.ty();
         let field_name = self.db_field_name;
-        // let field_name = self.field_receiver.db_field_name(&model_attrs.casing()?)?;
+
+        let based_on_name = self.based_on_db_field_name(&ty, &field_name, &model_attrs.to_data_type());
+        let db_type = if let Ok(db_ty) = based_on_name {
+            Some(db_ty)
+        } else if let Ok(Some(db_ty)) =  self.based_on_field_relation_type(&ty, &relation_type) {
+             Some(db_ty)
+        }else if let Ok(db_ty) = self.based_on_type_path_token(&ty) {
+             Some(db_ty)
+        }else {
+            None
+        };
+
+        Ok(db_type)
+    }
+
+    pub fn infer_type_by(
+        &self,
+        approach: InferenceApproach,
+    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
+        let relation_type = self.relation_type;
+        let model_attrs = self.model_attrs;
+        let ty = self.field_ty;
+        let field_name = self.db_field_name;
 
         // TODO: Consider removing lifetime except static here rather than doing it 
         // within the helper functions.
-        let res = match approach {
+        let db_type = match approach {
             InferenceApproach::BasedOnTypePathToken => Some(self.based_on_type_path_token(&ty)?),
             InferenceApproach::BasedOnRelationTypeFieldAttr => {
                 self.based_on_field_relation_type(&ty, &relation_type)?
@@ -90,7 +106,7 @@ impl<'a> FieldTypeInference<'a> {
                 Some(self.based_on_db_field_name(&ty, &field_name, &model_attrs.to_data_type())?)
             }
         };
-        Ok(res)
+        Ok(db_type)
     }
 
     fn based_on_type_path_token(
@@ -270,20 +286,26 @@ impl<'a> FieldTypeInference<'a> {
         &self,
         field_ty: &CustomType,
         db_field_name: &DbFieldName,
-        model_type: &DataType,
+        model_attrs: &ModelAttributes,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let crate_name = get_crate_name(false);
+        let model_type = model_attrs.to_data_type();
+        let table = model_attrs.table()?;
         let ty = &field_ty.into_inner_ref();
 
         let meta = if db_field_name.is_id() {
+            let table_name = match table {
+                Some(t) => vec![t.to_token_stream().to_string().into()],
+                None => vec![],
+            };
             DbFieldTypeAstMeta {
-                field_type_db_original: FieldType::Record(vec![]),
+                field_type_db_original: FieldType::Record(table_name),
                 field_type_db_token:
                     quote!(#crate_name::FieldType::Record(::std::vec![Self::table()])).into(),
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_thing::<#ty>();).into(),
             }
-        } else if db_field_name.is_in_or_out_edge_node(model_type) {
+        } else if db_field_name.is_in_or_out_edge_node(&model_type) {
             // An edge might be shared by multiple In/Out nodes. So, default to any type of
             // record for edge in and out e.g Student->Plays->Football, Student->Plays->Instrument,
             // Teacher->Plays->Football
@@ -359,23 +381,25 @@ impl<'a> FieldTypeInference<'a> {
                 quote!(#crate_name::validators::assert_type_is_object::<#ty>();).into(),
             },
             RelationType::NestArray(foreign_array_object) => {
+                let nesting_level = Self::count_vec_nesting(field_ty.to_basic_type());
+                        let nested_vec_type =
+                            Self::generate_nested_vec_type(&foreign_array_object, nesting_level);
 
-        let nesting_level = Self::count_vec_nesting(field_ty.to_basic_type());
-                let nested_vec_type =
-                    Self::generate_nested_vec_type(&foreign_array_object, nesting_level);
-
-                DbFieldTypeAstMeta {
-                            // provide the inner type for when the array part start recursing
-                            field_type_db_original: FieldType::Object,
-                            field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
-                            // db_field_type: quote!(#crate_name::FieldType::Array(
-                            //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
-                            //     ::std::option::Option::None
-                            // )),
-                            static_assertion_token: quote!(#crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);).into(),
-                            // static_assertion_token:
-                            //     quote!(#crate_name::validators::assert_type_is_array::<#ty>();).into(),
-                        }
+                        DbFieldTypeAstMeta {
+                                    // provide the inner type for when the array part start recursing
+                                    field_type_db_original: FieldType::Object,
+                                    field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
+                                    // db_field_type: quote!(#crate_name::FieldType::Array(
+                                    //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
+                                    //     ::std::option::Option::None
+                                    // )),
+                                    static_assertion_token: quote!(
+            // #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
+            #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #field_ty);
+                                ).into(),
+                                    // static_assertion_token:
+                                    //     quote!(#crate_name::validators::assert_type_is_array::<#ty>();).into(),
+                                }
             },
                 // We already did for list/array/set earlier. 
                 // TODO: Consider removing the concept of list altogether to 

@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use syn::{self, parse_quote, GenericArgument, Path, PathArguments, Type};
 
-use super::StructIdent;
+use super::{table::TableNameIdent, StructIdent};
 
 use crate::models::{edge::EdgeToken, node::NodeToken, object::ObjectToken, *};
 
@@ -134,6 +134,16 @@ impl<'a> ModelAttributes<'a> {
             Edge(edge) => edge.generics(),
             Object(object) => object.generics(),
         }
+    }
+
+    // Objects don't have a table
+    pub fn table(&self) -> ExtractorResult<Option<&TableNameIdent>> {
+        let table_name: Option<&table_meta::table::TableNameIdent> = match self {
+            ModelAttributes::Node(node) => Some(node.table()?),
+            ModelAttributes::Edge(edge) => Some(edge.table()?),
+            ModelAttributes::Object(object) => None,
+        };
+        table_name
     }
 
     pub fn explicit_fully_qualified_generics_path(&self) -> ExplicitFullyQualifiedGenericsPath {
