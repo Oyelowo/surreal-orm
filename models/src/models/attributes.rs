@@ -529,7 +529,7 @@ pub struct Student {
     last_name: String,
     #[surreal_orm(
         ty = int,
-        value = "18",
+        value = 18,
         assert = cond(value().is_not(NONE)).and(value().gte(18)),
         permissions = age_permissions
     )]

@@ -51,17 +51,29 @@ mod check3 {
     pub struct Student {
         id: SurrealSimpleId<Self>,
         #[surreal_orm(
-            ty = "string",
-            value = "18",
-            // assert = assert_fn(),
+            ty = number,
+            value = 18,
+            assert = assert_fn,
             permissions = permissions_fn
-            // permissions = permissions_fn2("Oyelowo Oyedayo")
         )]
-        age: String,
+        age: u8,
+
+
+        #[surreal_orm(
+            ty = string,
+            value = "permissions_fn",
+            assert = assert_fn(),
+            permissions = permissions_fn2("Oyelowo Oyedayo")
+        )]
+        age2: String,
     }
+
+
     fn er() {
         let x = permissions_fn();
     }
+
+
 }
 
 fn main() {
