@@ -47,21 +47,27 @@ impl FromMeta for ExprOrPath {
 
     fn from_value(value: &Lit) -> darling::Result<Self> {
         match value {
-            Lit::Byte(_) | Lit::Char(_) |
-            Lit::Int(_) | Lit::Float(_) | Lit::Bool(_) => Ok(ExprOrPath::Expr(syn::parse2(quote!(#value))?)),
-            Lit::Str(str_lit) => {
-                let value_str = str_lit.value();
-
-                match syn::parse_str::<Path>(&value_str) {
-                    Ok(path) => Ok(ExprOrPath::Path(path)),
-                    Err(_) => Ok(syn::parse_str::<Expr>(&value_str).map(ExprOrPath::Expr)?),
-                }
-            }
+            Lit::Byte(_)
+            | Lit::Char(_)
+            | Lit::Int(_)
+            | Lit::Float(_)
+            | Lit::Bool(_)
+            | Lit::Str(_) => Ok(ExprOrPath::Expr(syn::parse2(quote!(#value))?)),
+            // Lit::Str(str_lit) => {
+            //     let value_str = str_lit.value();
+            //     // just take the string directly as value the attribute is stringified i.e quoted
+            //     // e.g #[surreal_orm(value = "18")]
+            //     Ok(ExprOrPath::Expr(syn::parse_str::<Expr>(&value_str)?))
+            //
+            //     // match syn::parse_str::<Path>(&value_str) {
+            //     //     Ok(path) => Ok(ExprOrPath::Path(path)),
+            //     //     Err(_) => Ok(syn::parse_str::<Expr>(&value_str).map(ExprOrPath::Expr)?),
+            //     // }
+            // }
             _ => Err(darling::Error::unexpected_lit_type(value)),
         }
     }
 }
-
 
 //
 // impl FromMeta for ExprOrPath {
