@@ -52,12 +52,12 @@ mod check3 {
         id: SurrealSimpleId<Self>,
         #[surreal_orm(
             ty = "string",
-            value = 18,
+            value = "18",
             // assert = assert_fn(),
             permissions = permissions_fn
             // permissions = permissions_fn2("Oyelowo Oyedayo")
         )]
-        age: u8,
+        age: String,
     }
     fn er() {
         let x = permissions_fn();

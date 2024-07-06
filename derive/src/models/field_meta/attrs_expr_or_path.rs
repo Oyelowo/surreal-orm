@@ -140,6 +140,10 @@ macro_rules! impl_from_expr_or_path {
             fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
                 Ok(Self(ExprOrPath::from_meta(item)?))
             }
+
+            fn from_value(value: &Lit) -> darling::Result<Self> {
+                Ok(Self(ExprOrPath::from_value(value)?))
+            }
         }
 
         impl ToTokens for $ty {
