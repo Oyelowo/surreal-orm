@@ -1,4 +1,3 @@
-use crate::function;
 use crate::Object;
 // pub use crate::assert_fields;
 pub use num_traits::{Float, Num, PrimInt as Int};
@@ -269,7 +268,9 @@ pub fn assert_value_is_vec<T: IsVec>(_value: T) {}
 /// Validate that type is a Duration at compile time
 pub trait IsDuration {}
 
-impl IsDuration for std::time::Duration {}
+// impl IsDuration for std::time::Duration {}
+// impl IsDuration for crate::sql::Duration {}
+impl<T> IsDuration for T where T: Into<crate::sql::Duration> {}
 
 /// Validate that type is a Duration at compile time
 pub fn assert_type_is_duration<T: IsDuration>() {
