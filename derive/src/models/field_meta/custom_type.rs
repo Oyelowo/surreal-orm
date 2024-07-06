@@ -146,6 +146,12 @@ impl ToTokens for CustomType {
 #[derive(Debug, Clone)]
 pub struct CustomTypeTurboFished(Type);
 
+impl CustomTypeTurboFished {
+    pub fn to_custom_type(self) -> CustomType {
+        CustomType(self.0)
+    }
+}
+
 impl ToTokens for CustomTypeTurboFished {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         self.0.to_tokens(tokens)

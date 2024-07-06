@@ -314,10 +314,9 @@ impl<'a> FieldTypeInference<'a> {
             // Teacher->Plays->Football
             DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Record(vec![]),
-                field_type_db_token: quote!((
-                    ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![])),
-                    ::std::option::Option::None
-                ))
+                field_type_db_token: quote!(
+                    #crate_name::FieldType::Record(::std::vec![])
+                )
                 .into(),
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_link_many::<#ty>();).into(),
@@ -348,13 +347,19 @@ impl<'a> FieldTypeInference<'a> {
                   return Ok(None)
                 }
             
-            RelationType::LinkOne(ref_node) => DbFieldTypeAstMeta {
-                field_type_db_original: FieldType::Record(vec![]),
-                field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])).into(),
-                static_assertion_token: quote!(#crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkOne<#ref_node>);).into()
+            RelationType::LinkOne(ref_node) => {
+                let ref_node = ref_node.turbo_fishize()?;
+
+                DbFieldTypeAstMeta {
+                            field_type_db_original: FieldType::Record(vec![]),
+                            field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])).into(),
+                            static_assertion_token: quote!(#crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkOne<#ref_node>);).into()
+                        }
             },
             RelationType::LinkSelf(self_node) => {
                 let current_struct_type = self.model_attrs.struct_no_bounds()?;
+                let self_node = self_node.turbo_fishize()?;
+
                 DbFieldTypeAstMeta {
                             field_type_db_original: FieldType::Record(vec![]),
                             field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![Self::table()])).into(),
@@ -364,18 +369,23 @@ impl<'a> FieldTypeInference<'a> {
                                 ).into(),
                         }
             },
-            RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => DbFieldTypeAstMeta {
-                field_type_db_original: FieldType::Array(
-                    ::std::boxed::Box::new(FieldType::Record(vec![])),
-                    ::std::option::Option::None
-                ),
-                field_type_db_token: quote!(#crate_name::FieldType::Array(
-                    ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])),
-                    ::std::option::Option::None
-                )).into(),
-                static_assertion_token: quote!(
-                    #crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkMany<#ref_node>);
-            ).into(),
+            RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
+                let ref_node = ref_node.turbo_fishize()?;
+
+                let db_field_type_ast_meta = DbFieldTypeAstMeta {
+                            field_type_db_original: FieldType::Array(
+                                ::std::boxed::Box::new(FieldType::Record(vec![])),
+                                ::std::option::Option::None
+                            ),
+                            field_type_db_token: quote!(#crate_name::FieldType::Array(
+                                ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_node::table()])),
+                                ::std::option::Option::None
+                            )).into(),
+                            static_assertion_token: quote!(
+                                #crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkMany<#ref_node>);
+                        ).into(),
+                        };
+                db_field_type_ast_meta
             },
             RelationType::NestObject(_ref_object) => DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Object,
@@ -384,6 +394,7 @@ impl<'a> FieldTypeInference<'a> {
                 quote!(#crate_name::validators::assert_type_is_object::<#ty>();).into(),
             },
             RelationType::NestArray(foreign_array_object) => {
+                let foreign_array_object= foreign_array_object.turbo_fishize()?.to_custom_type();
                 let nesting_level = Self::count_vec_nesting(field_ty.to_basic_type());
                         let nested_vec_type =
                             Self::generate_nested_vec_type(&foreign_array_object, nesting_level);

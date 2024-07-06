@@ -138,6 +138,7 @@ impl ToTokens for NodeToken {
         tokens.extend(quote!(
             use #crate_name::ToRaw as _;
             use #crate_name::Aliasable as _;
+            use ::std::str::FromStr as _;
 
             impl #struct_impl_generics #crate_name::SchemaGetter for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 type Schema = #module_name_rexported::Schema #struct_ty_generics;

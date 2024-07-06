@@ -24,9 +24,15 @@ macro_rules! create_custom_type_wrapper {
                     self.0.to_tokens(tokens);
                 }
             }
+
+            impl [<$name TurboFished>] {
+                pub fn to_custom_type(self) -> crate::models::CustomType {
+                    self.0.to_custom_type()
+                }
+            }
         }
 
-        impl $name {
+        impl $name  {
             pub fn into_inner(self) -> crate::models::CustomType {
                 self.0
             }

@@ -77,7 +77,7 @@ impl ToTokens for FieldTypeDb {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let field_type_str = self.0.to_string();
         let crate_name = get_crate_name(false);
-        let as_token = quote!(#crate_name::FieldTypeDb::from_str(#field_type_str).expect("Failed to parse field type during tokenization. This is a bug. Please report it."));
+        let as_token = quote!(#crate_name::FieldType::from_str(#field_type_str).expect("Failed to parse field type during tokenization. This is a bug. Please report it."));
 
         as_token.to_tokens(tokens);
     }
