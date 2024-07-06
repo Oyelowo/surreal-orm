@@ -11,7 +11,17 @@ use surreal_query_builder::FieldType;
 use super::MyFieldReceiver;
 
 impl MyFieldReceiver {
-    pub fn field_type_db(
+    pub fn field_type_db_token(
+        &self,
+        model_attributes: &ModelAttributes,
+    ) -> ExtractorResult<FieldTypeDbToken> {
+        self.field_type_db_with_static_assertions(model_attributes)
+            // A relate field is an example of where we should not
+            // have a db field as that is a readonly derived field.
+            .map(|x| x.unwrap_or_default().field_type_db_token.into())
+    }
+
+    pub fn field_type_db_original(
         &self,
         model_attributes: &ModelAttributes,
     ) -> ExtractorResult<FieldTypeDb> {
