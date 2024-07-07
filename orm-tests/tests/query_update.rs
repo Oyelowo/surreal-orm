@@ -9,9 +9,7 @@ use chrono::Utc;
 use geo::{line_string, point, polygon};
 use pretty_assertions::assert_eq;
 use std::time::Duration;
-use surreal_models::{
-    alien, weapon, weapon_old, Alien, Rocket, SpaceShip, Weapon, WeaponOld,
-};
+use surreal_models::{alien, weapon, weapon_old, Alien, Rocket, SpaceShip, Weapon, WeaponOld};
 use surreal_orm::{
     statements::{create, insert, select, update},
     *,
@@ -630,12 +628,13 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
     assert_eq!(get_selected_weapons().await.len(), 10);
 
     // Test update with MERGE keyoword and using updater
+    let rocket = Rocket::partial_builder().name("Bruno".into()).build();
     let update_weapons_with_filter = update::<Weapon>(Weapon::table())
         .merge(
             Weapon::partial_builder()
                 .name("Oyelowo".into())
                 .strength(16.0)
-                .rocket(Rocket::partial_builder().name("Bruno".into()).build()
+                .rocket(rocket)
                 .build(),
         )
         .where_(filter)
@@ -661,6 +660,7 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
 
     Ok(())
 }
+
 #[tokio::test]
 async fn test_update_single_id_merge_no_fields_skip() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
