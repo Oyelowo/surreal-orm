@@ -59,7 +59,7 @@ impl<'a> Codegen<'a> {
         } = &RelateAttribute::try_from(relate)?;
         let arrow = &ArrowTokenStream::from(edge_direction);
         let destination_node_table_str = &foreign_node_table.to_string();
-        let binding = field_type.get_generics_from_current_struct(table_derive_attributes);
+        let binding = field_type.get_generics_from_current_struct(table_derive_attributes)?;
         let (_edge_impl_generics, edge_ty_generics, _edge_where_clause) = binding.split_for_impl();
 
         let edge_name_with_direction_as_method_ident =
@@ -73,9 +73,9 @@ impl<'a> Codegen<'a> {
             if edge_ty_generics.is_empty() {
                 quote!(#foreign_node_schema_ident)
             } else {
-            // NOTE: This may  not really be needed as the return type
-            // should help to auto-infer the type or generics as we call the
-            // connect method on the struct.
+                // NOTE: This may  not really be needed as the return type
+                // should help to auto-infer the type or generics as we call the
+                // connect method on the struct.
                 quote!(#foreign_node_schema_ident :: #edge_ty_generics)
             };
         let foreign_node_schema_type_alias_with_generics_turbofishized =
@@ -476,8 +476,14 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 edge_name_as_struct_original_ident.deref(),
                 edge_types,
             );
-        let binding =
-            aggregated_edge_type.get_generics_from_current_struct(table_derive_attributes);
+
+        let binding = match aggregated_edge_type.get_generics_from_current_struct(table_derive_attributes) {
+            Ok(binding) => binding,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
+
+
+
         let (edge_type_impl_generics, edge_type_ty_generics, edge_type_where_clause) =
             binding.split_for_impl();
 

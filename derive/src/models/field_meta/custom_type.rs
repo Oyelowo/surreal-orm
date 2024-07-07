@@ -23,8 +23,6 @@ use super::{
     custom_type_self_replacement::ReplaceSelfVisitor, field_name_serialized::DbFieldName, *,
 };
 
-
-
 #[derive(Debug, Clone)]
 pub struct CustomTypeNoSelf(CustomType);
 
@@ -306,8 +304,14 @@ impl CustomType {
     pub fn get_generics_from_current_struct(
         &self,
         model_attributes: &ModelAttributes,
-    ) -> CustomGenerics {
-        GenericTypeExtractor::sync_field_type_to_current_struct_generics(model_attributes, self)
+    ) -> ExtractorResult<CustomGenerics> {
+        let custom_type = self.replace_self_with_current_struct_concrete_type(&model_attributes)?;
+        Ok(
+            GenericTypeExtractor::sync_field_type_to_current_struct_generics(
+                model_attributes,
+                custom_type.into_inner_ref(),
+            ),
+        )
     }
 
     pub fn extract_generics_for_complex_type(
