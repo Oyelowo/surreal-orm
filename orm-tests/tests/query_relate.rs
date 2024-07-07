@@ -73,7 +73,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().in_.get_id().unwrap().to_string(),
+        result.clone().r#in.get_id().unwrap().to_string(),
         "student:⟨1⟩"
     );
     assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨2⟩");
@@ -97,7 +97,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().in_.get_id().unwrap().to_string(),
+        result.clone().r#in.get_id().unwrap().to_string(),
         "student:⟨2⟩"
     );
     assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨1⟩");
@@ -137,7 +137,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
         .starts_with("writes:"));
 
     assert_eq!(
-        result.clone().unwrap().in_.get_id().unwrap().to_string(),
+        result.clone().unwrap().r#in.get_id().unwrap().to_string(),
         "student:⟨2⟩"
     );
     assert_eq!(
@@ -160,15 +160,15 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
 
     assert_eq!(result.len(), 3);
     assert_eq!(result[0].time_written, Duration::from_secs(47));
-    assert_eq!(result[0].in_.get_id().unwrap().to_string(), "student:⟨2⟩");
+    assert_eq!(result[0].r#in.get_id().unwrap().to_string(), "student:⟨2⟩");
     assert_eq!(result[0].out.get_id().unwrap().to_string(), "blog:⟨1⟩");
 
     assert_eq!(result[1].time_written, Duration::from_secs(343));
-    assert_eq!(result[1].in_.get_id().unwrap().to_string(), "student:⟨1⟩");
+    assert_eq!(result[1].r#in.get_id().unwrap().to_string(), "student:⟨1⟩");
     assert_eq!(result[1].out.get_id().unwrap().to_string(), "book:⟨2⟩");
 
     assert_eq!(result[2].time_written, Duration::from_secs(923));
-    assert_eq!(result[2].in_.get_id().unwrap().to_string(), "student:⟨2⟩");
+    assert_eq!(result[2].r#in.get_id().unwrap().to_string(), "student:⟨2⟩");
     assert_eq!(result[2].out.get_id().unwrap().to_string(), "book:⟨1⟩");
 
     Ok(())
@@ -229,7 +229,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
 
     let user::Schema { tags, id, .. } = User::schema();
     let company::Schema { users, .. } = Company::schema();
-    let like::Schema { in_, .. } = CompanyLikeUser::schema();
+    let like::Schema { r#in, out, time, .. } = CompanyLikeUser::schema();
 
     // select users from company
     // let from_statement = select(All).from(codebreather.id);
@@ -266,17 +266,17 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
 
     let result = select(All)
         .from(CompanyLikeUser::table())
-        .order_by(order(in_).desc())
+        .order_by(order(r#in).desc())
         // .order_by(order(time.connected).desc())
         .return_many::<CompanyLikeUser>(db.clone())
         .await?;
     assert_eq!(result.len(), 12);
     assert_eq!(result[0].time.connected, dt);
-    assert_eq!(result[0].in_.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[1].in_.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[2].in_.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[5].in_.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[6].in_.get_id().unwrap().to_string(), "user:user0");
+    assert_eq!(result[0].r#in.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[1].r#in.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[2].r#in.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[5].r#in.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[6].r#in.get_id().unwrap().to_string(), "user:user0");
 
     Ok(())
 }
@@ -427,7 +427,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
         relate_simple_object
             .clone()
             .unwrap()
-            .in_
+            .r#in  
             .get_id()
             .unwrap()
             .to_string(),
@@ -453,7 +453,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
     assert_eq!(
         relate_simple_array[0]
             .clone()
-            .in_
+            .r#in  
             .get_id()
             .unwrap()
             .to_string(),

@@ -96,24 +96,24 @@ impl<'a> Codegen<'a> {
         Ok(())
     }
 
-    fn insert_struct_partial_init_fields(
-        &mut self,
-    ) -> ExtractorResult<()> {
+    fn insert_struct_partial_init_fields(&mut self) -> ExtractorResult<()> {
         let fr = &self.field_receiver();
         let ident = fr.ident()?;
-        let db_field_name = 
-            fr
-            .db_field_name(&self.table_derive_attributes().casing()?)?;
-
-        // NOTE: Check in latest 2.0  version of surrealdb if in and out fields of
-        // edges are not updateable.Currently, they are readonly once created.
-        // Id field should remain immutable, hence this check.
-        if !db_field_name.is_id() {
-            self.serialized_ident_struct_partial_init_fields
-                .push(SerializedIdentStructPartialInitFields::new(
-                    quote!(#ident),
-                ));
-        }
+        // let db_field_name =
+        //     fr
+        //     .db_field_name(&self.table_derive_attributes().casing()?)?;
+        //
+        // // NOTE: Check in latest 2.0  version of surrealdb if in and out fields of
+        // // edges are not updateable.Currently, they are readonly once created.
+        // // Id field should remain immutable, hence this check.
+        // if !db_field_name.is_id() {
+        //     self.serialized_ident_struct_partial_init_fields
+        //         .push(SerializedIdentStructPartialInitFields::new(
+        //             quote!(#ident),
+        //         ));
+        // }
+        self.serialized_ident_struct_partial_init_fields
+            .push(SerializedIdentStructPartialInitFields::new(quote!(#ident)));
         Ok(())
     }
     fn insert_renamed_serialized_fields_kv(&mut self) -> Result<(), ExtractorError> {
