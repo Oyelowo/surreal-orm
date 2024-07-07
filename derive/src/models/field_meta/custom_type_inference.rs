@@ -96,23 +96,6 @@ impl<'a> FieldTypeInference<'a> {
             Ok(todo!())
         }
 
-        // let relation_type = self.relation_type;
-        // let model_attrs = self.model_attrs;
-        // let ty = self.field_ty;
-        // let field_name = self.db_field_name;
-        //
-        // let based_on_name = self.based_on_db_field_name(&ty, &field_name, &model_attrs);
-        // let db_type = if let Ok(db_ty) = based_on_name {
-        //     Some(db_ty)
-        // } else if let Ok(Some(db_ty)) =  self.based_on_field_relation_type(&ty, &relation_type) {
-        //      Some(db_ty)
-        // }else if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty) {
-        //      Some(db_ty)
-        // }else {
-        //     None
-        // };
-        //
-        // Ok(db_type)
         todo!()
     }
 
@@ -125,12 +108,17 @@ impl<'a> FieldTypeInference<'a> {
         let field_name = self.db_field_name;
 
         // NOTE: The order of the inference approach is important. Type path should always be first
-        let db_type = if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty, relation_type.clone()) {
+        let priority1 = || self.based_on_type_path_token_structure(&ty, relation_type.clone());
+        let priority2 = || self.based_on_db_field_name(&ty, &field_name, &model_attrs);
+        let priority3 = || self.based_on_field_relation_type(&ty, &relation_type);
+
+
+        let db_type = if let Ok(db_ty) = priority1() {
              Some(db_ty)
         }
-        else if let Ok(db_ty) = self.based_on_db_field_name(&ty, &field_name, &model_attrs) {
+        else if let Ok(db_ty) = priority2() {
             Some(db_ty)
-        } else if let Ok(Some(db_ty)) =  self.based_on_field_relation_type(&ty, &relation_type) {
+        } else if let Ok(Some(db_ty)) =  priority3() {
              Some(db_ty)
         }
         else {
