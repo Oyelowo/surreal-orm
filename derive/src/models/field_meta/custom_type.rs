@@ -175,6 +175,22 @@ impl CustomType {
         &self.0
     }
 
+    pub fn type_ident(&self) -> ExtractorResult<Ident> {
+        match self.into_inner_ref() {
+            Type::Path(type_path) => {
+                let last_segment = type_path
+                    .path
+                    .segments
+                    .last()
+                    .ok_or_else(|| darling::Error::custom("Expected a type. Make sure there are no typos and you are using a proper struct as the linked Node."))?;
+                Ok(last_segment.ident.clone())
+            }
+            _ => {
+                Err(syn::Error::new(self.to_token_stream().span(), "Expected a struct type").into())
+            }
+        }
+    }
+
     pub fn remove_non_static_lifetime_and_reference(&self) -> Self {
         let ty = match self.into_inner_ref() {
             Type::Reference(TypeReference { elem, lifetime, .. }) => match lifetime {
