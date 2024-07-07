@@ -14,22 +14,6 @@ use crate::models::*;
 
 use super::{field_name_serialized::DbFieldName, *};
 
-pub enum InferenceApproach {
-    /// This is done directly by morphologically analysing the field type path tokenstream
-    /// using certain heuristics and is cross-referenced with other stuff in case our guess
-    /// is wrong. Users can usually specify the exact db type as a field attribute for explicitness
-    BasedOnTypePathToken,
-    ///
-    /// This is usually shallow and just infers the type as a whole
-    /// based on field attributes such as relation type e.g link_one, link_field_ty. link_many etc
-    /// With these metadata, we can usually reliably derive/guess the field type as a whole
-    BasedOnRelationTypeFieldAttr,
-
-    /// based on field metadata such as reserved field names e.g `id`, `in` and `out`
-    /// With these metadata, we can usually reliably derive/guess the field type as a whole
-    BasedOnDbFieldName,
-}
-
 pub struct FieldTypeInference<'a> {
     pub db_field_name: &'a DbFieldName,
     pub field_ty: &'a CustomType,
@@ -81,6 +65,9 @@ impl<'a> FieldTypeInference<'a> {
         Ok(db_type)
     }
 
+    /// This is done directly by morphologically analysing the field type path tokenstream
+    /// using certain heuristics and is cross-referenced with other stuff in case our guess
+    /// is wrong. Users can usually specify the exact db type as a field attribute for explicitness
     fn based_on_type_path_token_structure(
         &self,
         field_ty: &CustomType,
@@ -248,7 +235,7 @@ impl<'a> FieldTypeInference<'a> {
                     quote!(#crate_name::validators::assert_type_is_geometry::<#ty>();).into(),
             }
         } 
-        else if let Some(foreign_type) = self.refereces_a_nested_object(relation_type)? {
+        else if let Some(foreign_type) = self.refereces_a_nested_object(&relation_type)? {
         // Guess if its a foreign Table type by comparing the type path segment with the foreign
         // rust field type ident
             let current_segment_is_likely_foreign_type = field_ty.type_ident()? == foreign_type.type_ident()?;
@@ -280,7 +267,7 @@ impl<'a> FieldTypeInference<'a> {
     }
 
     /// Gets out the foreign/nested object type if the field references a foreign struct
-    fn refereces_a_nested_object(&self, relation_type: RelationType) -> ExtractorResult<Option<CustomType>> {
+    fn refereces_a_nested_object(&self, relation_type: &'a RelationType) -> ExtractorResult<Option<&'a CustomType>> {
         // NOTE 1:
         // Links are excluded from this because we are handling them separately in the inference
         // based on link type.
@@ -294,10 +281,10 @@ impl<'a> FieldTypeInference<'a> {
         // single top-level struct, or one or deep lelve nested struct. 
         let foreign_type = match relation_type {
             RelationType::NestObject(ref_object) => {
-                Some(ref_object.into_inner())
+                Some(ref_object.into_inner_ref())
             },
             RelationType::NestArray(foreign_array_object) => {
-                Some(foreign_array_object.into_inner())
+                Some(foreign_array_object.into_inner_ref())
             },
             RelationType::Relate(_) 
             | RelationType::List(_) 
@@ -313,6 +300,8 @@ impl<'a> FieldTypeInference<'a> {
         Ok(foreign_type)
     }
 
+    /// based on field metadata such as reserved field names e.g `id`, `in` and `out`
+    /// With these metadata, we can usually reliably derive/guess the field type as a whole
     fn based_on_db_field_name(
         &self,
         field_ty: &CustomType,
@@ -359,6 +348,9 @@ impl<'a> FieldTypeInference<'a> {
         Ok(meta)
     }
 
+    /// This is usually shallow and just infers the type as a whole
+    /// based on field attributes such as relation type e.g link_one, link_fieldm link_many etc
+    /// With these metadata, we can usually reliably derive/guess the field type as a whole
     fn based_on_field_link_type(
         &self,
         field_ty: &CustomType,
