@@ -41,19 +41,46 @@ struct Company {
     name: String,
     founded: chrono::DateTime<chrono::Utc>,
 
-    #[surreal_orm(nest_array = "Person")]
+    #[surreal_orm(nest_array = Person)]
     founders: Vec<Person>,
 
     // #[surreal_orm(nest_array = "Person", ty = "array<array<object>>")]
-    #[surreal_orm(nest_array = "Person")]
+    #[surreal_orm(nest_array = Person)]
     founders_multiple_nesting: Vec<Vec<Person>>,
 
-    #[surreal_orm(nest_array = "Person")]
+    #[surreal_orm(nest_array = Person)]
     founders_10: Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
 
     tags: Vec<String>,
     home: geo::Point,
 }
+
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table = company_2_for_testing)]
+struct Company2ForTesting {
+    id: SurrealId<Self, i32>,
+    name: String,
+    founded: chrono::DateTime<chrono::Utc>,
+
+    #[surreal_orm(nest_array = "Person")]
+    founder1: Person,
+
+    #[surreal_orm(nest_array = "Person")]
+    // founders: Vec<Person>,
+    founders: [Person; 3],
+
+    // #[surreal_orm(nest_array = "Person", ty = "array<array<object>>")]
+    #[surreal_orm(nest_array = "Person")]
+    founders_multiple_nesting: Vec<[Person; 28]>,
+
+    #[surreal_orm(nest_array = "Person")]
+    founders_10: Vec<Vec<Vec<Vec<Option<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
+
+    tags: Vec<String>,
+    home: geo::Point,
+}
+
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
