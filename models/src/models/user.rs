@@ -39,13 +39,13 @@ impl Default for User {
 #[surreal_orm(table = like)]
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
-    #[serde(rename = "in", skip_serializing)]
-    #[surreal_orm(link_many = "In")]
-    pub in_: LinkMany<In>,
+    // #[serde(rename = "in", skip_serializing)]
+    #[surreal_orm(link_many = In)]
+    pub r#in: LinkMany<In>,
     #[serde(skip_serializing)]
-    #[surreal_orm(link_many = "Out")]
+    #[surreal_orm(link_many = Out)]
     pub out: LinkMany<Out>,
-    #[surreal_orm(nest_object = "Time")]
+    #[surreal_orm(nest_object = Time)]
     pub time: Time,
 }
 pub type CompanyLikeUser = Like<Company, User>;
@@ -56,10 +56,10 @@ pub type CompanyLikeUser = Like<Company, User>;
 pub struct Company {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    #[surreal_orm(link_many = "User")]
+    #[surreal_orm(link_many = User)]
     pub users: LinkMany<User>,
 
-    #[surreal_orm(relate(model = "CompanyLikeUser", connection = "->like->user"))]
+    #[surreal_orm(relate(model = CompanyLikeUser, connection = "->like->user"))]
     pub devs: Relate<User>,
 }
 
@@ -76,9 +76,9 @@ pub struct Time {
 pub struct Organization {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    #[surreal_orm(link_many = "User")]
+    #[surreal_orm(link_many = User)]
     pub users: LinkMany<User>,
-    #[surreal_orm(nest_object = "Time")]
+    #[surreal_orm(nest_object = Time)]
     pub time: Time,
     pub age: u8,
 }
