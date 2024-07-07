@@ -71,6 +71,7 @@ impl<'a> FieldTypeInference<'a> {
             ty: &CustomType, 
             field_name: &DbFieldName, 
             model_attrs: &ModelAttributes, 
+            relation_type: &RelationType,
             ass: &mut Vec<StaticAssertionToken>
         ) -> ExtractorResult<()> {
             let field_ty = ty.inner_angle_bracket_type()?;
@@ -81,13 +82,14 @@ impl<'a> FieldTypeInference<'a> {
                     field_ty: &fty,
                     relation_type: &RelationType::None,
                     model_attrs,
-                }
-                .infer_type_by(InferenceApproach::BasedOnTypePathToken)?;
+                    // TODO: Change relation back to using references
+                }.based_on_type_path_token_structure(fty.into_inner_ref(), relation_type.clone())?;
+                // .infer_type_by(InferenceApproach::BasedOnTypePathToken)?;
                 
-                if let Some(meta) = inner_db_ty_ast {
-                    ass.push(meta.static_assertion_token);
-                    infer_db_ty_from_path_recursively(fty.into_inner_ref(), field_name, model_attrs, ass)?;
-                }
+                // if let Ok(meta) = inner_db_ty_ast {
+                // }
+                ass.push(inner_db_ty_ast.static_assertion_token);
+                infer_db_ty_from_path_recursively(fty.into_inner_ref(), field_name, model_attrs, relation_type ,ass)?;
                 
             }
 
@@ -122,14 +124,16 @@ impl<'a> FieldTypeInference<'a> {
         let ty = self.field_ty;
         let field_name = self.db_field_name;
 
-        let based_on_name = self.based_on_db_field_name(&ty, &field_name, &model_attrs);
-        let db_type = if let Ok(db_ty) = based_on_name {
+        // NOTE: The order of the inference approach is important. Type path should always be first
+        let db_type = if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty, relation_type.clone()) {
+             Some(db_ty)
+        }
+        else if let Ok(db_ty) = self.based_on_db_field_name(&ty, &field_name, &model_attrs) {
             Some(db_ty)
         } else if let Ok(Some(db_ty)) =  self.based_on_field_relation_type(&ty, &relation_type) {
              Some(db_ty)
-        }else if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty, relation_type.clone()) {
-             Some(db_ty)
-        }else {
+        }
+        else {
             None
         };
 
@@ -326,14 +330,15 @@ impl<'a> FieldTypeInference<'a> {
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_geometry::<#ty>();).into(),
             }
-        } else if let Some(foreign_type) = self.references_serializable_foreign_struct(relation_type)? {
+        } 
+        else if let Some(foreign_type) = self.refereces_a_nested_object(relation_type)? {
         // Guess if its a foreign Table type by comparing the type path segment with the foreign
         // rust field type ident
             let current_segment_is_likely_foreign_type = field_ty.type_ident()? == foreign_type.type_ident()?;
             if current_segment_is_likely_foreign_type {
                 DbFieldTypeAstMeta {
-                    field_type_db_original: FieldType::Record(vec![]),
-                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#foreign_type::table()])).into(),
+                    field_type_db_original: FieldType::Object,
+                    field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                     static_assertion_token: quote!(
                                 #crate_name::validators::assert_type_eq_all!(#ty, #foreign_type);
                 ).into(),
@@ -357,25 +362,31 @@ impl<'a> FieldTypeInference<'a> {
     }
 
     /// Gets out the foreign/nested object type if the field references a foreign struct
-    fn references_serializable_foreign_struct(&self, relation_type: RelationType) -> ExtractorResult<Option<CustomType>> {
+    fn refereces_a_nested_object(&self, relation_type: RelationType) -> ExtractorResult<Option<CustomType>> {
         let foreign_type = match relation_type {
-            RelationType::LinkOne(ref_node) => {
-                Some(ref_node.into_inner())
-            },
-            RelationType::LinkSelf(self_node) => {
-                let replace_self_with_current_struct_concrete_type = self_node.replace_self_with_current_struct_concrete_type(self.model_attrs)?;
-                Some(replace_self_with_current_struct_concrete_type.into_inner())
-            },
-            RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
-                Some(ref_node.into_inner())
-            },
+            // RelationType::LinkOne(ref_node) => {
+            //     Some(ref_node.into_inner())
+            // },
+            // RelationType::LinkSelf(self_node) => {
+            //     let replace_self_with_current_struct_concrete_type = self_node.replace_self_with_current_struct_concrete_type(self.model_attrs)?;
+            //     Some(replace_self_with_current_struct_concrete_type.into_inner())
+            // },
+            // RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
+            //     Some(ref_node.into_inner())
+            // },
             RelationType::NestObject(ref_object) => {
                 Some(ref_object.into_inner())
             },
             RelationType::NestArray(foreign_array_object) => {
                 Some(foreign_array_object.into_inner())
             },
-            RelationType::Relate(_) | RelationType::List(_) | RelationType::None => {
+            RelationType::Relate(_) 
+            | RelationType::List(_) 
+            | RelationType::None  
+            | RelationType::LinkOne(_)  
+            | RelationType::LinkSelf(_)  
+            | RelationType::LinkManyInAndOutEdgeNodesInert(_)  
+            | RelationType::LinkMany(_)=> {
                 None
             }
         };
