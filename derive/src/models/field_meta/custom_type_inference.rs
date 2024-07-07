@@ -64,6 +64,56 @@ impl<'a> FieldTypeInference<'a> {
         })
     }
 
+    pub fn infer_type_by_priority_of_field_ty(
+        &self,
+    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
+        fn infer_db_ty_from_path_recursively(
+            ty: &CustomType, 
+            field_name: &DbFieldName, 
+            model_attrs: &ModelAttributes, 
+            ass: &mut Vec<StaticAssertionToken>
+        ) -> ExtractorResult<()> {
+            let field_ty = ty.inner_angle_bracket_type()?;
+
+            if let Some(fty) = field_ty  {
+                let inner_db_ty_ast = FieldTypeInference {
+                    db_field_name: field_name,
+                    field_ty: &fty,
+                    relation_type: &RelationType::None,
+                    model_attrs,
+                }
+                .infer_type_by(InferenceApproach::BasedOnTypePathToken)?;
+                
+                if let Some(meta) = inner_db_ty_ast {
+                    ass.push(meta.static_assertion_token);
+                    infer_db_ty_from_path_recursively(fty.into_inner_ref(), field_name, model_attrs, ass)?;
+                }
+                
+            }
+
+            Ok(todo!())
+        }
+
+        // let relation_type = self.relation_type;
+        // let model_attrs = self.model_attrs;
+        // let ty = self.field_ty;
+        // let field_name = self.db_field_name;
+        //
+        // let based_on_name = self.based_on_db_field_name(&ty, &field_name, &model_attrs);
+        // let db_type = if let Ok(db_ty) = based_on_name {
+        //     Some(db_ty)
+        // } else if let Ok(Some(db_ty)) =  self.based_on_field_relation_type(&ty, &relation_type) {
+        //      Some(db_ty)
+        // }else if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty) {
+        //      Some(db_ty)
+        // }else {
+        //     None
+        // };
+        //
+        // Ok(db_type)
+        todo!()
+    }
+
     pub fn infer_type_by_priority(
         &self,
     ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
@@ -77,7 +127,7 @@ impl<'a> FieldTypeInference<'a> {
             Some(db_ty)
         } else if let Ok(Some(db_ty)) =  self.based_on_field_relation_type(&ty, &relation_type) {
              Some(db_ty)
-        }else if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty) {
+        }else if let Ok(db_ty) = self.based_on_type_path_token_structure(&ty, relation_type.clone()) {
              Some(db_ty)
         }else {
             None
@@ -98,7 +148,7 @@ impl<'a> FieldTypeInference<'a> {
         // TODO: Consider removing lifetime except static here rather than doing it 
         // within the helper functions.
         let db_type = match approach {
-            InferenceApproach::BasedOnTypePathToken => Some(self.based_on_type_path_token_structure(&ty)?),
+            InferenceApproach::BasedOnTypePathToken => Some(self.based_on_type_path_token_structure(&ty, relation_type.clone())?),
             InferenceApproach::BasedOnRelationTypeFieldAttr => {
                 self.based_on_field_relation_type(&ty, &relation_type)?
             }
@@ -109,9 +159,11 @@ impl<'a> FieldTypeInference<'a> {
         Ok(db_type)
     }
 
+    // More Speed, Less Haste. Momentum is the kye.
     fn based_on_type_path_token_structure(
         &self,
         field_ty: &CustomType,
+        relation_type: RelationType
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let crate_name = get_crate_name(false);
         let binding = field_ty
@@ -158,7 +210,7 @@ impl<'a> FieldTypeInference<'a> {
                     // let item = CustomType::new(ty.into_inner());
                     let item = ty.into_inner();
 
-                    self.based_on_type_path_token_structure(&item)
+                    self.based_on_type_path_token_structure(&item, relation_type)
                 })
                 .ok_or(syn::Error::new(
                     ty.span(),
@@ -209,7 +261,7 @@ impl<'a> FieldTypeInference<'a> {
                 .flatten();
 
             let inner_item = inner_type
-                .map(|ct| self.based_on_type_path_token_structure(&ct))
+                .map(|ct| self.based_on_type_path_token_structure(&ct, relation_type))
                 .ok_or(syn::Error::new(
                     ty.span(),
                     "Could not infer type for the array inner type",
@@ -230,7 +282,7 @@ impl<'a> FieldTypeInference<'a> {
             let inner_type = field_ty.inner_angle_bracket_type()?;
 
             let inner_item = inner_type
-                .map(|ct| self.based_on_type_path_token_structure(&ct))
+                .map(|ct| self.based_on_type_path_token_structure(&ct, relation_type))
                 .ok_or(syn::Error::new(
                     ty.span(),
                     "Could not infer type for the set inner type",
@@ -274,7 +326,26 @@ impl<'a> FieldTypeInference<'a> {
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_geometry::<#ty>();).into(),
             }
-        } else {
+        } else if let Some(foreign_type) = self.references_serializable_foreign_struct(relation_type)? {
+        // Guess if its a foreign Table type by comparing the type path segment with the foreign
+        // rust field type ident
+            let current_segment_is_likely_foreign_type = field_ty.type_ident()? == foreign_type.type_ident()?;
+            if current_segment_is_likely_foreign_type {
+                DbFieldTypeAstMeta {
+                    field_type_db_original: FieldType::Record(vec![]),
+                    field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![#foreign_type::table()])).into(),
+                    static_assertion_token: quote!(
+                                #crate_name::validators::assert_type_eq_all!(#ty, #foreign_type);
+                ).into(),
+                }
+            } else  {
+                return Err(syn::Error::new(
+                    ty.span(),
+                    "Could not infer the database type for the field based on the field type in rust provided. Specify by using e.g ty = \"array\"",
+                ).into());
+            }
+
+            } else {
             return Err(syn::Error::new(
                 ty.span(),
                 "Could not infer the database type for the field based on the field type in rust provided. Specify by using e.g ty = \"array\"",
@@ -283,6 +354,33 @@ impl<'a> FieldTypeInference<'a> {
         };
 
         Ok(meta)
+    }
+
+    /// Gets out the foreign/nested object type if the field references a foreign struct
+    fn references_serializable_foreign_struct(&self, relation_type: RelationType) -> ExtractorResult<Option<CustomType>> {
+        let foreign_type = match relation_type {
+            RelationType::LinkOne(ref_node) => {
+                Some(ref_node.into_inner())
+            },
+            RelationType::LinkSelf(self_node) => {
+                let replace_self_with_current_struct_concrete_type = self_node.replace_self_with_current_struct_concrete_type(self.model_attrs)?;
+                Some(replace_self_with_current_struct_concrete_type.into_inner())
+            },
+            RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
+                Some(ref_node.into_inner())
+            },
+            RelationType::NestObject(ref_object) => {
+                Some(ref_object.into_inner())
+            },
+            RelationType::NestArray(foreign_array_object) => {
+                Some(foreign_array_object.into_inner())
+            },
+            RelationType::Relate(_) | RelationType::List(_) | RelationType::None => {
+                None
+            }
+        };
+
+        Ok(foreign_type)
     }
 
     fn based_on_db_field_name(
@@ -341,7 +439,7 @@ impl<'a> FieldTypeInference<'a> {
 
         let meta = match relation_type {
                 RelationType::Relate(_ref_node) => {
-                    // Relation are not stored on nodes, but
+                    // Relations are readonly and are not stored on nodes, but
                     // on edges. Just used on nodes for convenience
                     // during deserialization
                   return Ok(None)
