@@ -30,22 +30,10 @@ pub enum InferenceApproach {
     BasedOnDbFieldName,
 }
 
-impl InferenceApproach {
-    pub fn all() -> Vec<Self> {
-        vec![
-            InferenceApproach::BasedOnTypePathToken,
-            InferenceApproach::BasedOnRelationTypeFieldAttr,
-            InferenceApproach::BasedOnDbFieldName,
-        ]
-    }
-}
-
 pub struct FieldTypeInference<'a> {
-    // field_receiver: &'a MyFieldReceiver,
     pub db_field_name: &'a DbFieldName,
     pub field_ty: &'a CustomType,
     pub relation_type: &'a RelationType,
-    // table_attrs: &'a TableDeriveAttributes,
     pub model_attrs: &'a ModelAttributes<'a>,
 }
 
@@ -64,41 +52,6 @@ impl<'a> FieldTypeInference<'a> {
         })
     }
 
-    pub fn infer_type_by_priority_of_field_ty(
-        &self,
-    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
-        fn infer_db_ty_from_path_recursively(
-            ty: &CustomType, 
-            field_name: &DbFieldName, 
-            model_attrs: &ModelAttributes, 
-            relation_type: &RelationType,
-            ass: &mut Vec<StaticAssertionToken>
-        ) -> ExtractorResult<()> {
-            let field_ty = ty.inner_angle_bracket_type()?;
-
-            if let Some(fty) = field_ty  {
-                let inner_db_ty_ast = FieldTypeInference {
-                    db_field_name: field_name,
-                    field_ty: &fty,
-                    relation_type: &RelationType::None,
-                    model_attrs,
-                    // TODO: Change relation back to using references
-                }.based_on_type_path_token_structure(fty.into_inner_ref(), relation_type.clone())?;
-                // .infer_type_by(InferenceApproach::BasedOnTypePathToken)?;
-                
-                // if let Ok(meta) = inner_db_ty_ast {
-                // }
-                ass.push(inner_db_ty_ast.static_assertion_token);
-                infer_db_ty_from_path_recursively(fty.into_inner_ref(), field_name, model_attrs, relation_type ,ass)?;
-                
-            }
-
-            Ok(todo!())
-        }
-
-        todo!()
-    }
-
     pub fn infer_type_by_priority(
         &self,
     ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
@@ -110,7 +63,7 @@ impl<'a> FieldTypeInference<'a> {
         // NOTE: The order of the inference approach is important. Type path should always be first
         let priority1 = || self.based_on_type_path_token_structure(&ty, relation_type.clone());
         let priority2 = || self.based_on_db_field_name(&ty, &field_name, &model_attrs);
-        let priority3 = || self.based_on_field_relation_type(&ty, &relation_type);
+        let priority3 = || self.based_on_field_link_type(&ty, &relation_type);
 
 
         let db_type = if let Ok(db_ty) = priority1() {
@@ -128,30 +81,6 @@ impl<'a> FieldTypeInference<'a> {
         Ok(db_type)
     }
 
-    pub fn infer_type_by(
-        &self,
-        approach: InferenceApproach,
-    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
-        let relation_type = self.relation_type;
-        let model_attrs = self.model_attrs;
-        let ty = self.field_ty;
-        let field_name = self.db_field_name;
-
-        // TODO: Consider removing lifetime except static here rather than doing it 
-        // within the helper functions.
-        let db_type = match approach {
-            InferenceApproach::BasedOnTypePathToken => Some(self.based_on_type_path_token_structure(&ty, relation_type.clone())?),
-            InferenceApproach::BasedOnRelationTypeFieldAttr => {
-                self.based_on_field_relation_type(&ty, &relation_type)?
-            }
-            InferenceApproach::BasedOnDbFieldName => {
-                Some(self.based_on_db_field_name(&ty, &field_name, &model_attrs)?)
-            }
-        };
-        Ok(db_type)
-    }
-
-    // More Speed, Less Haste. Momentum is the kye.
     fn based_on_type_path_token_structure(
         &self,
         field_ty: &CustomType,
@@ -328,8 +257,9 @@ impl<'a> FieldTypeInference<'a> {
                     field_type_db_original: FieldType::Object,
                     field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                     static_assertion_token: quote!(
-                                #crate_name::validators::assert_type_eq_all!(#ty, #foreign_type);
-                ).into(),
+            // #crate_name::validators::assert_type_eq_all!(#ty, #foreign_type);
+                    #crate_name::validators::assert_type_is_object::<#ty>();
+                    ).into(),
                 }
             } else  {
                 return Err(syn::Error::new(
@@ -351,17 +281,18 @@ impl<'a> FieldTypeInference<'a> {
 
     /// Gets out the foreign/nested object type if the field references a foreign struct
     fn refereces_a_nested_object(&self, relation_type: RelationType) -> ExtractorResult<Option<CustomType>> {
+        // NOTE 1:
+        // Links are excluded from this because we are handling them separately in the inference
+        // based on link type.
+        // Nested objects are inluded here when we infer based on the field type path because
+        // nested/embedded objects are just normal rust struct types with no relation nor special treatment
+        // within the context of the database. But we are able to infer that because of the
+        // nest_array/ nest_object field attributes we provide
+        //
+        // NOTE 2:
+        // We are mainly interested in getting the foreign struct itself whether or not its a
+        // single top-level struct, or one or deep lelve nested struct. 
         let foreign_type = match relation_type {
-            // RelationType::LinkOne(ref_node) => {
-            //     Some(ref_node.into_inner())
-            // },
-            // RelationType::LinkSelf(self_node) => {
-            //     let replace_self_with_current_struct_concrete_type = self_node.replace_self_with_current_struct_concrete_type(self.model_attrs)?;
-            //     Some(replace_self_with_current_struct_concrete_type.into_inner())
-            // },
-            // RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
-            //     Some(ref_node.into_inner())
-            // },
             RelationType::NestObject(ref_object) => {
                 Some(ref_object.into_inner())
             },
@@ -428,7 +359,7 @@ impl<'a> FieldTypeInference<'a> {
         Ok(meta)
     }
 
-    fn based_on_field_relation_type(
+    fn based_on_field_link_type(
         &self,
         field_ty: &CustomType,
         relation_type: &RelationType,
@@ -484,37 +415,10 @@ impl<'a> FieldTypeInference<'a> {
                         };
                 db_field_type_ast_meta
             },
-            RelationType::NestObject(_ref_object) => DbFieldTypeAstMeta {
-                field_type_db_original: FieldType::Object,
-                field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
-                static_assertion_token:
-                quote!(#crate_name::validators::assert_type_is_object::<#ty>();).into(),
-            },
-            RelationType::NestArray(foreign_array_object) => {
-                let foreign_array_object= foreign_array_object.turbo_fishize()?.to_custom_type();
-                let nesting_level = Self::count_vec_nesting(field_ty.to_basic_type());
-                        let nested_vec_type =
-                            Self::generate_nested_vec_type(&foreign_array_object, nesting_level);
-
-                        DbFieldTypeAstMeta {
-                                    // provide the inner type for when the array part start recursing
-                                    field_type_db_original: FieldType::Array(Box::new(FieldType::Any), None),
-                                    field_type_db_token: quote!(#crate_name::FieldType::Array(
-                                        ::std::boxed::Box::new(#crate_name::FieldType::Any),
-                                        ::std::option::Option::None
-                                    )).into(),
-                                    static_assertion_token: quote!(
-                                        // #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #nested_vec_type);
-                                        #crate_name::validators::assert_type_eq_all!(#foreign_array_object, #field_ty);
-                                    ).into(),
-                                    // static_assertion_token:
-                                    //     quote!(#crate_name::validators::assert_type_is_array::<#ty>();).into(),
-                                }
-            },
-                // We already did for list/array/set earlier. 
                 // TODO: Consider removing the concept of list altogether to 
                 // avoid confusion/ambiguity
-                RelationType::List(_) | RelationType::None => {
+        // NOTE: Nested objects and nested arrays of objects are handled in the type path token
+                RelationType::NestArray(_) | RelationType::NestObject(_) | RelationType::List(_) | RelationType::None => {
                     return Err(syn::Error::new(
                         ty.span(),
                         format!("Could not infer type for the field. Specify explicitly by using e.g ty = \"array<any>\". You can choose from one of these types: {}", FieldType::variants().join(", ")),
@@ -526,19 +430,21 @@ impl<'a> FieldTypeInference<'a> {
         Ok(Some(meta))
     }
 
-    fn generate_nested_vec_type(
+    // TODO: Remove this
+    fn _generate_nested_vec_type(
         foreign_node: &CustomType,
         nesting_level: usize,
     ) -> proc_macro2::TokenStream {
         if nesting_level == 0 {
             quote!(#foreign_node)
         } else {
-            let inner_type = Self::generate_nested_vec_type(foreign_node, nesting_level - 1);
+            let inner_type = Self::_generate_nested_vec_type(foreign_node, nesting_level - 1);
             quote!(::std::vec::Vec<#inner_type>)
         }
     }
 
-    fn count_vec_nesting(field_type: &syn::Type) -> usize {
+    // TODO: Remove this
+    fn _count_vec_nesting(field_type: &syn::Type) -> usize {
         match field_type {
             syn::Type::Path(type_path) => {
                 if let Some(segment) = type_path.path.segments.last() {
@@ -547,7 +453,7 @@ impl<'a> FieldTypeInference<'a> {
                             if let Some(syn::GenericArgument::Type(inner_type)) =
                                 angle_args.args.first()
                             {
-                                1 + Self::count_vec_nesting(inner_type)
+                                1 + Self::_count_vec_nesting(inner_type)
                             } else {
                                 0
                             }
