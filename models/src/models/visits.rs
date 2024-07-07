@@ -48,11 +48,11 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
 
     #[serde(rename = "in", skip_serializing)]
-    #[surreal_orm(link_many = "In")]
+    #[surreal_orm(link_many = In)]
     pub in_: LinkMany<In>,
 
     #[serde(skip_serializing)]
-    #[surreal_orm(link_many = "Out")]
+    #[surreal_orm(link_many = Out)]
     // #[surreal_orm(ty = "record")]
     pub out: LinkMany<Out>,
 
