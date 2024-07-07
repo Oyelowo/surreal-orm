@@ -5,12 +5,12 @@ use surreal_orm::PartialUpdater;
 
 fn main() {
     let rocket = Rocket::partial_builder()
-        .something(907)
-        .something2(None)
+        .strength(907)
+        .name("Ye".into())
         .build();
     let x = Weapon::partial_builder()
         .name("Oyelowo".into())
-        .something(45)
+        .strength(45.0)
         .rocket(rocket)
         .build();
     // Weapon::pa
