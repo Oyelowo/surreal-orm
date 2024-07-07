@@ -78,7 +78,7 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     tags: Vec<String>,
 
     // #[surreal_orm(link_one = "Weapon", ty = "record<weapon>")]
-    #[surreal_orm(link_many = "Weapon")]
+    #[surreal_orm(link_many = Weapon)]
     weapon: LinkMany<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
