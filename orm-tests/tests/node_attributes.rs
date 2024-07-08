@@ -40,8 +40,7 @@ DEFINE FIELD home ON TABLE alien TYPE geometry<point>;
 DEFINE FIELD tags ON TABLE alien TYPE array<string>;
 DEFINE FIELD ally ON TABLE alien TYPE record<alien>;
 DEFINE FIELD weapon ON TABLE alien TYPE record<weapon>;
-DEFINE FIELD spaceShips ON TABLE alien TYPE array<record<space_ship>>;
-DEFINE FIELD planetsToVisit ON TABLE alien TYPE any;"
+DEFINE FIELD spaceShips ON TABLE alien TYPE array<record<space_ship>>;"
     );
 
     Ok(())
