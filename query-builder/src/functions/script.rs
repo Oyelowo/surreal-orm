@@ -84,10 +84,10 @@ pub fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>)
 #[macro_export]
 macro_rules! function {
     (($($arg:expr),*), {$($code:tt)*}) => {
-        $crate::functions::function_fn(vec![$($arg),*] as Vec<$crate::Param>, stringify!({$($code)*}))
+        $crate::functions::function_fn(vec![$($arg),*] as ::std::vec::Vec<$crate::Param>, stringify!({$($code)*}))
     };
     (($($arg:expr),*), $($code:tt)*) => {
-        $crate::functions::function_fn(vec![$($arg),*] as Vec<$crate::Param>, concat!($($code)*))
+        $crate::functions::function_fn(vec![$($arg),*] as ::std::vec::Vec<$crate::Param>, concat!($($code)*))
     };
 }
 pub use function;
