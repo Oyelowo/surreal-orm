@@ -28,7 +28,7 @@ fn create_test_alien(age: u8, name: String) -> Alien {
         name,
         age,
         created: Utc::now(),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,

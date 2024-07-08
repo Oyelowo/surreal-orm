@@ -23,19 +23,20 @@ impl<'a> Codegen<'a> {
 
     pub fn field_defintion_db(&self) -> ExtractorResult<Vec<DefineFieldStatementToken>> {
         let crate_name = get_crate_name(false);
-        let table_derive_attrs = self.table_derive_attributes();
+        let model_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
-        let casing = table_derive_attrs.casing()?;
+        let casing = model_attributes.casing()?;
         let db_field_name = field_receiver.db_field_name(&casing)?;
-        let field_type_in_db = field_receiver.field_type_db_original(table_derive_attrs)?;
-        let field_type_in_db_token = field_receiver.field_type_db_token(table_derive_attrs)?;
+        let field_type_in_db = field_receiver.field_type_db_original(model_attributes)?;
+        let field_type_in_db_token = field_receiver.field_type_db_token(model_attributes)?;
+        let relation_type = self.field_receiver().to_relation_type(model_attributes);
 
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
         let mut all_field_defintions: Vec<DefineFieldStatementToken> = vec![];
 
-        if let Some(define) = field_receiver.define.as_ref() {
-            quote!(#define.to_raw());
+        if !relation_type.is_relate_graph() {
+            define_field_methods.push(quote!(.type_(#field_type_in_db_token)));
         }
 
         if let Some(assert) = field_receiver.assert.as_ref() {
@@ -57,10 +58,10 @@ impl<'a> Codegen<'a> {
         let main_field_def = quote!(
             #crate_name::statements::define_field(#crate_name::Field::new(#db_field_name))
             .on_table(#crate_name::Table::from(Self::table()))
-            .type_(#field_type_in_db_token)
             #( # define_field_methods) *
             .to_raw()
         );
+
         all_field_defintions.push(main_field_def.into());
 
         if !define_array_field_item_methods.is_empty() {
@@ -75,6 +76,10 @@ impl<'a> Codegen<'a> {
             all_field_defintions.push(array_item_definition.into());
         };
 
+        if let Some(define) = field_receiver.define.as_ref() {
+            all_field_defintions.push(quote!(#define.to_raw()).into());
+        }
+
         Ok(all_field_defintions)
     }
 
@@ -83,16 +88,20 @@ impl<'a> Codegen<'a> {
         model_attrs: &ModelAttributes,
     ) -> ExtractorResult<StaticAssertionToken> {
         let field_receiver = self.field_receiver();
-        let field_type = field_receiver.field_type_db_original(model_attrs)?.into_inner();
+        let field_type = field_receiver.field_type_db_original(model_attrs)?;
 
-        let static_assertion = field_receiver
-            .value
-            .as_ref()
-            .map_or(StaticAssertionToken::default(), |v| {
-                v.get_default_value_static_assertion(field_type)
-            });
-
-        Ok(static_assertion)
+        match field_type {
+            Some(field_type) => {
+                let static_assertion = field_receiver
+                    .value
+                    .as_ref()
+                    .map_or(StaticAssertionToken::default(), |v| {
+                        v.get_default_value_static_assertion(field_type.into_inner())
+                    });
+                Ok(static_assertion)
+            }
+            None => Ok(StaticAssertionToken::default()),
+        }
     }
 
     fn validate_field_attributes(&self) -> ExtractorResult<()> {

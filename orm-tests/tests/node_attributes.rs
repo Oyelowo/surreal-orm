@@ -34,13 +34,14 @@ DEFINE FIELD name ON TABLE alien TYPE string;
 DEFINE FIELD age ON TABLE alien TYPE int;
 DEFINE FIELD created ON TABLE alien TYPE datetime;
 DEFINE FIELD lifeExpectancy ON TABLE alien TYPE duration;
-DEFINE FIELD linePolygon ON TABLE alien TYPE geometry<feature>;
-DEFINE FIELD territoryArea ON TABLE alien TYPE geometry<feature>;
-DEFINE FIELD home ON TABLE alien TYPE geometry<feature>;
+DEFINE FIELD lineString ON TABLE alien TYPE geometry<LineString>;
+DEFINE FIELD territoryArea ON TABLE alien TYPE geometry<polygon>;
+DEFINE FIELD home ON TABLE alien TYPE geometry<point>;
 DEFINE FIELD tags ON TABLE alien TYPE array<string>;
 DEFINE FIELD ally ON TABLE alien TYPE record<alien>;
 DEFINE FIELD weapon ON TABLE alien TYPE record<weapon>;
-DEFINE FIELD spaceShips ON TABLE alien TYPE array<record<space_ship>>;"
+DEFINE FIELD spaceShips ON TABLE alien TYPE array<record<space_ship>>;
+DEFINE FIELD planetsToVisit ON TABLE alien TYPE any;"
     );
 
     Ok(())
