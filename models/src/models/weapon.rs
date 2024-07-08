@@ -93,9 +93,9 @@ pub struct Account {
 #[surreal_orm(table = balance)]
 pub struct Balance {
     pub id: SurrealId<Self, String>,
-    #[surreal_orm(ty = "string")]
-    pub amount: &'static str,
-    // pub amount: Option<f64>,
+    // #[surreal_orm(ty = "string")]
+    // pub amount: &'static str,
+    pub amount: f64,
 }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
