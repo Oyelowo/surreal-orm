@@ -105,7 +105,7 @@ pub fn assert_value_is_number<T: Num>(_value: T) {}
 /// # Example
 /// ```
 /// # use surreal_query_builder as surreal_orm;
-/// # use surreal_orm::assert_type_is_int;
+/// # use surreal_orm::validators::assert_type_is_int;
 /// assert_type_is_int::<i8>();
 /// assert_type_is_int::<i16>();
 /// assert_type_is_int::<i32>();
@@ -120,7 +120,7 @@ pub fn assert_type_is_int<T: Int>() {}
 /// # Example
 /// ```
 /// # use surreal_query_builder as surreal_orm;
-/// # use surreal_orm::assert_value_is_int;
+/// # use surreal_orm::validators::assert_value_is_int;
 /// assert_value_is_int(1);
 /// assert_value_is_int(1u8);
 /// assert_value_is_int(1u16);
@@ -261,7 +261,7 @@ impl<T> IsVec for &Vec<T> {}
 /// # Example
 /// ```
 /// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::validators::assert_is_vec;
+/// use surreal_orm::validators::assert_type_is_vec;
 /// assert_type_is_vec::<Vec<i8>>();
 /// assert_type_is_vec::<Vec<String>>();
 /// assert_type_is_vec::<Vec<i32>>();
@@ -419,7 +419,8 @@ pub fn assert_type_is_bytes<T: IsBytes>() {
 /// ```
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::validators::assert_value_is_bytes;
-/// assert_value_is_bytes(crate::sql::Bytes::from("Hello, World!"));
+/// use surreal_orm::sql;
+/// assert_value_is_bytes(sql::Bytes::from(b"Hello, World!"));
 /// ```
 pub fn assert_value_is_bytes<T: IsBytes>(_value: T) {}
 
@@ -454,7 +455,8 @@ impl<T: Into<crate::sql::Geometry>> IsGeometry for T {}
 /// ```
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::validators::assert_type_is_geometry;
-/// assert_type_is_geometry::<crate::sql::Geometry>();
+/// use surreal_orm::sql;
+/// assert_type_is_geometry::<sql::Geometry>();
 /// ```
 pub fn assert_type_is_geometry<T: IsGeometry>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
@@ -473,7 +475,8 @@ impl<T> IsAny for T where T: crate::serde::Serialize {}
 /// ```
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::validators::assert_type_is_any;
-/// assert_type_is_any::<crate::sql::Any>();
+/// use surreal_orm::sql;
+/// assert_type_is_any::<sql::Value>();
 /// ```
 pub fn assert_type_is_any<T: IsAny>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
