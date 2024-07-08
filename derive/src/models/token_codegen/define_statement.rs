@@ -22,22 +22,22 @@ impl<'a> Codegen<'a> {
     }
 
     pub fn field_defintion_db(&self) -> ExtractorResult<Vec<DefineFieldStatementToken>> {
-        let crate_name = get_crate_name(false);
-        let model_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
+        let model_attributes = self.table_derive_attributes();
+        let relation_type = field_receiver.to_relation_type(model_attributes);
+        if relation_type.is_relate_graph() {
+            return Ok(vec![]);
+        }
+
+        let crate_name = get_crate_name(false);
         let casing = model_attributes.casing()?;
         let db_field_name = field_receiver.db_field_name(&casing)?;
         let field_type_in_db = field_receiver.field_type_db_original(model_attributes)?;
         let field_type_in_db_token = field_receiver.field_type_db_token(model_attributes)?;
-        let relation_type = self.field_receiver().to_relation_type(model_attributes);
 
         let mut define_field_methods = vec![];
         let mut define_array_field_item_methods = vec![];
         let mut all_field_defintions: Vec<DefineFieldStatementToken> = vec![];
-
-        if !relation_type.is_relate_graph() {
-            define_field_methods.push(quote!(.type_(#field_type_in_db_token)));
-        }
 
         if let Some(assert) = field_receiver.assert.as_ref() {
             define_field_methods.push(quote!(.assert(#assert)));
@@ -58,6 +58,7 @@ impl<'a> Codegen<'a> {
         let main_field_def = quote!(
             #crate_name::statements::define_field(#crate_name::Field::new(#db_field_name))
             .on_table(#crate_name::Table::from(Self::table()))
+            .type_(#field_type_in_db_token)
             #( # define_field_methods) *
             .to_raw()
         );
