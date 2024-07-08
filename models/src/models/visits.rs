@@ -78,8 +78,8 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     tags: Vec<String>,
 
     // #[surreal_orm(link_one = "Weapon", ty = "record<weapon>")]
-    #[surreal_orm(link_many = Weapon)]
-    weapon: LinkMany<Weapon>,
+    #[surreal_orm(link_one = Weapon)]
+    weapon: LinkOne<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
     // #[surreal_orm(link_many = "SpaceShip", ty = "array<record<space_ship>>")]
@@ -97,40 +97,37 @@ where
     Out: Node,
 {
     pub id: SurrealSimpleId<Self>,
-    // pub id: SurrealSimpleId<Self>,
-    #[serde(skip_serializing)]
-    #[surreal_orm(link_many = "In")]
+    #[surreal_orm(link_many = In)]
     pub r#in: LinkMany<In>,
 
-    #[serde(skip_serializing)]
-    #[surreal_orm(link_many = "Out")]
+    #[surreal_orm(link_many = Out)]
     pub out: LinkMany<Out>,
-    pub name: String,
-    pub hair_color: Option<&'static str>,
+    pub hair_color: Option<String>,
+
     #[surreal_orm(ty = "duration")]
     pub time_visited: Duration,
+
     #[surreal_orm(link_one = "Planet<u64>")]
     pub mana: LinkOne<Planet<u64>>,
-    // pub age: &'a u8,
-    // pub zdf: &'static u8,
-    // pub zdf: &'static str,
-    // pub name: &'a String,
-    // pub name2: &'a str,
-    // pub created: DateTime<Utc>,
-    // pub life_expectancy: Duration,
-    // pub line_polygon: geo::LineString,
-    // pub territory_area: geo::Polygon,
-    // pub home: geo::Point,
-    // pub tags: Vec<String>,
-    // #[surreal_orm(link_one = "Weapon")]
-    // pub weapon: LinkOne<Weapon>,
+    pub name: String,
+    pub age: u8,
+    pub created: DateTime<Utc>,
+    pub life_expectancy: Duration,
+    pub line_polygon: geo::LineString,
+    pub territory_area: geo::Polygon,
+    pub home: geo::Point,
+    pub tags: Vec<String>,
+    #[surreal_orm(link_one = "Weapon")]
+    pub weapon: LinkOne<Weapon>,
     // Again, we dont have to provide the type attribute, it can auto detect
-    // #[surreal_orm(link_many = "SpaceShip")]
-    // pub space_ships: LinkMany<SpaceShip>,
-    // This is a read only field
-    // #[surreal_orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
+    #[surreal_orm(link_many = "SpaceShip")]
+    pub space_ships: LinkMany<SpaceShip>,
+        //
+        // TODO:: Prevent doing this at compile time
+    // This is a read only field. This wouldnt make sense. as we are using in node also as edge.
+        // e.g visit->visit->plant
+    // #[surreal_orm(relate(model = "VistVisitsPlanet", connection = "->visits->planet"))]
     // #[serde(skip_serializing, default)]
-    // pub planets_to_visit: Relate<Planet<u64>>,
+    // pub visit_to_planet: Relate<Planet<u64>>,
 }
-
 

@@ -181,7 +181,11 @@ impl<'a> Codegen<'a> {
 
     fn create_static_assertions(&self, relate: &Relate) -> ExtractorResult<StaticAssertionToken> {
         let crate_name = get_crate_name(false);
-        let current_struct = &self.table_derive_attributes().ident();
+        let model_attributes = &self.table_derive_attributes();
+        let current_struct_ident = &model_attributes.ident();
+        let current_struct_generics = model_attributes.generics();
+        let (_struct_impl_generics, struct_ty_generics, _struct_where_clause) =
+            current_struct_generics.split_for_impl();
         let field_receiver = self.field_receiver();
         let field_type = &field_receiver.ty();
         let edge_type = &relate.edge_type;
@@ -215,7 +219,7 @@ impl<'a> Codegen<'a> {
             quote!(
                 {
                      // #crate_name::validators::assert_fields!(<#home_node_type as #crate_name::Node>::TableNameChecker: #origin_node_table);
-                     #crate_name::validators::assert_type_eq_all!(#home_node_type, #current_struct);
+                     #crate_name::validators::assert_type_eq_all!(#home_node_type, #current_struct_ident #struct_ty_generics);
                      #crate_name::validators::assert_impl_one!(<#edge_type as #crate_name::Edge>::#home_node_associated_type_ident: #crate_name::Node);
                 }
             ),
@@ -477,12 +481,11 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
                 edge_types,
             );
 
-        let binding = match aggregated_edge_type.get_generics_from_current_struct(table_derive_attributes) {
-            Ok(binding) => binding,
-            Err(err) => return tokens.extend(err.write_errors()),
-        };
-
-
+        let binding =
+            match aggregated_edge_type.get_generics_from_current_struct(table_derive_attributes) {
+                Ok(binding) => binding,
+                Err(err) => return tokens.extend(err.write_errors()),
+            };
 
         let (edge_type_impl_generics, edge_type_ty_generics, edge_type_where_clause) =
             binding.split_for_impl();

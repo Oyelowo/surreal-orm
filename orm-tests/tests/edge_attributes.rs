@@ -29,14 +29,14 @@ async fn test_node_atttributes_auto_inferred() -> SurrealOrmResult<()> {
             .collect::<Vec<_>>()
             .join("\n"),
         "DEFINE FIELD id ON TABLE visits TYPE record<visits>;
-DEFINE FIELD in ON TABLE visits TYPE record<any>;
-DEFINE FIELD out ON TABLE visits TYPE record<any>;
+DEFINE FIELD in ON TABLE visits TYPE array<record<any>>;
+DEFINE FIELD out ON TABLE visits TYPE array<record<any>>;
 DEFINE FIELD timeVisited ON TABLE visits TYPE duration;
 DEFINE FIELD age ON TABLE visits TYPE int;
 DEFINE FIELD created ON TABLE visits TYPE datetime;
 DEFINE FIELD lifeExpectancy ON TABLE visits TYPE duration;
 DEFINE FIELD linePolygon ON TABLE visits TYPE geometry<feature>;
-DEFINE FIELD territoryArea ON TABLE visits TYPE geometry<feature>;
+DEFINE FIELD territoryArea ON TABLE visits TYPE geometry<polygon>;
 DEFINE FIELD home ON TABLE visits TYPE geometry<feature>;
 DEFINE FIELD tags ON TABLE visits TYPE array<string>;
 DEFINE FIELD weapon ON TABLE visits TYPE record<weapon>;
@@ -62,8 +62,8 @@ async fn test_node_atttributes_explicit() -> SurrealOrmResult<()> {
             .collect::<Vec<_>>()
             .join("\n"),
         "DEFINE FIELD id ON TABLE visits_explicit TYPE record<visits_explicit>;
-DEFINE FIELD in ON TABLE visits_explicit TYPE record<any>;
-DEFINE FIELD out ON TABLE visits_explicit TYPE record<any>;
+DEFINE FIELD in ON TABLE visits_explicit TYPE array<record<any>>;
+DEFINE FIELD out ON TABLE visits_explicit TYPE array<record<any>>;
 DEFINE FIELD timeVisited ON TABLE visits_explicit TYPE duration;"
     );
 
