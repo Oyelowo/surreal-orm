@@ -23,6 +23,7 @@ pub enum Reference<V: Model> {
     FetchedValue(V),
     /// null if foreign node does not exist
     Null,
+    // None,
 }
 
 impl<V> Reference<V>
@@ -72,7 +73,7 @@ impl<V: Node> Default for Reference<V> {
 
 macro_rules! implement_deref_for_link {
     ($reference_ty:ty; $target:ty) => {
-        impl<V: Node> std::ops::Deref for $reference_ty {
+        impl<V: Node> ::std::ops::Deref for $reference_ty {
             type Target = $target;
 
             fn deref(&self) -> &Self::Target {
@@ -80,7 +81,7 @@ macro_rules! implement_deref_for_link {
             }
         }
 
-        impl<V: Node> std::ops::DerefMut for $reference_ty {
+        impl<V: Node> ::std::ops::DerefMut for $reference_ty {
             fn deref_mut(&mut self) -> &mut Self::Target {
                 &mut self.0
             }
