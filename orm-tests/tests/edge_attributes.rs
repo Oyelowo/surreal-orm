@@ -31,13 +31,29 @@ async fn test_node_atttributes_auto_inferred() -> SurrealOrmResult<()> {
         "DEFINE FIELD id ON TABLE visits TYPE record<visits>;
 DEFINE FIELD in ON TABLE visits TYPE array<record<any>>;
 DEFINE FIELD out ON TABLE visits TYPE array<record<any>>;
+DEFINE FIELD hairColor ON TABLE visits TYPE option<string>;
 DEFINE FIELD timeVisited ON TABLE visits TYPE duration;
+DEFINE FIELD mana ON TABLE visits TYPE record<planet>;
+DEFINE FIELD name ON TABLE visits TYPE string;
 DEFINE FIELD age ON TABLE visits TYPE int;
 DEFINE FIELD created ON TABLE visits TYPE datetime;
 DEFINE FIELD lifeExpectancy ON TABLE visits TYPE duration;
-DEFINE FIELD linePolygon ON TABLE visits TYPE geometry<feature>;
+DEFINE FIELD lineString ON TABLE visits TYPE geometry<LineString>;
+DEFINE FIELD multiLineString ON TABLE visits TYPE geometry<multiline>;
+DEFINE FIELD polygon ON TABLE visits TYPE geometry<polygon>;
+DEFINE FIELD multiPolygon ON TABLE visits TYPE geometry<multipolygon>;
+DEFINE FIELD point ON TABLE visits TYPE geometry<point>;
+DEFINE FIELD multiPoint ON TABLE visits TYPE geometry<multipoint>;
+DEFINE FIELD geometryCollection ON TABLE visits TYPE geometry<feature>;
 DEFINE FIELD territoryArea ON TABLE visits TYPE geometry<polygon>;
-DEFINE FIELD home ON TABLE visits TYPE geometry<feature>;
+DEFINE FIELD home ON TABLE visits TYPE geometry<point>;
+DEFINE FIELD pointExplicit ON TABLE visits TYPE geometry<point>;
+DEFINE FIELD multiPointExplicit ON TABLE visits TYPE geometry<multipoint>;
+DEFINE FIELD lineStringExplicit ON TABLE visits TYPE geometry<LineString>;
+DEFINE FIELD multiLineStringExplicit ON TABLE visits TYPE geometry<multiline>;
+DEFINE FIELD polygonExplicit ON TABLE visits TYPE geometry<polygon>;
+DEFINE FIELD multiPolygonExplicit ON TABLE visits TYPE geometry<multipolygon>;
+DEFINE FIELD geometryCollectionExplicit ON TABLE visits TYPE geometry<feature>;
 DEFINE FIELD tags ON TABLE visits TYPE array<string>;
 DEFINE FIELD weapon ON TABLE visits TYPE record<weapon>;
 DEFINE FIELD spaceShips ON TABLE visits TYPE array<record<space_ship>>;"
@@ -88,8 +104,8 @@ async fn test_node_type_atttribute_explicit() -> SurrealOrmResult<()> {
             .collect::<Vec<_>>()
             .join("\n"),
         "DEFINE FIELD id ON TABLE visits_with_explicit_attributes TYPE record<visits_with_explicit_attributes>;
-DEFINE FIELD in ON TABLE visits_with_explicit_attributes TYPE record<any>;
-DEFINE FIELD out ON TABLE visits_with_explicit_attributes TYPE record<any>;
+DEFINE FIELD in ON TABLE visits_with_explicit_attributes TYPE array<record<any>>;
+DEFINE FIELD out ON TABLE visits_with_explicit_attributes TYPE array<record<any>>;
 DEFINE FIELD name ON TABLE visits_with_explicit_attributes TYPE string;
 DEFINE FIELD age ON TABLE visits_with_explicit_attributes TYPE int;
 DEFINE FIELD created ON TABLE visits_with_explicit_attributes TYPE datetime;
