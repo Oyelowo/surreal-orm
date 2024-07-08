@@ -234,7 +234,7 @@ macro_rules! impl_utils_for_ref_vec {
         impl<V: Node> $ref_vec<V> {
             /// Returns an empty vector
             pub fn null() -> Self {
-                $ref_vec(vec![])
+                $ref_vec(::std::vec![])
             }
 
             /// Returns the number of values that are fetched and available and not null
@@ -246,7 +246,7 @@ macro_rules! impl_utils_for_ref_vec {
             }
 
             /// Returns the values that are fetched and available and not null
-            pub fn values_truthy(&self) -> Vec<&V> {
+            pub fn values_truthy(&self) -> ::std::vec::Vec<&V> {
                 self.0
                     .iter()
                     // .filter(|m| matches!(m, Reference::FetchedValue(_)))
@@ -255,7 +255,7 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(_) => None,
                         Reference::Null => None,
                     })
-                    .collect::<Vec<_>>()
+                    .collect::<::std::vec::Vec<_>>()
             }
 
             /// Returns just the fully fetched values if fetched and available, otherwise, None
@@ -267,11 +267,11 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(_) => None,
                         Reference::Null => None,
                     })
-                    .collect::<Vec<Option<&V>>>()
+                    .collect::<::std::vec::Vec<::std::option::Option<&V>>>()
             }
 
             /// Returns just the keys of the foreign field. Some links may not exist
-            pub fn keys(&self) -> Vec<Option<sql::Thing>> {
+            pub fn keys(&self) -> ::std::vec::Vec<::std::option::Option<sql::Thing>> {
                 self.0
                     .iter()
                     .map(|m| match m {
@@ -281,13 +281,13 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(id) => Some(id.to_owned()),
                         Reference::Null => None,
                     })
-                    .collect::<Vec<Option<sql::Thing>>>()
+                    .collect::<::std::vec::Vec<::std::option::Option<sql::Thing>>>()
             }
 
             /// Returns only the keys that are non-None ids.
             /// It does not check if the ids actually exist in the
             /// foreign table.
-            pub fn keys_truthy(&self) -> Vec<sql::Thing> {
+            pub fn keys_truthy(&self) -> ::std::vec::Vec<sql::Thing> {
                 self.0
                     .iter()
                     .filter_map(|m| match m {
@@ -297,12 +297,12 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(id) => Some(id.to_owned()),
                         Reference::Null => None,
                     })
-                    .collect::<Vec<_>>()
+                    .collect::<::std::vec::Vec<_>>()
             }
 
             /// Returns only the keys that exist if foreign links are fetched
             /// and available.
-            pub fn keys_checked(&self) -> Vec<sql::Thing> {
+            pub fn keys_checked(&self) -> ::std::vec::Vec<sql::Thing> {
                 self.0
                     .iter()
                     .filter_map(|m| match m {
@@ -312,7 +312,7 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(_id) => None,
                         Reference::Null => None,
                     })
-                    .collect::<Vec<_>>()
+                    .collect::<::std::vec::Vec<_>>()
             }
         }
     };
