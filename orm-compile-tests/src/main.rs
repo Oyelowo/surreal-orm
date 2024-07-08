@@ -17,7 +17,7 @@
 mod check1 {
     use surreal_orm_compile_tests::*;
 
-    #[derive(Node, Serialize, Deserialize)]
+    #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(table = student)]
     pub struct Student {
@@ -31,7 +31,7 @@ mod check2 {
 
     use surreal_orm_compile_tests::*;
 
-    #[derive(Node, Serialize, Deserialize)]
+    #[derive(Node, Serialize, Deserialize, Clone, Debug)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(table = student)]
     pub struct Student {
@@ -45,7 +45,7 @@ mod check3 {
 
     use surreal_orm_compile_tests::*;
 
-    #[derive(Node, Serialize, Deserialize)]
+    #[derive(Node, Serialize, Deserialize, Clone, Debug)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(table = student)]
     pub struct Student {
@@ -79,3 +79,5 @@ mod check3 {
 fn main() {
     println!("Hello, world!");
 }
+
+
