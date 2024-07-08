@@ -420,7 +420,7 @@ pub fn assert_type_is_bytes<T: IsBytes>() {
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::validators::assert_value_is_bytes;
 /// use surreal_orm::sql;
-/// assert_value_is_bytes(sql::Bytes::from(b"Hello, World!"));
+/// assert_value_is_bytes(sql::Bytes::from(vec![1, 2, 3]));
 /// ```
 pub fn assert_value_is_bytes<T: IsBytes>(_value: T) {}
 
