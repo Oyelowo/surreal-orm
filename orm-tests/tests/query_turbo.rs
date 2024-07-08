@@ -251,7 +251,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let account = Account::table();
+    let ref account = Account::table();
     let id1 = &Account::create_id("one".to_string());
     let id2 = &Account::create_id("two".to_string());
     let amount_to_transfer = 300.00;
