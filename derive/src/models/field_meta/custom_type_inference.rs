@@ -6,7 +6,7 @@
 */
 
 use proc_macros_helpers::get_crate_name;
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{self, spanned::Spanned, Expr};
 
@@ -226,11 +226,17 @@ impl<'a> FieldTypeInference<'a> {
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_datetime::<#ty>();).into(),
             }
-        } else if field_ty.raw_type_is_geometry() {
+        } 
+        // else if field_ty.raw_type_is_geometry() {
+        else if let Some(geo_kind) = field_ty.raw_type_geometry_kind() {
+            // We are intentionally using debug string representation of the geometry kind
+            let geo_kind_name_from_debug_print = format!("{:?}", &geo_kind);
+            let geo_kind_ident = format_ident!("{geo_kind_name_from_debug_print}");
+            
+
             DbFieldTypeAstMeta {
-                // TODO: check if to auto-infer more speicific geometry type?
-                field_type_db_original: FieldType::Geometry(vec![]),
-                field_type_db_token: quote!(#crate_name::FieldType::Geometry(::std::vec![])).into(),
+                field_type_db_original: FieldType::Geometry(vec![geo_kind]),
+                field_type_db_token: quote!(#crate_name::FieldType::Geometry(::std::vec![#crate_name::GeometryType::#geo_kind_ident])).into(),
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_geometry::<#ty>();).into(),
             }

@@ -77,11 +77,11 @@ pub enum GeometryType {
     /// Define a field with polygon geometric type
     Polygon,
     /// Define a field with multipoint geometric type
-    Multipoint,
+    MultiPoint,
     /// Define a field with multiline geometric type
-    Multiline,
+    MultiLine,
     /// Define a field with multpipolygon geometric type
-    Multipolygon,
+    MultiPolygon,
     /// Define a field with collection of geometry types
     Collection,
 }
@@ -95,9 +95,9 @@ impl FromStr for GeometryType {
             "point" => Ok(Self::Point),
             "LineString" => Ok(Self::LineString),
             "polygon" => Ok(Self::Polygon),
-            "multipoint" => Ok(Self::Multipoint),
-            "multiline" => Ok(Self::Multiline),
-            "multipolygon" => Ok(Self::Multipolygon),
+            "multipoint" => Ok(Self::MultiPoint),
+            "multiline" => Ok(Self::MultiLine),
+            "multipolygon" => Ok(Self::MultiPolygon),
             "collection" => Ok(Self::Collection),
             _ => Err(format!("Invalid geometry type: {}", s)),
         }
@@ -111,9 +111,9 @@ impl Display for GeometryType {
             GeometryType::Point => "point",
             GeometryType::LineString => "LineString",
             GeometryType::Polygon => "polygon",
-            GeometryType::Multipoint => "multipoint",
-            GeometryType::Multiline => "multiline",
-            GeometryType::Multipolygon => "multipolygon",
+            GeometryType::MultiPoint => "multipoint",
+            GeometryType::MultiLine => "multiline",
+            GeometryType::MultiPolygon => "multipolygon",
             GeometryType::Collection => "collection",
         };
         write!(f, "{}", geom)
@@ -593,9 +593,9 @@ fn parse_simple_geom(input: &str) -> IResult<&str, GeometryType> {
         tag("point").map(|_| GeometryType::Point),
         tag("LineString").map(|_| GeometryType::LineString),
         tag("polygon").map(|_| GeometryType::Polygon),
-        tag("multipoint").map(|_| GeometryType::Multipoint),
-        tag("multiline").map(|_| GeometryType::Multiline),
-        tag("multipolygon").map(|_| GeometryType::Multipolygon),
+        tag("multipoint").map(|_| GeometryType::MultiPoint),
+        tag("multiline").map(|_| GeometryType::MultiLine),
+        tag("multipolygon").map(|_| GeometryType::MultiPolygon),
         tag("collection").map(|_| GeometryType::Collection),
     ))(input)
 }
@@ -744,7 +744,7 @@ mod tests {
         FieldType::Geometry(vec![
             GeometryType::Collection,
             GeometryType::Point,
-            GeometryType::Multipolygon,
+            GeometryType::MultiPolygon,
             GeometryType::LineString,
             GeometryType::Polygon
         ])
@@ -834,7 +834,7 @@ mod tests {
         FieldType::Option(Box::new(FieldType::Geometry(vec![
             GeometryType::Collection,
             GeometryType::Point,
-            GeometryType::Multipolygon,
+            GeometryType::MultiPolygon,
             GeometryType::LineString,
             GeometryType::Polygon
         ])))
@@ -950,7 +950,7 @@ mod tests {
             Box::new(FieldType::Geometry(vec![
                 GeometryType::Point,
                 GeometryType::Polygon,
-                GeometryType::Multipolygon
+                GeometryType::MultiPolygon
             ])),
             Some(10)
         )
@@ -992,7 +992,7 @@ mod tests {
             Box::new(FieldType::Geometry(vec![
                 GeometryType::Point,
                 GeometryType::Polygon,
-                GeometryType::Multipolygon
+                GeometryType::MultiPolygon
             ])),
             Some(10)
         )
