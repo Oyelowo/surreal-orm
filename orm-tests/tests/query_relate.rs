@@ -73,10 +73,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().r#in.get_id().unwrap().to_string(),
+        result.clone().r#in.keys_truthy().first().unwrap().to_string(),
         "student:⟨1⟩"
     );
-    assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨2⟩");
+    assert_eq!(result.clone().out.keys_truthy().first().unwrap().to_string(), "book:⟨2⟩");
     let id = serde_json::to_string(&result.clone().id).unwrap();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
@@ -97,10 +97,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().r#in.get_id().unwrap().to_string(),
+        result.clone().r#in.keys_truthy().first().unwrap().to_string(),
         "student:⟨2⟩"
     );
-    assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨1⟩");
+    assert_eq!(result.clone().out.keys_truthy().first().unwrap().to_string(), "book:⟨1⟩");
     let id = &result.clone().id.to_string();
     assert_eq!(
         sql::to_value(&result).unwrap().to_string(),
@@ -137,11 +137,11 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
         .starts_with("writes:"));
 
     assert_eq!(
-        result.clone().unwrap().r#in.get_id().unwrap().to_string(),
+        result.clone().unwrap().r#in.keys_truthy().first().unwrap().to_string(),
         "student:⟨2⟩"
     );
     assert_eq!(
-        result.clone().unwrap().out.get_id().unwrap().to_string(),
+        result.clone().unwrap().out.keys_truthy().first().unwrap().to_string(),
         "blog:⟨1⟩"
     );
     let id = result.clone().unwrap().id.to_string();
@@ -160,16 +160,16 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
 
     assert_eq!(result.len(), 3);
     assert_eq!(result[0].time_written, Duration::from_secs(47));
-    assert_eq!(result[0].r#in.get_id().unwrap().to_string(), "student:⟨2⟩");
-    assert_eq!(result[0].out.get_id().unwrap().to_string(), "blog:⟨1⟩");
+    assert_eq!(result[0].r#in.keys_truthy().first().unwrap().to_string(), "student:⟨2⟩");
+    assert_eq!(result[0].out.keys_truthy().first().unwrap().to_string(), "blog:⟨1⟩");
 
     assert_eq!(result[1].time_written, Duration::from_secs(343));
-    assert_eq!(result[1].r#in.get_id().unwrap().to_string(), "student:⟨1⟩");
-    assert_eq!(result[1].out.get_id().unwrap().to_string(), "book:⟨2⟩");
+    assert_eq!(result[1].r#in.keys_truthy().first().unwrap().to_string(), "student:⟨1⟩");
+    assert_eq!(result[1].out.keys_truthy().first().unwrap().to_string(), "book:⟨2⟩");
 
     assert_eq!(result[2].time_written, Duration::from_secs(923));
-    assert_eq!(result[2].r#in.get_id().unwrap().to_string(), "student:⟨2⟩");
-    assert_eq!(result[2].out.get_id().unwrap().to_string(), "book:⟨1⟩");
+    assert_eq!(result[2].r#in.keys_truthy().first().unwrap().to_string(), "student:⟨2⟩");
+    assert_eq!(result[2].out.keys_truthy().first().unwrap().to_string(), "book:⟨1⟩");
 
     Ok(())
 }
@@ -272,11 +272,11 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
         .await?;
     assert_eq!(result.len(), 12);
     assert_eq!(result[0].time.connected, dt);
-    assert_eq!(result[0].r#in.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[1].r#in.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[2].r#in.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[5].r#in.get_id().unwrap().to_string(), "user:user1");
-    assert_eq!(result[6].r#in.get_id().unwrap().to_string(), "user:user0");
+    assert_eq!(result[0].r#in.keys_truthy().first().unwrap().to_string(), "user:user1");
+    assert_eq!(result[1].r#in.keys_truthy().first().unwrap().to_string(), "user:user1");
+    assert_eq!(result[2].r#in.keys_truthy().first().unwrap().to_string(), "user:user1");
+    assert_eq!(result[5].r#in.keys_truthy().first().unwrap().to_string(), "user:user1");
+    assert_eq!(result[6].r#in.keys_truthy().first().unwrap().to_string(), "user:user0");
 
     Ok(())
 }
@@ -428,7 +428,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
             .clone()
             .unwrap()
             .r#in  
-            .get_id()
+            .keys_truthy().first()
             .unwrap()
             .to_string(),
         "student:oyelowo"
@@ -438,7 +438,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
         relate_simple_object
             .unwrap()
             .out
-            .get_id()
+            .keys_truthy().first()
             .unwrap()
             .to_string(),
         "book:kivi"
@@ -454,7 +454,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
         relate_simple_array[0]
             .clone()
             .r#in  
-            .get_id()
+            .keys_truthy().first()
             .unwrap()
             .to_string(),
         "student:oyelowo"
@@ -463,7 +463,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
         relate_simple_array[0]
             .clone()
             .out
-            .get_id()
+            .keys_truthy().first()
             .unwrap()
             .to_string(),
         "book:kivi"
