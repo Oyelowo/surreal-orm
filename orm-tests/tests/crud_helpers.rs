@@ -30,17 +30,16 @@ async fn test_create() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ss_id = SpaceShip::create_id(format!("num-{}", 1));
-    let spaceship = SpaceShip {
+    let ss_id = SpaceShip::create_id("num-1".into());
+    let spaceship_instance =|| SpaceShip {
         id: ss_id.clone(),
-        name: format!("spaceship-{}", 1),
+        name: "spaceship-1".into(),
         created: chrono::Utc::now(),
     };
 
-    let spaceship = spaceship.create().get_one(db.clone()).await?;
+    let spaceship = spaceship_instance().create().get_one(db.clone()).await?;
     // Second attempt should fail since it will be duplicate.
-    spaceship
-        .clone()
+    spaceship_instance()
         .create()
         .get_one(db.clone())
         .await
