@@ -73,7 +73,7 @@ pub enum GeometryType {
     /// Define a field with point geometric type
     Point,
     /// Define a field with line geometric type
-    Line,
+    LineString,
     /// Define a field with polygon geometric type
     Polygon,
     /// Define a field with multipoint geometric type
@@ -93,7 +93,7 @@ impl FromStr for GeometryType {
         match s {
             "feature" => Ok(Self::Feature),
             "point" => Ok(Self::Point),
-            "line" => Ok(Self::Line),
+            "LineString" => Ok(Self::LineString),
             "polygon" => Ok(Self::Polygon),
             "multipoint" => Ok(Self::Multipoint),
             "multiline" => Ok(Self::Multiline),
@@ -109,7 +109,7 @@ impl Display for GeometryType {
         let geom = match self {
             GeometryType::Feature => "feature",
             GeometryType::Point => "point",
-            GeometryType::Line => "line",
+            GeometryType::LineString => "LineString",
             GeometryType::Polygon => "polygon",
             GeometryType::Multipoint => "multipoint",
             GeometryType::Multiline => "multiline",
@@ -591,7 +591,7 @@ fn parse_simple_geom(input: &str) -> IResult<&str, GeometryType> {
     alt((
         tag("feature").map(|_| GeometryType::Feature),
         tag("point").map(|_| GeometryType::Point),
-        tag("line").map(|_| GeometryType::Line),
+        tag("LineString").map(|_| GeometryType::LineString),
         tag("polygon").map(|_| GeometryType::Polygon),
         tag("multipoint").map(|_| GeometryType::Multipoint),
         tag("multiline").map(|_| GeometryType::Multiline),
@@ -733,7 +733,7 @@ mod tests {
         "geometry    < point | line  |     polygon>",
         FieldType::Geometry(vec![
             GeometryType::Point,
-            GeometryType::Line,
+            GeometryType::LineString,
             GeometryType::Polygon
         ])
     );
@@ -745,7 +745,7 @@ mod tests {
             GeometryType::Collection,
             GeometryType::Point,
             GeometryType::Multipolygon,
-            GeometryType::Line,
+            GeometryType::LineString,
             GeometryType::Polygon
         ])
     );
@@ -824,7 +824,7 @@ mod tests {
         "option<geometry    < point | line  |     polygon>>",
         FieldType::Option(Box::new(FieldType::Geometry(vec![
             GeometryType::Point,
-            GeometryType::Line,
+            GeometryType::LineString,
             GeometryType::Polygon
         ])))
     );
@@ -835,7 +835,7 @@ mod tests {
             GeometryType::Collection,
             GeometryType::Point,
             GeometryType::Multipolygon,
-            GeometryType::Line,
+            GeometryType::LineString,
             GeometryType::Polygon
         ])))
     );
