@@ -41,7 +41,7 @@ migration-embedded = { path = "examples/migration-embedded" }
 migration-cli = { path = "examples/migration-cli" }
 migration-simple = { path = "examples/migration-simple" }
 
-surrealdb = { version = "1.2.0", features = [
+surrealdb = { version = "1.5.3", features = [
   "protocol-ws",
   "protocol-http",
   "kv-mem",
