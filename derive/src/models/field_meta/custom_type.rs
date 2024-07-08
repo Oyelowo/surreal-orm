@@ -11,7 +11,7 @@ use darling::FromMeta;
 use proc_macro::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
-use surreal_query_builder::FieldType;
+use surreal_query_builder::{FieldType, GeometryType};
 use syn::{
     self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, Expr, GenericArgument,
     Ident, Lifetime, Path, PathArguments, Token, Type, TypeReference,
@@ -690,11 +690,39 @@ impl CustomType {
                     || last_seg.ident == "Polygon"
                     || last_seg.ident == "MultiPoint"
                     || last_seg.ident == "MultiLineString"
+                    || last_seg.ident == "MultiLine"
                     || last_seg.ident == "MultiPolygon"
                     || last_seg.ident == "GeometryCollection"
             }
             syn::Type::Array(_) => true,
             _ => false,
+        }
+    }
+
+    pub fn raw_type_geometry_kind(&self) -> Option<GeometryType> {
+        let ty = &self.into_inner_ref();
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
+                let kind = last_seg.ident.to_string().to_lowercase();
+
+                match kind.as_str() {
+                    "point" => Some(GeometryType::Point),
+                    "linestring" => Some(GeometryType::LineString),
+                    "polygon" => Some(GeometryType::Polygon),
+                    "multipoint" => Some(GeometryType::MultiPoint),
+                    "multilinestring" => Some(GeometryType::MultiLine),
+                    "multipolygon" => Some(GeometryType::MultiPolygon),
+                    "geometrycollection" => Some(GeometryType::Collection),
+                    "geometry" => Some(GeometryType::Feature),
+                    _ => None,
+                }
+            }
+            _ => None,
         }
     }
 
