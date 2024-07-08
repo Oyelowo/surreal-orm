@@ -17,18 +17,14 @@ create_tokenstream_wrapper!(=> StructPartialFieldType);
 impl<'a> Codegen<'a> {
     pub fn create_struct_partial_metadata(&mut self) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
-        let table_derive_attributes = self.table_derive_attributes();
+        let model_attributes = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let field_type = field_receiver.ty();
         let field_ident_original = field_receiver.ident()?;
-        let db_field_name = field_receiver.db_field_name(&table_derive_attributes.casing()?)?;
-
-        if !db_field_name.is_updateable_by_default(&self.data_type()) {
-            return Ok(());
-        }
+        let db_field_name = field_receiver.db_field_name(&model_attributes.casing()?)?;
 
         let maybe_fn_path = format!("{crate_name}::Maybe::is_none");
-        match field_receiver.to_relation_type(table_derive_attributes) {
+        match field_receiver.to_relation_type(model_attributes) {
             RelationType::None
             | RelationType::NestArray(_)
             | RelationType::LinkOne(_)
@@ -36,6 +32,7 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkMany(_)
             | RelationType::LinkManyInAndOutEdgeNodesInert(_)
             | RelationType::List(_) => {
+                let field_type = field_type.replace_self_with_current_struct_concrete_type(model_attributes)?;
                 let optionalized_field_type = quote!(#crate_name:: Maybe<#field_type>);
                 self.insert_struct_partial_field_type_def_meta(quote!(
                     #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]
