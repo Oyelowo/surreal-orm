@@ -338,7 +338,10 @@ impl<'a> FieldTypeInference<'a> {
             DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Record(vec![]),
                 field_type_db_token: quote!(
-                    #crate_name::FieldType::Record(::std::vec![])
+                    #crate_name::FieldType::Array(
+                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![])),
+                        ::std::option::Option::None
+                    )
                 )
                 .into(),
                 static_assertion_token:

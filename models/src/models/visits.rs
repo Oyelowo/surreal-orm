@@ -28,10 +28,10 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
     #[surreal_orm(ty = "record<visits_explicit>")]
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(link_many="In", ty = "array<record>")]
+    #[surreal_orm(link_many="In", ty = "array<record<any>>")]
     pub in_: LinkMany<In>,
     // #[surreal_orm(type_ = "record<planet>")]
-    #[surreal_orm(link_many="Out", ty = "array<record>")]
+    #[surreal_orm(link_many="Out", ty = "array<record<any>>")]
     pub out: LinkMany<Out>,
     #[surreal_orm(ty = "duration")]
     pub time_visited: Duration,
@@ -113,9 +113,37 @@ where
     pub age: u8,
     pub created: DateTime<Utc>,
     pub life_expectancy: Duration,
-    pub line_polygon: geo::LineString,
+    pub line_string: geo::LineString,
+    pub multi_line_string: geo::MultiLineString,
+    pub polygon: geo::Polygon,
+    pub multi_polygon: geo::MultiPolygon,
+    pub point: geo::Point,
+    pub multi_point: geo::MultiPoint,
+    pub geometry_collection: sql::Geometry,
     pub territory_area: geo::Polygon,
     pub home: geo::Point,
+    
+    #[surreal_orm(ty = "geometry<point>")]
+    pub point_explicit: geo::Point,
+
+    #[surreal_orm(ty = "geometry<multipoint>")]
+    pub multi_point_explicit: geo::MultiPoint,
+
+    #[surreal_orm(ty = "geometry<LineString>")]
+    pub line_string_explicit: geo::LineString,
+
+    #[surreal_orm(ty = "geometry<multiline>")]
+    pub multi_line_string_explicit: geo::MultiLineString,
+
+    #[surreal_orm(ty = "geometry<polygon>")]
+    pub polygon_explicit: geo::Polygon,
+
+    #[surreal_orm(ty = "geometry<multipolygon>")]
+    pub multi_polygon_explicit: geo::MultiPolygon,
+
+    #[surreal_orm(ty = "geometry<feature>")]
+    pub geometry_collection_explicit: sql::Geometry,
+
     pub tags: Vec<String>,
     #[surreal_orm(link_one = "Weapon")]
     pub weapon: LinkOne<Weapon>,
