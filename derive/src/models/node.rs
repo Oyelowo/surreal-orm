@@ -235,7 +235,7 @@ impl ToTokens for NodeToken {
                   // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
 
                 pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
-                    unimplemented!()
+                    [#( stringify!(#serializable_fields)), *]
                 }
             }
 
