@@ -41,8 +41,8 @@ FOR create, delete
 	WHERE firstName IS 'Oyelowo'
 FOR update
 	WHERE ageInlineExpr <= 130;
-DEFINE FIELD timeToKelowna ON TABLE student_with_granular_attributes TYPE duration VALUE $value OR { nanos: 0, secs: 604800 } ASSERT $value IS NOT NONE;
-DEFINE FIELD timeToKelownaInline ON TABLE student_with_granular_attributes TYPE duration VALUE $value OR { nanos: 0, secs: 604800 } ASSERT $value IS NOT NONE;
+DEFINE FIELD timeToKelowna ON TABLE student_with_granular_attributes TYPE duration VALUE $value OR 1w ASSERT $value IS NOT NONE;
+DEFINE FIELD timeToKelownaInline ON TABLE student_with_granular_attributes TYPE duration VALUE $value OR 1w ASSERT $value IS NOT NONE;
 DEFINE FIELD bestFriend ON TABLE student_with_granular_attributes TYPE record<student_with_granular_attributes>;
 DEFINE FIELD unoBook ON TABLE student_with_granular_attributes TYPE record<book>;
 DEFINE FIELD course ON TABLE student_with_granular_attributes TYPE record<book>;
