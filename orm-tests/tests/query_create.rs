@@ -263,7 +263,7 @@ async fn test_create_alien_with_links() -> SurrealOrmResult<()> {
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,
@@ -331,7 +331,7 @@ async fn test_create_alien_with_links() -> SurrealOrmResult<()> {
     assert_eq!(unsaved_alien.id.to_string(), created_alien.id.to_string());
 
     assert_eq!(
-        sql::Geometry::from(created_alien.clone().line_polygon).to_string(),
+        sql::Geometry::from(created_alien.clone().line_string).to_string(),
         "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
             [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
     );
@@ -388,7 +388,7 @@ async fn test_create_fetch_record_links() -> SurrealOrmResult<()> {
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,
@@ -491,7 +491,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealOrmRes
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,
@@ -571,7 +571,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,
@@ -756,7 +756,7 @@ async fn test_alien_build_output() -> SurrealOrmResult<()> {
         created: DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z")
             .unwrap()
             .with_timezone(&Utc),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,
@@ -846,7 +846,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,
@@ -973,7 +973,7 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory,
+        line_string: territory,
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon,
         home: point,

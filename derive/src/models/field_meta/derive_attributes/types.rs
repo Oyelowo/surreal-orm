@@ -14,28 +14,29 @@ impl MyFieldReceiver {
     pub fn field_type_db_token(
         &self,
         model_attributes: &ModelAttributes,
-    ) -> ExtractorResult<FieldTypeDbToken> {
-        self.field_type_db_with_static_assertions(model_attributes)
             // A relate field is an example of where we should not
             // have a db field as that is a readonly derived field.
-            .map(|x| x.unwrap_or_default().field_type_db_token.into())
+    ) -> ExtractorResult<Option<FieldTypeDbToken>> {
+        Ok(self.field_type_db_with_static_assertions(model_attributes)?
+            .map(|x| x.field_type_db_token.into()))
     }
 
     pub fn field_type_db_original(
         &self,
         model_attributes: &ModelAttributes,
-    ) -> ExtractorResult<FieldTypeDb> {
-        self.field_type_db_with_static_assertions(model_attributes)
-            // TODO: Crosscheck if using default makes sense here.
-            // A relate field is an example of where we should not
-            // have a db field as that is a readonly derived field.
-            .map(|x| x.unwrap_or_default().field_type_db_original.into())
+    ) -> ExtractorResult<Option<FieldTypeDb>> {
+        Ok(self.field_type_db_with_static_assertions(model_attributes)?
+            .map(|x| x.field_type_db_original.into()))
     }
 
     pub fn field_type_db_with_static_assertions(
         &self,
         model_attributes: &ModelAttributes,
     ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
+        if self.to_relation_type(model_attributes).is_relate_graph() {
+            return Ok(None);
+        }
+
         let crate_name = get_crate_name(false);
         let field_ty = self
             .ty()

@@ -23,7 +23,7 @@ pub struct Alien {
     pub age: u8,
     pub created: DateTime<Utc>,
     pub life_expectancy: Duration,
-    pub line_polygon: geo::LineString,
+    pub line_string: geo::LineString,
     pub territory_area: geo::Polygon,
     pub home: geo::Point,
     pub tags: Vec<String>,
