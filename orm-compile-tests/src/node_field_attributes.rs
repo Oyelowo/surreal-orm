@@ -572,7 +572,7 @@ fn _type_mismatch_age_boolean_is_not_datetime() {}
 /// use surreal_compile_tests::*;
 ///  #[derive(Node, Serialize, Deserialize)]
 ///  #[serde(rename_all = "camelCase")]
-///  #[surreal_orm(table = student)]
+///  #[urreal_orm(table = student)]
 /// pub struct Student {
 ///    id: SurrealSimpleId<Self>,
 ///   #[surreal_orm(ty = "duration")]
