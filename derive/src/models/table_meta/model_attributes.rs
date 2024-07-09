@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2024 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::str::FromStr;
 
 use syn::{self, parse_quote, GenericArgument, Path, PathArguments, Type};
