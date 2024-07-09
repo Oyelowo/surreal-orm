@@ -255,7 +255,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let id2 = &Account::create_id("two".to_string());
     let amount_to_transfer = 300.00;
 
-    let acc = Account::schema();
     let account::Schema { balance, .. } = Account::schema();
 
     let query_chain = query_turbo! {

@@ -7,8 +7,6 @@
 
 use std::fmt::{self, Display};
 
-use surrealdb::opt::capabilities::Targets;
-
 use crate::{
     BindingsList, Buildable, Conditional, Erroneous, Field, FieldType, Filter, Parametric,
     Queryable, Table, ValueLike,

@@ -8,10 +8,8 @@
 use std::{fmt::Display, ops::Deref};
 
 use darling::FromMeta;
-use proc_macro::TokenStream;
-use proc_macros_helpers::get_crate_name;
-use quote::{quote, ToTokens};
-use surreal_query_builder::{FieldType, GeometryType};
+use quote::ToTokens;
+use surreal_query_builder::GeometryType;
 use syn::{
     self, parse_quote, spanned::Spanned, visit::Visit, visit_mut::VisitMut, Expr, GenericArgument,
     Ident, Lifetime, Path, PathArguments, Token, Type, TypeReference,
