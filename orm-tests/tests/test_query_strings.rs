@@ -50,7 +50,7 @@ fn multiplication_tests1() {
         query1 = query1.limit(55).order_by(order(age).desc());
     }
 
-    insta::assert_display_snapshot!(&query1.fine_tune_params());
+    insta::assert_snapshot!(&query1.fine_tune_params());
 
     let student_table = &Student::get_table();
     let _book_table = &Book::get_table();
@@ -120,9 +120,9 @@ fn multiplication_tests1() {
         query = query.group_by(arr![age, bestFriend, &Field::new("dayo")]);
     }
 
-    insta::assert_display_snapshot!(&query.fine_tune_params());
-    insta::assert_display_snapshot!(&query.to_raw().build());
-    insta::assert_display_snapshot!(&query.get_bindings().len());
+    insta::assert_snapshot!(&query.fine_tune_params());
+    insta::assert_snapshot!(&query.to_raw().build());
+    insta::assert_snapshot!(&query.get_bindings().len());
 }
 
 #[tokio::test]
@@ -137,7 +137,7 @@ async fn relate_query_building_for_ids() {
     let relate_simple =
         relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
 
-    insta::assert_display_snapshot!(&relate_simple.fine_tune_params());
+    insta::assert_snapshot!(&relate_simple.fine_tune_params());
     assert_eq!(relate_simple.clone().to_raw().build().len(), 126);
     assert_eq!(relate_simple.clone().get_bindings().len(), 3);
 }
@@ -158,7 +158,7 @@ async fn relate_query_building_for_subqueries() {
             ),
     )
     .content(write);
-    insta::assert_display_snapshot!(relation.fine_tune_params());
+    insta::assert_snapshot!(relation.fine_tune_params());
     assert_eq!(relation.get_bindings().len(), 3);
 }
 
@@ -178,8 +178,8 @@ fn multiplication_tests2() {
         .book(Book::schema().id.equal(Thing::from(("book", "blaze"))))
         .content;
 
-    insta::assert_display_snapshot!(&cursive_relation.fine_tune_params());
-    insta::assert_display_snapshot!(&cursive_relation.to_raw());
+    insta::assert_snapshot!(&cursive_relation.fine_tune_params());
+    insta::assert_snapshot!(&cursive_relation.to_raw());
 }
 
 #[test]

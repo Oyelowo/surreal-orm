@@ -203,7 +203,7 @@ mod tests {
     use crate::{
         chain, cond, statements::select, traits::Buildable, All, Field, Operatable, ToRaw,
     };
-    use insta::assert_display_snapshot;
+    use insta::assert_snapshot;
     use select::CanOrder;
     use surrealdb::sql;
 
@@ -239,7 +239,7 @@ mod tests {
             .chain(statement2)
             .chain(select(All).from(fake_id3));
 
-        assert_display_snapshot!(transaction.fine_tune_params());
-        assert_display_snapshot!(transaction.to_raw().to_string());
+        assert_snapshot!(transaction.fine_tune_params());
+        assert_snapshot!(transaction.to_raw().to_string());
     }
 }

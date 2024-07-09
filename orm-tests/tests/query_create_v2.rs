@@ -695,12 +695,12 @@ async fn test_alien_build_output() -> SurrealOrmResult<()> {
     let build = create_v2(unsaved_alien);
 
     assert_eq!(build.get_bindings().len(), 1);
-    insta::assert_display_snapshot!(build.get_bindings()[0].get_raw_value().len());
+    insta::assert_snapshot!(build.get_bindings()[0].get_raw_value().len());
     assert_eq!(
         build.fine_tune_params(),
         "CREATE alien CONTENT $_param_00000001;"
     );
-    insta::assert_display_snapshot!(build.to_raw().build().len());
+    insta::assert_snapshot!(build.to_raw().build().len());
     Ok(())
 }
 

@@ -168,9 +168,9 @@ mod tests {
             chain(sales).chain(total).chain(count).chain(returned),
         ));
 
-        insta::assert_display_snapshot!(def.to_raw());
+        insta::assert_snapshot!(def.to_raw());
 
-        insta::assert_display_snapshot!(def.fine_tune_params());
+        insta::assert_snapshot!(def.fine_tune_params());
 
         assert_eq!(
             def.to_raw().build(),

@@ -83,8 +83,8 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
             COMMIT TRANSACTION;\n\t"
     );
 
-    insta::assert_display_snapshot!(transaction_query.fine_tune_params());
-    insta::assert_display_snapshot!(transaction_query.to_raw().build());
+    insta::assert_snapshot!(transaction_query.fine_tune_params());
+    insta::assert_snapshot!(transaction_query.to_raw().build());
 
     assert_eq!(accounts.len(), 2);
     assert_eq!(accounts[0].balance, 135_605.16);

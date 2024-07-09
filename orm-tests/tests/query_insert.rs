@@ -684,7 +684,7 @@ async fn test_alien_build_output() -> SurrealOrmResult<()> {
     let build = insert(unsaved_alien);
 
     assert_eq!(build.get_bindings().len(), 12);
-    insta::assert_display_snapshot!(build.get_bindings()[0].get_raw_value());
+    insta::assert_snapshot!(build.get_bindings()[0].get_raw_value());
     assert_eq!(
         build.fine_tune_params(),
         "INSERT INTO alien (age, ally, created, home, id, lifeExpectancy, lineString, \
@@ -693,8 +693,8 @@ async fn test_alien_build_output() -> SurrealOrmResult<()> {
             $_param_00000005, $_param_00000006, $_param_00000007, $_param_00000008, $_param_00000009, \
             $_param_00000010, $_param_00000011, $_param_00000012);"
     );
-    insta::assert_display_snapshot!(build.fine_tune_params());
-    insta::assert_display_snapshot!(build.to_raw().build().len());
+    insta::assert_snapshot!(build.fine_tune_params());
+    insta::assert_snapshot!(build.to_raw().build().len());
     Ok(())
 }
 

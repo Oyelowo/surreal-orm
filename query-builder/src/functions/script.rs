@@ -182,7 +182,7 @@ mod tests {
             (name, id),
             "{ return [1,2,3].map(v => v * 10 * $name * $id) ; }"
         );
-        insta::assert_display_snapshot!(f2);
-        insta::assert_display_snapshot!(f2.to_raw());
+        insta::assert_snapshot!(f2);
+        insta::assert_snapshot!(f2.to_raw());
     }
 }

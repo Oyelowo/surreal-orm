@@ -12,5 +12,5 @@ const _MIGRATIONS2_TWOWAY: migrator::EmbeddedMigrationsTwoWay =
 
 #[test]
 fn test_embed_migrations() {
-    // insta::assert_display_snapshot!(MIGRATIONS.migrations.to_vec());
+    // insta::assert_snapshot!(MIGRATIONS.migrations.to_vec());
 }

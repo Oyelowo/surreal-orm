@@ -44,8 +44,8 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
         }
     }));
 
-    insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_snapshot!(created_stats_statement.to_raw());
+    insta::assert_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\
@@ -100,8 +100,8 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
         return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
     }));
 
-    insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_snapshot!(created_stats_statement.to_raw());
+    insta::assert_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\
@@ -155,8 +155,8 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
         let count = array::len!(strengths);
         return total / count;
     }));
-    insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_snapshot!(created_stats_statement.to_raw());
+    insta::assert_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\
@@ -200,8 +200,8 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealOrmResult<()> {
         let count = array::len!(strengths);
         return total.divide(count);
     }));
-    insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_snapshot!(created_stats_statement.to_raw());
+    insta::assert_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\
@@ -246,8 +246,8 @@ async fn test_code_block_with_macro() -> SurrealOrmResult<()> {
 
     let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(code_block));
 
-    insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_snapshot!(created_stats_statement.to_raw());
+    insta::assert_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\
@@ -299,8 +299,8 @@ async fn test_code_block_simplified() -> SurrealOrmResult<()> {
 
     let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(code_block));
 
-    insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_snapshot!(created_stats_statement.to_raw());
+    insta::assert_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\
@@ -357,8 +357,8 @@ async fn test_code_block() -> SurrealOrmResult<()> {
         )),
     );
 
-    insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_snapshot!(created_stats_statement.to_raw());
+    insta::assert_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\

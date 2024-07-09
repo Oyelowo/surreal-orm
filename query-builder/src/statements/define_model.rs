@@ -244,7 +244,7 @@ mod tests {
                 FOR create, delete\n\tWHERE name IS 'Oyedayo'\n\
                 FOR update\n\tWHERE age <= 130;"
         );
-        insta::assert_display_snapshot!(statement.fine_tune_params());
+        insta::assert_snapshot!(statement.fine_tune_params());
         assert_eq!(statement.get_bindings().len(), 7);
     }
 
@@ -257,7 +257,7 @@ mod tests {
             statement.to_raw().build(),
             "DEFINE MODEL ml::recommendation;"
         );
-        insta::assert_display_snapshot!(statement.fine_tune_params());
+        insta::assert_snapshot!(statement.fine_tune_params());
         assert_eq!(statement.get_bindings().len(), 1);
     }
 
@@ -270,7 +270,7 @@ mod tests {
             statement.to_raw().build(),
             "DEFINE MODEL ml::recommendation<v1.2.3>;"
         );
-        insta::assert_display_snapshot!(statement.fine_tune_params());
+        insta::assert_snapshot!(statement.fine_tune_params());
         assert_eq!(statement.get_bindings().len(), 2);
     }
 }

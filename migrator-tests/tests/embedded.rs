@@ -32,14 +32,14 @@ fn test_embedded() {
         migs[0].name().basename(),
         "create_new_stuff".to_string().into()
     );
-    insta::assert_display_snapshot!(migs[0].content());
+    insta::assert_snapshot!(migs[0].content());
     assert_eq!(
         migs[1].name().to_string(),
         "20231029224601_create_another.surql"
     );
     assert_eq!(migs[1].name().basename(), "create_another".into());
     assert_eq!(migs.len(), 2);
-    insta::assert_display_snapshot!(migs[1].content());
+    insta::assert_snapshot!(migs[1].content());
 
     let migs = MIGRATIONS_TWO_WAY.to_migrations_two_way().unwrap();
     assert_eq!(migs.len(), 1);
@@ -50,8 +50,8 @@ fn test_embedded() {
         "20231030025711_migration_name_example.up.surql"
     );
     assert_eq!(migs[0].up.name.basename(), "migration_name_example".into());
-    insta::assert_display_snapshot!(migs[0].up.content);
-    insta::assert_display_snapshot!(migs[0].down.content);
+    insta::assert_snapshot!(migs[0].up.content);
+    insta::assert_snapshot!(migs[0].down.content);
 }
 
 #[tokio::test]

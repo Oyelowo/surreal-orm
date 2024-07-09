@@ -261,8 +261,8 @@ mod tests {
 
         assert_eq!(transaction.get_bindings().len(), 10);
 
-        insta::assert_display_snapshot!(transaction.fine_tune_params());
-        insta::assert_display_snapshot!(transaction.to_raw().build());
+        insta::assert_snapshot!(transaction.fine_tune_params());
+        insta::assert_snapshot!(transaction.to_raw().build());
     }
 
     #[test]
@@ -299,7 +299,7 @@ mod tests {
 
         assert_eq!(transaction.get_bindings().len(), 10);
 
-        insta::assert_display_snapshot!(transaction.fine_tune_params());
-        insta::assert_display_snapshot!(transaction.to_raw().build());
+        insta::assert_snapshot!(transaction.fine_tune_params());
+        insta::assert_snapshot!(transaction.to_raw().build());
     }
 }
