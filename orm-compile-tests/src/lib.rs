@@ -29,7 +29,7 @@ pub fn permissions_fn() -> Permissions {
     unimplemented!()
 }
 
-pub fn permissions_fn2(name: &'static str) -> Permissions {
+pub fn permissions_fn2(_name: &'static str) -> Permissions {
     unimplemented!()
 }
 
