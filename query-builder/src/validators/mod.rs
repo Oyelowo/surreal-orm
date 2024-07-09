@@ -1,3 +1,7 @@
+use crate::LinkMany;
+use crate::LinkOne;
+use crate::LinkSelf;
+use crate::Node;
 use crate::Object;
 // pub use crate::assert_fields;
 pub use num_traits::{Float, Num, PrimInt as Int};
@@ -239,7 +243,20 @@ pub trait IsArray {}
 impl<T> IsArray for Vec<T> {}
 impl<T> IsArray for &Vec<T> {}
 impl<T, const N: usize> IsArray for [T; N] {}
+impl<T> IsArray for &[T] {}
+impl<T> IsArray for &mut [T] {}
+impl<T> IsArray for &mut Vec<T> {}
+impl IsArray for crate::sql::Array {}
+// impl<T> IsArray for T where T: Into<crate::sql::Array> {}
+impl<N: Node> IsArray for LinkMany<N> {}
+impl<V: Node> IsLinkMany for LinkMany<V> {}
+impl<V: Node> IsLink for LinkMany<V> {}
 
+impl<V: Node> IsLinkSelf for LinkSelf<V> {}
+impl<V: Node> IsLink for LinkSelf<V> {}
+
+impl<V: Node> IsLinkOne for LinkOne<V> {}
+impl<V: Node> IsLink for LinkOne<V> {}
 /// Validate that type is an array at compile time
 /// Array can be a Vec or a slice
 pub fn assert_type_is_array<T: IsArray>() {
@@ -361,6 +378,8 @@ pub fn assert_value_is_bool<T: IsBool>(_value: T) {}
 pub trait IsThing {}
 
 impl<T> IsThing for T where T: Into<crate::sql::Thing> {}
+impl<N: Node> IsThing for LinkOne<N> {}
+impl<N: Node> IsThing for LinkSelf<N> {}
 
 /// Validate that type is a Thing at compile time
 pub fn assert_type_is_thing<T: IsThing>() {
@@ -485,7 +504,7 @@ pub fn assert_type_is_any<T: IsAny>() {
 /// Validate that value is a any at compile time
 pub fn assert_value_is_any<T: IsAny>(_value: T) {}
 
-/// Validate that type is a surreald orm Object at compile time
+/// Validate that type is a surrealdb orm Object at compile time
 pub trait IsObject {}
 
 impl<T: Object> IsObject for T {}
@@ -498,6 +517,22 @@ impl<T: Object> IsObject for T {}
 /// assert_type_is_object::<AnEmbeddedObject>();
 /// ```
 pub fn assert_type_is_object<T: IsObject>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
+/// Validate that type is a surrealdb Node at compile time
+pub trait IsNode {}
+
+impl<T: crate::Node> IsNode for T {}
+
+/// Validate that type is a Node at compile time
+/// # Example
+/// ```rust,ignore
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::validators::assert_type_is_node;
+/// assert_type_is_node::<ANode>();
+/// ```
+pub fn assert_type_is_node<T: IsNode>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
 
