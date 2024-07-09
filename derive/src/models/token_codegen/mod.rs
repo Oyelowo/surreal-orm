@@ -155,6 +155,7 @@ pub struct Codegen<'a> {
     pub aliases_struct_fields_names_kv: Vec<AliasesStructFieldsNamesKv>,
 
     /// list of fields names that are actually serialized and not skipped.
+    #[allow(unused)]
     pub serialized_alias_name_no_skip: Vec<String>,
 
     /// Field names after taking into consideration

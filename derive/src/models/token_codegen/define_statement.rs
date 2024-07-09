@@ -32,7 +32,6 @@ impl<'a> Codegen<'a> {
         let crate_name = get_crate_name(false);
         let casing = model_attributes.casing()?;
         let db_field_name = field_receiver.db_field_name(&casing)?;
-        let field_type_in_db = field_receiver.field_type_db_original(model_attributes)?;
         let field_type_in_db_token = field_receiver.field_type_db_token(model_attributes)?;
 
         let mut define_field_methods = vec![];

@@ -298,6 +298,7 @@ impl ForeignNodeSchemaIdent {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 struct DestinationNodeTableName(String);
 
