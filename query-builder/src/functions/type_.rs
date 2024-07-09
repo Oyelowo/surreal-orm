@@ -139,10 +139,7 @@ create_type!(
     /// ```rust
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let datetime = ::chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///    chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     /// let result = type_::datetime!(datetime);
     /// assert_eq!(result.to_raw().build(), "type::datetime('1970-01-01T00:01:01Z')");
     ///
@@ -157,10 +154,7 @@ create_type!(
     =>
     "datetime",
     DatetimeLike,
-    chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-        chrono::Utc,
-    ),
+    chrono::DateTime::from_timestamp(61, 0).unwrap(),
     "'1970-01-01T00:01:01Z'"
 );
 
@@ -553,11 +547,8 @@ mod tests {
 
     #[test]
     fn test_datetime_macro_with_plain_datetime() {
-        let value = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-            chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-            chrono::Utc,
-        );
-        let result = type_::datetime!(value);
+        let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
+        let result = type_::datetime!(value());
         assert_eq!(
             result.fine_tune_params(),
             "type::datetime($_param_00000001)"
@@ -785,10 +776,7 @@ pub mod is {
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
         /// use surreal_orm::{*, functions::type_};
-        /// let datetime = ::chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-        ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-        ///    chrono::Utc,
-        /// );
+        /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
         /// let result = type_::is::datetime!(datetime);
         /// assert_eq!(result.to_raw().build(), "type::is::datetime('1970-01-01T00:01:01Z')");
         ///
@@ -803,10 +791,7 @@ pub mod is {
         =>
         "datetime",
         DatetimeLike,
-        chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-            chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-            chrono::Utc,
-        ),
+        chrono::DateTime::from_timestamp(61, 0).unwrap(),
         "'1970-01-01T00:01:01Z'"
     );
 

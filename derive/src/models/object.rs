@@ -73,7 +73,6 @@ impl ToTokens for ObjectToken {
             schema_struct_fields_names_kv_empty,
             struct_partial_fields,
             struct_partial_associated_functions,
-            serialized_fmt_db_field_names_instance: serializable_fields,
             serialized_ident_struct_partial_init_fields,
             ..
         } = &code_gen;

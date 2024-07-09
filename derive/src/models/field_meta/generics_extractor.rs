@@ -15,15 +15,9 @@ use super::CustomType;
 #[derive(Debug)]
 pub struct StrippedBoundsGenerics(pub Generics);
 
-#[derive(Clone, Debug, Default)]
-pub struct CustomGenericsWithoutStaticInImpl(pub Generics);
-
 create_tokenstream_wrapper!(=>ImplGenerics);
 create_tokenstream_wrapper!(=>TypeGenerics);
 create_tokenstream_wrapper!(=>WhereClause);
-
-#[derive(Clone, Debug)]
-struct GenericsMeta(ImplGenerics, TypeGenerics, Option<WhereClause>);
 
 #[derive(Clone, Debug, Default)]
 pub struct CustomGenerics {
