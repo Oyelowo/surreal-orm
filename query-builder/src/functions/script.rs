@@ -15,7 +15,6 @@
 // 	return [1,2,3].map(v => v * 10);
 // };
 //
-//
 
 use crate::{Buildable, Function, Param};
 
@@ -55,9 +54,9 @@ pub fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>)
 /// // Simple functions
 /// // Embedded JavaScript functions within SurrealDB support all functionality in the ES2020 specification including async / await functions, and generator functions. Any value from SurrealDB is converted into a JavaScript type automatically, and the return value from the JavaScript function is converted to a SurrealDB value.
 /// let f2 = function!((), {
-///    return [1,2,3].map(v => v * 10);
+///    return [1, 2, 3].map(v => v * 10);
 /// });
-/// assert_eq!(f2.to_raw().build(), "function() { return [1, 2, 3].map(v => v * 10) ; }");
+/// assert_eq!(f2.to_raw().build(), "function() { return [1, 2, 3].map(v => v * 10); }");
 ///
 /// // Function arguments
 /// // Additional arguments can be passed in to the function from SurrealDB, and these are accessible using the arguments object within the JavaScript function.
@@ -180,7 +179,7 @@ mod tests {
 
         let f2 = function!(
             (name, id),
-            "{ return [1,2,3].map(v => v * 10 * $name * $id) ; }"
+            "{ return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
         );
         insta::assert_snapshot!(f2);
         insta::assert_snapshot!(f2.to_raw());
