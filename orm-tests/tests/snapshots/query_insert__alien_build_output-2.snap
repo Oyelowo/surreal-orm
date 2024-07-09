@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/query_insert.rs
+source: orm-tests/tests/query_insert.rs
 expression: build.fine_tune_params()
 ---
-INSERT INTO alien (age, ally, created, home, id, lifeExpectancy, linePolygon, name, spaceShips, tags, territoryArea, weapon) VALUES ($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006, $_param_00000007, $_param_00000008, $_param_00000009, $_param_00000010, $_param_00000011, $_param_00000012);
+INSERT INTO alien (age, ally, created, home, id, lifeExpectancy, lineString, name, spaceShips, tags, territoryArea, weapon) VALUES ($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006, $_param_00000007, $_param_00000008, $_param_00000009, $_param_00000010, $_param_00000011, $_param_00000012);

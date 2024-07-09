@@ -687,7 +687,7 @@ async fn test_alien_build_output() -> SurrealOrmResult<()> {
     insta::assert_display_snapshot!(build.get_bindings()[0].get_raw_value());
     assert_eq!(
         build.fine_tune_params(),
-        "INSERT INTO alien (age, ally, created, home, id, lifeExpectancy, linePolygon, \
+        "INSERT INTO alien (age, ally, created, home, id, lifeExpectancy, lineString, \
             name, spaceShips, tags, territoryArea, weapon) VALUES \
             ($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, \
             $_param_00000005, $_param_00000006, $_param_00000007, $_param_00000008, $_param_00000009, \
