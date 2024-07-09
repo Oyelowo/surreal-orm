@@ -49,7 +49,8 @@ impl MyFieldReceiver {
             Some(ref db_type) => {
                 let relation = self.to_relation_type(model_attributes);
                 let static_assertion_token = match &relation {
-                    RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
+                    RelationType::LinkMany(ref_node)
+                    | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
                         quote! {
                             #crate_name::validators::assert_type_is_link_many::<#field_ty>();
                             #crate_name::validators::assert_type_is_node::<#ref_node>();
@@ -79,9 +80,7 @@ impl MyFieldReceiver {
                             #crate_name::validators::assert_type_is_object::<#nested_object>();
                         }
                     }
-                    | RelationType::Relate(_)
-                    | RelationType::None
-                    | RelationType::List(_) => {
+                    RelationType::Relate(_) | RelationType::None | RelationType::List(_) => {
                         // db_type.generate_static_assertion(&field_ty.into_inner())
                         quote! {}
                     }
@@ -98,7 +97,8 @@ impl MyFieldReceiver {
                     static_assertion_token: quote! {
                         #static_assertion_token
                         #assertions_from_db_type
-                    }.into(),
+                    }
+                    .into(),
                     field_type_db_token: db_type.into_token_stream().into(),
                 };
                 Some(db_field_type_ast_meta)

@@ -23,7 +23,8 @@ pub struct FieldTypeInference<'a> {
 
 impl<'a> FieldTypeInference<'a> {
     pub fn infer_type(&self) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
-        let inferred = self.infer_type_by_priority()
+        let inferred = self
+            .infer_type_by_priority()
             .map(|res| Some(res))
             .unwrap_or_else(|_| None);
 
@@ -36,9 +37,7 @@ impl<'a> FieldTypeInference<'a> {
         })
     }
 
-    pub fn infer_type_by_priority(
-        &self,
-    ) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
+    pub fn infer_type_by_priority(&self) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
         let relation_type = self.relation_type;
         let model_attrs = self.model_attrs;
         let ty = self.field_ty;
@@ -49,16 +48,13 @@ impl<'a> FieldTypeInference<'a> {
         let priority2 = || self.based_on_db_field_name(&ty, &field_name, &model_attrs);
         let priority3 = || self.based_on_field_link_type(&ty, &relation_type);
 
-
         let db_type = if let Ok(db_ty) = priority1() {
-             Some(db_ty)
-        }
-        else if let Ok(db_ty) = priority2() {
             Some(db_ty)
-        } else if let Ok(Some(db_ty)) =  priority3() {
-             Some(db_ty)
-        }
-        else {
+        } else if let Ok(db_ty) = priority2() {
+            Some(db_ty)
+        } else if let Ok(Some(db_ty)) = priority3() {
+            Some(db_ty)
+        } else {
             None
         };
 
@@ -71,7 +67,7 @@ impl<'a> FieldTypeInference<'a> {
     fn based_on_type_path_token_structure(
         &self,
         field_ty: &CustomType,
-        relation_type: RelationType
+        relation_type: RelationType,
     ) -> ExtractorResult<DbFieldTypeAstMeta> {
         let crate_name = get_crate_name(false);
         let binding = field_ty
@@ -142,15 +138,18 @@ impl<'a> FieldTypeInference<'a> {
         } else if field_ty.is_array() {
             // let inner_type = field_ty.get_array_inner_type();
             let inner_type = field_ty.inner_angle_bracket_type()?;
-            let none_opt_token =|| quote!(::std::option::Option::None);
+            let none_opt_token = || quote!(::std::option::Option::None);
 
-            let array_len_token_stream = field_ty.get_array_const_length().map_or(none_opt_token(), |expr| {
-                if expr.to_token_stream().is_empty() {
-                    none_opt_token()
-                } else {
-                    quote!(::std::option::Option::Some(#expr))
-                }
-            });
+            let array_len_token_stream =
+                field_ty
+                    .get_array_const_length()
+                    .map_or(none_opt_token(), |expr| {
+                        if expr.to_token_stream().is_empty() {
+                            none_opt_token()
+                        } else {
+                            quote!(::std::option::Option::Some(#expr))
+                        }
+                    });
 
             let array_len_token = field_ty.get_array_const_length();
             let array_len_token_as_int = array_len_token
@@ -226,13 +225,12 @@ impl<'a> FieldTypeInference<'a> {
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_datetime::<#ty>();).into(),
             }
-        } 
+        }
         // else if field_ty.raw_type_is_geometry() {
         else if let Some(geo_kind) = field_ty.raw_type_geometry_kind() {
             // We are intentionally using debug string representation of the geometry kind
             let geo_kind_name_from_debug_print = format!("{:?}", &geo_kind);
             let geo_kind_ident = format_ident!("{geo_kind_name_from_debug_print}");
-            
 
             DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Geometry(vec![geo_kind]),
@@ -240,28 +238,28 @@ impl<'a> FieldTypeInference<'a> {
                 static_assertion_token:
                     quote!(#crate_name::validators::assert_type_is_geometry::<#ty>();).into(),
             }
-        } 
-        else if let Some(foreign_type) = self.refereces_a_nested_object(&relation_type)? {
-        // Guess if its a foreign Table type by comparing the type path segment with the foreign
-        // rust field type ident
-            let current_segment_is_likely_foreign_type = field_ty.type_ident()? == foreign_type.type_ident()?;
+        } else if let Some(foreign_type) = self.refereces_a_nested_object(&relation_type)? {
+            // Guess if its a foreign Table type by comparing the type path segment with the foreign
+            // rust field type ident
+            let current_segment_is_likely_foreign_type =
+                field_ty.type_ident()? == foreign_type.type_ident()?;
             if current_segment_is_likely_foreign_type {
                 DbFieldTypeAstMeta {
                     field_type_db_original: FieldType::Object,
                     field_type_db_token: quote!(#crate_name::FieldType::Object).into(),
                     static_assertion_token: quote!(
-            // #crate_name::validators::assert_type_eq_all!(#ty, #foreign_type);
-                    #crate_name::validators::assert_type_is_object::<#ty>();
-                    ).into(),
+                    // #crate_name::validators::assert_type_eq_all!(#ty, #foreign_type);
+                            #crate_name::validators::assert_type_is_object::<#ty>();
+                            )
+                    .into(),
                 }
-            } else  {
+            } else {
                 return Err(syn::Error::new(
                     ty.span(),
                     "Could not infer the database type for the field based on the field type in rust provided. Specify by using e.g ty = \"array\"",
                 ).into());
             }
-
-            } else {
+        } else {
             return Err(syn::Error::new(
                 ty.span(),
                 "Could not infer the database type for the field based on the field type in rust provided. Specify by using e.g ty = \"array\"",
@@ -273,7 +271,10 @@ impl<'a> FieldTypeInference<'a> {
     }
 
     /// Gets out the foreign/nested object type if the field references a foreign struct
-    fn refereces_a_nested_object(&self, relation_type: &'a RelationType) -> ExtractorResult<Option<&'a CustomType>> {
+    fn refereces_a_nested_object(
+        &self,
+        relation_type: &'a RelationType,
+    ) -> ExtractorResult<Option<&'a CustomType>> {
         // NOTE 1:
         // Links are excluded from this because we are handling them separately in the inference
         // based on link type.
@@ -284,23 +285,19 @@ impl<'a> FieldTypeInference<'a> {
         //
         // NOTE 2:
         // We are mainly interested in getting the foreign struct itself whether or not its a
-        // single top-level struct, or one or deep lelve nested struct. 
+        // single top-level struct, or one or deep lelve nested struct.
         let foreign_type = match relation_type {
-            RelationType::NestObject(ref_object) => {
-                Some(ref_object.into_inner_ref())
-            },
+            RelationType::NestObject(ref_object) => Some(ref_object.into_inner_ref()),
             RelationType::NestArray(foreign_array_object) => {
                 Some(foreign_array_object.into_inner_ref())
-            },
-            RelationType::Relate(_) 
-            | RelationType::List(_) 
-            | RelationType::None  
-            | RelationType::LinkOne(_)  
-            | RelationType::LinkSelf(_)  
-            | RelationType::LinkManyInAndOutEdgeNodesInert(_)  
-            | RelationType::LinkMany(_)=> {
-                None
             }
+            RelationType::Relate(_)
+            | RelationType::List(_)
+            | RelationType::None
+            | RelationType::LinkOne(_)
+            | RelationType::LinkSelf(_)
+            | RelationType::LinkManyInAndOutEdgeNodesInert(_)
+            | RelationType::LinkMany(_) => None,
         };
 
         Ok(foreign_type)

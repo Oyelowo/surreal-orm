@@ -19,7 +19,6 @@ use surreal_orm::{
 use typed_builder::TypedBuilder;
 use CrudType::*;
 
-
 fn age_permissions() -> Permissions {
     let student_with_granular_attributes::Schema {
         ageInlineExpr,
@@ -590,9 +589,9 @@ pub struct Writes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // pub id: SurrealSimpleId<Writes<In, Out>>,
     #[serde(skip_serializing)]
-    #[surreal_orm(link_many="In")]
+    #[surreal_orm(link_many = "In")]
     pub r#in: LinkOne<In>,
-    #[surreal_orm(link_many="Out")]
+    #[surreal_orm(link_many = "Out")]
     #[serde(skip_serializing)]
     pub out: LinkOne<Out>,
     pub time_written: Duration,
@@ -647,4 +646,3 @@ pub struct Blog {
 // }
 //
 //
-

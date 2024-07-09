@@ -50,10 +50,10 @@ pub(crate) struct CommonIdents {
 pub struct Codegen<'a> {
     /// list of fields names that are actually serialized and not skipped as ident
     /// used for partial udpater struct. We stick to the original field name,
-    /// to stay consistent with rust struct declaration within the code but 
+    /// to stay consistent with rust struct declaration within the code but
     /// handle the renaming automatically for the user.
     /// Personally, I think this is better than using the serialized field name in this specific
-    /// context. 
+    /// context.
     /// NOTE: Currently, I am skipping id field since it's immutable and should not be updated.
     /// And considering same for in and out fields of edge tables if surrealdb 2.0 does not support
     /// that.

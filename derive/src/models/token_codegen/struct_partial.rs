@@ -32,7 +32,8 @@ impl<'a> Codegen<'a> {
             | RelationType::LinkMany(_)
             | RelationType::LinkManyInAndOutEdgeNodesInert(_)
             | RelationType::List(_) => {
-                let field_type = field_type.replace_self_with_current_struct_concrete_type(model_attributes)?;
+                let field_type =
+                    field_type.replace_self_with_current_struct_concrete_type(model_attributes)?;
                 let optionalized_field_type = quote!(#crate_name:: Maybe<#field_type>);
                 self.insert_struct_partial_field_type_def_meta(quote!(
                     #[serde(skip_serializing_if = #maybe_fn_path, rename = #db_field_name)]

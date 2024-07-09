@@ -52,7 +52,6 @@ impl DbFieldName {
         model_type.is_edge() && (self.0 == "in" || self.0 == "out")
     }
 
-
     // TODO: Confirm in new surrealdb version if we can now update in and out fields
     // in edge tables and id field in all tables(i doubt we should be able to for id field but
     // maybe for in and out).

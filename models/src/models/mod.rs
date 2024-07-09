@@ -16,4 +16,3 @@ pub mod user_with_generics;
 pub mod visits;
 pub mod weapon;
 pub mod with_generics;
-

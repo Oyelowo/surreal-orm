@@ -70,9 +70,15 @@ impl DbResources for Resources {
 
     fn params(&self) -> Vec<Raw> {
         vec![
-            define_param(__some_test_param1()).value("test param one").to_raw(),
-            define_param(__some_test_param2()).value("test param two").to_raw(),
-            define_param(__some_test_param3()).value("test param three").to_raw(),
+            define_param(__some_test_param1())
+                .value("test param one")
+                .to_raw(),
+            define_param(__some_test_param2())
+                .value("test param two")
+                .to_raw(),
+            define_param(__some_test_param3())
+                .value("test param three")
+                .to_raw(),
         ]
     }
 
@@ -326,9 +332,9 @@ pub mod snake_cases {
     #[surreal_orm(table = eats_snake_case, schemafull)]
     pub struct EatsSnakeCase<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Self>,
-        #[surreal_orm(link_many="In")]
+        #[surreal_orm(link_many = "In")]
         pub r#in: LinkOne<In>,
-        #[surreal_orm(link_many="Out")]
+        #[surreal_orm(link_many = "Out")]
         pub out: LinkOne<Out>,
         pub place: String,
         pub created_at: chrono::DateTime<Utc>,

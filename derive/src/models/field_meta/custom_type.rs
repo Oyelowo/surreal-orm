@@ -17,9 +17,7 @@ use syn::{
 
 use crate::models::*;
 
-use super::{
-    custom_type_self_replacement::ReplaceSelfVisitor, *,
-};
+use super::{custom_type_self_replacement::ReplaceSelfVisitor, *};
 
 #[derive(Debug, Clone)]
 pub struct CustomTypeNoSelf(CustomType);

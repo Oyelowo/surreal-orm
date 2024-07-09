@@ -424,7 +424,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
         relate_simple_object
             .clone()
             .unwrap()
-            .r#in  
+            .r#in
             .get_id()
             .unwrap()
             .to_string(),
@@ -450,7 +450,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
     assert_eq!(
         relate_simple_array[0]
             .clone()
-            .r#in  
+            .r#in
             .get_id()
             .unwrap()
             .to_string(),

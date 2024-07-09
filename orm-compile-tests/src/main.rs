@@ -58,7 +58,6 @@ mod check3 {
         )]
         age: u8,
 
-
         #[surreal_orm(
             ty = string,
             value = "permissions_fn",
@@ -72,5 +71,3 @@ mod check3 {
 fn main() {
     println!("Hello, world!");
 }
-
-
