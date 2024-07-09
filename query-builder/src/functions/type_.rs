@@ -139,8 +139,9 @@ create_type!(
     /// ```rust
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
+    ///
     /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
-    /// let result = type_::datetime!(datetime);
+    /// let result = type_::datetime!(dt);
     /// assert_eq!(result.to_raw().build(), "type::datetime('1970-01-01T00:01:01Z')");
     ///
     /// let datetime_field = Field::new("datetime_field");
@@ -776,8 +777,9 @@ pub mod is {
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
         /// use surreal_orm::{*, functions::type_};
+        ///
         /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
-        /// let result = type_::is::datetime!(datetime);
+        /// let result = type_::is::datetime!(dt);
         /// assert_eq!(result.to_raw().build(), "type::is::datetime('1970-01-01T00:01:01Z')");
         ///
         /// let datetime_field = Field::new("datetime_field");
