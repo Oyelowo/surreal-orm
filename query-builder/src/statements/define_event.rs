@@ -117,7 +117,7 @@ impl EventBuilder {
 pub struct Then(EventBuilder);
 
 impl Then {
-    pub fn then(mut self, query: impl Queryable + Parametric + Display) -> DefineEventStatement {
+    pub fn then(mut self, query: impl Queryable + Display) -> DefineEventStatement {
         self.0.then_string = Some(format!("{}", &query));
         self.0.bindings.extend(query.get_bindings());
         DefineEventStatement(self.0)
