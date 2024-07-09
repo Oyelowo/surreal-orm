@@ -29,13 +29,13 @@ DbMigrationSchemaState {
             Info(
                 {
                     "__some_test_param1": DefineStatementRaw(
-                        "DEFINE PARAM $__some_test_param1 VALUE NONE PERMISSIONS FULL",
+                        "DEFINE PARAM $__some_test_param1 VALUE 'test param one' PERMISSIONS FULL",
                     ),
                     "__some_test_param2": DefineStatementRaw(
-                        "DEFINE PARAM $__some_test_param2 VALUE NONE PERMISSIONS FULL",
+                        "DEFINE PARAM $__some_test_param2 VALUE 'test param two' PERMISSIONS FULL",
                     ),
                     "__some_test_param3": DefineStatementRaw(
-                        "DEFINE PARAM $__some_test_param3 VALUE NONE PERMISSIONS FULL",
+                        "DEFINE PARAM $__some_test_param3 VALUE 'test param three' PERMISSIONS FULL",
                     ),
                 },
             ),
@@ -125,7 +125,7 @@ DbMigrationSchemaState {
                 "surql",
             ),
             checksum_up: Checksum(
-                "adceda8f9eaccd54bcb515250c8a9e2deee25a0c24228433e739fd3f72dfaab4",
+                "07ae2bc74fc393a53ad8f26eab2ca631cb4fbaec74979f3e3bf7848f41c7334d",
             ),
             checksum_down: None,
         },
