@@ -244,10 +244,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
         .order_by(order(id).desc());
 
     let time = CompanyLikeUser::schema().time();
-    let dt = DateTime::<Utc>::from_naive_utc_and_offset(
-        NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-        Utc,
-    );
+    let dt = DateTime::from_timestamp(61, 0).unwrap();
 
     // Relate fromstate -> like-> devs
     let relation =
