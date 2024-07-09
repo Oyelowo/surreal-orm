@@ -278,7 +278,7 @@ mod tests {
 
         let expected_db_conn: Expr = parse_quote! { my_db };
         let expected_query = "SELECT * FROM users WHERE id = $id".to_string();
-        let expected_bindings = vec![Binding {
+        let expected_bindings = [Binding {
             key: parse_quote! { id },
             value: parse_quote! { 1 },
         }];
@@ -324,7 +324,7 @@ mod tests {
             "SELECT * FROM users WHERE id = $id".to_string(),
             "CREATE user:oyelowo SET name = 'Oyelowo', company = 'Codebreather', skills = ['Rust', 'python', 'typescript']".to_string()
         ];
-        let expected_bindings = vec![Binding {
+        let expected_bindings = [Binding {
             key: parse2(quote! { id }).unwrap(),
             value: parse2(quote! { 1 }).unwrap(),
         }];

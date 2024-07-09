@@ -123,7 +123,7 @@ pub struct QueryTransaction {
 
 impl QueryTransaction {
     /// takes a statement as an argument
-    pub fn query(mut self, query: impl Queryable + Parametric + Display) -> Self {
+    pub fn query(mut self, query: impl Queryable + Display) -> Self {
         self.data.bindings.extend(query.get_bindings());
         self.data.queries.push(query.build());
         self

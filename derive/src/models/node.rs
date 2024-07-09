@@ -223,7 +223,6 @@ impl ToTokens for NodeToken {
                     self.0
                 }
             }
-        
 
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
