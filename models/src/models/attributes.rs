@@ -593,6 +593,7 @@ pub struct Writes<In: Node, Out: Node> {
     #[surreal_orm(link_many="In")]
     pub r#in: LinkMany<In>,
     #[surreal_orm(link_many="Out")]
+    #[serde(skip_serializing)]
     pub out: LinkMany<Out>,
     pub time_written: Duration,
     pub count: i32,
