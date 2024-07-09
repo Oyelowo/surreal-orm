@@ -49,6 +49,7 @@ pub struct Rocket {
     pub created: DateTime<Utc>,
 }
 
+#[allow(dead_code)]
 struct Mana<T>
 where
     T: Clone,

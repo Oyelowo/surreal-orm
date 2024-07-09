@@ -16,14 +16,4 @@ pub mod user_with_generics;
 pub mod visits;
 pub mod weapon;
 pub mod with_generics;
-pub use with_generics::*;
 
-// pub use self::alien::*;
-// pub use self::attributes::*;
-// // pub use self::combined::*;
-// pub use self::configuration::*;
-// pub use self::planet::*;
-// pub use self::spaceship::*;
-// pub use self::user::*;
-// pub use self::visits::*;
-// pub use self::weapon::*;

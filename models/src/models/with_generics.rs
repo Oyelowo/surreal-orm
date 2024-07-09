@@ -2,8 +2,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use surreal_orm::*;
 
-
-
 #[derive(Node, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = planet_with_generics)]
@@ -45,12 +43,8 @@ pub struct RocketWithGenerics<'a, T: Serialize + Default + Clone + surreal_orm::
     must_number: [Strength; 3],
 }
 
-fn cere() {
-    // let x: HashSet<String> = HashSet::new()
-}
-fn test_partial_ob() {
-    // Rocket::schema().
-    let rocket = RocketWithGenerics::partial_builder()
+fn _test_partial_ob() {
+let rocket = RocketWithGenerics::partial_builder()
         // .name("Sugar".to_string())
         .something(43)
         .fav_number(None)
@@ -60,7 +54,7 @@ fn test_partial_ob() {
         .nana("ewe")
         .build();
 
-    let x = PlanetWithGenerics::partial_builder().rocket(rocket).build();
+    let _x = PlanetWithGenerics::partial_builder().rocket(rocket).build();
 }
 //
 // type Lala<'a, T> = <Weapon<'a, T> as PartialUpdater>::StructPartial;

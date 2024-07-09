@@ -4,7 +4,6 @@ use surreal_orm::*;
 // type Lala<'a, T> = <Weapon<'a, T> as PartialUpdater>::StructPartial;
 //
 fn main() {
-    let x = 5;
     let rocket = RocketWithGenerics::partial_builder()
         .something(907)
         .something2(Some("Mars"))

@@ -67,13 +67,6 @@ mod check3 {
         )]
         age2: String,
     }
-
-
-    fn er() {
-        let x = permissions_fn();
-    }
-
-
 }
 
 fn main() {

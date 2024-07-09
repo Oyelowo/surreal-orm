@@ -6,7 +6,7 @@
  */
 
 #![allow(non_snake_case)]
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::DateTime;
 
 use pretty_assertions::assert_eq;
 use std::time::Duration;
@@ -229,7 +229,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
 
     let user::Schema { tags, id, .. } = User::schema();
     let company::Schema { users, .. } = Company::schema();
-    let like::Schema { r#in, out, time, .. } = CompanyLikeUser::schema();
+    let like::Schema { r#in, .. } = CompanyLikeUser::schema();
 
     // select users from company
     // let from_statement = select(All).from(codebreather.id);
