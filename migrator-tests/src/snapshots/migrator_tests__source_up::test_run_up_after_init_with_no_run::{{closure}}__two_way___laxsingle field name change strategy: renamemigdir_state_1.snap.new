@@ -1,8 +1,9 @@
 ---
 source: migrator-tests/src/lib.rs
+assertion_line: 244
 expression: migration_queries_snaps
 ---
-header: Basename - migration_init. Extension - surql
+header: Basename - migration_init. Extension - up.surql
  Migration Query: 
 -- Resetting migrations metadata table at initialization
 DELETE migration;
@@ -49,6 +50,7 @@ DEFINE FIELD out ON eats_snake_case TYPE record<any> PERMISSIONS FULL;
 DEFINE FIELD place ON eats_snake_case TYPE string PERMISSIONS FULL;
 
 DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
 DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
 DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
 DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
@@ -92,3 +94,44 @@ DEFINE TOKEN token2 ON DATABASE TYPE EDDSA VALUE 'abrakradabra';
 
 
 DEFINE USER oyelowo ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$u1CPdtdC0Ek5GE1gvidj/g$fjFa7PZM+4hp4hlUJN1fz/FaDAf7KY1Qu48F5m5P0V8' ROLES OWNER;
+
+header: Basename - migration_init. Extension - down.surql
+ Migration Query: 
+REMOVE TABLE animal;
+
+REMOVE TABLE animal_snake_case;
+
+REMOVE TABLE crop;
+
+REMOVE TABLE eats;
+
+REMOVE TABLE eats_snake_case;
+
+REMOVE TABLE migration;
+
+REMOVE TABLE planet;
+
+REMOVE TABLE student;
+
+
+REMOVE ANALYZER ascii;
+
+
+REMOVE PARAM $__some_test_param1;
+REMOVE PARAM $__some_test_param2;
+REMOVE PARAM $__some_test_param3;
+
+
+REMOVE FUNCTION fn::get_animal_by_id;
+REMOVE FUNCTION fn::get_animal_by_id2;
+
+
+REMOVE SCOPE regional;
+REMOVE SCOPE scope1;
+REMOVE SCOPE scope2;
+
+
+REMOVE TOKEN token2 ON DATABASE;
+
+
+REMOVE USER oyelowo ON DATABASE;
