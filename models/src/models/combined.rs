@@ -140,7 +140,7 @@ fn define_age() -> DefineFieldStatement {
 }
 
 // #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-#[derive(Node,  Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table = "student"
@@ -302,7 +302,6 @@ impl WhiteSpaceRemoval for &str {}
 impl WhiteSpaceRemoval for String {}
 
 use serde_json::{Map, Value};
-
 
 // fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String {
 //     let value: Value = serde_json::from_str(json_string).expect("Invalid JSON string");

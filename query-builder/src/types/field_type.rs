@@ -36,7 +36,7 @@
 // Geometric Types include:
 // geometry<feature>
 // geometry<point>
-// geometry<LineStrgn> 
+// geometry<LineStrgn>
 // geometry<polygon>
 // geometry<multipoint>
 // geometry<multiline>

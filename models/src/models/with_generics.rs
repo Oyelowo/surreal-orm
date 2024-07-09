@@ -44,7 +44,7 @@ pub struct RocketWithGenerics<'a, T: Serialize + Default + Clone + surreal_orm::
 }
 
 fn _test_partial_ob() {
-let rocket = RocketWithGenerics::partial_builder()
+    let rocket = RocketWithGenerics::partial_builder()
         // .name("Sugar".to_string())
         .something(43)
         .fav_number(None)

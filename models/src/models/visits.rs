@@ -28,7 +28,7 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
     #[surreal_orm(ty = "record<visits_explicit>")]
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(link_one= "In", ty = "record<any>")]
+    #[surreal_orm(link_one = "In", ty = "record<any>")]
     pub in_: LinkOne<In>,
     // #[surreal_orm(type_ = "record<planet>")]
     #[surreal_orm(link_one = "Out", ty = "record<any>")]
@@ -122,7 +122,7 @@ where
     pub geometry_collection: sql::Geometry,
     pub territory_area: geo::Polygon,
     pub home: geo::Point,
-    
+
     #[surreal_orm(ty = "geometry<point>")]
     pub point_explicit: geo::Point,
 
@@ -150,12 +150,11 @@ where
     // Again, we dont have to provide the type attribute, it can auto detect
     #[surreal_orm(link_many = "SpaceShip")]
     pub space_ships: LinkMany<SpaceShip>,
-        //
-        // TODO:: Prevent doing this at compile time
+    //
+    // TODO:: Prevent doing this at compile time
     // This is a read only field. This wouldnt make sense. as we are using in node also as edge.
-        // e.g visit->visit->plant
+    // e.g visit->visit->plant
     // #[surreal_orm(relate(model = "VistVisitsPlanet", connection = "->visits->planet"))]
     // #[serde(skip_serializing, default)]
     // pub visit_to_planet: Relate<Planet<u64>>,
 }
-

@@ -41,14 +41,14 @@ impl DbFieldTypeAstMeta {
         if self.field_type_db_original.is_array() {
             return Some(&self.field_type_db_token);
         }
-        return None
+        return None;
     }
 
     pub fn set_item_type_path<'a>(&'a self) -> Option<&'a FieldTypeDbToken> {
         if self.field_type_db_original.is_set() {
             return Some(&self.field_type_db_token);
         }
-        return None
+        return None;
     }
 }
 
@@ -62,7 +62,6 @@ impl Default for DbFieldTypeAstMeta {
         }
     }
 }
-
 
 #[derive(Debug, Clone, Default)]
 pub struct FieldTypeDb(pub FieldType);

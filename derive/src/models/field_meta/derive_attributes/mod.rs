@@ -5,9 +5,9 @@
  * Licensed under the MIT license
  */
 
+mod db_field_types;
 mod generics;
 mod ident;
-mod db_field_types;
 
 use darling::FromField;
 use proc_macro2::Ident;
@@ -35,7 +35,7 @@ pub struct MyFieldReceiver {
     attrs: Vec<syn::Attribute>,
 
     /// Explicity specify the array or set item/element rust type
-    #[darling(default, rename= "item_rust_ty")]
+    #[darling(default, rename = "item_rust_ty")]
     pub(crate) array_item_ty_specified: Option<ArrayItemType>,
 
     /// Old name of field when renaming

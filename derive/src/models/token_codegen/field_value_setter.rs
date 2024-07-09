@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
 
@@ -64,10 +63,10 @@ impl<'a> Codegen<'a> {
 
         let field_type =
             field_type.replace_self_with_current_struct_concrete_type(table_attributes)?;
-        let setter_assignable_impl = quote!( impl #field_impl_generics 
-                #crate_name::SetterAssignable<#field_type> for 
-                self::#field_name_pascalized  #field_where_clause {}
-            );
+        let setter_assignable_impl = quote!( impl #field_impl_generics
+            #crate_name::SetterAssignable<#field_type> for
+            self::#field_name_pascalized  #field_where_clause {}
+        );
 
         let field_type_setter_patcher_impls: FieldTypeSetterPatcherImpls = if field_receiver
             .db_field_name(casing)?
@@ -184,7 +183,8 @@ impl<'a> Codegen<'a> {
 
         let (generics, array_item_type) = match field_receiver.to_relation_type(model_attributes) {
             RelationType::LinkMany(foreign_node) => {
-                let generics_meta = foreign_node.get_generics_from_current_struct(model_attributes)?;
+                let generics_meta =
+                    foreign_node.get_generics_from_current_struct(model_attributes)?;
                 (
                     Some(generics_meta),
                     Some(quote!(<#foreign_node as #crate_name::Model>::Id)),
@@ -217,7 +217,8 @@ impl<'a> Codegen<'a> {
 
                 let inferred_type = match inner_list_type {
                     Some(ref ty) => {
-                        let generics_meta = ty.get_generics_from_current_struct(model_attributes)?;
+                        let generics_meta =
+                            ty.get_generics_from_current_struct(model_attributes)?;
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
                     None => (None, None),

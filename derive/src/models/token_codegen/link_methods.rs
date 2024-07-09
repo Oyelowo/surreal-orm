@@ -70,8 +70,8 @@ impl<'a> Codegen<'a> {
         }
 
         for meta in metas {
-        // We dont want to import generics In and Out nodes in the edge table
-        // as they are not concrete types
+            // We dont want to import generics In and Out nodes in the edge table
+            // as they are not concrete types
             if self.is_in_or_out_edge_node()? {
                 continue;
             }
@@ -105,7 +105,7 @@ impl<'a> Codegen<'a> {
                 let normalized_field_name_str = if self.build().is_empty(){
                     #db_field_name
                 }else {
-                    #db_field_name_with_foregin_access 
+                    #db_field_name_with_foregin_access
                 };
 
                 let clause: #crate_name::NodeClause = clause.into();

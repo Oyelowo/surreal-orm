@@ -110,7 +110,7 @@ impl DefineFieldStatement {
 
     /// Set the default value for the field.
     pub fn value(mut self, default_value: impl Into<ValueLike>) -> Self {
-    // pub fn value<T, U>(mut self, default_value: U) where T: Deref<Target = U>, T: Into<U>, U: Into<T>, T: Into<ValueLike>, T: Into<sql::Value> -> Self {
+        // pub fn value<T, U>(mut self, default_value: U) where T: Deref<Target = U>, T: Into<U>, U: Into<T>, T: Into<ValueLike>, T: Into<sql::Value> -> Self {
         let value: ValueLike = default_value.into();
         self.value = Some(value.build());
         self.bindings.extend(value.get_bindings());

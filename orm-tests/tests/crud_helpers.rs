@@ -31,7 +31,7 @@ async fn test_create() -> SurrealOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let ss_id = SpaceShip::create_id("num-1".into());
-    let spaceship_instance =|| SpaceShip {
+    let spaceship_instance = || SpaceShip {
         id: ss_id.clone(),
         name: "spaceship-1".into(),
         created: chrono::Utc::now(),

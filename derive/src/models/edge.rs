@@ -112,15 +112,14 @@ impl ToTokens for EdgeToken {
         } = &code_gen;
 
         let has_in_and_out_fields = serialized_field_names_normalised
-                .iter()
-                .map(|this|{
-                    let this = this.to_string();
-                     this.trim_start_matches("r#").replace("\"", "")
-                })
-                .filter(|this|{
-                    this  == "in" || this == "out"
-                }).count() == 2;
-
+            .iter()
+            .map(|this| {
+                let this = this.to_string();
+                this.trim_start_matches("r#").replace("\"", "")
+            })
+            .filter(|this| this == "in" || this == "out")
+            .count()
+            == 2;
 
         if !has_in_and_out_fields {
             tokens.extend(

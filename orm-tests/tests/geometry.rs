@@ -81,7 +81,6 @@ struct Company2ForTesting {
     home: geo::Point,
 }
 
-
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = "gen_z_company")]
@@ -558,6 +557,3 @@ fn test_company_field_definitions() {
 
     insta::assert_snapshot!(company_defs);
 }
-
-
-
