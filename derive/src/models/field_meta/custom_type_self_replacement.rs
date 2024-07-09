@@ -251,7 +251,7 @@ mod tests {
 
         assert_eq!(
             quote::quote!(#ty_to_replace).to_string(),
-            quote::quote!(User<'a, 'b, U, V>).to_string()
+            quote::quote!(User<'a, 'b, U, T , >).to_string()
         );
     }
 }
