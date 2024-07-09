@@ -10,12 +10,13 @@ members = [
   "migrator-tests",
   "proc-macros-helpers",
   "derive",
+  "derive_tests",
   "models",
   "orm-tests",
   "orm-compile-tests",
   "examples/migration-filebased",
   "examples/migration-embedded",
-  "examples/migration-cli",
+  "examples/migration-cli", "derive_tests",
 ]
 
 [workspace.package]

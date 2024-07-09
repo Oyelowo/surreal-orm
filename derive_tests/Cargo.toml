@@ -1,0 +1,27 @@
+[package]
+name = "derive_tests"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+
+[dependencies]
+surreal-orm = { workspace = true }
+surreal-models = { workspace = true }
+surrealdb = { workspace = true }
+pretty_assertions = { workspace = true }
+syn = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+geo = { workspace = true }
+insta = { workspace = true }
+tokio = { workspace = true }
+uuid = { workspace = true }
+rand = { workspace = true }
+
+[lib]
+doctest = false
