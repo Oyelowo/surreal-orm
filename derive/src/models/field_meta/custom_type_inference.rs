@@ -366,7 +366,7 @@ impl<'a> FieldTypeInference<'a> {
                     // during deserialization
                   return Ok(None)
                 }
-            
+
             RelationType::LinkOne(ref_node) => {
                 let ref_node = ref_node.turbo_fishize()?;
 

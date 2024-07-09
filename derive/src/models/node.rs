@@ -203,7 +203,7 @@ impl ToTokens for NodeToken {
             pub struct  #struct_partial_ident #struct_impl_generics #struct_where_clause {
                 #[serde(skip)]
                 #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>,
-               #(#struct_partial_fields), * 
+               #(#struct_partial_fields), *
             }
 
             #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
@@ -211,11 +211,11 @@ impl ToTokens for NodeToken {
 
             impl #struct_impl_generics #struct_partial_builder_ident #struct_ty_generics #struct_where_clause {
                 pub fn new() ->Self {
-                    Self(#struct_partial_ident { 
-                        _____struct_marker_ident: #crate_name::Maybe::None, 
+                    Self(#struct_partial_ident {
+                        _____struct_marker_ident: #crate_name::Maybe::None,
                         #( #serialized_ident_struct_partial_init_fields: #crate_name::Maybe::None), *
                     })
-                } 
+                }
 
                 #( #struct_partial_associated_functions) *
 

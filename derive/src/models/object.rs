@@ -110,7 +110,7 @@ impl ToTokens for ObjectToken {
                     #module_name_rexported::Schema #explicit_generics ::new_prefixed(prefix)
                 }
             }
-        
+
             impl #impl_generics #crate_name::PartialUpdater for #struct_name_ident #ty_generics #where_clause {
                 type StructPartial = #struct_partial_ident #ty_generics;
                 type PartialBuilder = #struct_partial_builder_ident #ty_generics;
@@ -133,7 +133,7 @@ impl ToTokens for ObjectToken {
             pub struct  #struct_partial_ident #impl_generics #where_clause {
                 #[serde(skip)]
                 #_____struct_marker_ident: #crate_name::Maybe<#struct_marker>,
-               #(#struct_partial_fields), * 
+               #(#struct_partial_fields), *
             }
 
             #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
@@ -141,11 +141,11 @@ impl ToTokens for ObjectToken {
 
             impl #impl_generics #struct_partial_builder_ident #ty_generics #where_clause {
                 pub fn new() ->Self {
-                    Self(#struct_partial_ident { 
-                        _____struct_marker_ident: #crate_name::Maybe::None, 
+                    Self(#struct_partial_ident {
+                        _____struct_marker_ident: #crate_name::Maybe::None,
                         #( #serialized_ident_struct_partial_init_fields: #crate_name::Maybe::None), *
                     })
-                } 
+                }
 
                 #( #struct_partial_associated_functions) *
 
