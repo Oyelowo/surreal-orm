@@ -1,5 +1,6 @@
 ---
 source: migrator-tests/src/lib.rs
+assertion_line: 190
 expression: db_miration_schema_state
 ---
 DbMigrationSchemaState {
@@ -110,12 +111,16 @@ DbMigrationSchemaState {
                 "migration_init",
             ),
             extension: Extension(
-                "surql",
+                "up.surql",
             ),
             checksum_up: Checksum(
-                "07ae2bc74fc393a53ad8f26eab2ca631cb4fbaec74979f3e3bf7848f41c7334d",
+                "b7a5b1e2b57e959dc5a41f74fe98b382d31c4e181acaefb80c630d80c921024f",
             ),
-            checksum_down: None,
+            checksum_down: Some(
+                Checksum(
+                    "1297b3600eaa5bf46b7cb0f2ef0ec816f722f2aac01dee04e648ec8533a3884d",
+                ),
+            ),
         },
     ],
 }
