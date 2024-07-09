@@ -8,19 +8,21 @@ LET $balance1 = (CREATE ONLY balance CONTENT { amount: 300f, id: balance:balance
 
 CREATE ONLY balance CONTENT { amount: 300f, id: balance:balance2 };
 
-IF balance > 100 
+LET $balance_amount = $balance1.amount;
+
+IF $balance_amount > 100 
 	{ LET $first_name = 'Oyelowo';
 
 LET $score = 100;
 
 SELECT * FROM account WHERE balance = 5; }
-ELSE IF balance < 100 
+ELSE IF $balance_amount < 100 
 	{ LET $first_name = 'Oyelowo';
 
 LET $score = 100;
 
 SELECT * FROM account WHERE balance = 5; }
-ELSE IF balance >= 100 
+ELSE IF $balance_amount >= 100 
 	{ LET $first_name = 'Oyelowo';
 
 LET $score = 100;
@@ -73,4 +75,3 @@ UPDATE account:two SET balance -= 300f;
 UPDATE account:two SET balance -= 50f;
 
 COMMIT TRANSACTION;
-	

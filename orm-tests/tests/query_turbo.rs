@@ -251,7 +251,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref account = Account::table();
     let id1 = &Account::create_id("one".to_string());
     let id2 = &Account::create_id("two".to_string());
     let amount_to_transfer = 300.00;
@@ -271,40 +270,45 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
                 amount: amount_to_transfer,
             });
 
-        if balance.greater_than(100) {
-            let first_name = "Mars";
+        let balance_amount = balance1.with_path::<Balance>(E).amount;
+        if balance_amount.greater_than(100) {
+            let first_name = "Oyelowo";
             let score = 100;
-            select(All).from(account).where_(acc.balance.eq(5));
-        } else if balance.less_than(100) {
-            let first_name = "Jupiter";
+            select(All).from(Account::table()).where_(balance.eq(5));
+        } else if balance_amount.less_than(100) {
+            let first_name = "Oyelowo";
             let score = 100;
-            select(All).from(account).where_(acc.balance.eq(5));
-        }  else {
-            let first_name = "Earth";
+            select(All).from(Account::table()).where_(balance.eq(5));
+        } else if balance_amount.gte(100) {
+            let first_name = "Oyelowo";
             let score = 100;
-            select(All).from(account).where_(acc.balance.eq(5));
+            select(All).from(Account::table()).where_(balance.eq(5));
+        } else {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table()).where_(balance.eq(5));
         };
 
-        for name in vec!["Jupiter", "Alberta"] {
-            let first = "Vancouver";
-            select(All).from(account).where_(acc.balance.eq(5));
+        for name in vec!["Oyelowo", "Oyedayo"] {
+            let first = "Oyelowo";
+            select(All).from(Account::table()).where_(balance.eq(5));
 
-            let good_stmt = select(All).from(account).where_(acc.balance.eq(64));
+            let good_stmt = select(All).from(Account::table()).where_(balance.eq(64));
 
             if balance.gt(50) {
-                let first_name = "Pluto";
+                let first_name = "Oyelowo";
             };
 
-            select(All).from(account).where_(acc.balance.eq(34));
+            select(All).from(Account::table()).where_(balance.eq(34));
 
             let numbers = vec![23, 98];
 
             for age in numbers {
               let score = 100;
-              let first_stmt = select(All).from(account).where_(acc.balance.eq(5));
+              let first_stmt = select(All).from(Account::table()).where_(balance.eq(5));
 
-              let second_stmt = select(All).from(account).where_(acc.balance.eq(25));
-              select(All).from(account).where_(acc.balance.eq(923));
+              let second_stmt = select(All).from(Account::table()).where_(balance.eq(25));
+              select(All).from(Account::table()).where_(balance.eq(923));
 
             };
         };
@@ -320,13 +324,13 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
 
         // You can reference the balance object by using the $balance variable and pass the amount
         // as a parameter to the decrement_by function. i.e $balance.amount
-        let updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance1.with_path::<Balance>(E).amount));
-        update::<Account>(id1).set(acc.balance.increment_by(balance1.with_path::<Balance>(E).amount));
-        update::<Account>(id1).set(acc.balance.increment_by(45.3));
+        let updated1 = update::<Account>(id1).set(balance.increment_by(balance1.with_path::<Balance>(E).amount));
+        update::<Account>(id1).set(balance.increment_by(balance1.with_path::<Balance>(E).amount));
+        update::<Account>(id1).set(balance.increment_by(45.3));
 
         // You can also pass the amount directly to the decrement_by function. i.e 300.00
-        update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
-        update::<Account>(id2).set(acc.balance.decrement_by(50));
+        update::<Account>(id2).set(balance.decrement_by(amount_to_transfer));
+        update::<Account>(id2).set(balance.decrement_by(50));
 
         commit transaction;
     };
