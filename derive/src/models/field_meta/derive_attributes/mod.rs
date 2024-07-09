@@ -7,7 +7,7 @@
 
 mod generics;
 mod ident;
-mod types;
+mod db_field_types;
 
 use darling::FromField;
 use proc_macro2::Ident;
