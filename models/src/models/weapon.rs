@@ -35,8 +35,8 @@ pub struct WeaponOld {
     pub nice: bool,
     pub bunch_of_other_fields: i32,
     pub created: DateTime<Utc>,
-    // #[surreal_orm(nest_object = "Rocket")]
-    // pub rocket: Rocket,
+    #[surreal_orm(nest_object = "Rocket")]
+    pub rocket: Rocket,
 }
 
 #[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]

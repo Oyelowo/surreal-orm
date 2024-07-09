@@ -8,19 +8,21 @@ LET $balance1 = $_param_00000001;
 
 CREATE ONLY balance CONTENT $_param_00000002;
 
-IF balance > $_param_00000003 
+LET $balance_amount = $balance1.amount;
+
+IF $balance_amount > $_param_00000003 
 	{ LET $first_name = $_param_00000004;
 
 LET $score = $_param_00000005;
 
 SELECT * FROM account WHERE balance = $_param_00000006; }
-ELSE IF balance < $_param_00000007 
+ELSE IF $balance_amount < $_param_00000007 
 	{ LET $first_name = $_param_00000008;
 
 LET $score = $_param_00000009;
 
 SELECT * FROM account WHERE balance = $_param_00000010; }
-ELSE IF balance >= $_param_00000011 
+ELSE IF $balance_amount >= $_param_00000011 
 	{ LET $first_name = $_param_00000012;
 
 LET $score = $_param_00000013;
@@ -73,4 +75,3 @@ UPDATE $_param_00000036 SET balance -= $_param_00000037;
 UPDATE $_param_00000038 SET balance -= $_param_00000039;
 
 COMMIT TRANSACTION;
-	
