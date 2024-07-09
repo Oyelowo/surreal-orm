@@ -1,5 +1,5 @@
 [package]
-name = "surreal-derive"
+name = "surreal-derive-helpers"
 version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }
@@ -23,10 +23,7 @@ paste = { workspace = true }
 
 serde = { workspace = true }
 surreal-query-builder = { workspace = true }
-surreal-derive-helpers = { workspace = true }
 migrator = { workspace = true }
 proc-macros-helpers = { workspace = true }
 
 [lib]
-proc-macro = true
-doctest = false
