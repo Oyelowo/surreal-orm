@@ -199,6 +199,8 @@ impl VisitMut for ReplaceSelfVisitor {
 }
 
 #[allow(dead_code)]
+// Convert a vector of generic arguments to a punctuated list of generic arguments
+// e.g., vec![A, B, C] -> A, B, C
 fn vec_to_punctuated(vec: Vec<GenericArgument>) -> Punctuated<GenericArgument, Comma> {
     let mut punctuated = Punctuated::new();
     for item in vec {
@@ -210,6 +212,8 @@ fn vec_to_punctuated(vec: Vec<GenericArgument>) -> Punctuated<GenericArgument, C
 
 #[cfg(test)]
 mod tests {
+    use quote::{format_ident, quote};
+
     use super::*;
 
     #[test]
@@ -242,7 +246,6 @@ mod tests {
             path: Path::from(Ident::new("Self", proc_macro2::Span::call_site())),
         });
 
-        // let ty_to_replace: Type = parse_quote!(User<'a, 'b, U, V>);
         let mut replacer = ReplaceSelfVisitor {
             struct_ident,
             generics,
@@ -250,8 +253,30 @@ mod tests {
         let ty_to_replace = replacer.replace_self(&ty_to_replace.into());
 
         assert_eq!(
+            quote!(#ty_to_replace).to_string(),
+            quote!(User<'a, 'b, U, T ,>).to_string()
+        );
+    }
+
+    #[test]
+    fn replace_self_using_quote() {
+        let struct_ident = format_ident!("User");
+        let generics = quote!(<'a, 'b, U, V>);
+        let generics: AngleBracketedGenericArguments = syn::parse2(generics).unwrap();
+        let type_with_self = quote!(Self<'a, 'b, U, V>);
+
+        let mut replacer = ReplaceSelfVisitor {
+            struct_ident,
+            generics,
+        };
+        let type_with_self: syn::Type = syn::parse2(type_with_self).unwrap();
+        let ty_to_replace = replacer.replace_self(&type_with_self.into());
+
+
+
+        assert_eq!(
             quote::quote!(#ty_to_replace).to_string(),
-            quote::quote!(User<'a, 'b, U, T>).to_string()
+            quote::quote!(User<'a, 'b, U, V>).to_string()
         );
     }
 }
