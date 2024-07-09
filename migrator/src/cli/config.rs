@@ -9,7 +9,7 @@ use clap::Args;
 use std::fmt::Display;
 use std::str::FromStr;
 use surrealdb::dbs::Capabilities;
-use surrealdb::opt::Config;
+use surrealdb::opt::{Config, WaitFor};
 use typed_builder::TypedBuilder;
 
 use surrealdb::engine::any::{connect, Any};
@@ -150,10 +150,11 @@ impl DatabaseConnection {
             .await
             .expect("Failed to use db");
         db_instance
-            .use_ns(self.clone().sc.unwrap_or_default())
+            .use_ns(self.clone().ns)
             .await
             .expect("Failed to use ns");
 
+        db_instance.wait_for(WaitFor::Connection).await;
         self.db_connection = Some(db_instance);
 
         self
