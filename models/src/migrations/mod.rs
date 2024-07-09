@@ -70,9 +70,9 @@ impl DbResources for Resources {
 
     fn params(&self) -> Vec<Raw> {
         vec![
-            define_param(__some_test_param1()).to_raw(),
-            define_param(__some_test_param2()).to_raw(),
-            define_param(__some_test_param3()).to_raw(),
+            define_param(__some_test_param1()).value("test param one").to_raw(),
+            define_param(__some_test_param2()).value("test param two").to_raw(),
+            define_param(__some_test_param3()).value("test param three").to_raw(),
         ]
     }
 

@@ -53,15 +53,18 @@ use crate::{
 /// let statement = define_param(endpoint_base()).value("https://dummyjson.com");
 /// assert!(!statement.build().is_empty());
 /// ```
-pub fn define_param(param_name: impl Deref<Target = Param>) -> DefineParamStatement {
+pub fn define_param(param_name: impl Deref<Target = Param>) -> DefineParamStatementBuilder {
     let param_name: &Param = param_name.deref();
-    DefineParamStatement {
+    let define_param_statement = DefineParamStatement {
         name: param_name.to_string(),
         value: None,
         bindings: vec![],
         errors: vec![],
-    }
+    };
+    DefineParamStatementBuilder(define_param_statement)
 }
+
+pub struct DefineParamStatementBuilder(DefineParamStatement);
 
 /// Define param statement
 pub struct DefineParamStatement {
@@ -71,14 +74,14 @@ pub struct DefineParamStatement {
     errors: ErrorList,
 }
 
-impl DefineParamStatement {
+impl DefineParamStatementBuilder {
     /// Set the value of the parameter.
-    pub fn value(mut self, value: impl Into<ValueLike>) -> Self {
+    pub fn value(mut self, value: impl Into<ValueLike>) -> DefineParamStatement {
         let value: ValueLike = value.into();
-        self.bindings.extend(value.get_bindings());
-        self.errors.extend(value.get_errors());
-        self.value = Some(value.build());
-        self
+        self.0.bindings.extend(value.get_bindings());
+        self.0.errors.extend(value.get_errors());
+        self.0.value = Some(value.build());
+        self.0
     }
 }
 
