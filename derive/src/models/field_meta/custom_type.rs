@@ -18,7 +18,7 @@ use syn::{
 use crate::models::*;
 
 use super::{
-    custom_type_self_replacement::ReplaceSelfVisitor, field_name_serialized::DbFieldName, *,
+    custom_type_self_replacement::ReplaceSelfVisitor, *,
 };
 
 #[derive(Debug, Clone)]
