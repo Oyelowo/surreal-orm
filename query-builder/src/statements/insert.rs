@@ -222,7 +222,7 @@ where
     let value = sql::to_value(node).ok().map_or_else(
         || {
             errors.push("Unable to convert node to json".to_string());
-            sql::Value::None
+            sql::Value::Null
         },
         |v| v,
     );
@@ -234,7 +234,7 @@ where
             let value = value.pick(&[key.as_str().into()]);
 
             let binding = if value == sql::Value::None {
-                Binding::new(sql::Value::None).with_name(key.into())
+                Binding::new(sql::Value::Null).with_name(key.into())
             } else {
                 Binding::new(value).with_name(key.into())
             };

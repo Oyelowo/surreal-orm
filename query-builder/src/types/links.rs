@@ -23,7 +23,6 @@ pub enum Reference<V: Model> {
     FetchedValue(V),
     /// null if foreign node does not exist
     Null,
-    // None,
 }
 
 impl<V> Reference<V>
