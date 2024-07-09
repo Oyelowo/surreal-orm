@@ -5,11 +5,9 @@
  * Licensed under the MIT license
  */
 
-use std::sync::Arc;
 
 use proc_macros_helpers::get_crate_name;
-use quote::{quote, ToTokens};
-use syn::spanned::Spanned;
+use quote::quote;
 
 use crate::models::*;
 

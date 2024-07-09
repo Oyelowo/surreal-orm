@@ -141,7 +141,7 @@ impl<'a> ModelAttributes<'a> {
             ModelAttributes::Node(node) => Some(node.table()?),
             ModelAttributes::Edge(edge) => Some(edge.table()?),
             // Objects don't have a table
-            ModelAttributes::Object(object) => None,
+            ModelAttributes::Object(_object) => None,
         };
         Ok(table_name)
     }
