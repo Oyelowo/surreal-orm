@@ -48,6 +48,7 @@ struct Company {
     #[surreal_orm(nest_array = Person)]
     founders_multiple_nesting: Vec<Vec<Person>>,
 
+    #[allow(clippy::type_complexity)]
     #[surreal_orm(nest_array = Person)]
     founders_10: Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
 
@@ -74,6 +75,7 @@ struct Company2ForTesting {
     #[surreal_orm(nest_array = "Person")]
     founders_multiple_nesting: Vec<[Person; 28]>,
 
+    #[allow(clippy::type_complexity)]
     #[surreal_orm(nest_array = "Person")]
     founders_10: Vec<Vec<Vec<Vec<Option<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
 
