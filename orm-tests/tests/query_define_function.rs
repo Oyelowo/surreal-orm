@@ -46,20 +46,20 @@ define_function!(get_or_create_spaceship(
 fn test_function_definition_with_idiomatic_if_statement() {
     let dt = chrono::Utc.timestamp_opt(61, 0).unwrap();
     let spaceship = get_or_create_spaceship_fn("Oyelowo", "Oyedayo", dt, 5);
-    insta::assert_display_snapshot!(spaceship.to_raw().build());
-    insta::assert_display_snapshot!(spaceship.fine_tune_params());
+    insta::assert_snapshot!(spaceship.to_raw().build());
+    insta::assert_snapshot!(spaceship.fine_tune_params());
 
     let spaceship = get_or_create_spaceship_fn("Oyelowo", "Oyedayo", Param::new("birthday"), 5);
-    insta::assert_display_snapshot!(spaceship.to_raw().build());
-    insta::assert_display_snapshot!(spaceship.fine_tune_params());
+    insta::assert_snapshot!(spaceship.to_raw().build());
+    insta::assert_snapshot!(spaceship.fine_tune_params());
 
     let spaceship = get_or_create_spaceship_fn("Oyelowo", "Oyedayo", Field::new("birthday"), 5);
-    insta::assert_display_snapshot!(spaceship.to_raw().build());
-    insta::assert_display_snapshot!(spaceship.fine_tune_params());
+    insta::assert_snapshot!(spaceship.to_raw().build());
+    insta::assert_snapshot!(spaceship.fine_tune_params());
 
     let spaceship = get_or_create_spaceship!("Oyelowo", "Oyedayo", dt, 5);
-    insta::assert_display_snapshot!(spaceship.to_raw().build());
-    insta::assert_display_snapshot!(spaceship.fine_tune_params());
+    insta::assert_snapshot!(spaceship.to_raw().build());
+    insta::assert_snapshot!(spaceship.fine_tune_params());
 
     let spaceship = get_or_create_spaceship!(
         Field::new("first_name"),
@@ -67,8 +67,8 @@ fn test_function_definition_with_idiomatic_if_statement() {
         Param::new("birthday"),
         5
     );
-    insta::assert_display_snapshot!(spaceship.to_raw().build());
-    insta::assert_display_snapshot!(spaceship.fine_tune_params());
+    insta::assert_snapshot!(spaceship.to_raw().build());
+    insta::assert_snapshot!(spaceship.fine_tune_params());
 
     let spaceship = get_or_create_spaceship!(
         "Oyelowo",
@@ -76,8 +76,8 @@ fn test_function_definition_with_idiomatic_if_statement() {
         Field::new("birthday"),
         5
     );
-    insta::assert_display_snapshot!(spaceship.to_raw().build());
-    insta::assert_display_snapshot!(spaceship.fine_tune_params());
+    insta::assert_snapshot!(spaceship.to_raw().build());
+    insta::assert_snapshot!(spaceship.fine_tune_params());
 
     assert_eq!(
         spaceship.to_raw().build(),
@@ -89,8 +89,8 @@ fn test_function_definition_with_idiomatic_if_statement() {
     );
 
     let spaceship_statement = get_or_create_spaceship_statement();
-    insta::assert_display_snapshot!(spaceship_statement.to_raw().build());
-    insta::assert_display_snapshot!(spaceship_statement.fine_tune_params());
+    insta::assert_snapshot!(spaceship_statement.to_raw().build());
+    insta::assert_snapshot!(spaceship_statement.fine_tune_params());
 }
 
 define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
@@ -118,8 +118,8 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
 #[test]
 fn test_function_definition() {
     let person = get_person!("Oyelowo", "Oyedayo", "2022-09-21");
-    insta::assert_display_snapshot!(person.to_raw().build());
-    insta::assert_display_snapshot!(person.fine_tune_params());
+    insta::assert_snapshot!(person.to_raw().build());
+    insta::assert_snapshot!(person.fine_tune_params());
     assert_eq!(
         person.to_raw().build(),
         "fn::get_person('Oyelowo', 'Oyedayo', '2022-09-21')"
@@ -130,6 +130,6 @@ fn test_function_definition() {
     );
 
     let person_statement = get_person_statement();
-    insta::assert_display_snapshot!(person_statement.to_raw().build());
-    insta::assert_display_snapshot!(person_statement.fine_tune_params());
+    insta::assert_snapshot!(person_statement.to_raw().build());
+    insta::assert_snapshot!(person_statement.fine_tune_params());
 }

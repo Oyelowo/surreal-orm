@@ -320,7 +320,7 @@ impl fmt::Display for IfElseStatement {
 
 #[cfg(test)]
 mod tests {
-    use insta::assert_display_snapshot;
+    use insta::assert_snapshot;
     use surrealdb::sql;
 
     use crate::{
@@ -340,8 +340,8 @@ mod tests {
             .end();
 
         assert_eq!(if_statement.get_bindings().len(), 4);
-        insta::assert_display_snapshot!(if_statement.fine_tune_params());
-        insta::assert_display_snapshot!(if_statement.to_raw().build());
+        insta::assert_snapshot!(if_statement.fine_tune_params());
+        insta::assert_snapshot!(if_statement.to_raw().build());
     }
 
     #[test]
@@ -354,8 +354,8 @@ mod tests {
             .end();
 
         assert_eq!(if_statement1.get_bindings().len(), 3);
-        insta::assert_display_snapshot!(if_statement1.fine_tune_params());
-        insta::assert_display_snapshot!(if_statement1.to_raw().build());
+        insta::assert_snapshot!(if_statement1.fine_tune_params());
+        insta::assert_snapshot!(if_statement1.to_raw().build());
     }
 
     #[test]
@@ -370,8 +370,8 @@ mod tests {
             .end();
         assert_eq!(if_statement2.get_bindings().len(), 4);
 
-        insta::assert_display_snapshot!(if_statement2.fine_tune_params());
-        insta::assert_display_snapshot!(if_statement2.to_raw().build());
+        insta::assert_snapshot!(if_statement2.fine_tune_params());
+        insta::assert_snapshot!(if_statement2.to_raw().build());
     }
 
     #[test]
@@ -388,8 +388,8 @@ mod tests {
             .end();
 
         assert_eq!(if_statement.get_bindings().len(), 5);
-        assert_display_snapshot!(if_statement.fine_tune_params());
-        assert_display_snapshot!(if_statement.to_raw().build());
+        assert_snapshot!(if_statement.fine_tune_params());
+        assert_snapshot!(if_statement.to_raw().build());
     }
 
     #[test]
@@ -409,8 +409,8 @@ mod tests {
             .end();
 
         assert_eq!(if_statement4.get_bindings().len(), 6);
-        assert_display_snapshot!(if_statement4.fine_tune_params());
-        assert_display_snapshot!(if_statement4.to_raw().build());
+        assert_snapshot!(if_statement4.fine_tune_params());
+        assert_snapshot!(if_statement4.to_raw().build());
     }
 
     #[test]
@@ -433,8 +433,8 @@ mod tests {
             .end();
 
         assert_eq!(if_statement5.get_bindings().len(), 9);
-        assert_display_snapshot!(if_statement5.fine_tune_params());
-        assert_display_snapshot!(if_statement5.to_raw().build());
+        assert_snapshot!(if_statement5.fine_tune_params());
+        assert_snapshot!(if_statement5.to_raw().build());
     }
 
     #[test]
@@ -478,7 +478,7 @@ mod tests {
             .end();
 
         assert_eq!(if_statement5.get_bindings().len(), 9);
-        assert_display_snapshot!(if_statement5.fine_tune_params());
-        assert_display_snapshot!(if_statement5.to_raw().build());
+        assert_snapshot!(if_statement5.fine_tune_params());
+        assert_snapshot!(if_statement5.to_raw().build());
     }
 }

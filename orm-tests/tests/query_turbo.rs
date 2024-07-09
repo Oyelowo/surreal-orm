@@ -24,8 +24,8 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_chain() {
         select(All).from(account_table);
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 }
 
 #[test]
@@ -43,8 +43,8 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_transaction(
         commit transaction;
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 }
 
 #[test]
@@ -60,8 +60,8 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_block() {
         return var_name;
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 }
 
 #[test]
@@ -79,8 +79,8 @@ fn test_duplicate_variable_name_properly_chain_bound_in_dedicated_transaction() 
         COMMIT TRANSACTION;
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 }
 
 #[test]
@@ -96,8 +96,8 @@ fn test_duplicate_variable_name_properly_chain_bound_in_dedicated_block() {
         return var_name;
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 }
 
 #[tokio::test]
@@ -112,8 +112,8 @@ async fn test_simple_standalone_for_loop() -> SurrealOrmResult<()> {
         };
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 
     Ok(())
 }
@@ -146,8 +146,8 @@ async fn test_multiple_for_loops() -> SurrealOrmResult<()> {
         };
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 
     Ok(())
 }
@@ -183,8 +183,8 @@ async fn test_simple_standalone_if_else() -> SurrealOrmResult<()> {
         };
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 
     Ok(())
 }
@@ -240,8 +240,8 @@ async fn test_multiple_if_else() -> SurrealOrmResult<()> {
         return cond_username;
     };
 
-    insta::assert_display_snapshot!(query.to_raw().build());
-    insta::assert_display_snapshot!(query.fine_tune_params());
+    insta::assert_snapshot!(query.to_raw().build());
+    insta::assert_snapshot!(query.fine_tune_params());
 
     Ok(())
 }
@@ -335,8 +335,8 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         commit transaction;
     };
 
-    insta::assert_display_snapshot!(query_chain.to_raw().build());
-    insta::assert_display_snapshot!(query_chain.fine_tune_params());
+    insta::assert_snapshot!(query_chain.to_raw().build());
+    insta::assert_snapshot!(query_chain.fine_tune_params());
 
     let _result = query_chain.run(db.clone()).await?;
 

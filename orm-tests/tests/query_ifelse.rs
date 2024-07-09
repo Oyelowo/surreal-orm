@@ -67,8 +67,8 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         return cond;
     };
 
-    insta::assert_display_snapshot!(queries_1.to_raw().build());
-    insta::assert_display_snapshot!(queries_1.fine_tune_params());
+    insta::assert_snapshot!(queries_1.to_raw().build());
+    insta::assert_snapshot!(queries_1.fine_tune_params());
 
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(untagged)]
@@ -79,8 +79,8 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
     }
     let query_result_1 = select(All).from(queries_1);
 
-    insta::assert_display_snapshot!(query_result_1.to_raw().build());
-    insta::assert_display_snapshot!(query_result_1.fine_tune_params());
+    insta::assert_snapshot!(query_result_1.to_raw().build());
+    insta::assert_snapshot!(query_result_1.fine_tune_params());
 
     let query_result_1 = query_result_1
         .return_many::<SpaceShipOrWeapon>(db.clone())
@@ -118,8 +118,8 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         return if_else_external(val, oye_name);
     };
 
-    insta::assert_display_snapshot!(queries_2.to_raw().build());
-    insta::assert_display_snapshot!(queries_2.fine_tune_params());
+    insta::assert_snapshot!(queries_2.to_raw().build());
+    insta::assert_snapshot!(queries_2.fine_tune_params());
 
     let query_result_2: Vec<SpaceShipOrWeapon> =
         select(All).from(queries_2).return_many(db.clone()).await?;
@@ -208,8 +208,8 @@ async fn test_if_else_statement_and_let_macro() -> SurrealOrmResult<()> {
         .chain(name.clone())
         .chain(if_statement.clone());
 
-    insta::assert_display_snapshot!(queries_1.to_raw().build());
-    insta::assert_display_snapshot!(queries_1.fine_tune_params());
+    insta::assert_snapshot!(queries_1.to_raw().build());
+    insta::assert_snapshot!(queries_1.fine_tune_params());
 
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(untagged)]
@@ -316,8 +316,8 @@ async fn test_if_else_statement() -> SurrealOrmResult<()> {
         .chain(let_name.clone())
         .chain(if_statement.clone());
 
-    insta::assert_display_snapshot!(queries_1.to_raw().build());
-    insta::assert_display_snapshot!(queries_1.fine_tune_params());
+    insta::assert_snapshot!(queries_1.to_raw().build());
+    insta::assert_snapshot!(queries_1.fine_tune_params());
 
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(untagged)]

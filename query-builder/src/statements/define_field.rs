@@ -321,7 +321,7 @@ mod tests {
                 FOR create, delete\n\tWHERE name IS 'Oyedayo'\n\
                 FOR update\n\tWHERE age <= 130;"
         );
-        insta::assert_display_snapshot!(statement.fine_tune_params());
+        insta::assert_snapshot!(statement.fine_tune_params());
         assert_eq!(statement.get_bindings().len(), 6);
     }
 
@@ -337,7 +337,7 @@ mod tests {
             statement.build(),
             "DEFINE FIELD email ON TABLE user TYPE string;"
         );
-        insta::assert_display_snapshot!(statement.fine_tune_params());
+        insta::assert_snapshot!(statement.fine_tune_params());
         assert_eq!(statement.get_bindings().len(), 0);
     }
 }
