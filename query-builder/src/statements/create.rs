@@ -19,6 +19,7 @@ use crate::{
     ErrorList, Setter, ToRaw,
 };
 
+#[allow(unused)]
 struct SetterCreator(Vec<Setter>);
 
 impl From<Setter> for SetterCreator {

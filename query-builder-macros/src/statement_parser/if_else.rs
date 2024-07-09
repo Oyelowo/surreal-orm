@@ -248,6 +248,7 @@ impl Parse for IfElseStatementAst {
     }
 }
 
+#[allow(dead_code)]
 pub struct TokenizedIfElseStmt {
     pub code_to_render: TokenStream,
     pub query_chain: TokenStream,
