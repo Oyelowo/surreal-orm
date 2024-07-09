@@ -65,6 +65,9 @@ pub struct Codegen<'a> {
     /// other scenario.
     pub serialized_ident_struct_partial_init_fields: Vec<SerializedIdentStructPartialInitFields>,
     /// list of fields names that are actually serialized and not skipped as string.
+    /// Usually, this is every field except the many-to-many relation fields which
+    /// are not serialized because they are not directly part of the struct.
+    /// They are readonly fields that are accessed through the relation field.
     pub serialized_fmt_db_field_names_instance: Vec<SerializableField>,
     /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
     pub linked_fields: Vec<LinkedField>,

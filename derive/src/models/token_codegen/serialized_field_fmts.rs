@@ -18,14 +18,17 @@ impl<'a> Codegen<'a> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
         let db_field_name = field_receiver.db_field_name(&table_derive_attrs.casing()?)?;
+        let relation_type = field_receiver.to_relation_type(table_derive_attrs);
 
-        self.serialized_fmt_db_field_names_instance
-            .push(quote!(#db_field_name .into()).into());
+        if !relation_type.is_relate_graph() {
+            self.serialized_fmt_db_field_names_instance
+                .push(quote!(#db_field_name .into()).into());
+        }
 
         let serialized_field_fmt = || quote!(#crate_name::Field::new(#db_field_name));
 
         if !field_receiver.skip_serializing && !field_receiver.skip {
-            match field_receiver.to_relation_type(table_derive_attrs) {
+            match relation_type {
                 RelationType::LinkOne(_) => {
                     self.link_one_fields.push(serialized_field_fmt().into());
                     self.link_one_and_self_fields
