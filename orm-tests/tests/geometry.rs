@@ -33,6 +33,7 @@ pub struct Person {
     name: String,
 }
 
+#[allow(clippy::type_complexity)]
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = "company")]
@@ -48,7 +49,6 @@ struct Company {
     #[surreal_orm(nest_array = Person)]
     founders_multiple_nesting: Vec<Vec<Person>>,
 
-    #[allow(clippy::type_complexity)]
     #[surreal_orm(nest_array = Person)]
     founders_10: Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
 
@@ -56,6 +56,7 @@ struct Company {
     home: geo::Point,
 }
 
+#[allow(clippy::type_complexity)]
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table = company_2_for_testing)]
@@ -75,7 +76,6 @@ struct Company2ForTesting {
     #[surreal_orm(nest_array = "Person")]
     founders_multiple_nesting: Vec<[Person; 28]>,
 
-    #[allow(clippy::type_complexity)]
     #[surreal_orm(nest_array = "Person")]
     founders_10: Vec<Vec<Vec<Vec<Option<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
 
