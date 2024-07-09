@@ -108,10 +108,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
 
                 #[test]
                 fn [<test_ $function_name _fn_with_plain_datetime>]() {
-                    let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-                                chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-                                chrono::Utc,
-                            );
+                    let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
                     let result = time::[<$function_name>]!(dt);
                     assert_eq!(result.fine_tune_params(), format!("time::{}($_param_00000001)", $function_name));
                     assert_eq!(
@@ -138,10 +135,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::day!(dt);
     /// assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
@@ -175,10 +169,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::hour!(dt);
     /// assert_eq!(result.fine_tune_params(), "time::hour($_param_00000001)");
@@ -212,10 +203,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::minute!(dt);
     /// assert_eq!(result.fine_tune_params(), "time::minute($_param_00000001)");
@@ -249,10 +237,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::month!(dt);
     /// assert_eq!(result.fine_tune_params(), "time::month($_param_00000001)");
@@ -287,10 +272,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::nano!(dt);
     /// assert_eq!(
@@ -323,10 +305,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::second!(dt);
     /// assert_eq!(
@@ -359,10 +338,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::unix!(dt);
     /// assert_eq!(
@@ -395,10 +371,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::wday!(dt);
     /// assert_eq!(
@@ -431,10 +404,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::week!(dt);
     /// assert_eq!(
@@ -467,10 +437,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::yday!(dt);
     /// assert_eq!(
@@ -503,10 +470,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
     ///
     /// let result = time::year!(dt);
     /// assert_eq!(
@@ -555,10 +519,7 @@ pub fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-///    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-///    chrono::Utc,
-/// );
+/// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
 /// let duration = std::time::Duration::from_secs(10);
 /// let result = time::floor!(dt, duration);
 /// assert_eq!(
@@ -614,11 +575,8 @@ pub fn ceil_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLi
 /// # Example
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
-/// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-///   chrono::Utc,
-///   );
+///   use surreal_orm::{*, functions::time};
+///   let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
 ///   let duration = std::time::Duration::from_secs(10);
 ///   let result = time::ceil!(dt, duration);
 ///   assert_eq!(
@@ -686,10 +644,7 @@ pub fn format_fn(datetime: impl Into<DatetimeLike>, format: impl Into<StrandLike
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-///   chrono::Utc,
-/// );
+/// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
 /// let result = time::format_!(dt, "%Y-%m-%d");
 /// assert_eq!(
 ///     result.to_raw().build(),
@@ -784,10 +739,7 @@ pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-///   chrono::Utc,
-/// );
+/// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
 /// let duration = std::time::Duration::from_secs(10);
 /// let result = time::round!(dt, duration);
 /// assert_eq!(
@@ -851,10 +803,7 @@ pub fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<StrandLik
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-///     chrono::Utc,
-/// );
+/// let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
 /// let result = time::group!(dt, "year");
 /// assert_eq!(
 ///    result.to_raw().build(),
@@ -927,10 +876,7 @@ mod tests {
 
     #[test]
     fn test_floor_macro_with_plain_datetime_and_duration() {
-        let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-            chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-            chrono::Utc,
-        );
+        let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
         let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
         let result = time::floor!(dt, duration);
         assert_eq!(
@@ -961,10 +907,7 @@ mod tests {
 
     #[test]
     fn test_round_macro_with_plain_datetime_and_duration() {
-        let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-            chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-            chrono::Utc,
-        );
+        let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
         let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
         let result = time::round!(dt, duration);
         assert_eq!(
@@ -1014,10 +957,7 @@ mod tests {
             paste::paste! {
                 #[test]
                 fn [<test_group_macro_with_plain_datetime_and_ $interval_name>]() {
-                    let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-                        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-                        chrono::Utc,
-                    );
+                    let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
                     let result = time::group!(dt, $interval);
                     assert_eq!(
                         result.fine_tune_params(),
@@ -1105,10 +1045,7 @@ macro_rules! create_time_fn_with_single_array_of_datetime_arg {
 
                 #[test]
                 fn [<test_ $function_name _fn_with_plain_datetime>]() {
-                    let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-                                chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-                                chrono::Utc,
-                            );
+                    let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
                     let dt2 = $crate::Param::new("dt2");
                     let result = time::[<$function_name>]!(arr![dt, dt2]);
                     assert_eq!(result.fine_tune_params(), format!("time::{}([$_param_00000001, $dt2])", $function_name));
@@ -1136,18 +1073,9 @@ create_time_fn_with_single_array_of_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt1 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
-    /// let dt2 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(62, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
-    /// let dt3 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(63, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt1 = chrono::DateTime::from_timestamp(61, 0).unwrap();
+    /// let dt2 = chrono::DateTime::from_timestamp(62, 0).unwrap();
+    /// let dt3 = chrono::DateTime::from_timestamp(63, 0).unwrap();
     ///
     /// let result = time::max!([dt1, dt2, dt3]);
     /// assert_eq!(
@@ -1180,18 +1108,9 @@ create_time_fn_with_single_array_of_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt1 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
-    /// let dt2 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(62, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
-    /// let dt3 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-    ///     chrono::NaiveDateTime::from_timestamp_opt(63, 0).unwrap(),
-    ///     chrono::Utc,
-    /// );
+    /// let dt1 = chrono::DateTime::from_timestamp(61, 0).unwrap();
+    /// let dt2 = chrono::DateTime::from_timestamp(62, 0).unwrap();
+    /// let dt3 = chrono::DateTime::from_timestamp(63, 0).unwrap();
     ///
     /// let result = time::min!([dt1, dt2, dt3]);
     /// assert_eq!(
