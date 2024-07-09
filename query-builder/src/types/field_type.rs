@@ -36,7 +36,7 @@
 // Geometric Types include:
 // geometry<feature>
 // geometry<point>
-// geometry<line>
+// geometry<LineStrgn> 
 // geometry<polygon>
 // geometry<multipoint>
 // geometry<multiline>
@@ -72,7 +72,7 @@ pub enum GeometryType {
     Feature,
     /// Define a field with point geometric type
     Point,
-    /// Define a field with line geometric type
+    /// Define a field with LineStrigWgeometric type
     LineString,
     /// Define a field with polygon geometric type
     Polygon,
@@ -154,7 +154,7 @@ pub enum FieldType {
     /// Store a reference to another record. The value must be a Record ID.
     Record(Vec<crate::Table>), // record<user | admin> or record<user> or record
     /// RFC 7946 compliant data type for storing geometry in the GeoJson format.
-    Geometry(Vec<GeometryType>), // geometry<point | line | polygon>
+    Geometry(Vec<GeometryType>), // geometry<point | LineStrigW| polygon>
     Option(Box<FieldType>),           // option<string>
     Union(Vec<FieldType>),            // string | int | object
     Set(Box<FieldType>, Option<u64>), // set<string, 10>, set<string>, set
@@ -730,7 +730,7 @@ mod tests {
 
     test_parse_db_field_type!(
         geometry_spaced,
-        "geometry    < point | line  |     polygon>",
+        "geometry    < point | LineString  |     polygon>",
         FieldType::Geometry(vec![
             GeometryType::Point,
             GeometryType::LineString,
@@ -740,7 +740,7 @@ mod tests {
 
     test_parse_db_field_type!(
         geometry_no_space,
-        "geometry<collection| point|multipolygon|line|polygon>",
+        "geometry<collection| point|multipolygon|LineString|polygon>",
         FieldType::Geometry(vec![
             GeometryType::Collection,
             GeometryType::Point,
@@ -821,7 +821,7 @@ mod tests {
     );
     test_parse_db_field_type!(
         option_geometry_spaced,
-        "option<geometry    < point | line  |     polygon>>",
+        "option<geometry    < point | LineString |     polygon>>",
         FieldType::Option(Box::new(FieldType::Geometry(vec![
             GeometryType::Point,
             GeometryType::LineString,
@@ -830,7 +830,7 @@ mod tests {
     );
     test_parse_db_field_type!(
         option_geometry_no_space,
-        "option<geometry<collection| point|multipolygon|line|polygon>>",
+        "option<geometry<collection| point|multipolygon|LineString|polygon>>",
         FieldType::Option(Box::new(FieldType::Geometry(vec![
             GeometryType::Collection,
             GeometryType::Point,
