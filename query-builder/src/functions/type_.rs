@@ -548,7 +548,7 @@ mod tests {
     #[test]
     fn test_datetime_macro_with_plain_datetime() {
         let dt = chrono::DateTime::from_timestamp(61, 0).unwrap();
-        let result = type_::datetime!(value());
+        let result = type_::datetime!(dt);
         assert_eq!(
             result.fine_tune_params(),
             "type::datetime($_param_00000001)"
