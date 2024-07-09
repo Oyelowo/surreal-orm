@@ -1,5 +1,5 @@
 ---
-source: surreal-query-builder/src/functions/script.rs
+source: query-builder/src/functions/script.rs
 expression: f2.to_raw()
 ---
-function($name, $id) { return [1,2,3].map(v => v * 10 * $name * $id) ; }
+function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }
