@@ -11,6 +11,7 @@ DELETE migration;
 
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD attributes[*] ON animal TYPE string PERMISSIONS FULL;
 DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
 DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
 DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
@@ -31,16 +32,19 @@ DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
 DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
 DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
 DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD labels[*] ON planet TYPE string PERMISSIONS FULL;
 DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
 DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
 
 header: Basename - migration_gen_1. Extension - surql
  Migration Query: 
+REMOVE FIELD attributes[*] ON TABLE animal;
 -- Rename field attributes to characteristics
 DEFINE FIELD characteristics ON animal TYPE array<string> PERMISSIONS FULL;
 UPDATE animal SET characteristics = attributes;
 REMOVE FIELD attributes ON TABLE animal;
 -- Rename field ending
+DEFINE FIELD characteristics[*] ON animal TYPE string PERMISSIONS FULL;
 REMOVE FIELD createdAt ON TABLE animal;
 REMOVE FIELD updatedAt ON TABLE animal;
 DEFINE INDEX species_speed_idx ON animal FIELDS velocity, characteristics UNIQUE;

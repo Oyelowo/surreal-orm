@@ -33,8 +33,8 @@ DbMigrationSchemaState {
                     "crop": DefineStatementRaw(
                         "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
                     ),
-                    "eats": DefineStatementRaw(
-                        "DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE",
+                    "eats_v2": DefineStatementRaw(
+                        "DEFINE TABLE eats_v2 SCHEMAFULL PERMISSIONS NONE",
                     ),
                     "migration": DefineStatementRaw(
                         "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
@@ -68,11 +68,11 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "2d850089c51a49447395c7b5da3c2cad248644d7a649e2b3711c2d4510cd0ffc",
+                "7e8893918909d1d527bc7a6a279a95d1703e445e0cde90e8082ed4fd9ced0dbf",
             ),
             checksum_down: Some(
                 Checksum(
-                    "b32d97ef0c72b2ed8167f41fe0049b26c83f9b3fd63db462d9f7851d2e2f6b82",
+                    "3c181ebdca7900fc67015a028a1c04cbc47ee88cd90baf1f5238cac2e0b7e95e",
                 ),
             ),
         },
@@ -84,7 +84,7 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "6afbec180b04c58fb85b85c513214b2f9a5d2dd4fbd30ae89fc98fafe93db26b",
+                "b7a5b1e2b57e959dc5a41f74fe98b382d31c4e181acaefb80c630d80c921024f",
             ),
             checksum_down: Some(
                 Checksum(
