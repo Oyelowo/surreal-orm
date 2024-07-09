@@ -484,3 +484,4 @@ pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macr
     };
     quote!(#output).into()
 }
+
