@@ -337,20 +337,14 @@ impl<'a> FieldTypeInference<'a> {
             // Teacher->Plays->Football
             DbFieldTypeAstMeta {
                 field_type_db_original: FieldType::Record(vec![]),
-                field_type_db_token: quote!(
-                    #crate_name::FieldType::Array(
-                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![])),
-                        ::std::option::Option::None
-                    )
-                )
-                .into(),
+                field_type_db_token: quote!(#crate_name::FieldType::Record(::std::vec![])).into(),
                 static_assertion_token:
-                    quote!(#crate_name::validators::assert_type_is_link_many::<#ty>();).into(),
+                    quote!(#crate_name::validators::assert_type_is_link_one::<#ty>();).into(),
             }
         } else {
             return Err(syn::Error::new(
                 ty.span(),
-                format!("Could not infer type for the field - {db_field_name}. Specify by using e.g ty = \"array\"")
+                format!("Could not infer type for the field - {db_field_name}. Specify by using e.g ty = \"record<any>\"")
             )
             .into());
         };

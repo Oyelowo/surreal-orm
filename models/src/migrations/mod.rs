@@ -327,9 +327,9 @@ pub mod snake_cases {
     pub struct EatsSnakeCase<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Self>,
         #[surreal_orm(link_many="In")]
-        pub r#in: LinkMany<In>,
+        pub r#in: LinkOne<In>,
         #[surreal_orm(link_many="Out")]
-        pub out: LinkMany<Out>,
+        pub out: LinkOne<Out>,
         pub place: String,
         pub created_at: chrono::DateTime<Utc>,
     }
@@ -432,10 +432,10 @@ impl TableResources for AnimalV2 {
 #[surreal_orm(table = eats, schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(link_many = In)]
-    pub r#in: LinkMany<In>,
-    #[surreal_orm(link_many = Out)]
-    pub out: LinkMany<Out>,
+    #[surreal_orm(link_one = In)]
+    pub r#in: LinkOne<In>,
+    #[surreal_orm(link_one = Out)]
+    pub out: LinkOne<Out>,
     pub place: String,
     pub created_at: chrono::DateTime<Utc>,
 }
@@ -447,10 +447,10 @@ pub type AnimalEatsCrop = Eats<Animal, Crop>;
 pub struct EatsV2<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(link_many = In, ty = "array<record<any>>")]
-    pub in_: LinkMany<In>,
-    #[surreal_orm(link_many = Out, ty = "array<record<any>>")]
-    pub out: LinkMany<Out>,
+    #[surreal_orm(link_one = In, ty = "array<record<any>>")]
+    pub in_: LinkOne<In>,
+    #[surreal_orm(link_one = Out, ty = "array<record<any>>")]
+    pub out: LinkOne<Out>,
     pub location: String,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,

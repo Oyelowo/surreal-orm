@@ -29,10 +29,10 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
     #[surreal_orm(link_many="In", ty = "array<record<any>>")]
-    pub in_: LinkMany<In>,
+    pub in_: LinkOne<In>,
     // #[surreal_orm(type_ = "record<planet>")]
     #[surreal_orm(link_many="Out", ty = "array<record<any>>")]
-    pub out: LinkMany<Out>,
+    pub out: LinkOne<Out>,
     #[surreal_orm(ty = "duration")]
     pub time_visited: Duration,
 }
@@ -48,13 +48,13 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
 
     #[serde(rename = "in", skip_serializing)]
-    #[surreal_orm(link_many = In)]
-    pub in_: LinkMany<In>,
+    #[surreal_orm(link_one = In)]
+    pub in_: LinkOne<In>,
 
     #[serde(skip_serializing)]
-    #[surreal_orm(link_many = Out)]
+    #[surreal_orm(link_one = Out)]
     // #[surreal_orm(ty = "record")]
-    pub out: LinkMany<Out>,
+    pub out: LinkOne<Out>,
 
     // #[surreal_orm(ty = "string")]
     name: String,
@@ -97,11 +97,11 @@ where
     Out: Node,
 {
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(link_many = In)]
-    pub r#in: LinkMany<In>,
+    #[surreal_orm(link_one = In)]
+    pub r#in: LinkOne<In>,
 
-    #[surreal_orm(link_many = Out)]
-    pub out: LinkMany<Out>,
+    #[surreal_orm(link_one = Out)]
+    pub out: LinkOne<Out>,
     pub hair_color: Option<String>,
 
     #[surreal_orm(ty = "duration")]

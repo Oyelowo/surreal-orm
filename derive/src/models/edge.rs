@@ -273,13 +273,13 @@ impl ToTokens for EdgeToken {
                     }
 
                     fn define_fields() -> ::std::vec::Vec<#crate_name::Raw> {
-                        vec![
+                        ::std::vec![
                            #( #field_definitions), *
                         ]
                     }
 
                     fn get_field_meta() -> ::std::vec::Vec<#crate_name::FieldMetadata> {
-                        return vec![#( #field_metadata), *]
+                        return ::std::vec![#( #field_metadata), *]
                     }
                 }
 
