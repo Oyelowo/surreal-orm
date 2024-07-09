@@ -144,7 +144,7 @@ impl ToTokens for EdgeToken {
         let struct_partial_builder_ident = struct_name_ident.partial_builder_ident();
 
         tokens.extend(quote!(
-                use #crate_name::{ToRaw as _};
+                use #crate_name::ToRaw as _;
                 use ::std::str::FromStr as _;
 
                 impl #impl_generics #struct_name_ident #ty_generics #where_clause {
@@ -166,7 +166,7 @@ impl ToTokens for EdgeToken {
                         #module_name_rexported::Schema #explicit_generics ::new_prefixed(prefix)
                     }
                 }
-            
+
                 impl #impl_generics #crate_name::PartialUpdater for #struct_name_ident #ty_generics #where_clause {
                     type StructPartial = #struct_partial_ident #ty_generics;
                     type PartialBuilder = #struct_partial_builder_ident #ty_generics;
@@ -192,7 +192,7 @@ impl ToTokens for EdgeToken {
                         #table_str.into()
                     }
                 }
-      
+
                 #[allow(non_snake_case)]
                 #[derive(#crate_name::serde::Serialize, Debug, Clone, Default)]
                 pub struct  #struct_partial_ident #impl_generics #where_clause {
@@ -206,11 +206,11 @@ impl ToTokens for EdgeToken {
 
                 impl #impl_generics #struct_partial_builder_ident #ty_generics #where_clause {
                     pub fn new() ->Self {
-                        Self(#struct_partial_ident { 
-                            _____struct_marker_ident: #crate_name::Maybe::None, 
+                        Self(#struct_partial_ident {
+                            _____struct_marker_ident: #crate_name::Maybe::None,
                             #( #serialized_ident_struct_partial_init_fields: #crate_name::Maybe::None), *
                         })
-                    } 
+                    }
 
                     #( #struct_partial_associated_functions) *
 
@@ -343,7 +343,7 @@ impl ToTokens for EdgeToken {
                             self.#___________errors.to_vec()
                         }
                     }
-        
+
                     impl #impl_generics #crate_name::Aliasable for #struct_name_ident #ty_generics #where_clause {}
 
                     impl #impl_generics #crate_name::Parametric for &#struct_name_ident #ty_generics #where_clause {
