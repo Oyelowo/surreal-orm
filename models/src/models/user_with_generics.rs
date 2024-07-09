@@ -30,10 +30,10 @@ pub struct Like<In: Node, Out: Node> {
     pub scores_plural: Vec<Vec<f64>>,
     #[serde(rename = "in", skip_serializing)]
     #[surreal_orm(link_many = "In")]
-    pub in_: LinkMany<In>,
+    pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
-    #[surreal_orm(link_many = "Out")]
-    pub out: LinkMany<Out>,
+    #[surreal_orm(link_one = "Out")]
+    pub out: LinkOne<Out>,
     #[surreal_orm(nest_object = Time)]
     pub time: Time,
 }

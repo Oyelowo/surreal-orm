@@ -40,11 +40,11 @@ impl Default for User {
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // #[serde(rename = "in", skip_serializing)]
-    #[surreal_orm(link_many = In)]
-    pub r#in: LinkMany<In>,
+    #[surreal_orm(link_one = In)]
+    pub r#in: LinkOne<In>,
     #[serde(skip_serializing)]
-    #[surreal_orm(link_many = Out)]
-    pub out: LinkMany<Out>,
+    #[surreal_orm(link_one = Out)]
+    pub out: LinkOne<Out>,
     #[surreal_orm(nest_object = Time)]
     pub time: Time,
 }

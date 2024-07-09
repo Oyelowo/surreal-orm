@@ -591,10 +591,10 @@ pub struct Writes<In: Node, Out: Node> {
     // pub id: SurrealSimpleId<Writes<In, Out>>,
     #[serde(skip_serializing)]
     #[surreal_orm(link_many="In")]
-    pub r#in: LinkMany<In>,
+    pub r#in: LinkOne<In>,
     #[surreal_orm(link_many="Out")]
     #[serde(skip_serializing)]
-    pub out: LinkMany<Out>,
+    pub out: LinkOne<Out>,
     pub time_written: Duration,
     pub count: i32,
 }
@@ -609,12 +609,12 @@ pub struct Likes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // pub id: SurrealSimpleId<Likes<In, Out>>,
     #[serde(rename = "in", skip_serializing)]
-    #[surreal_orm(link_many = In)]
-    pub in_: LinkMany<In>,
+    #[surreal_orm(link_one = In)]
+    pub in_: LinkOne<In>,
 
     #[serde(skip_serializing)]
-    #[surreal_orm(link_many = Out)]
-    pub out: LinkMany<Out>,
+    #[surreal_orm(link_one = Out)]
+    pub out: LinkOne<Out>,
     pub likes_count: u64,
 }
 pub type StudentLiksBook = Likes<Student, Book>;
