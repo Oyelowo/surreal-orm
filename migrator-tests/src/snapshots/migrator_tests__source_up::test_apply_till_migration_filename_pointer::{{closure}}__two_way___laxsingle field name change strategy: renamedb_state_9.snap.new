@@ -1,5 +1,6 @@
 ---
 source: migrator-tests/src/lib.rs
+assertion_line: 190
 expression: db_miration_schema_state
 ---
 DbMigrationSchemaState {
@@ -27,8 +28,17 @@ DbMigrationSchemaState {
         tables: Tables(
             Info(
                 {
+                    "animal": DefineStatementRaw(
+                        "DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "crop": DefineStatementRaw(
+                        "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
+                    ),
                     "migration": DefineStatementRaw(
                         "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "planet": DefineStatementRaw(
+                        "DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE",
                     ),
                 },
             ),
@@ -45,6 +55,38 @@ DbMigrationSchemaState {
         ),
     },
     migration_meta: [
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_12_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "a690c007dcfe85267364a44063fea37a55785d83a4c8237af75c11d5a5a321ff",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "7eefd526c19969d2329f170436b63860c7c11606e0f420b86f97b0f5e6e5475d",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_11_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                ),
+            ),
+        },
         StreamLinedMigration {
             basename: Basename(
                 "migration_10_gen_after_init",
