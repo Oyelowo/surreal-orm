@@ -447,9 +447,9 @@ pub type AnimalEatsCrop = Eats<Animal, Crop>;
 pub struct EatsV2<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(link_one = In, ty = "array<record<any>>")]
+    #[surreal_orm(link_one = In, ty = "record<any>")]
     pub in_: LinkOne<In>,
-    #[surreal_orm(link_one = Out, ty = "array<record<any>>")]
+    #[surreal_orm(link_one = Out, ty = "record<any>")]
     pub out: LinkOne<Out>,
     pub location: String,
     pub created_at: chrono::DateTime<Utc>,

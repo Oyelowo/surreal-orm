@@ -1,0 +1,70 @@
+---
+source: orm-tests/tests/query_turbo.rs
+assertion_line: 334
+expression: query_chain.to_raw().build()
+---
+BEGIN TRANSACTION;
+
+LET $balance1 = (CREATE ONLY balance CONTENT { amount: 300f, id: balance:balance1 });
+
+CREATE ONLY balance CONTENT { amount: 300f, id: balance:balance2 };
+
+IF balance > 100 
+	{ LET $first_name = 'Mars';
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5; }
+ELSE IF balance < 100 
+	{ LET $first_name = 'Jupiter';
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5; }
+ELSE
+	{ LET $first_name = 'Earth';
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5; };
+
+FOR $name IN ['Jupiter', 'Alberta'] {
+LET $first = 'Vancouver';
+
+SELECT * FROM account WHERE balance = 5;
+
+LET $good_stmt = (SELECT * FROM account WHERE balance = 64);
+
+IF balance > 50 
+	{ LET $first_name = 'Pluto'; };
+
+SELECT * FROM account WHERE balance = 34;
+
+LET $numbers = [23, 98];
+
+FOR $age IN $numbers {
+LET $score = 100;
+
+LET $first_stmt = (SELECT * FROM account WHERE balance = 5);
+
+LET $second_stmt = (SELECT * FROM account WHERE balance = 25);
+
+SELECT * FROM account WHERE balance = 923;
+};
+};
+
+LET $balance3 = (CREATE balance CONTENT { amount: 300f, id: balance:balance3 });
+
+LET $accounts = (SELECT * FROM account:one..=two);
+
+LET $updated1 = (UPDATE account:one SET balance += $balance1.amount);
+
+UPDATE account:one SET balance += $balance1.amount;
+
+UPDATE account:one SET balance += 45.3f;
+
+UPDATE account:two SET balance -= 300f;
+
+UPDATE account:two SET balance -= 50f;
+
+COMMIT TRANSACTION;
