@@ -551,3 +551,14 @@ macro_rules! check_unique_idents {
         $crate::check_unique_idents!($($tail),*);
     };
 }
+
+
+
+/// Checks that it is false
+#[macro_export]
+macro_rules! assert_not {
+    ($e:expr) => {
+        assert!(!$e)
+    };
+}
+pub use assert_not;
