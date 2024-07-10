@@ -16,7 +16,7 @@ use surrealdb::sql;
 // Alien
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "alien")]
+#[surreal_orm(table = alien)]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
