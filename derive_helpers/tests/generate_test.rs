@@ -1,26 +1,14 @@
-
-use quote::{format_ident, quote, ToTokens};
 use darling::FromDeriveInput;
-use surreal_derive_helpers::models::NodeToken;
+use quote::{format_ident, quote, ToTokens};
+use surreal_derive_helpers::models::{EdgeToken, NodeToken};
+use surreal_query_builder::assert_not;
 use test_case::test_case;
 
-enum ModelType {
-    Node,
-    Edge,
-}
-use ModelType::*;
-
 // General test for the Node derive macro
-#[test_case(Node ; "node model common attributes")]
-#[test_case(Edge ; "edge model common attributes")]
-fn test_node_trait_derive(model_type: ModelType) {
-    let model_type = match model_type {
-        Node => quote!(Node),
-        Edge => quote!(Edge),
-    };
-
+#[test]
+fn test_node_trait_derive() {
     let input = quote!(
-        #[derive(#model_type)]
+        #[derive(Node)]
         #[surreal_orm(table = "student", drop, schemafull, permissions = perm)]
         pub struct Student {
             id: SurrealSimpleId<Self>,
@@ -40,8 +28,52 @@ fn test_node_trait_derive(model_type: ModelType) {
 
     let derive_input = syn::parse2(input).unwrap();
     let node_token = NodeToken::from_derive_input(&derive_input).unwrap();
+    let node_token = node_token.to_token_stream().to_string();
+
+    assert!(node_token.contains("impl surreal_orm :: Node for Student "));
+    assert_not!(node_token.contains("impl surreal_orm :: Edge for Student "));
     insta::assert_snapshot!(
-        format!("{model_type}_trait_derive"),
+        format!("node_trait_derive"),
+        format!("{:#}", node_token.to_token_stream())
+    );
+}
+
+#[test]
+fn test_edge_trait_derive() {
+    let input = quote!(
+        #[derive(Edge)]
+        #[surreal_orm(table = writes, drop, schemafull, permissions = perm)]
+        pub struct Writes<In, Out> {
+            id: SurrealSimpleId<Self>,
+
+            duration_of_write: Duration,
+
+            #[surreal_orm(link_one = In)]
+            r#in: LinkOne<In>,
+
+            #[surreal_orm(link_one = Out)]
+            out: LinkOne<Out>,
+
+            #[surreal_orm(link_one = Book)]
+            course: LinkOne<Book>,
+
+            #[surreal_orm(link_many = Book)]
+            field_nother: LinkMany<Book>,
+        }
+    );
+
+    let derive_input = syn::parse2(input).expect("Failed to parse input");
+    let node_token = EdgeToken::from_derive_input(&derive_input).expect("Failed to get node token");
+    let node_token = node_token.to_token_stream().to_string();
+    let node_no_whitespace = node_token.replace(" ", "");
+
+    assert!(node_no_whitespace.contains("impl<In,Out>surreal_orm::EdgeforWrites<In,Out>"));
+    assert!(node_token.contains("impl < In , Out > surreal_orm :: Edge for Writes < In , Out >"));
+    assert_not!(node_no_whitespace.contains("impl<In,Out>surreal_orm::NodeforWrites<In,Out>"));
+    assert_not!(node_token.contains("impl < In , Out > surreal_orm :: Node for Writes < In , Out >"));
+
+    insta::assert_snapshot!(
+        format!("{}-edge_trait_derive", file!()),
         format!("{:#}", node_token.to_token_stream())
     );
 }
