@@ -5,11 +5,11 @@
  * Licensed under the MIT license
  */
 
+use crate::models::*;
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Ident;
-use crate::models::*;
 
 #[derive(Debug, Clone, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]

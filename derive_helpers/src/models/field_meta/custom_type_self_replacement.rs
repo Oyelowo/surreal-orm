@@ -254,7 +254,7 @@ mod tests {
 
         assert_eq!(
             quote!(#ty_to_replace).to_string(),
-            quote!(User<'a, 'b, U, T ,>).to_string()
+            quote!(User<'a, 'b, U, T>).to_string()
         );
     }
 
@@ -271,8 +271,6 @@ mod tests {
         };
         let type_with_self: syn::Type = syn::parse2(type_with_self).unwrap();
         let ty_to_replace = replacer.replace_self(&type_with_self.into());
-
-
 
         assert_eq!(
             quote::quote!(#ty_to_replace).to_string(),

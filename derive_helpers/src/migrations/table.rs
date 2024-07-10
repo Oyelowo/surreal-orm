@@ -30,7 +30,6 @@ impl ToTokens for TableMigrationSchemaDeriveAttributes {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -53,5 +52,4 @@ mod tests {
 
         assert_eq!(tokens.to_string(), expected.to_string());
     }
-
 }
