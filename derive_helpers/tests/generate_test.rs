@@ -1,10 +1,8 @@
 use darling::FromDeriveInput;
-use quote::{format_ident, quote, ToTokens};
+use quote::{quote, ToTokens};
 use surreal_derive_helpers::models::{EdgeToken, NodeToken};
 use surreal_query_builder::assert_not;
-use test_case::test_case;
 
-// General test for the Node derive macro
 #[test]
 fn test_node_trait_derive() {
     let input = quote!(
@@ -33,7 +31,7 @@ fn test_node_trait_derive() {
     assert!(node_token.contains("impl surreal_orm :: Node for Student "));
     assert_not!(node_token.contains("impl surreal_orm :: Edge for Student "));
     insta::assert_snapshot!(
-        format!("node_trait_derive"),
+        "node_trait_derive",
         format!("{:#}", node_token.to_token_stream())
     );
 }
@@ -70,10 +68,12 @@ fn test_edge_trait_derive() {
     assert!(node_no_whitespace.contains("impl<In,Out>surreal_orm::EdgeforWrites<In,Out>"));
     assert!(node_token.contains("impl < In , Out > surreal_orm :: Edge for Writes < In , Out >"));
     assert_not!(node_no_whitespace.contains("impl<In,Out>surreal_orm::NodeforWrites<In,Out>"));
-    assert_not!(node_token.contains("impl < In , Out > surreal_orm :: Node for Writes < In , Out >"));
+    assert_not!(
+        node_token.contains("impl < In , Out > surreal_orm :: Node for Writes < In , Out >")
+    );
 
     insta::assert_snapshot!(
-        format!("{}-edge_trait_derive", file!()),
+        "edge_trait_derive",
         format!("{:#}", node_token.to_token_stream())
     );
 }

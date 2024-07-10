@@ -1,0 +1,5 @@
+---
+source: derive_helpers/tests/table_name.rs
+expression: "format!(\"{:#}\", node_token.to_token_stream())"
+---
+:: core :: compile_error ! { "table name must be in snake case of the current struct name. \n        Try: `big_writes`.\n        If you don't want to follow this convention, use attribute `relax_table`. " }
