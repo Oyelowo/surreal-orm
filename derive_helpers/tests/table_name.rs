@@ -70,10 +70,8 @@ use TableNameFormat::*;
 #[test_case("student_table", Raw, Relax, Valid; "Node table snake case raw table name with struct name with relax")]
 #[test_case("student_table", Stringified, NoRelax, Valid; "Node table snake case stringified table name version of struct name cannot be used without relax")]
 #[test_case("student_table", Stringified, Relax, Valid; "Node table snake case stringified table name version of struct name can be used with relax")]
-
 #[test_case("snake_case_but_wrong_name", Stringified, NoRelax, Invalid; "snake case different from even snake case version of struct name cannot be used with relax")]
 #[test_case("snake_case_but_wrong_name", Stringified, Relax, Valid; "snake case different from even snake case version of struct name can be used with relax")]
-
 #[test_case("StudentTable",  Raw, NoRelax, Invalid; "non snake case raw table name version of struct name cannot be used without relax")]
 #[test_case("StudentTable",  Raw, Relax, Valid; "non snake case raw table name version of struct name cann be used with relax")]
 #[test_case("StudentTable",  Stringified, NoRelax, Invalid; "non snake case stringified table name version of struct name cannot be used without relax")]
@@ -128,14 +126,12 @@ fn test_node_table_name(
 #[test_case("big_writes", Raw, Relax, Valid)]
 #[test_case("big_writes", Stringified, NoRelax, Valid)]
 #[test_case("big_writes", Stringified, Relax, Valid)]
-
 #[test_case("snake_case_but_wrong_name", Stringified, NoRelax, Invalid)]
 #[test_case("snake_case_but_wrong_name", Stringified, Relax, Valid)]
-
-#[test_case("BigWrites",  Raw, NoRelax, Invalid)]
-#[test_case("BigWrites",  Raw, Relax, Valid)]
-#[test_case("BigWrites",  Stringified, NoRelax, Invalid)]
-#[test_case("BigWrites",  Stringified, Relax, Valid)]
+#[test_case("BigWrites", Raw, NoRelax, Invalid)]
+#[test_case("BigWrites", Raw, Relax, Valid)]
+#[test_case("BigWrites", Stringified, NoRelax, Invalid)]
+#[test_case("BigWrites", Stringified, Relax, Valid)]
 fn test_edge_table_name(
     table_name: &str,
     table_name_format: TableNameFormat,
@@ -187,4 +183,3 @@ fn test_edge_table_name(
         Invalid => assert!(must_be_in_snake_case_error()),
     }
 }
-

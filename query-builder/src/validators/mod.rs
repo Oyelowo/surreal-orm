@@ -552,8 +552,6 @@ macro_rules! check_unique_idents {
     };
 }
 
-
-
 /// Checks that it is false
 #[macro_export]
 macro_rules! assert_not {

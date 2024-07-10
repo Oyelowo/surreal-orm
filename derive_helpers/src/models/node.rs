@@ -7,11 +7,11 @@
 
 use std::ops::Deref;
 
+use crate::models::*;
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
-use crate::models::*;
 
 #[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
@@ -472,4 +472,3 @@ impl ToTokens for NodeToken {
 ));
     }
 }
-

@@ -10,9 +10,6 @@ use quote::quote;
 use surreal_derive_helpers::models::EdgeToken;
 use syn::parse_macro_input;
 
-
-
-
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input);
     let output = match EdgeToken::from_derive_input(&input) {
