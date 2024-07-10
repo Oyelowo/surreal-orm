@@ -30,3 +30,28 @@ impl ToTokens for TableMigrationSchemaDeriveAttributes {
     }
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quote::quote;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_table_migration_schema_derive_attributes() {
+        let input = parse_quote! {
+            struct TableMigrationSchema;
+        };
+
+        let derive_input = TableMigrationSchemaDeriveAttributes::from_derive_input(&input).unwrap();
+        let mut tokens = proc_macro2::TokenStream::new();
+        derive_input.to_tokens(&mut tokens);
+
+        let expected = quote! {
+            impl surreal_orm::TableResources for TableMigrationSchema {}
+        };
+
+        assert_eq!(tokens.to_string(), expected.to_string());
+    }
+
+}
