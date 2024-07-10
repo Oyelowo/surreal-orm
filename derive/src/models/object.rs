@@ -6,7 +6,7 @@
  */
 
 use darling::FromDeriveInput;
-use surreal_derive_helpers::{migrations::table::TableMigrationSchemaDeriveAttributes, models::ObjectToken};
+use surreal_derive_helpers::models::ObjectToken;
 use syn::parse_macro_input;
 use quote::quote;
 
