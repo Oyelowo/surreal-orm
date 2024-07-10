@@ -1,5 +1,0 @@
----
-source: derive_helpers/tests/invalid_combinations.rs
-expression: node_token
----
-:: core :: compile_error ! { "Invalid combination. When `define`, the following attributes cannot be use in combination to prevent confusion:\n                            drop,\n                            flexible,\n                            as,\n                            schemafull,\n                            permissions" }
