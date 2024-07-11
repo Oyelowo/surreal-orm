@@ -195,10 +195,10 @@ pub struct Student {
     written_books: Relate<Book>,
 
     // #[surreal_orm(relate(model = StudentWritesBook, connection = "->writes->book"))]
-    // #[serde(skip_serializing)]
+    // #[serde(skip_serializing, default)]
     // prof_book: Relate<Book>,
     #[surreal_orm(relate(model = StudentWritesBlog, connection = "->writes->blog"))]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     blogsssss: Relate<Blog>,
 }
 
