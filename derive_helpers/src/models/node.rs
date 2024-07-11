@@ -61,6 +61,13 @@ impl ToTokens for NodeToken {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
+        
+
+        // let model_att = tab
+        let attrs = match code_gen.field_receiver().validate_attributes(&table_attrs) {
+            Ok(props) => props,
+            Err(err) => return tokens.extend(err.write_errors()),
+        };
 
         let Codegen {
             schema_struct_fields_types_kv,
