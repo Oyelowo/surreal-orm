@@ -39,12 +39,13 @@ impl Default for User {
 #[surreal_orm(table = like)]
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
-    // #[serde(rename = "in", skip_serializing)]
+    // #[serde(rename = "in")]
     #[surreal_orm(link_one = In)]
     pub r#in: LinkOne<In>,
-    #[serde(skip_serializing)]
+
     #[surreal_orm(link_one = Out)]
     pub out: LinkOne<Out>,
+
     #[surreal_orm(nest_object = Time)]
     pub time: Time,
 }
@@ -56,6 +57,7 @@ pub type CompanyLikeUser = Like<Company, User>;
 pub struct Company {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
+
     #[surreal_orm(link_many = User)]
     pub users: LinkMany<User>,
 
@@ -77,8 +79,10 @@ pub struct Time {
 pub struct Organization {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
+
     #[surreal_orm(link_many = User)]
     pub users: LinkMany<User>,
+
     #[surreal_orm(nest_object = Time)]
     pub time: Time,
     pub age: u8,
