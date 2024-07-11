@@ -94,7 +94,7 @@ pub struct MyFieldReceiver {
     pub(crate) skip_serializing: bool,
 
     #[darling(default)]
-    pub(crate) default: ::darling::util::Ignored,
+    pub(crate) default: bool,
 
     #[darling(default)]
     pub(crate) skip: bool,
