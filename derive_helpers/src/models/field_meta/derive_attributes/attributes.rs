@@ -15,7 +15,7 @@ impl MyFieldReceiver {
                 return Err(syn::Error::new(
                     self.ident()?.span(),
                         format!(
-                            "Missing required serde attribute on field - `{field_name}. set `#[serde(skip_serializing, default)]` on the field.
+                            "Missing required serde attribute on `{field_name}. set `#[serde(skip_serializing, default)]` on the field.
                                 This is because this field is a readonly relate field",
                         ),
                     )
