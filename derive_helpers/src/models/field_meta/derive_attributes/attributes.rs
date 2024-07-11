@@ -11,12 +11,12 @@ impl MyFieldReceiver {
         if self.relate.is_some() {
             let has_required_attrs = self.default && self.skip_serializing;
             if !has_required_attrs {
+                let field_name = self.ident()?.to_string();
                 return Err(syn::Error::new(
                     self.ident()?.span(),
                         format!(
-                            "serde attribute not set with the required attributes on field - `{}` is a readonly \
-                                relate field, you must set `#[serde(skip_serializing, default)]` on the field.",
-                            self.ident.as_ref().unwrap().to_string()
+                            "Missing required serde attribute on field - `{field_name}. set `#[serde(skip_serializing, default)]` on the field.
+                                This is because this field is a readonly relate field",
                         ),
                     )
                     .into());
