@@ -24,16 +24,20 @@ pub struct User<'a> {
 #[surreal_orm(table = like)]
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
+
     #[surreal_orm(ty = "option<float>")]
     pub score: Option<f64>,
+
     #[surreal_orm(ty = "array<array<float>>")]
     pub scores_plural: Vec<Vec<f64>>,
-    #[serde(rename = "in", skip_serializing)]
-    #[surreal_orm(link_many = "In")]
+
+    #[serde(rename = "in")]
+    #[surreal_orm(link_many = In)]
     pub in_: LinkOne<In>,
-    #[serde(skip_serializing)]
-    #[surreal_orm(link_one = "Out")]
+
+    #[surreal_orm(link_one = Out)]
     pub out: LinkOne<Out>,
+
     #[surreal_orm(nest_object = Time)]
     pub time: Time,
 }
@@ -51,6 +55,8 @@ pub struct Company<'b> {
     pub users: LinkMany<User<'b>>,
 
     #[surreal_orm(relate(model = "CompanyLikeUser<'b>", connection = "->like->user"))]
+
+    #[serde(skip_serializing)]
     pub devs: Relate<User<'b>>,
 }
 
@@ -67,8 +73,10 @@ pub struct Time {
 pub struct Organization<'a> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
+
     #[surreal_orm(link_many = "User<'a>")]
     pub users: LinkMany<User<'a>>,
+
     #[surreal_orm(nest_object = Time)]
     pub time: Time,
     pub age: u8,

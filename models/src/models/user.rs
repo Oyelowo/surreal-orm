@@ -60,6 +60,7 @@ pub struct Company {
     pub users: LinkMany<User>,
 
     #[surreal_orm(relate(model = CompanyLikeUser, connection = "->like->user"))]
+    #[serde(skip_serializing)]
     pub devs: Relate<User>,
 }
 
