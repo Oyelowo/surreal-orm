@@ -349,6 +349,7 @@ implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Relate<V: Node>(Vec<Reference<V>>);
 
+
 implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);
 implement_bidirectional_conversion!(Relate<V>, Vec<Reference<V>>);
 impl_utils_for_ref_vec!(Relate);

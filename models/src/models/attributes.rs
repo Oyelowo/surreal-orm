@@ -257,7 +257,7 @@ pub struct StudentWithGranularAttributes {
         model = StudentWithGranularAttributesWritesBlog,
         connection = "->writes->blog"
     ))]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     _blogs: Relate<Blog>,
 }
 
@@ -436,7 +436,7 @@ pub struct StudentWithDefineAttr {
         model = StudentWithDefineAttrWritesBlog,
         connection = "->writes->blog"
     ))]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     _blogs: Relate<Blog>,
 }
 
@@ -511,7 +511,7 @@ pub struct StudentWithDefineFnAttr {
         model = StudentWithDefineFnAttrWritesBlog,
         connection = "->writes->blog"
     ))]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     _blogs: Relate<Blog>,
 }
 
@@ -559,7 +559,7 @@ pub struct Student {
     _written_books: Relate<Book>,
 
     #[surreal_orm(relate(model = StudentWritesBlog, connection = "->writes->blog"))]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     _blogs: Relate<Blog>,
 }
 
