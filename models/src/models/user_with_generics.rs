@@ -54,13 +54,9 @@ pub struct Company<'b> {
     #[surreal_orm(link_many = "User<'b>")]
     pub users: LinkMany<User<'b>>,
 
+    #[surreal_orm(relate(model = "CompanyLikeUser<'b>", connection = "->like->user"))]
     #[serde(skip_serializing, default)]
-    pub devs: Vec<User<'b>>,
-
-    // #[surreal_orm(relate(model = "CompanyLikeUser<'b>", connection = "->like->user"))]
-    // #[serde(skip_serializing, default)]
-    // pub devs: Relate<User<'b>>,
-
+    pub devs: Relate<User<'b>>,
 }
 
 #[derive(Object, Serialize, Deserialize, Debug, Clone)]
