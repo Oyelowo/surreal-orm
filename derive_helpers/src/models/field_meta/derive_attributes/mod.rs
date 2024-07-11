@@ -8,6 +8,7 @@
 mod db_field_types;
 mod generics;
 mod ident;
+pub mod attributes;
 
 use darling::FromField;
 use proc_macro2::Ident;
@@ -29,10 +30,12 @@ create_ident_wrapper!(OldFieldName);
 pub struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
-    ident: Option<Ident>,
+    pub ident: Option<Ident>,
     /// This magic field name pulls the type from the input.
-    ty: Type,
-    attrs: Vec<syn::Attribute>,
+    pub ty: Type,
+    // #[darling(with=path)]
+    // fn(Vec<Attribute>) -> darling::Result<T>
+    pub attrs: Vec<syn::Attribute>,
 
     /// Explicity specify the array or set item/element rust type
     #[darling(default, rename = "item_rust_ty")]
@@ -48,7 +51,7 @@ pub struct MyFieldReceiver {
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) relate: Option<Relate>,
+    pub relate: Option<Relate>,
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
@@ -68,12 +71,6 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) nest_object: Option<NestObjectAttrType>,
 
-    #[darling(default)]
-    pub(crate) skip_serializing: bool,
-
-    #[darling(default)]
-    pub(crate) skip: bool,
-
     #[darling(default, rename = "ty")]
     pub(crate) field_type_db: Option<FieldTypeDb>,
 
@@ -92,6 +89,17 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) item_assert: Option<AttributeItemAssert>,
 
+    // Serde attributes
+    #[darling(default)]
+    pub(crate) skip_serializing: bool,
+
+    #[darling(default)]
+    pub(crate) default: bool,
+    // default: ::darling::util::Ignored,
+
+    #[darling(default)]
+    pub(crate) skip: bool,
+
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
@@ -100,7 +108,4 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     deserialize_with: ::darling::util::Ignored,
-
-    #[darling(default)]
-    default: ::darling::util::Ignored,
 }
