@@ -31,7 +31,6 @@ impl<'a> Codegen<'a> {
     pub fn field_defintion_db(&self) -> ExtractorResult<Vec<DefineFieldStatementToken>> {
         let field_receiver = self.field_receiver();
         let model_attributes = self.table_derive_attributes();
-        let relation_type = field_receiver.to_relation_type(model_attributes);
         if self.skip_field()? {
             return Ok(vec![]);
         }
