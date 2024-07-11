@@ -61,10 +61,8 @@ impl ToTokens for NodeToken {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
-        
 
-        // let model_att = tab
-        let attrs = match code_gen.field_receiver().validate_attributes(&table_attrs) {
+        match code_gen.field_receiver().validate_attributes() {
             Ok(props) => props,
             Err(err) => return tokens.extend(err.write_errors()),
         };
