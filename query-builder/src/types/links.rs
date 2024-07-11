@@ -343,7 +343,9 @@ implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
 impl_utils_for_ref_vec!(LinkMany);
 implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 
-/// reference to a foreign node in a one-to-many relationship via an edge
+/// reference to a foreign node in a many-to-many relationship via an edge
+/// This is not stored in the database and is merely a readonly field
+/// derived from the edge referencing the foreign table.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Relate<V: Node>(Vec<Reference<V>>);
 
