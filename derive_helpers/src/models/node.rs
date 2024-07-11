@@ -120,21 +120,20 @@ impl ToTokens for NodeToken {
 
         // #[derive(#crate::Model, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
-        // #[surreal_orm(table = "student", drop, schemafull, permission, define="any_fnc")]
+        // #[surreal_orm(table = student, drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
-        //     #[serde(skip_serializing_if = "Option::is_none")]
-        //     #[builder(default, setter(strip_option))]
-        //     id: Option<String>,
+        //     id: SurrealSimpleId<Self>,
         //     first_name: String,
         //
-        //     #[surreal_orm(link_one = "Book", skip_serializing)]
+        //     #[surreal_orm(link_one = Book)]
         //     course: LinkOne<Book>,
         //
-        //     #[surreal_orm(link_many = "Book", skip_serializing)]
+        //     #[surreal_orm(link_many = Book)]
         //     #[serde(rename = "lowo")]
         //     all_semester_courses: LinkMany<Book>,
         //
-        //     #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
+        //     #[surreal_orm(relate(model = StudentWritesBlog, connection = "->writes->Blog"))]
+        //     #[serde(skip_serializing)]
         //     written_blogs: Relate<Blog>,
         // }
         tokens.extend(quote!(
