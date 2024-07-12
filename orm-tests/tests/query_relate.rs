@@ -80,7 +80,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     let id = serde_json::to_string(&result.clone().id).unwrap();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        format!("{{\"id\":{id},\"timeWritten\":{{\"secs\":343,\"nanos\":0}},\"count\":0}}")
+        format!(
+            r###"{{"id":{},"in":{{"tb":"student","id":{{"String":"1"}}}},"out":{{"tb":"book","id":{{"String":"2"}}}},"timeWritten":{{"secs":343,"nanos":0}},"count":0}}"###,
+            id
+        )
     );
 
     // Student 2 writes book1
@@ -104,7 +107,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     let id = &result.clone().id.to_string();
     assert_eq!(
         sql::to_value(&result).unwrap().to_string(),
-        format!("{{ count: 0, id: {id}, timeWritten: {{ nanos: 0, secs: 923 }} }}")
+        format!("{{ count: 0, id: {id}, in: student:⟨2⟩, out: book:⟨1⟩, timeWritten: {{ nanos: 0, secs: 923 }} }}")
     );
 
     // Student 2 writes blog1
@@ -147,7 +150,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     let id = result.clone().unwrap().id.to_string();
     assert_eq!(
         sql::to_value(&result).unwrap().to_string(),
-        format!("{{ count: 545, id: {id}, timeWritten: {{ nanos: 0, secs: 47 }} }}")
+        format!("{{ count: 545, id: {id}, in: student:⟨2⟩, out: blog:⟨1⟩, timeWritten: {{ nanos: 0, secs: 47 }} }}")
     );
 
     let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
