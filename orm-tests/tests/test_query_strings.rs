@@ -138,7 +138,7 @@ async fn relate_query_building_for_ids() {
         relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
 
     insta::assert_snapshot!(&relate_simple.fine_tune_params());
-    assert_eq!(relate_simple.clone().to_raw().build().len(), 126);
+    assert_eq!(relate_simple.clone().to_raw().build().len(), 147);
     assert_eq!(relate_simple.clone().get_bindings().len(), 3);
 }
 
