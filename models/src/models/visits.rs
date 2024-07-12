@@ -27,10 +27,11 @@ pub type AlienVisitsPlanet = Visits<Alien, Planet<u64>>;
 pub struct VisitsExplicit<In: Node, Out: Node> {
     #[surreal_orm(ty = "record<visits_explicit>")]
     pub id: SurrealSimpleId<Self>,
+
     #[serde(rename = "in")]
     #[surreal_orm(link_one = "In", ty = "record<any>")]
     pub in_: LinkOne<In>,
-    // #[surreal_orm(type_ = "record<planet>")]
+
     #[surreal_orm(link_one = "Out", ty = "record<any>")]
     pub out: LinkOne<Out>,
     #[surreal_orm(ty = "duration")]
@@ -47,11 +48,10 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     // #[surreal_orm(ty = "record<visits_with_explicit_attributes>")]
     pub id: SurrealSimpleId<Self>,
 
-    #[serde(rename = "in", skip_serializing)]
+    #[serde(rename = "in")]
     #[surreal_orm(link_one = In)]
     pub in_: LinkOne<In>,
 
-    #[serde(skip_serializing)]
     #[surreal_orm(link_one = Out)]
     // #[surreal_orm(ty = "record")]
     pub out: LinkOne<Out>,
