@@ -20,7 +20,7 @@ fn test_node_trait_derive() {
             all_semester_courses: LinkMany<Book>,
 
             #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
-            #[serde(skip_serializing)]
+            #[serde(skip_serializing, default)]
             written_blogs: Relate<Blog>,
         }
     );
@@ -37,11 +37,28 @@ fn test_node_trait_derive() {
     );
 }
 
-#[test]
-fn test_relate_field_must_have_serde_skip_serializing_attribute() {
+enum RelateFieldAttribute {
+    SerdeSkipSerializingOnly,
+    DefaultOnly,
+    BothAttrs,
+}
+use test_case::test_case;
+use RelateFieldAttribute::*;
+#[test_case(SerdeSkipSerializingOnly)]
+#[test_case(DefaultOnly)]
+#[test_case(BothAttrs)]
+fn test_relate_field_has_serde_skip_serializing_but_not_attribute(
+    relate_field_attr_provided: RelateFieldAttribute,
+) {
+    let serde_attr_for_relate = match relate_field_attr_provided {
+        SerdeSkipSerializingOnly => quote!(skip_serializing),
+        DefaultOnly => quote!(default),
+        BothAttrs => quote!(skip_serializing, default),
+    };
+
     let input = quote!(
-        #[derive(Node)]
-        #[surreal_orm(table = "student", drop, schemafull, permissions = perm)]
+        #[derive(Node, Serialize, Deserialize, Debug, Clone)]
+        #[surreal_orm(table = student)]
         pub struct Student {
             id: SurrealSimpleId<Self>,
             first_name: String,
@@ -54,6 +71,7 @@ fn test_relate_field_must_have_serde_skip_serializing_attribute() {
             all_semester_courses: LinkMany<Book>,
 
             #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
+            #[serde(#serde_attr_for_relate)]
             written_blogs: Relate<Blog>,
         }
     );
@@ -62,8 +80,33 @@ fn test_relate_field_must_have_serde_skip_serializing_attribute() {
     let node_token = NodeToken::from_derive_input(&derive_input).unwrap();
     let node_token = node_token.to_token_stream().to_string();
 
-    assert!(node_token.contains("Missing required serde attribute on `written_blogs`"));
-    assert_not!(node_token.contains("impl surreal_orm :: Node for Student "));
+    let error_msg = || {
+        node_token.contains("Missing required 'skip_serializing' or 'default' serde attribute(s) on `written_blogs`")
+    };
+    let has_node_trait_valid =  || node_token.contains("impl surreal_orm :: Node for Student ");
+    match relate_field_attr_provided {
+        SerdeSkipSerializingOnly => {
+            assert!(error_msg(), "should have default and skip_serializing attributes");
+            assert_not!(has_node_trait_valid());
+        }
+        DefaultOnly => {
+            assert!(error_msg(), "should have default and skip_serializing attributes");
+            assert_not!(has_node_trait_valid());
+        }
+        BothAttrs => {
+            assert_not!(error_msg());
+            assert!(has_node_trait_valid());
+        }
+    }
+
+
+    insta::assert_snapshot!(
+        format!(
+            "relate_field_must_have_serde_skip_serializing_attribute-{}",
+            serde_attr_for_relate.to_string()
+        ),
+        format!("{:#}", node_token.to_token_stream())
+    );
 }
 
 #[test]

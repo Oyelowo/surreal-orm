@@ -16,8 +16,8 @@ impl MyFieldReceiver {
                 return Err(syn::Error::new(
                     self.ident()?.span(),
                         format!(
-                            "Missing required serde attribute(s) on `{field_name}`. set `#[serde(skip_serializing, default)]` on the field. \
-                                \nThis is because this field is a readonly derived relational field and we don't want to store it in the data"
+                            "Missing required 'skip_serializing' or 'default' serde attribute(s) on `{field_name}`. set `#[serde(skip_serializing, default)]` on the field. \
+                                \nThis is because this field is a readonly derived relational field and we don't want to store it in the database"
                         ),
                     )
                     .into());
