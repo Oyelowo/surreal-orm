@@ -414,7 +414,7 @@ async fn relate_query() -> surreal_orm::SurrealOrmResult<()> {
     let relate_simple = relate(Student::with(student_id).writes__(E).book(book_id)).content(write);
     assert_eq!(
         relate_simple.to_raw().build(),
-        format!("RELATE student:oyelowo->writes->book:kivi CONTENT {{ count: 0, id: {write_id}, timeWritten: {{ nanos: 0, secs: 343 }} }} ;")
+        format!("RELATE student:oyelowo->writes->book:kivi CONTENT {{ count: 0, id: {write_id}, in: NONE, out: NONE, timeWritten: {{ nanos: 0, secs: 343 }} }} ;")
     );
 
     // // You can use return one method and it just returns the single object
@@ -503,7 +503,7 @@ async fn relate_query_with_sub_query() -> surreal_orm::SurrealOrmResult<()> {
     let write_id = write.get_id();
     assert_eq!(
         statement.to_raw().build(),
-        format!("RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT {{ count: 0, id: {write_id}, timeWritten: {{ nanos: 0, secs: 52 }} }} ;")
+        format!("RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT {{ count: 0, id: {write_id}, in: NONE, out: NONE, timeWritten: {{ nanos: 0, secs: 52 }} }} ;")
     );
 
     let result = statement.return_many(db.clone()).await?;
