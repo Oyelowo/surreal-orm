@@ -52,6 +52,7 @@ pub struct Company<'b> {
     pub namex: &'b str,
 
     #[surreal_orm(link_many = "User<'b>")]
+    #[serde(default)]
     pub users: LinkMany<User<'b>>,
 
     #[surreal_orm(relate(model = "CompanyLikeUser<'b>", connection = "->like->user"))]

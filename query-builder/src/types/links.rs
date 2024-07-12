@@ -122,6 +122,21 @@ macro_rules! impl_from_model_for_ref_type {
     };
 }
 
+// The original derive default adds addition default bounds to the 
+// generic type which is not wanted here as we can generate a 
+// default without needing to know the wrapped type default.
+// Out default is either null or empty vec
+// With this, user does not have to implement default for the wrapped type
+// even if they use the serde default attribute
+macro_rules! implement_custom_default_for_link {
+    ($reference_ty:ty) => {
+        impl<V: Node> Default for $reference_ty {
+            fn default() -> Self {
+                Self::null()
+            }
+        }
+    };
+}
 impl<V: Node> std::convert::From<Vec<V>> for LinkMany<V> {
     fn from(model_vec: Vec<V>) -> Self {
         let xx = model_vec
@@ -147,13 +162,14 @@ impl<V: Node> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
     }
 }
 /// A reference to a foreign node which can either be an ID or a fetched value itself or null.
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LinkOne<V: Node>(Reference<V>);
 
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
 impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
+implement_custom_default_for_link!(LinkOne<V>);
 
 impl<V: Node> From<LinkOne<V>> for Option<sql::Thing> {
     fn from(link: LinkOne<V>) -> Self {
@@ -185,7 +201,7 @@ impl<V: Node> LinkOne<V> {
 
 /// a reference to current struct as foreign node in a one-to-one relationship which can be either an ID or a fetched value itself or null.
 /// It is similar to `LinkOne` is boxed to avoid infinite recursion.
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LinkSelf<V: Node>(Box<Reference<V>>);
 
 impl<V: Node> From<LinkSelf<V>> for Option<sql::Thing> {
@@ -215,7 +231,7 @@ where
     }
 }
 
-// impl<V: Node> Default for LinkSelf<V> {}
+implement_custom_default_for_link!(LinkSelf<V>);
 implement_deref_for_link!(LinkSelf<V>; Box<Reference<V>>);
 implement_bidirectional_conversion!(LinkSelf<V>, Box<Reference<V>>);
 impl_from_model_for_ref_type!(Box<V>, LinkSelf<V>);
@@ -313,7 +329,7 @@ macro_rules! impl_utils_for_ref_vec {
 /// Reference to a foreign node in a simple direct one-to-many relationship
 /// Returns either the foreign values if fetched, id keys of the foreign Field if not fetched,
 /// empty Vec if not available
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LinkMany<V: Node>(Vec<Reference<V>>);
 
 impl<V: Node> IntoIterator for LinkMany<V> {
@@ -339,6 +355,7 @@ impl<V: Node> From<LinkMany<V>> for Vec<Option<sql::Thing>> {
 
 // impl<V: Node> From<Vec<V>> for LinkMany<V> {}
 
+implement_custom_default_for_link!(LinkMany<V>);
 implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
 impl_utils_for_ref_vec!(LinkMany);
 implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
