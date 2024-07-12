@@ -149,7 +149,7 @@ impl ToTokens for EdgeToken {
                       // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
                     pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
                         // this is used for static checking, so, we dont need the fields
-                        unimplemented!()
+                        [#( stringify!(#serializable_fields)), *]
                     }
                 }
 
