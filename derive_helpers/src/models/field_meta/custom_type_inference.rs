@@ -422,21 +422,21 @@ impl<'a> FieldTypeInference<'a> {
         Ok(Some(meta))
     }
 
-    // TODO: Remove this
-    fn _generate_nested_vec_type(
+    #[allow(unused)]
+    fn generate_nested_vec_type(
         foreign_node: &CustomType,
         nesting_level: usize,
     ) -> proc_macro2::TokenStream {
         if nesting_level == 0 {
             quote!(#foreign_node)
         } else {
-            let inner_type = Self::_generate_nested_vec_type(foreign_node, nesting_level - 1);
+            let inner_type = Self::generate_nested_vec_type(foreign_node, nesting_level - 1);
             quote!(::std::vec::Vec<#inner_type>)
         }
     }
 
-    // TODO: Remove this
-    fn _count_vec_nesting(field_type: &syn::Type) -> usize {
+    #[allow(unused)]
+    fn count_vec_nesting(field_type: &syn::Type) -> usize {
         match field_type {
             syn::Type::Path(type_path) => {
                 if let Some(segment) = type_path.path.segments.last() {
@@ -445,7 +445,7 @@ impl<'a> FieldTypeInference<'a> {
                             if let Some(syn::GenericArgument::Type(inner_type)) =
                                 angle_args.args.first()
                             {
-                                1 + Self::_count_vec_nesting(inner_type)
+                                1 + Self::count_vec_nesting(inner_type)
                             } else {
                                 0
                             }
