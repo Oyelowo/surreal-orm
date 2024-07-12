@@ -1,0 +1,5 @@
+---
+source: derive_helpers/tests/generate_test.rs
+expression: "format!(\"{:#}\", node_token.to_token_stream())"
+---
+":: core :: compile_error ! { \"Missing required 'skip_serializing' or 'default' serde attribute(s) on `written_blogs`. set `#[serde(skip_serializing, default)]` on the field. \\nThis is because this field is a readonly derived relational field and we don't want to store it in the database\" }"
