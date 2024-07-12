@@ -366,13 +366,8 @@ implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Relate<V: Node>(Vec<Reference<V>>);
 
-impl<V: Node> Default for Relate<V> {
-    fn default() -> Self {
-        Self::null()
-    }
-}
 
-
+implement_custom_default_for_link!(Relate<V>);
 implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);
 implement_bidirectional_conversion!(Relate<V>, Vec<Reference<V>>);
 impl_utils_for_ref_vec!(Relate);
