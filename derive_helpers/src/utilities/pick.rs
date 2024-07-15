@@ -171,7 +171,6 @@ impl ToTokens for PickedMeta {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let new_struct = &self.new_struct;
         let old_struct = &self.old_struct;
-        let generics = &self.generics_without_bounds;
         let field_names = &self.field_names;
 
         let new_generics_type_args = self.map_empty_generics_to_phantom_placeholder().0;
@@ -192,7 +191,7 @@ impl ToTokens for PickedMeta {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use syn::parse_quote;
+
     #[test]
     fn test_parse_single_without_generics() {
         let input = quote! {
@@ -215,7 +214,210 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_single() {
+    fn test_parse_single_lifetime() {
+        let input = quote! {
+            PickedPerson, Person<'a>, [name]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+
+        assert_eq!(picked_meta.field_names.len(), 1);
+        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 1);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_single_lifetime_with_phantom_data() {
+        let input = quote! {
+            PickedPerson, Person<'a, _>, [name]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+
+        assert_eq!(picked_meta.field_names.len(), 1);
+        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_single_lifetime_with_phantom_data_and_another_lifetime() {
+        let input = quote! {
+            PickedPerson, Person<'a, _, 'b>, [name]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+
+        assert_eq!(picked_meta.field_names.len(), 1);
+        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a", "_", "'b",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_single_lifetime_with_phantom_data_and_another_lifetime_and_const() {
+        let input = quote! {
+            PickedPerson, Person<'a, _, 'b, _>, [name]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+
+        assert_eq!(picked_meta.field_names.len(), 1);
+        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 4);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a", "_", "'b", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_multiple_lifetimes_only() {
+        let input = quote! {
+            PickedPerson, Person<'a, 'b>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a", "'b",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_multiple_lifetimes_and_skipped_at_beginning() {
+        let input = quote! {
+            PickedPerson, Person<_, 'a, 'b>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["_", "'a", "'b",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_multiple_lifetimes_and_skipped_at_end() {
+        let input = quote! {
+            PickedPerson, Person<'a, 'b, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a", "'b", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_single_lifetime_and_type_param() {
         let input = quote! {
             PickedPerson, Person<'a, T>, [name]
         };
@@ -236,10 +438,8 @@ mod tests {
                 .collect::<Vec<String>>(),
             vec!["'a", "T",]
         );
-        assert_eq!(
-            picked_meta.to_token_stream().to_string(),
-            "struct PickedPerson < 'a , T > { name : < Person < 'a , T , > as PersonPickable > :: name , }"
-        );
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
     }
 
     #[test]
@@ -277,26 +477,315 @@ mod tests {
         let tokenstream = picked_meta.to_token_stream().to_string();
         insta::assert_snapshot!(tokenstream.replace(" ", ""));
         insta::assert_snapshot!(tokenstream);
-        // assert_eq!(tokenstream, "struct PickedPerson < 'a , _ , U , _ > { name : < Person < 'a , _ , U , _ > as PersonPickable > :: name , age : < Person < 'a , _ , U , _ > as PersonPickable > :: age , some : < Person < 'a , _ , U , _ > as PersonPickable > :: some , another : < Person < 'a , _ , U , _ > as PersonPickable > :: another , }");
+        assert_eq!(
+            tokenstream.replace(" ", ""),
+"structPickedPerson<'a,U>{name:<Person<'a,::std::marker::PhantomData<dynAny>,U,::std::mar\
+ker::PhantomData<dynAny>,>asPersonPickable>::name,age:<Person<'a,::std::marker::PhantomData<dynAn\
+y>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::age,some:<Person<'a,::std::marker::Ph\
+antomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::some,another:<Person<'\
+a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::another,}");
     }
 
-    // #[test]
-    // fn test_to_tokens() {
-    //     let input = quote! {
-    //         PickedPerson, Person<'a, _, U>, [name]
-    //     };
-    //
-    //     let picked_meta = PickedMeta::parse(input).unwrap();
-    //
-    //     let tokens = quote! { #picked_meta };
-    //
-    //     let expected = quote! {
-    //         struct PickedPerson<'a, U> {
-    //             name: <Person<'a, std::marker::PhantomData<dyn Any>, U> as PersonPickable>::name,
-    //         }
-    //     };
-    //
-    //     assert_eq!(tokens.to_string(), expected.to_string());
-    // }
-    //
+    #[test]
+    fn test_single_type_params_generics() {
+        let input = quote! {
+            PickedPerson, Person<T>, [name]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 1);
+        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 1);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["T",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_single_type_params_generics_with_phantom_data() {
+        let input = quote! {
+            PickedPerson, Person<T, _>, [name]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 1);
+        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["T", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_type_params_generics() {
+        let input = quote! {
+            PickedPerson, Person<T, U>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["T", "U",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_type_params_generics_with_phantom_data_at_the_end() {
+        let input = quote! {
+            PickedPerson, Person<T, U, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["T", "U", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning() {
+        let input = quote! {
+            PickedPerson, Person<_, T, U>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["_", "T", "U",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end() {
+        let input = quote! {
+            PickedPerson, Person<_, T, U, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 4);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["_", "T", "U", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end_and_middle() {
+        let input = quote! {
+            PickedPerson, Person<_, T, _, U, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 5);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["_", "T", "_", "U", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end_and_middle_and_lifetime(
+    ) {
+        let input = quote! {
+            PickedPerson, Person<'a, _, T, _, U, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 6);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a", "_", "T", "_", "U", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end_and_middle_and_lifetime_and_const(
+    ) {
+        let input = quote! {
+            PickedPerson, Person<'a, _, T, _, U, _, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 2);
+        assert_eq!(
+            picked_meta.field_names,
+            vec![format_ident!("name"), format_ident!("age"),]
+        );
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 7);
+        assert_eq!(
+            picked_meta
+                .generics_without_bounds
+                .params
+                .iter()
+                .map(|param| param.to_token_stream().to_string())
+                .collect::<Vec<String>>(),
+            vec!["'a", "_", "T", "_", "U", "_", "_",]
+        );
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_skips_at_beginning_and_end() {
+        let input = quote! {
+            PickedPerson, Person<_, _, _, U, _, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_skips_at_beginning_and_end_and_middle() {
+        let input = quote! {
+            PickedPerson, Person<_, _, T, _, U, _, _>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_multiple_skips_at_beginning_all() {
+        let input = quote! {
+            PickedPerson, Person<_, _, _, _, _, _, T>, [name, age]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+
+        insta::assert_snapshot!(tokenstream);
+    }
 }
