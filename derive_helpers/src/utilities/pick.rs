@@ -12,45 +12,10 @@ use syn::{
 
 use crate::models::create_tokenstream_wrapper;
 
-// use std::any::Any;
-//
-// struct Person<'a, T: 'a, U: 'a> {
-//     name: String,
-//     age: u8,
-//     some: &'a T,
-//     another: &'a U,
-// }
-//
-// trait PersonPickable {
-//     type name;
-//     type age;
-//     type some;
-//     type another;
-// }
-//
-// // impl<'a, T> PersonPicker for Person<'a, T> {
-// impl<'a, T: 'a, U: 'a> PersonPickable for Person<'a, T, U> {
-//     type name = String;
-//     type age = u8;
-//     type some = &'a T;
-//     type another = &'a U;
-// }
-//
-// // struct PickedPerson<'a, T> {
-// //     name: <Person<'a, T> as PersonPicker>::name,
-// // }
-// struct PickedPerson<'a> {
-//     name: <Person<'a, std::marker::PhantomData<dyn Any>, std::marker::PhantomData<dyn Any>> as PersonPickable>::name,
-//     // __phantom_data: std::marker::PhantomData<&'a T>,
-//     // kaka: T
-// }
-//
-
 pub struct PickedMeta {
     new_struct: Ident,
     old_struct: Ident,
     old_struct_trait: Path,
-    // enerics_without_bounds: Vec<CustomGenericsPattern>,
     generics_without_bounds: Generics,
     field_names: Vec<Ident>,
 }
@@ -61,7 +26,6 @@ create_tokenstream_wrapper!( => FilteredEmptyGenerics);
 impl PickedMeta {
     fn map_empty_generics_to_phantom_placeholder(&self) -> GenericsWithOmiitedAsPhantomData {
         let generics = &self.generics_without_bounds;
-        // replace empty generics with phantom data type
         let new_generics_params = generics.params.iter().map(|param| match param {
             syn::GenericParam::Type(type_param) => {
                 let ident = &type_param.ident;
@@ -90,37 +54,6 @@ impl PickedMeta {
     }
 
     fn filter_empty_generic_params(&self) -> FilteredEmptyGenerics {
-        // let generics = &self.generics_without_bounds;
-        // let filtered_generics = generics.params.iter().map(|param| match param {
-        //     syn::GenericParam::Type(type_param) => {
-        //         let ident = &type_param.ident;
-        //         if ident.to_string() == "_" {
-        //             quote! {}
-        //         } else {
-        //             quote! { #ident, }
-        //         }
-        //     }
-        //     syn::GenericParam::Lifetime(lifetime) => {
-        //         let lifetime = &lifetime.lifetime;
-        //         quote! { #lifetime, }
-        //     }
-        //     syn::GenericParam::Const(const_param) => {
-        //         let ident = &const_param.ident;
-        //         quote! { #ident, }
-        //     }
-        // });
-        //
-        // let no_generics = generics.into_token_stream().is_empty();
-        // let filtered_generics = if no_generics {
-        //     quote! {}
-        // } else {
-        //     quote!( <#(#filtered_generics)* >)
-        // };
-        // filtered_generics.into()
-        //
-        //
-        //
-
         let generics = &self.generics_without_bounds;
 
         let filtered_generics = generics.params.iter().filter(|param| match param {
@@ -140,7 +73,6 @@ impl PickedMeta {
     }
 }
 
-// pick!(PickedPerson, Person<'a, _, U> as PersonPicker, [name, age]);
 impl Parse for PickedMeta {
     fn parse(input: ParseStream) -> Result<Self> {
         let new_struct = input.parse()?;
@@ -217,6 +149,29 @@ mod tests {
             tokenstream,
             "struct PickedPerson { name : < Person as PersonPickable > :: name , }"
         );
+        insta::assert_snapshot!(tokenstream);
+    }
+
+    #[test]
+    fn test_parse_single_without_generics_and_trait_paths() {
+        let input = quote! {
+            PickedPerson, Person as crate :: person::Pickable, [name]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
+        assert_eq!(picked_meta.old_struct, format_ident!("Person"));
+        assert_eq!(picked_meta.field_names.len(), 1);
+        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(picked_meta.generics_without_bounds.params.len(), 0);
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+        assert_eq!(
+            tokenstream,
+            "struct PickedPerson { name : < Person as crate :: person :: Pickable > :: name , }"
+        );
+        insta::assert_snapshot!(tokenstream);
     }
 
     #[test]
