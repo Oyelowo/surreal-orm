@@ -1,0 +1,5 @@
+---
+source: derive_helpers/src/utilities/pick.rs
+expression: tokenstream
+---
+struct PickedPerson < 'a > { name : < Person < 'a , > as PersonPickable > :: name , }
