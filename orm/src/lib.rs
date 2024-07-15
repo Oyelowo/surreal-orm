@@ -200,6 +200,9 @@ pub use surreal_derive::Node;
 #[doc = include_str!("docs/object_field_attributes.md")]
 pub use surreal_derive::Object;
 
+pub use surreal_derive::Pickable;
+pub use surreal_derive::pick;
+
 // TODO: document
 // #[doc = include_str!("docs/table_resources.md")]
 pub use surreal_derive::TableResources;
