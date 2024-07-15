@@ -30,6 +30,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 mod migrations;
 mod models;
+mod utilities;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
 pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
@@ -49,4 +50,9 @@ pub fn surreal_object_trait_derive(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(TableResources, attributes(surreal_orm))]
 pub fn surreal_table_resources_derive(input: TokenStream) -> TokenStream {
     migrations::table::generate_table_resources_trait(input)
+}
+
+#[proc_macro_derive(Pickable)]
+pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
+    utilities::generate_table_resources_trait(input)
 }

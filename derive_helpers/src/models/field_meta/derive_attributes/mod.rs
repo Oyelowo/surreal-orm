@@ -45,7 +45,6 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) old_name: Option<OldFieldName>,
 
-    /// New name of field when renaming
     #[darling(default)]
     pub(crate) rename: Option<Rename>,
 
