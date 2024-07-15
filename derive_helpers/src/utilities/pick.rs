@@ -7,9 +7,7 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{
-    parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    Generics, Ident, Result, Token,
+    parse::{Parse, ParseStream}, punctuated::Punctuated, Generics, Ident, Path, Result, Token
 };
 
 use crate::models::create_tokenstream_wrapper;
@@ -51,6 +49,7 @@ use crate::models::create_tokenstream_wrapper;
 pub struct PickedMeta {
     new_struct: Ident,
     old_struct: Ident,
+    old_struct_trait: Path,
     // enerics_without_bounds: Vec<CustomGenericsPattern>,
     generics_without_bounds: Generics,
     field_names: Vec<Ident>,
@@ -141,12 +140,18 @@ impl PickedMeta {
     }
 }
 
+// pick!(PickedPerson, Person<'a, _, U> as PersonPicker, [name, age]);
 impl Parse for PickedMeta {
     fn parse(input: ParseStream) -> Result<Self> {
         let new_struct = input.parse()?;
         input.parse::<Token![,]>()?;
+
         let old_struct = input.parse()?;
         let generics = input.parse::<Generics>()?;
+
+        let _as = input.parse::<Token![as]>()?;
+
+        let pickee_struct_trait = input.parse::<Path>()?;
 
         input.parse::<Token![,]>()?;
 
@@ -158,30 +163,31 @@ impl Parse for PickedMeta {
         Ok(PickedMeta {
             new_struct,
             old_struct,
+            old_struct_trait: pickee_struct_trait,
             generics_without_bounds: generics,
             field_names: fields_names.into_iter().collect(),
         })
     }
 }
 
-// pick!(PickedPerson, Person<'a, _, U>, [name]);
-// pick!(PickedPerson; Person<'a, _, U> ; [name]);
 
 impl ToTokens for PickedMeta {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let new_struct = &self.new_struct;
-        let old_struct = &self.old_struct;
-        let field_names = &self.field_names;
+        let Self {
+            new_struct,
+            old_struct,
+            old_struct_trait,
+            field_names,
+            ..
+        } = &self;
 
         let new_generics_type_args = self.map_empty_generics_to_phantom_placeholder().0;
         let filtered_generics = self.filter_empty_generic_params();
 
-        let old_struct_trait_name = format_ident!("{old_struct}Pickable");
-
         tokens.extend(quote! {
             struct #new_struct #filtered_generics {
                 #(
-                    #field_names: <#old_struct #new_generics_type_args as #old_struct_trait_name>::#field_names,
+                    #field_names: <#old_struct #new_generics_type_args as #old_struct_trait>::#field_names,
                 )*
             }
         });
@@ -195,7 +201,7 @@ mod tests {
     #[test]
     fn test_parse_single_without_generics() {
         let input = quote! {
-            PickedPerson, Person, [name]
+            PickedPerson, Person as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -216,7 +222,7 @@ mod tests {
     #[test]
     fn test_parse_single_lifetime() {
         let input = quote! {
-            PickedPerson, Person<'a>, [name]
+            PickedPerson, Person<'a> as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -244,7 +250,7 @@ mod tests {
     #[test]
     fn test_parse_single_lifetime_with_phantom_data() {
         let input = quote! {
-            PickedPerson, Person<'a, _>, [name]
+            PickedPerson, Person<'a, _> as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -272,7 +278,7 @@ mod tests {
     #[test]
     fn test_parse_single_lifetime_with_phantom_data_and_another_lifetime() {
         let input = quote! {
-            PickedPerson, Person<'a, _, 'b>, [name]
+            PickedPerson, Person<'a, _, 'b> as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -300,7 +306,7 @@ mod tests {
     #[test]
     fn test_parse_single_lifetime_with_phantom_data_and_another_lifetime_and_const() {
         let input = quote! {
-            PickedPerson, Person<'a, _, 'b, _>, [name]
+            PickedPerson, Person<'a, _, 'b, _> as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -328,7 +334,7 @@ mod tests {
     #[test]
     fn test_parse_multiple_lifetimes_only() {
         let input = quote! {
-            PickedPerson, Person<'a, 'b>, [name, age]
+            PickedPerson, Person<'a, 'b> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -359,7 +365,7 @@ mod tests {
     #[test]
     fn test_parse_multiple_lifetimes_and_skipped_at_beginning() {
         let input = quote! {
-            PickedPerson, Person<_, 'a, 'b>, [name, age]
+            PickedPerson, Person<_, 'a, 'b> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -389,7 +395,7 @@ mod tests {
     #[test]
     fn test_parse_multiple_lifetimes_and_skipped_at_end() {
         let input = quote! {
-            PickedPerson, Person<'a, 'b, _>, [name, age]
+            PickedPerson, Person<'a, 'b, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -419,7 +425,7 @@ mod tests {
     #[test]
     fn test_parse_single_lifetime_and_type_param() {
         let input = quote! {
-            PickedPerson, Person<'a, T>, [name]
+            PickedPerson, Person<'a, T> as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -445,7 +451,7 @@ mod tests {
     #[test]
     fn test_parse() {
         let input = quote! {
-            PickedPerson, Person<'a, _, U, _>, [name, age, some, another]
+            PickedPerson, Person<'a, _, U, _> as PersonPickable, [name, age, some, another]
         };
 
         // let picked_meta = PickedMeta::parse(input.into()).unwrap();
@@ -489,7 +495,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_single_type_params_generics() {
         let input = quote! {
-            PickedPerson, Person<T>, [name]
+            PickedPerson, Person<T> as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -516,7 +522,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_single_type_params_generics_with_phantom_data() {
         let input = quote! {
-            PickedPerson, Person<T, _>, [name]
+            PickedPerson, Person<T, _> as PersonPickable, [name]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -543,7 +549,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_type_params_generics() {
         let input = quote! {
-            PickedPerson, Person<T, U>, [name, age]
+            PickedPerson, Person<T, U> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -573,7 +579,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_type_params_generics_with_phantom_data_at_the_end() {
         let input = quote! {
-            PickedPerson, Person<T, U, _>, [name, age]
+            PickedPerson, Person<T, U, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -603,7 +609,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning() {
         let input = quote! {
-            PickedPerson, Person<_, T, U>, [name, age]
+            PickedPerson, Person<_, T, U> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -633,7 +639,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end() {
         let input = quote! {
-            PickedPerson, Person<_, T, U, _>, [name, age]
+            PickedPerson, Person<_, T, U, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -663,7 +669,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end_and_middle() {
         let input = quote! {
-            PickedPerson, Person<_, T, _, U, _>, [name, age]
+            PickedPerson, Person<_, T, _, U, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -694,7 +700,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end_and_middle_and_lifetime(
     ) {
         let input = quote! {
-            PickedPerson, Person<'a, _, T, _, U, _>, [name, age]
+            PickedPerson, Person<'a, _, T, _, U, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -725,7 +731,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     fn test_multiple_type_params_generics_with_phantom_data_at_the_beginning_and_end_and_middle_and_lifetime_and_const(
     ) {
         let input = quote! {
-            PickedPerson, Person<'a, _, T, _, U, _, _>, [name, age]
+            PickedPerson, Person<'a, _, T, _, U, _, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -755,7 +761,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_skips_at_beginning_and_end() {
         let input = quote! {
-            PickedPerson, Person<_, _, _, U, _, _>, [name, age]
+            PickedPerson, Person<_, _, _, U, _, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -767,7 +773,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_skips_at_beginning_and_end_and_middle() {
         let input = quote! {
-            PickedPerson, Person<_, _, T, _, U, _, _>, [name, age]
+            PickedPerson, Person<_, _, T, _, U, _, _> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
@@ -779,7 +785,7 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
     #[test]
     fn test_multiple_skips_at_beginning_all() {
         let input = quote! {
-            PickedPerson, Person<_, _, _, _, _, _, T>, [name, age]
+            PickedPerson, Person<_, _, _, _, _, _, T> as PersonPickable, [name, age]
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
