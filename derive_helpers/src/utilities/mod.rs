@@ -1,71 +1,15 @@
 pub mod ident;
+pub mod renaming;
 
-use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta};
-use proc_macro2::TokenStream;
-use proc_macros_helpers::get_crate_name;
-use quote::{quote, format_ident, ToTokens};
-use std::str::FromStr;
-use strum_macros::EnumString;
-use syn::{Ident, Type};
-
+use self::ident::{FieldAttribute, FieldIdentNormalizedDeserialized};
 use crate::models::{CaseString, ExtractorResult, StructGenerics};
 
-use self::ident::FieldIdentNormalizedDeserialized;
-
-#[derive(Debug, Clone)]
-pub struct RenameDeserialize {
-    pub(crate) deserialize: String,
-}
-
-/// This enables us to handle potentially nested values i.e
-///   #[serde(rename = "simple_name")]
-///    or
-///   #[serde(rename(deserialize = "age"))]
-///  #[serde(rename(serialize = "ser_name_nested", deserialize = "deser_name_nested"))]
-/// However, We dont care about deserialized name from serde, so we just ignore that.
-impl FromMeta for RenameDeserialize {
-    fn from_string(value: &str) -> ::darling::Result<Self> {
-        Ok(Self {
-            deserialize: value.into(),
-        })
-    }
-
-    fn from_list(items: &[darling::ast::NestedMeta]) -> ::darling::Result<Self> {
-        #[derive(FromMeta)]
-        struct FullRename {
-            deserialize: String,
-
-            #[darling(default)]
-            #[allow(dead_code)]
-            serialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
-        }
-
-        impl From<FullRename> for RenameDeserialize {
-            fn from(v: FullRename) -> Self {
-                let FullRename { deserialize, .. } = v;
-                Self { deserialize }
-            }
-        }
-        FullRename::from_list(items).map(RenameDeserialize::from)
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct StructLevelCasingDeserialize(CaseString);
-
-impl From<CaseString> for StructLevelCasingDeserialize {
-    fn from(value: CaseString) -> Self {
-        Self(value)
-    }
-}
-
-impl std::ops::Deref for StructLevelCasingDeserialize {
-    type Target = CaseString;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+use darling::{ast::Data, util, FromDeriveInput};
+use proc_macro2::TokenStream;
+use proc_macros_helpers::get_crate_name;
+use quote::{format_ident, quote, ToTokens};
+use std::str::FromStr;
+use syn::{Ident, Type};
 
 #[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
@@ -78,17 +22,17 @@ pub struct TableDeriveAttributesPickable {
     pub data: Data<util::Ignored, FieldAttribute>,
 
     #[darling(default)]
-    pub(crate) rename_all: Option<RenameDeserialize>,
+    pub(crate) rename_all: Option<renaming::RenameDeserialize>,
 }
 
 #[derive(Debug, Clone, Default)]
-struct PickableMetadata<'a> {
+pub(crate) struct PickableMetadata<'a> {
     pub(crate) field_name_normalized_deserialized: Vec<FieldIdentNormalizedDeserialized>,
     pub(crate) field_type: Vec<&'a Type>,
 }
 
 impl TableDeriveAttributesPickable {
-    pub fn casing_deserialize(&self) -> ExtractorResult<StructLevelCasingDeserialize> {
+    pub fn casing_deserialize(&self) -> ExtractorResult<renaming::StructLevelCasingDeserialize> {
         let struct_level_casing = self
             .rename_all
             .as_ref()
@@ -121,35 +65,6 @@ impl TableDeriveAttributesPickable {
     }
 }
 
-#[allow(dead_code)]
-#[derive(Clone, Debug, FromField)]
-#[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
-pub struct FieldAttribute {
-    /// Get the ident of the field. For fields in tuple or newtype structs or
-    /// enum bodies, this can be `None`.
-    pub ident: Option<Ident>,
-    /// This magic field name pulls the type from the input.
-    pub ty: Type,
-    pub attrs: Vec<syn::Attribute>,
-
-    #[darling(default)]
-    pub(crate) rename: Option<RenameDeserialize>,
-}
-
-struct FieldNameDeserialzed(Ident);
-
-// #[derive(Debug, Copy, Clone)]
-// pub struct StructLevelCasing(CaseString);
-/// Options: "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case",
-/// "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
-
-impl FieldAttribute {
-    // pub fn field_names_deserialized_fmt(&self) -> ExtractorResult<FieldNameDeserialzed> {
-    //     let ident = self.ident.as_ref().unwrap();
-    //     format_ident!("__{}_deserialized_fmt", ident)
-    // }
-}
-
 impl ToTokens for TableDeriveAttributesPickable {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let crate_name = get_crate_name(false);
@@ -157,7 +72,6 @@ impl ToTokens for TableDeriveAttributesPickable {
         let struct_name_ident = &table_derive_attributes.ident;
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
             &table_derive_attributes.generics.split_for_impl();
-        let struct_marker = table_derive_attributes.generics.phantom_marker_type();
         let meta = match table_derive_attributes.get_meta() {
             Ok(meta) => meta,
             Err(err) => return tokens.extend(err.write_errors()),
@@ -191,7 +105,7 @@ impl ToTokens for TableDeriveAttributesPickable {
         // }
         let pickable_name = format_ident!("{struct_name_ident}Pickable");
         tokens.extend(quote!(
-            pub trait #pickable_name {
+            pub trait #crate_name :: #pickable_name {
                 #( type #field_name_normalized_deserialized ;) *
             }
 

@@ -5,35 +5,31 @@
  * Licensed under the MIT license
  */
 
-use std::{fmt::Display, ops::Deref};
-
+use super::renaming::{self, StructLevelCasingDeserialize};
 use crate::models::*;
 use convert_case::{Case, Casing};
+use darling::FromField;
 use quote::format_ident;
-
-use super::{FieldAttribute, StructLevelCasingDeserialize};
-
-// use super::{FieldIdentNormalized, FieldNamePascalized, IdentCased, MyFieldReceiver};
+use std::ops::Deref;
+use syn::{Ident, Type};
 
 create_ident_wrapper!(FieldIdentNormalizedDeserialized);
 create_ident_wrapper!(DeserializedFieldName);
 
-// struct DeserializedFieldName(String);
+#[allow(dead_code)]
+#[derive(Clone, Debug, FromField)]
+#[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
+pub struct FieldAttribute {
+    /// Get the ident of the field. For fields in tuple or newtype structs or
+    /// enum bodies, this can be `None`.
+    pub ident: Option<Ident>,
+    /// This magic field name pulls the type from the input.
+    pub ty: Type,
+    pub attrs: Vec<syn::Attribute>,
 
-// impl Display for DeserializedFieldName {
-//     #[inline]
-//     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-//         self.0.fmt(f)
-//     }
-// }
-//
-// impl ToTokens for DeserializedFieldName {
-//     #[inline]
-//     fn to_tokens(&self, tokens: &mut TokenStream) {
-//         self.0.to_tokens(tokens)
-//     }
-// }
-
+    #[darling(default)]
+    pub(crate) rename: Option<renaming::RenameDeserialize>,
+}
 
 impl FieldAttribute {
     pub fn ident(&self) -> ExtractorResult<FieldIdentOriginal> {
@@ -52,7 +48,10 @@ impl FieldAttribute {
         Ok(self.ident_meta_deserialized(struct_casing)?.0)
     }
 
-    pub fn field_name_normaized_de_no_raw(&self, struct_casing: &StructLevelCasingDeserialize) -> ExtractorResult<DeserializedFieldName> {
+    pub fn field_name_normaized_de_no_raw(
+        &self,
+        struct_casing: &StructLevelCasingDeserialize,
+    ) -> ExtractorResult<DeserializedFieldName> {
         Ok(self.ident_meta_deserialized(struct_casing)?.1)
     }
 
@@ -60,7 +59,8 @@ impl FieldAttribute {
         &self,
         struct_casing: &StructLevelCasingDeserialize,
     ) -> ExtractorResult<FieldNamePascalized> {
-        let field_name_normalized = self.field_ident_normalized_deserialized_rawable(struct_casing)?;
+        let field_name_normalized =
+            self.field_ident_normalized_deserialized_rawable(struct_casing)?;
 
         let field_name_pascalized = format_ident!(
             "__{}__",
@@ -75,7 +75,7 @@ impl FieldAttribute {
 
     fn ident_meta_deserialized(
         &self,
-        struct_casing: &StructLevelCasingDeserialize,
+        struct_casing: &renaming::StructLevelCasingDeserialize,
     ) -> ExtractorResult<(FieldIdentNormalizedDeserialized, DeserializedFieldName)> {
         let field_ident_original = self.ident()?;
         let field_ident_cased =
@@ -105,7 +105,10 @@ impl FieldAttribute {
         Ok((field_ident_normalized.into(), field_name_serialized.into()))
     }
 
-    fn convert_case(ident: impl Into<String>, casing: &StructLevelCasingDeserialize) -> IdentCased {
+    fn convert_case(
+        ident: impl Into<String>,
+        casing: &renaming::StructLevelCasingDeserialize,
+    ) -> IdentCased {
         let ident: String = ident.into();
         let ident = match casing.deref() {
             CaseString::None => ident,
