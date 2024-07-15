@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote, ToTokens};
+use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream}, punctuated::Punctuated, Generics, Ident, Path, Result, Token
 };
@@ -129,6 +129,7 @@ impl ToTokens for PickedMeta {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use quote::format_ident;
 
     #[test]
     fn test_parse_single_without_generics() {
