@@ -1,8 +1,6 @@
+
 use std::any::Any;
 
-use serde::Serialize;
-
-#[derive(Debug, Serialize)]
 struct Person<'a, T: 'a, U: 'a> {
     name: String,
     age: u8,
@@ -24,6 +22,7 @@ impl<'a, T: 'a, U: 'a> PersonPickable for Person<'a, T, U> {
     type some = &'a T;
     type another = &'a U;
 }
+
 // struct PickedPerson<'a, T> {
 //     name: <Person<'a, T> as PersonPicker>::name,
 // }
@@ -57,7 +56,7 @@ fn main() {
         // kaka: 43,
         // __phantom_data: std::marker::PhantomData,
     };
-    // std::marker::PhantomData<dyn Any>
+// std::marker::PhantomData<dyn Any>
     let p2 = PickedPersonAll {
         name: "Oyelowo".into(),
         // some: &43,
