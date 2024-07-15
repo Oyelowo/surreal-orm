@@ -38,7 +38,7 @@ struct PickedPersonAll<'a, U> {
     name: <Person<'a, std::marker::PhantomData<dyn Any>, U> as PersonPickable>::name,
     // kaka: &'a std::marker::PhantomData<dyn Any>, U
     // some: <Person<'a, std::marker::PhantomData<dyn Any>, U> as PersonPickable>::some,
-    another: <Person<'a, std::marker::PhantomData<dyn Any>, U> as PersonPickable>::another,
+    another: <Person<'a, std::marker::PhantomData<dyn Any>, U, > as PersonPickable>::another,
 }
 
 fn main() {
