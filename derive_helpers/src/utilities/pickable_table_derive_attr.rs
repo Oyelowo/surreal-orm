@@ -90,15 +90,12 @@ impl ToTokens for TableDeriveAttributesPickable {
             #[allow(non_camel_case_types, unused)]
             pub trait #pickable_name {
                 #(
-                    #[allow(non_camel_case_types, unused)]
                     type #field_name_normalized_deserialized ;
                 ) *
             }
 
-            #[allow(non_camel_case_types, unused)]
             impl #struct_impl_generics #pickable_name for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 #( 
-                    #[allow(non_camel_case_types, unused)]
                     type #field_name_normalized_deserialized = #field_type ;
                 ) *
             }
@@ -128,6 +125,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -164,6 +162,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -200,6 +199,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -236,6 +236,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -272,6 +273,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -308,6 +310,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -344,6 +347,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -380,6 +384,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -416,6 +421,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type name;
                 type age;
@@ -453,6 +459,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait PersonPickable {
                 type firstName;
                 type age;
@@ -508,7 +515,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
-            pub trait PersonPickable {
+            #[allow(non_camel_case_types, unused)]pub trait PersonPickable {
                 type firstName;
                 type simple_rename;
                 type serialized_renmed_age;
@@ -564,7 +571,7 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
-            pub trait PersonPickable {
+            #[allow(non_camel_case_types, unused)]pub trait PersonPickable {
                 type firstName;
                 type simple_rename;
                 type serialized_renmed_age;
