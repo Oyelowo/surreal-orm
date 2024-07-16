@@ -126,7 +126,7 @@ impl ToTokens for PickedMeta {
         let filtered_generics = self.filter_empty_generic_params();
 
         tokens.extend(quote! {
-            struct #new_struct #filtered_generics {
+            pub struct #new_struct #filtered_generics {
                 #(
                     #field_names: <#old_struct #new_generics_type_args as #old_struct_trait> ::#field_names,
                 )*
@@ -156,7 +156,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson {
+            pub struct PickedPerson {
                 name: <Person as PersonPickable>::name,
             }
         };
@@ -180,7 +180,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson {
+            pub struct PickedPerson {
                 name: <Person as crate::person::Pickable>::name,
             }
         };
@@ -214,7 +214,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a> {
+            pub struct PickedPerson<'a> {
                 name: <Person<'a> as PersonPickable>::name,
             }
         };
@@ -248,7 +248,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a> {
+            pub struct PickedPerson<'a> {
                 name: <Person<'a, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
             }
         };
@@ -282,7 +282,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, 'b> {
+            pub struct PickedPerson<'a, 'b> {
                 name: <Person<'a, ::std::marker::PhantomData<dyn Any>, 'b > as PersonPickable>::name,
             }
         };
@@ -316,7 +316,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, 'b> {
+            pub struct PickedPerson<'a, 'b> {
                 name: <Person<'a, ::std::marker::PhantomData<dyn Any>, 'b, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
             }
         };
@@ -353,7 +353,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, 'b> {
+            pub struct PickedPerson<'a, 'b> {
                 name: <Person<'a, 'b> as PersonPickable>::name,
                 age: <Person<'a, 'b> as PersonPickable>::age,
             }
@@ -390,7 +390,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, 'b> {
+            pub struct PickedPerson<'a, 'b> {
                 name: <Person<::std::marker::PhantomData<dyn Any>, 'a, 'b> as PersonPickable>::name,
                 age: <Person<::std::marker::PhantomData<dyn Any>, 'a, 'b> as PersonPickable>::age,
             }
@@ -453,7 +453,7 @@ mod tests {
         );
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, T> {
+            pub struct PickedPerson<'a, T> {
                 name: <Person<'a, T> as PersonPickable>::name,
             }
         };
@@ -495,7 +495,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, U> {
+            pub struct PickedPerson<'a, U> {
                 name: <Person<'a, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<'a, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
                 some: <Person<'a, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::some,
@@ -558,7 +558,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T> {
+            pub struct PickedPerson<T> {
                 name: <Person<T, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
             }
         };
@@ -594,7 +594,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T, U> {
+            pub struct PickedPerson<T, U> {
                 name: <Person<T, U> as PersonPickable>::name,
                 age: <Person<T, U> as PersonPickable>::age,
             }
@@ -631,7 +631,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T, U> {
+            pub struct PickedPerson<T, U> {
                 name: <Person<T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
             }
@@ -668,7 +668,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T, U> {
+            pub struct PickedPerson<T, U> {
                 name: <Person<::std::marker::PhantomData<dyn Any>, T, U > as PersonPickable>::name,
                 age: <Person<::std::marker::PhantomData<dyn Any>, T, U > as PersonPickable>::age,
             }
@@ -705,7 +705,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T, U> {
+            pub struct PickedPerson<T, U> {
                 name: <Person<::std::marker::PhantomData<dyn Any>, T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<::std::marker::PhantomData<dyn Any>, T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
             }
@@ -742,7 +742,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T, U> {
+            pub struct PickedPerson<T, U> {
                 name: <Person<::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
             }
@@ -781,7 +781,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, T, U> {
+            pub struct PickedPerson<'a, T, U> {
                 name: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
             }
@@ -819,7 +819,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<'a, T, U> {
+            pub struct PickedPerson<'a, T, U> {
                 name: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
             }
@@ -838,7 +838,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<U> {
+            pub struct PickedPerson<U> {
                 name: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
             }
@@ -857,7 +857,7 @@ mod tests {
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T, U> {
+            pub struct PickedPerson<T, U> {
                 name: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
                 age: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
             }
@@ -875,7 +875,7 @@ mod tests {
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
-            struct PickedPerson<T> {
+            pub struct PickedPerson<T> {
                 name: <Person
         <::std::marker::PhantomData<dyn Any>,
         ::std::marker::PhantomData<dyn Any>,
