@@ -110,14 +110,55 @@ impl ToTokens for TableDeriveAttributesPickable {
         // }
         let pickable_name = format_ident!("{struct_name_ident}Pickable");
         tokens.extend(quote!(
-            pub trait #crate_name :: #pickable_name {
+            pub trait #pickable_name {
                 #( type #field_name_normalized_deserialized ;) *
             }
 
-            impl #struct_impl_generics pickable_name for #struct_name_ident #struct_ty_generics #struct_where_clause {
+            impl #struct_impl_generics #pickable_name for #struct_name_ident #struct_ty_generics #struct_where_clause {
                 #( type #field_name_normalized_deserialized = #field_type ;) *
             }
 
         ));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use darling::FromDeriveInput;
+
+    #[test]
+    fn test_table_derive_attributes_pickable() {
+        let input = syn::parse_quote! {
+            #[derive(Pickable)]
+            struct Person {
+                name: String,
+                age: u8,
+                some: u32,
+                another: String,
+            }
+        };
+
+        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+
+        let expected = quote!(
+            pub trait PersonPickable {
+                type name;
+                type age;
+                type some;
+                type another;
+            }
+
+            impl PersonPickable for Person {
+                type name = String;
+                type age = u8;
+                type some = u32;
+                type another = String;
+            }
+        );
+
+        let mut tokens_input = TokenStream::new();
+        table_derive_attributes.to_tokens(&mut tokens_input);
+        assert_eq!(tokens_input.to_string(), expected.to_string());
     }
 }
