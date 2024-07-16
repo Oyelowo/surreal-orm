@@ -128,7 +128,7 @@ mod tests {
     use darling::FromDeriveInput;
 
     #[test]
-    fn test_table_derive_attributes_pickable() {
+    fn test_table_derive_attributes_pickable_without_generics() {
         let input = syn::parse_quote! {
             #[derive(Pickable)]
             struct Person {
@@ -154,6 +154,43 @@ mod tests {
                 type age = u8;
                 type some = u32;
                 type another = String;
+            }
+        );
+
+        let mut tokens_input = TokenStream::new();
+        table_derive_attributes.to_tokens(&mut tokens_input);
+        assert_eq!(tokens_input.to_string(), expected.to_string());
+    }
+
+
+
+    #[test]
+    fn test_table_derive_attributes_pickable_with_single_lifetime_generics() {
+        let input = syn::parse_quote! {
+            #[derive(Pickable)]
+            struct Person<'a> {
+                name: String,
+                age: u8,
+                some: &'a u32,
+                another: &'a String,
+            }
+        };
+
+        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+
+        let expected = quote!(
+            pub trait PersonPickable {
+                type name;
+                type age;
+                type some;
+                type another;
+            }
+
+            impl<'a> PersonPickable for Person<'a> {
+                type name = String;
+                type age = u8;
+                type some = &'a u32;
+                type another = &'a String;
             }
         );
 
