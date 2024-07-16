@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use surreal_orm::{pick, Pickable};
 
 #[derive(Pickable, Debug, Serialize)]
@@ -16,7 +16,7 @@ pick!{
     #[derive(Serialize)] 
     NewPersonWithAttributes, Person<'a,_,_> as PersonPickable, 
     [
-        #[serde(skip)]
+        #[serde(rename = "name2")]
         name, 
         age,
         // #[serde(borrow)]
@@ -56,4 +56,9 @@ fn main() {
     };
     println!("{}", new1.name);
     println!("{}", new1.age);
+
+    let new3 = NewPersonWithAttributes {
+        name: "Oye".to_string(),
+        age: 154,
+    };
 }
