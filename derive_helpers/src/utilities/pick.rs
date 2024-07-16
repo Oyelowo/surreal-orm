@@ -1198,4 +1198,33 @@ mod tests {
 
         insta::assert_snapshot!(tokenstream);
     }
+
+    #[test]
+    fn can_add_container_struct_and_field_attributes() {
+        let input = quote! {
+            #[derive(Debug)]
+            PickedPerson,
+            Person<'a, _, U, _> as PersonPickable,
+            [
+                #[serde(rename = "goodie")]
+                name,
+                age
+            ]
+        };
+
+        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+
+        let tokenstream = picked_meta.to_token_stream().to_string();
+
+        let expected = quote! {
+            #[derive(Debug)]
+            pub struct PickedPerson<'a, U> {
+                #[serde(rename = "goodie")]
+                name: <Person<'a, ::std::marker::PhantomData<dyn ::std::any::Any>, U, ::std::marker::PhantomData<dyn ::std::any::Any> > as PersonPickable>::name,
+                age: <Person<'a, ::std::marker::PhantomData<dyn ::std::any::Any>, U, ::std::marker::PhantomData<dyn ::std::any::Any> > as PersonPickable>::age,
+            }
+        };
+
+        assert_eq!(tokenstream, expected.to_string());
+    }
 }
