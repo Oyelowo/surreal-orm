@@ -1,5 +1,5 @@
 ---
 source: derive_helpers/src/utilities/pick.rs
-expression: "tokenstream.replace(\" \", \"\")"
+expression: tokenstream
 ---
-structPickedPerson<'a,U>{name:<Person<'a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::name,age:<Person<'a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::age,some:<Person<'a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::some,another:<Person<'a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::another,}
+struct PickedPerson < 'a , U > { name : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > > as PersonPickable > :: name , age : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > > as PersonPickable > :: age , some : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > > as PersonPickable > :: some , another : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > > as PersonPickable > :: another , }
