@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-use super::renaming::{self, StructLevelCasingDeserialize};
 use crate::models::*;
 use convert_case::{Case, Casing};
 use darling::FromField;
