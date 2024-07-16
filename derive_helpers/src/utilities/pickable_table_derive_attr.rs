@@ -501,7 +501,7 @@ mod tests {
 // #[serde(rename(deserialize = "de_name"))]
 // #[serde(rename(serialize = "ser_name", deserialize = "de_name"))]
     #[test]
-    fn test_derive_table_attributes_pickable_with_rename_all_deserialize() {
+    fn test_derive_table_attributes_pickable_with_rename_all_serialize() {
         let input = syn::parse_quote! {
             #[derive(Pickable, Serialize, Deserialize)]
             #[serde(rename_all = "camelCase")]
@@ -547,6 +547,59 @@ mod tests {
                 type ser_name = String;
             }
             
+        );
+
+        let mut tokens_input = TokenStream::new();
+        table_derive_attributes.to_tokens(&mut tokens_input);
+        assert_eq!(tokens_input.to_string(), expected.to_string());
+    }
+
+    #[test]
+    fn test_derive_table_attributes_pickable_with_rename_all_serialize_with_lifetime_and_type_generics() {
+        let input = syn::parse_quote! {
+            #[derive(Pickable, Serialize, Deserialize)]
+            #[serde(rename_all = "camelCase")]
+            struct Person<'a, T> {
+                // Should use camelCase inheritted from the Container struct
+                first_name: String,
+
+                // Should use "simple_rename". Field attributes supersede/overrides struct
+                // container attributes in this case i.e camelCase
+                #[serde(rename = "simple_rename")]
+                last_name: String,
+
+                // should use "serialized_renmed_age" since that's what we're interested in
+                #[serde(rename(serialize = "serialized_renmed_age"))]
+                age: u8,
+
+                // Should stay some since we are interested in the serialized name
+                #[serde(rename(deserialize = "deserialized_renamed_field"))]
+                some: &'a T,
+
+                // Should use "ser_name" since that's what we're interested in
+                #[serde(rename(serialize = "ser_name", deserialize = "de_name"))]
+                another: T,
+            }
+        };
+
+        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+
+        let expected = quote!(
+            pub trait PersonPickable {
+                type firstName;
+                type simple_rename;
+                type serialized_renmed_age;
+                type some;
+                type ser_name;
+            }
+
+            impl<'a, T> PersonPickable for Person<'a, T> {
+                type firstName = String;
+                type simple_rename = String;
+                type serialized_renmed_age = u8;
+                type some = &'a T;
+                type ser_name = T;
+            }
         );
 
         let mut tokens_input = TokenStream::new();
