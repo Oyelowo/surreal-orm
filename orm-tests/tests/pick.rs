@@ -1,13 +1,28 @@
 use serde::Serialize;
 use surreal_orm::{pick, Pickable};
 
-#[derive(Pickable, Debug, Serialize)]
+#[derive(Debug, Serialize)]
 struct Person<'a, T: 'a, U: 'a> {
     name: String,
     age: u8,
     some: &'a T,
     another: &'a U,
 }
+#[allow(non_camel_case_types, unused)]
+pub trait PersonPickable {
+    type name;
+    type age;
+    type some;
+    type another;
+}
+
+impl<'a, T: 'a, U: 'a> PersonPickable for Person<'a, T, U> {
+    type name = String;
+    type age = u8;
+    type some = &'a T;
+    type another = &'a U;
+}
+
 
 pick!(NewPersonWithUnusedTypeGenericsSkipped, Person<'a,_,_> as PersonPickable, [name, age]);
 pick!(NewPerson, Person<'a,T,U> as PersonPickable, [name, age]);
