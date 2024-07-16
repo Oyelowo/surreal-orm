@@ -7,7 +7,9 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{
-    parse::{Parse, ParseStream}, punctuated::Punctuated, Generics, Ident, Path, Result, Token
+    parse::{Parse, ParseStream},
+    punctuated::Punctuated,
+    Generics, Ident, Path, Result, Token,
 };
 
 use crate::models::create_tokenstream_wrapper;
@@ -26,23 +28,27 @@ create_tokenstream_wrapper!( => FilteredEmptyGenerics);
 impl PickedMeta {
     fn map_empty_generics_to_phantom_placeholder(&self) -> GenericsWithOmiitedAsPhantomData {
         let generics = &self.generics_without_bounds;
-        let new_generics_params = generics.params.iter().map(|param| match param {
-            syn::GenericParam::Type(type_param) => {
-                let ident = &type_param.ident;
-                if ident.to_string() == "_" {
-                    quote! { ::std::marker::PhantomData<dyn Any>, }
-                } else {
-                    quote! { #ident, }
+        let new_generics_params = generics.params.iter().enumerate().map(|(i, param)| {
+            let is_last = i == generics.params.len() - 1;
+            let separator = if is_last { quote! {} } else { quote! {,} };
+            match param {
+                    syn::GenericParam::Type(type_param) => {
+                        let ident = &type_param.ident;
+                        if ident.to_string() == "_" {
+                            quote! { ::std::marker::PhantomData<dyn Any>, }
+                        } else {
+                            quote! { #ident #separator }
+                        }
+                    }
+                    syn::GenericParam::Lifetime(lifetime) => {
+                        let lifetime = &lifetime.lifetime;
+                        quote! { #lifetime #separator }
+                    }
+                    syn::GenericParam::Const(const_param) => {
+                        let ident = &const_param.ident;
+                        quote! { #ident #separator }
+                    }
                 }
-            }
-            syn::GenericParam::Lifetime(lifetime) => {
-                let lifetime = &lifetime.lifetime;
-                quote! { #lifetime, }
-            }
-            syn::GenericParam::Const(const_param) => {
-                let ident = &const_param.ident;
-                quote! { #ident, }
-            }
         });
         let no_generics = generics.into_token_stream().is_empty();
         let new_generics_type_args = if no_generics {
@@ -102,7 +108,6 @@ impl Parse for PickedMeta {
     }
 }
 
-
 impl ToTokens for PickedMeta {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Self {
@@ -146,10 +151,12 @@ mod tests {
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 0);
 
         let tokenstream = picked_meta.to_token_stream().to_string();
-        assert_eq!(
-            tokenstream,
-            "struct PickedPerson { name : < Person as PersonPickable > :: name , }"
-        );
+        let expected = quote! {
+            struct PickedPerson {
+                name: <Person as PersonPickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -168,10 +175,12 @@ mod tests {
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 0);
 
         let tokenstream = picked_meta.to_token_stream().to_string();
-        assert_eq!(
-            tokenstream,
-            "struct PickedPerson { name : < Person as crate :: person :: Pickable > :: name , }"
-        );
+        let expected = quote! {
+            struct PickedPerson {
+                name: <Person as crate::person::Pickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string(),);
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -200,6 +209,12 @@ mod tests {
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a> {
+                name: <Person<'a> as PersonPickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
