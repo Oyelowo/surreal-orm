@@ -15,11 +15,12 @@ use syn::{
 use crate::models::create_tokenstream_wrapper;
 
 pub struct PickedMeta {
+    attributes: Vec<syn::Attribute>,
     new_struct: Ident,
     old_struct: Ident,
     old_struct_trait: Path,
     generics_without_bounds: Generics,
-    field_names: Vec<Ident>,
+    field_names: Vec<FieldPicked>,
 }
 
 create_tokenstream_wrapper!( => GenericsWithOmiitedAsPhantomData);
@@ -83,8 +84,22 @@ impl PickedMeta {
     }
 }
 
+struct FieldPicked {
+    name: Ident,
+    attrs: Vec<syn::Attribute>,
+}
+
+impl Parse for FieldPicked {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let attrs = input.call(syn::Attribute::parse_outer)?;
+        let name = input.parse()?;
+        Ok(FieldPicked { name, attrs })
+    }
+}
+
 impl Parse for PickedMeta {
     fn parse(input: ParseStream) -> Result<Self> {
+        let attributes = input.call(syn::Attribute::parse_outer)?;
         let new_struct = input.parse()?;
         input.parse::<Token![,]>()?;
 
@@ -100,9 +115,10 @@ impl Parse for PickedMeta {
         let content;
         let _brace_token = syn::bracketed!(content in input);
 
-        let fields_names = Punctuated::<Ident, Token![,]>::parse_terminated(&content)?;
+        let fields_names = Punctuated::<FieldPicked, Token![,]>::parse_terminated(&content)?;
 
         Ok(PickedMeta {
+            attributes,
             new_struct,
             old_struct,
             old_struct_trait: pickee_struct_trait,
@@ -119,17 +135,31 @@ impl ToTokens for PickedMeta {
             old_struct,
             old_struct_trait,
             field_names,
+            attributes,
             ..
         } = &self;
 
         let new_generics_type_args = self.map_empty_generics_to_phantom_placeholder().0;
         let filtered_generics = self.filter_empty_generic_params();
 
+        let fields = field_names.iter().map(|field| {
+            let FieldPicked { name, attrs } = field;
+            quote! {
+                #(#attrs)*
+                #name: <#old_struct #new_generics_type_args as #old_struct_trait> ::#name,
+            }
+        });
+
         tokens.extend(quote! {
+            #(#attributes)*
+            // #[derive(::serde::Deserialize)]
             pub struct #new_struct #filtered_generics {
                 #(
-                    #field_names: <#old_struct #new_generics_type_args as #old_struct_trait> ::#field_names,
+                    #fields
                 )*
+                // #(
+                //     #field_names: <#old_struct #new_generics_type_args as #old_struct_trait> ::#field_names,
+                // )*
             }
         });
     }
@@ -150,8 +180,23 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 0);
 
         let tokenstream = picked_meta.to_token_stream().to_string();
@@ -174,8 +219,23 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 0);
 
         let tokenstream = picked_meta.to_token_stream().to_string();
@@ -199,8 +259,23 @@ mod tests {
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
 
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 1);
         assert_eq!(
             picked_meta
@@ -233,8 +308,23 @@ mod tests {
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
 
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
         assert_eq!(
             picked_meta
@@ -267,8 +357,23 @@ mod tests {
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
 
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
         assert_eq!(
             picked_meta
@@ -301,8 +406,23 @@ mod tests {
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
 
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 4);
         assert_eq!(
             picked_meta
@@ -335,10 +455,25 @@ mod tests {
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
 
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec!["name".to_string(), "age".to_string()]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
         assert_eq!(
@@ -372,10 +507,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
         assert_eq!(
@@ -409,10 +556,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
         assert_eq!(
@@ -439,8 +598,23 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
         assert_eq!(
             picked_meta
@@ -472,14 +646,25 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 4);
         assert_eq!(
-            picked_meta.field_names,
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .len(),
+            4
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
             vec![
-                format_ident!("name"),
-                format_ident!("age"),
-                format_ident!("some"),
-                format_ident!("another"),
+                String::from("name"),
+                String::from("age"),
+                String::from("some"),
+                String::from("another"),
             ]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 4);
@@ -516,8 +701,23 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 1);
         assert_eq!(
             picked_meta
@@ -543,8 +743,23 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 1);
-        assert_eq!(picked_meta.field_names, vec![format_ident!("name"),]);
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"),]
+        );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
         assert_eq!(
             picked_meta
@@ -576,10 +791,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 2);
         assert_eq!(
@@ -613,10 +840,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
         assert_eq!(
@@ -650,10 +889,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 3);
         assert_eq!(
@@ -687,10 +938,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 4);
         assert_eq!(
@@ -724,10 +987,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 5);
         assert_eq!(
@@ -763,10 +1038,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 6);
         assert_eq!(
@@ -801,10 +1088,22 @@ mod tests {
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
-        assert_eq!(picked_meta.field_names.len(), 2);
         assert_eq!(
-            picked_meta.field_names,
-            vec![format_ident!("name"), format_ident!("age"),]
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            picked_meta
+                .field_names
+                .iter()
+                .map(|field| field.name.to_string())
+                .collect::<Vec<String>>(),
+            vec![String::from("name"), String::from("age"),]
         );
         assert_eq!(picked_meta.generics_without_bounds.params.len(), 7);
         assert_eq!(
