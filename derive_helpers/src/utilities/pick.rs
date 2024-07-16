@@ -469,9 +469,6 @@ mod tests {
                 .field_names
                 .iter()
                 .map(|field| field.name.to_string())
-                .collect::<Vec<String>>()
-                .iter()
-                .map(|field| field.name.to_string())
                 .collect::<Vec<String>>(),
             vec!["name".to_string(), "age".to_string()]
         );
