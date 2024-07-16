@@ -9,7 +9,7 @@ use darling::{util, FromMeta};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
-    pub(crate) serialize: String,
+    pub(crate) serialize: Option<String>,
 }
 
 /// This enables us to handle potentially nested values i.e
@@ -21,17 +21,19 @@ pub struct Rename {
 impl FromMeta for Rename {
     fn from_string(value: &str) -> ::darling::Result<Self> {
         Ok(Self {
-            serialize: value.into(),
+            serialize: Some(value.into()),
         })
     }
 
     fn from_list(items: &[darling::ast::NestedMeta]) -> ::darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRename {
-            serialize: String,
+            serialize: Option<String>,
 
             #[darling(default)]
-            _deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
+            #[allow(dead_code)]
+            deserialize: Option<util::Ignored>, // Ignore deserialize since we only care about the serialized string
+            // deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
         }
 
         impl From<FullRename> for Rename {

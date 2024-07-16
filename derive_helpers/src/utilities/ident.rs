@@ -28,7 +28,7 @@ pub struct FieldAttribute {
     pub attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
-    pub(crate) rename: Option<renaming::RenameDeserialize>,
+    pub(crate) rename: Option<Rename>,
 }
 
 impl FieldAttribute {
@@ -43,21 +43,21 @@ impl FieldAttribute {
 
     pub fn field_ident_normalized_deserialized_rawable(
         &self,
-        struct_casing: &StructLevelCasingDeserialize,
+        struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<FieldIdentNormalizedDeserialized> {
         Ok(self.ident_meta_deserialized(struct_casing)?.0)
     }
 
     pub fn field_name_normaized_de_no_raw(
         &self,
-        struct_casing: &StructLevelCasingDeserialize,
+        struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<DeserializedFieldName> {
         Ok(self.ident_meta_deserialized(struct_casing)?.1)
     }
 
     pub fn field_name_pascalized(
         &self,
-        struct_casing: &StructLevelCasingDeserialize,
+        struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<FieldNamePascalized> {
         let field_name_normalized =
             self.field_ident_normalized_deserialized_rawable(struct_casing)?;
@@ -75,16 +75,22 @@ impl FieldAttribute {
 
     fn ident_meta_deserialized(
         &self,
-        struct_casing: &renaming::StructLevelCasingDeserialize,
+        struct_casing: &StructLevelCasing,
     ) -> ExtractorResult<(FieldIdentNormalizedDeserialized, DeserializedFieldName)> {
         let field_ident_original = self.ident()?;
         let field_ident_cased =
             || Self::convert_case(field_ident_original.to_string(), struct_casing).to_string();
 
-        let field_ident_normalized_de = &self
-            .rename
-            .as_ref()
-            .map_or_else(field_ident_cased, |renamed| renamed.deserialize.clone());
+        let field_ident_normalized_de =
+            &self
+                .rename
+                .as_ref()
+                .map_or_else(field_ident_cased, |renamed| {
+                    renamed
+                        .serialize
+                        .clone()
+                        .unwrap_or(field_ident_original.to_string())
+                });
 
         let (field_ident_normalized, field_name_serialized) = if field_ident_normalized_de
             .starts_with("r#")
@@ -105,10 +111,7 @@ impl FieldAttribute {
         Ok((field_ident_normalized.into(), field_name_serialized.into()))
     }
 
-    fn convert_case(
-        ident: impl Into<String>,
-        casing: &renaming::StructLevelCasingDeserialize,
-    ) -> IdentCased {
+    fn convert_case(ident: impl Into<String>, casing: &StructLevelCasing) -> IdentCased {
         let ident: String = ident.into();
         let ident = match casing.deref() {
             CaseString::None => ident,

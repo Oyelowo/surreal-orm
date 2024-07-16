@@ -62,7 +62,9 @@ impl MyFieldReceiver {
         let field_ident_normalized = &self
             .rename
             .as_ref()
-            .map_or_else(field_ident_cased, |renamed| renamed.serialize.clone());
+            .map(|rename| rename.serialize.clone())
+            .flatten()
+            .map_or_else(field_ident_cased, |renamed| renamed);
 
         let (field_ident_normalized, field_name_serialized) = if field_ident_normalized
             .starts_with("r#")

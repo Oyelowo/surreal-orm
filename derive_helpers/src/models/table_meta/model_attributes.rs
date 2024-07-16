@@ -176,7 +176,9 @@ impl<'a> ModelAttributes<'a> {
         let struct_level_casing = self
             .rename_all()
             .as_ref()
-            .map(|case| CaseString::from_str(case.serialize.as_str()));
+            .map(|case| case.serialize.clone())
+            .flatten()
+            .map(|case| CaseString::from_str(case.as_str()));
 
         let casing = match struct_level_casing {
             Some(Ok(case)) => case,
