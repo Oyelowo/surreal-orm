@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use surreal_orm::{pick, Pickable};
 
 #[derive(Pickable, Debug, Serialize)]
@@ -12,6 +12,27 @@ struct Person<'a, T: 'a, U: 'a> {
 pick!(NewPersonWithUnusedTypeGenericsSkipped, Person<'a,_,_> as PersonPickable, [name, age]);
 pick!(NewPerson, Person<'a,T,U> as PersonPickable, [name, age]);
 
+pick!{
+    #[derive(Serialize)] 
+    NewPersonWithAttributes, Person<'a,_,_> as PersonPickable, 
+    [
+        #[serde(skip)]
+        name, 
+        age,
+        // #[serde(borrow)]
+        // some
+    ] 
+}
+
+// #[pick(OldPerson, [age, num])]
+// #[pick(Book, [title, author])]
+// struct NewStructThing {
+//    extra: String,
+//     #[override]
+//     age: u32,
+// }
+
+
 fn main() {
     let person = Person {
         name: "Oyelowo".into(),
@@ -21,8 +42,6 @@ fn main() {
     };
     println!("{:?}", person);
 
-
-
     let new2 = NewPersonWithUnusedTypeGenericsSkipped {
         name: "Oye".to_string(),
         age: 154,
@@ -31,7 +50,7 @@ fn main() {
     println!("{}", new2.name);
     println!("{}", new2.age);
 
-    let new1 = NewPerson::<'_, u32, &str>{
+    let new1 = NewPerson::<'_, u32, &str> {
         name: "Oye".to_string(),
         age: 154,
     };
