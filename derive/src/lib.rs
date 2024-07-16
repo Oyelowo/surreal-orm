@@ -72,88 +72,58 @@ pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
 
 
 /// ```rust
-/// use std::any::Any;
-///
-/// #[derive(Node)]
+/// #[derive(Pickable, Debug, Serialize)]
 /// struct Person<'a, T: 'a, U: 'a> {
 ///     name: String,
 ///     age: u8,
 ///     some: &'a T,
 ///     another: &'a U,
 /// }
-/// pick!(PickedPerson, Person as PersonPickable, [name, age]);
 ///
-/// trait PersonPickable {
-///     type name;
-///     type age;
-///     type some;
-///     type another;
-/// }
+/// pick!(NewPersonWithUnusedTypeGenericsSkipped, Person<'a,_,_> as PersonPickable, [name, age]);
+/// pick!(NewPerson, Person<'a,T,U> as PersonPickable, [name, age]);
 ///
-/// // impl<'a, T> PersonPicker for Person<'a, T> {
-/// impl<'a, T: 'a, U: 'a> PersonPickable for Person<'a, T, U> {
-///     type name = String;
-///     type age = u8;
-///     type some = &'a T;
-///     type another = &'a U;
-/// }
-///
-/// // struct PickedPerson<'a, T> {
-/// //     name: <Person<'a, T> as PersonPicker>::name,
-/// // }
-/// struct PickedPerson<'a> {
-///     name: <Person<'a, std::marker::PhantomData<dyn Any>, std::marker::PhantomData<dyn Any>> as PersonPickable>::name,
-///     // __phantom_data: std::marker::PhantomData<&'a T>,
-///     // kaka: T
-/// }
-///
-/// struct PickedPersonAll<'a, U> {
-///     // name: <Person<'a, std::marker::PhantomData<dyn Any>> as PersonPickable>::name,
-///     name: <Person<'a, std::marker::PhantomData<dyn Any>, U> as PersonPickable>::name,
-///     // kaka: &'a std::marker::PhantomData<dyn Any>, U
-///     // some: <Person<'a, std::marker::PhantomData<dyn Any>, U> as PersonPickable>::some,
-///     another: <Person<'a, std::marker::PhantomData<dyn Any>, U> as PersonPickable>::another,
+/// pick!{
+///     #[derive(Serialize)] 
+///     NewPersonWithAttributes, Person<'a,_,_> as PersonPickable, 
+///     [
+///         #[serde(rename = "name2")]
+///         name, 
+///         age,
+///     ] 
 /// }
 ///
 /// fn main() {
-///     // let person = Person<'a, T> {
 ///     let person = Person {
 ///         name: "Oyelowo".into(),
 ///         age: 25,
 ///         some: &43,
 ///         another: &"kaka",
 ///     };
+///     println!("{:?}", person);
 ///
-///     // let something = PickedPerson::<'_, u32>{
-///     let something = PickedPerson {
-///         name: "Oyelowo".into(),
-///         // name: person.name,
-///         // kaka: 43,
-///         // __phantom_data: std::marker::PhantomData,
+///     let new2 = NewPersonWithUnusedTypeGenericsSkipped {
+///         name: "Oye".to_string(),
+///         age: 154,
 ///     };
-/// // std::marker::PhantomData<dyn Any>
-///     let p2 = PickedPersonAll {
-///         name: "Oyelowo".into(),
-///         // some: &43,
-///         another: &"kaka",
+///
+///     println!("{}", new2.name);
+///     println!("{}", new2.age);
+///
+///     let new1 = NewPerson::<'_, u32, &str> {
+///         name: "Oye".to_string(),
+///         age: 154,
 ///     };
+///     println!("{}", new1.name);
+///     println!("{}", new1.age);
+///
+///     let new3 = NewPersonWithAttributes {
+///         name: "Oye".to_string(),
+///         age: 154,
+///     };
+///     println!("{}", new3.name);
 /// }
-///
-/// // pick!(PickedPerson, Person, [name]);
-/// //
-/// // #[pick(Person, [name])]
-/// // #[pick(AnotherPerson, [age])]
-/// // struct PickedPerson {
-/// //     more_fields: u8,
-/// // }
-/// //
-/// //
-/// // #[derive(Serialize, Deserialize)]
-/// // struct NewPerson {
-/// //     #[serde(flatten)]
-/// //     picked_person: PickedPerson,
-/// //     more_fields: u8,
-/// // }
+/// ```
 #[proc_macro]
 pub fn pick(input: TokenStream) -> TokenStream {
     let output = match syn::parse2::<PickedMeta>(input.into()) {
