@@ -61,4 +61,5 @@ fn main() {
         name: "Oye".to_string(),
         age: 154,
     };
+    println!("{}", new3.name);
 }
