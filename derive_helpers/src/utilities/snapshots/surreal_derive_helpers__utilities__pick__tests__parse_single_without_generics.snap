@@ -2,4 +2,4 @@
 source: derive_helpers/src/utilities/pick.rs
 expression: tokenstream
 ---
-struct PickedPerson { name : < Person as PersonPickable > :: name , }
+pub struct PickedPerson { name : < Person as PersonPickable > :: name , }
