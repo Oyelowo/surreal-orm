@@ -71,16 +71,17 @@ pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
 }
 
 
-/// pick!(PickedPerson, Person, [name]);
 /// ```rust
 /// use std::any::Any;
 ///
+/// #[derive(Node)]
 /// struct Person<'a, T: 'a, U: 'a> {
 ///     name: String,
 ///     age: u8,
 ///     some: &'a T,
 ///     another: &'a U,
 /// }
+/// pick!(PickedPerson, Person as PersonPickable, [name, age]);
 ///
 /// trait PersonPickable {
 ///     type name;

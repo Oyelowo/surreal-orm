@@ -5,16 +5,14 @@
  * Licensed under the MIT license
  */
 
-use super::{ident::{FieldAttribute, FieldIdentNormalizedDeserialized}};
+use super::ident::{FieldAttribute, FieldIdentNormalizedDeserialized};
 use crate::models::{CaseString, ExtractorResult, Rename, StructGenerics, StructLevelCasing};
 
 use darling::{ast::Data, util, FromDeriveInput};
 use proc_macro2::TokenStream;
-use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
 use std::str::FromStr;
 use syn::{Ident, Type};
-
 
 #[derive(Clone, Debug, FromDeriveInput)]
 #[darling(attributes(pick, serde), forward_attrs(allow, doc, cfg))]
@@ -37,20 +35,6 @@ pub(crate) struct PickableMetadata<'a> {
 }
 
 impl TableDeriveAttributesPickable {
-    // pub fn casing_deserialize(&self) -> ExtractorResult<renaming::StructLevelCasingDeserialize> {
-    //     let struct_level_casing = self
-    //         .rename_all
-    //         .as_ref()
-    //         .map(|case| CaseString::from_str(case.deserialize.as_str()));
-    //
-    //     let casing = match struct_level_casing {
-    //         Some(Ok(case)) => case,
-    //         Some(Err(e)) => return Err(darling::Error::custom(e.to_string()).into()),
-    //         None => CaseString::None,
-    //     };
-    //     Ok(casing.into())
-    // }
-
     pub fn casing(&self) -> ExtractorResult<StructLevelCasing> {
         let struct_level_casing = self
             .rename_all
@@ -88,7 +72,6 @@ impl TableDeriveAttributesPickable {
 
 impl ToTokens for TableDeriveAttributesPickable {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let crate_name = get_crate_name(false);
         let table_derive_attributes = self;
         let struct_name_ident = &table_derive_attributes.ident;
         let (struct_impl_generics, struct_ty_generics, struct_where_clause) =
@@ -102,36 +85,22 @@ impl ToTokens for TableDeriveAttributesPickable {
             field_type,
         } = meta;
 
-        // use std::any::Any;
-        //
-        // struct Person<'a, T: 'a, U: 'a> {
-        //     name: String,
-        //     age: u8,
-        //     some: &'a T,
-        //     another: &'a U,
-        // }
-        //
-        // trait PersonPickable {
-        //     type name;
-        //     type age;
-        //     type some;
-        //     type another;
-        // }
-        //
-        // impl<'a, T: 'a, U: 'a> PersonPickable for Person<'a, T, U> {
-        //     type name = String;
-        //     type age = u8;
-        //     type some = &'a T;
-        //     type another = &'a U;
-        // }
         let pickable_name = format_ident!("{struct_name_ident}Pickable");
         tokens.extend(quote!(
+            #[allow(non_camel_case_types, unused)]
             pub trait #pickable_name {
-                #( type #field_name_normalized_deserialized ;) *
+                #(
+                    #[allow(non_camel_case_types, unused)]
+                    type #field_name_normalized_deserialized ;
+                ) *
             }
 
+            #[allow(non_camel_case_types, unused)]
             impl #struct_impl_generics #pickable_name for #struct_name_ident #struct_ty_generics #struct_where_clause {
-                #( type #field_name_normalized_deserialized = #field_type ;) *
+                #( 
+                    #[allow(non_camel_case_types, unused)]
+                    type #field_name_normalized_deserialized = #field_type ;
+                ) *
             }
 
         ));
@@ -155,7 +124,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -178,8 +148,6 @@ mod tests {
         assert_eq!(tokens_input.to_string(), expected.to_string());
     }
 
-
-
     #[test]
     fn test_table_derive_attributes_pickable_with_single_lifetime_generics() {
         let input = syn::parse_quote! {
@@ -192,7 +160,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -227,7 +196,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -262,7 +232,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -297,7 +268,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -332,7 +304,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -354,7 +327,7 @@ mod tests {
         table_derive_attributes.to_tokens(&mut tokens_input);
         assert_eq!(tokens_input.to_string(), expected.to_string());
     }
-    
+
     #[test]
     fn test_derive_table_attributes_pickable_with_multiple_lifetime_and_type_generic() {
         let input = syn::parse_quote! {
@@ -367,7 +340,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -390,7 +364,6 @@ mod tests {
         assert_eq!(tokens_input.to_string(), expected.to_string());
     }
 
-
     #[test]
     fn test_table_derive_attributes_pickable_with_single_lifetime_and_multiple_type_generic() {
         let input = syn::parse_quote! {
@@ -403,7 +376,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -438,7 +412,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -474,7 +449,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -497,9 +473,9 @@ mod tests {
         assert_eq!(tokens_input.to_string(), expected.to_string());
     }
 
-// #[serde(rename(serialize = "ser_name"))]
-// #[serde(rename(deserialize = "de_name"))]
-// #[serde(rename(serialize = "ser_name", deserialize = "de_name"))]
+    // #[serde(rename(serialize = "ser_name"))]
+    // #[serde(rename(deserialize = "de_name"))]
+    // #[serde(rename(serialize = "ser_name", deserialize = "de_name"))]
     #[test]
     fn test_derive_table_attributes_pickable_with_rename_all_serialize() {
         let input = syn::parse_quote! {
@@ -528,7 +504,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -546,7 +523,7 @@ mod tests {
                 type some = u32;
                 type ser_name = String;
             }
-            
+
         );
 
         let mut tokens_input = TokenStream::new();
@@ -555,7 +532,8 @@ mod tests {
     }
 
     #[test]
-    fn test_derive_table_attributes_pickable_with_rename_all_serialize_with_lifetime_and_type_generics() {
+    fn test_derive_table_attributes_pickable_with_rename_all_serialize_with_lifetime_and_type_generics(
+    ) {
         let input = syn::parse_quote! {
             #[derive(Pickable, Serialize, Deserialize)]
             #[serde(rename_all = "camelCase")]
@@ -582,7 +560,8 @@ mod tests {
             }
         };
 
-        let table_derive_attributes = TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
+        let table_derive_attributes =
+            TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
             pub trait PersonPickable {
@@ -606,5 +585,4 @@ mod tests {
         table_derive_attributes.to_tokens(&mut tokens_input);
         assert_eq!(tokens_input.to_string(), expected.to_string());
     }
-
 }
