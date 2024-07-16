@@ -30,25 +30,29 @@ impl PickedMeta {
         let generics = &self.generics_without_bounds;
         let new_generics_params = generics.params.iter().enumerate().map(|(i, param)| {
             let is_last = i == generics.params.len() - 1;
-            let separator = if is_last { quote! {} } else { quote! {,} };
+            let separator = if is_last {
+                quote! {}
+            } else {
+                quote! {,}
+            };
             match param {
-                    syn::GenericParam::Type(type_param) => {
-                        let ident = &type_param.ident;
-                        if ident.to_string() == "_" {
-                            quote! { ::std::marker::PhantomData<dyn Any> #separator }
-                        } else {
-                            quote! { #ident #separator }
-                        }
-                    }
-                    syn::GenericParam::Lifetime(lifetime) => {
-                        let lifetime = &lifetime.lifetime;
-                        quote! { #lifetime #separator }
-                    }
-                    syn::GenericParam::Const(const_param) => {
-                        let ident = &const_param.ident;
+                syn::GenericParam::Type(type_param) => {
+                    let ident = &type_param.ident;
+                    if ident.to_string() == "_" {
+                        quote! { ::std::marker::PhantomData<dyn Any> #separator }
+                    } else {
                         quote! { #ident #separator }
                     }
                 }
+                syn::GenericParam::Lifetime(lifetime) => {
+                    let lifetime = &lifetime.lifetime;
+                    quote! { #lifetime #separator }
+                }
+                syn::GenericParam::Const(const_param) => {
+                    let ident = &const_param.ident;
+                    quote! { #ident #separator }
+                }
+            }
         });
         let no_generics = generics.into_token_stream().is_empty();
         let new_generics_type_args = if no_generics {
@@ -124,7 +128,7 @@ impl ToTokens for PickedMeta {
         tokens.extend(quote! {
             struct #new_struct #filtered_generics {
                 #(
-                    #field_names: <#old_struct #new_generics_type_args as #old_struct_trait>::#field_names,
+                    #field_names: <#old_struct #new_generics_type_args as #old_struct_trait> ::#field_names,
                 )*
             }
         });
@@ -245,7 +249,7 @@ mod tests {
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
             struct PickedPerson<'a> {
-                name: <Person<'a, ::std::marker::PhantomData<dyn Any>> as PersonPickable>::name,
+                name: <Person<'a, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
             }
         };
         assert_eq!(tokenstream, expected.to_string());
@@ -277,6 +281,12 @@ mod tests {
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a, 'b> {
+                name: <Person<'a, ::std::marker::PhantomData<dyn Any>, 'b > as PersonPickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -305,6 +315,12 @@ mod tests {
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a, 'b> {
+                name: <Person<'a, ::std::marker::PhantomData<dyn Any>, 'b, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -336,6 +352,13 @@ mod tests {
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a, 'b> {
+                name: <Person<'a, 'b> as PersonPickable>::name,
+                age: <Person<'a, 'b> as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -366,6 +389,13 @@ mod tests {
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a, 'b> {
+                name: <Person<::std::marker::PhantomData<dyn Any>, 'a, 'b> as PersonPickable>::name,
+                age: <Person<::std::marker::PhantomData<dyn Any>, 'a, 'b> as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -422,6 +452,12 @@ mod tests {
             vec!["'a", "T",]
         );
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a, T> {
+                name: <Person<'a, T> as PersonPickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -458,15 +494,16 @@ mod tests {
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
-        insta::assert_snapshot!(tokenstream.replace(" ", ""));
+        let expected = quote! {
+            struct PickedPerson<'a, U> {
+                name: <Person<'a, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<'a, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+                some: <Person<'a, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::some,
+                another: <Person<'a, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::another,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
-        assert_eq!(
-            tokenstream.replace(" ", ""),
-"structPickedPerson<'a,U>{name:<Person<'a,::std::marker::PhantomData<dynAny>,U,::std::mar\
-ker::PhantomData<dynAny>,>asPersonPickable>::name,age:<Person<'a,::std::marker::PhantomData<dynAn\
-y>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::age,some:<Person<'a,::std::marker::Ph\
-antomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::some,another:<Person<'\
-a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPersonPickable>::another,}");
     }
 
     #[test]
@@ -520,6 +557,12 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T> {
+                name: <Person<T, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -550,6 +593,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T, U> {
+                name: <Person<T, U> as PersonPickable>::name,
+                age: <Person<T, U> as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -580,6 +630,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T, U> {
+                name: <Person<T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -610,6 +667,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T, U> {
+                name: <Person<::std::marker::PhantomData<dyn Any>, T, U > as PersonPickable>::name,
+                age: <Person<::std::marker::PhantomData<dyn Any>, T, U > as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -640,6 +704,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T, U> {
+                name: <Person<::std::marker::PhantomData<dyn Any>, T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<::std::marker::PhantomData<dyn Any>, T, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -670,6 +741,14 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T, U> {
+                name: <Person<::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+            }
+        };
+
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -701,6 +780,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a, T, U> {
+                name: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -732,6 +818,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a, T, U> {
+                name: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<'a, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -744,6 +837,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<U> {
+                name: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -756,6 +856,13 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T, U> {
+                name: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::name,
+                age: <Person<::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any>, T, ::std::marker::PhantomData<dyn Any>, U, ::std::marker::PhantomData<dyn Any>, ::std::marker::PhantomData<dyn Any> > as PersonPickable>::age,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
@@ -766,8 +873,32 @@ a,::std::marker::PhantomData<dynAny>,U,::std::marker::PhantomData<dynAny>,>asPer
         };
 
         let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
-
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<T> {
+                name: <Person
+        <::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        T >
+        as PersonPickable>::name,
+
+                age: <Person
+        <::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        ::std::marker::PhantomData<dyn Any>,
+        T >
+        as PersonPickable>::age,
+            }
+        };
+
+        assert_eq!(tokenstream, expected.to_string());
 
         insta::assert_snapshot!(tokenstream);
     }

@@ -2,4 +2,4 @@
 source: derive_helpers/src/utilities/pick.rs
 expression: tokenstream
 ---
-struct PickedPerson < 'a , T , U > { name : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , T , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > , :: std :: marker :: PhantomData < dyn Any > , > as PersonPickable > :: name , age : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , T , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > , :: std :: marker :: PhantomData < dyn Any > , > as PersonPickable > :: age , }
+struct PickedPerson < 'a , T , U > { name : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , T , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > , :: std :: marker :: PhantomData < dyn Any > > as PersonPickable > :: name , age : < Person < 'a , :: std :: marker :: PhantomData < dyn Any > , T , :: std :: marker :: PhantomData < dyn Any > , U , :: std :: marker :: PhantomData < dyn Any > , :: std :: marker :: PhantomData < dyn Any > > as PersonPickable > :: age , }
