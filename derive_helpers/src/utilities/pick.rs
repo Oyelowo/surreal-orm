@@ -35,7 +35,7 @@ impl PickedMeta {
                     syn::GenericParam::Type(type_param) => {
                         let ident = &type_param.ident;
                         if ident.to_string() == "_" {
-                            quote! { ::std::marker::PhantomData<dyn Any>, }
+                            quote! { ::std::marker::PhantomData<dyn Any> #separator }
                         } else {
                             quote! { #ident #separator }
                         }
@@ -243,6 +243,12 @@ mod tests {
         );
 
         let tokenstream = picked_meta.to_token_stream().to_string();
+        let expected = quote! {
+            struct PickedPerson<'a> {
+                name: <Person<'a, ::std::marker::PhantomData<dyn Any>> as PersonPickable>::name,
+            }
+        };
+        assert_eq!(tokenstream, expected.to_string());
         insta::assert_snapshot!(tokenstream);
     }
 
