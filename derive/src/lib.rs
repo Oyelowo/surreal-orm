@@ -29,7 +29,6 @@ extern crate proc_macro;
 
 mod migrations;
 mod models;
-mod utilities;
 
 
 use darling::FromDeriveInput;
