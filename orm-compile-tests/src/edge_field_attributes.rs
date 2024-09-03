@@ -2,7 +2,6 @@
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
  */
 
 // August 25, 2023.
@@ -42,10 +41,10 @@ mod check1 {
 
         #[surreal_orm(link_one = In)]
         pub r#in: LinkOne<In>,
-   
+
         #[surreal_orm(link_one = Out)]
         pub out: LinkOne<Out>,
-   
+
         #[surreal_orm(define = "define_field_fn()")]
         pub likes_count: u64,
     }
@@ -62,10 +61,10 @@ mod check2 {
 
         #[surreal_orm(link_one = In)]
         pub r#in: LinkOne<In>,
-   
+
         #[surreal_orm(link_one = Out)]
         pub out: LinkOne<Out>,
-   
+
         #[surreal_orm(define = define_field_fn)]
         pub likes_count: u64,
     }
@@ -82,10 +81,10 @@ mod check3 {
 
         #[surreal_orm(link_one = In)]
         pub r#in: LinkOne<In>,
-   
+
         #[surreal_orm(link_one = Out)]
         pub out: LinkOne<Out>,
-   
+
         #[surreal_orm(value = "18", assert = assert_fn(), permissions = permissions_fn())]
         pub likes_count: u64,
     }
@@ -102,10 +101,10 @@ mod check4 {
 
         #[surreal_orm(link_one = In)]
         pub r#in: LinkOne<In>,
-   
+
         #[surreal_orm(link_one = Out)]
         pub out: LinkOne<Out>,
-   
+
         #[surreal_orm(
             value = "18",
             assert= assert_fn,

@@ -2,7 +2,6 @@
  * Email: oyelowo.oss@gmail.com
 * Author: Oyelowo Oyedayo
  * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
  */
 
 use pretty_assertions::assert_eq;

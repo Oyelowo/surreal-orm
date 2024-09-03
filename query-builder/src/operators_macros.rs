@@ -2,7 +2,6 @@
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
  */
 
 /// This macro is used to create the different operators that can be used in the query builder.
