@@ -2,7 +2,6 @@
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
  */
 
 // array::add() Adds an item to an array if it doesn't exist

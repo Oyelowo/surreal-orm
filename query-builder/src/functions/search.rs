@@ -2,7 +2,6 @@
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
  */
 
 // These functions are used in conjunction with the 'matches' operator to either collect the relevance score or highlight the searched keywords within the content.

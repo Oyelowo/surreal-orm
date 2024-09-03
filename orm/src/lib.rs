@@ -4,7 +4,6 @@
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
  */
 
 //! # surreal-orm is a hyper expressive and intuitive query builder and ORM for surrealdb implemented in Rust.
