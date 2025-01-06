@@ -214,9 +214,9 @@ pub fn float_fn(
 ///
 /// # Arguments
 /// * `from` - The minimum value of the range. Can be a number, field or parameter reprsenting
-/// the number.
+///    the number.
 /// * `to` - The maximum value of the range. Can be a number, field or parameter reprsenting
-/// the number.
+///    the number.
 ///
 /// # Example
 /// ```rust
