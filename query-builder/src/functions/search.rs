@@ -148,7 +148,7 @@ pub fn highlight_fn(
 /// * `str1` - The string to use as the start of the highlight.
 /// * `str2` - The string to use as the end of the highlight.
 /// * `predicate_ref_number` - The predicate reference number to highlight.
-/// All arguments could be a field or a parameter that represents the value.
+///     All arguments could be a field or a parameter that represents the value.
 ///
 /// # Example
 /// ```rust

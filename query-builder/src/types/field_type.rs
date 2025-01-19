@@ -341,7 +341,7 @@ impl FieldType {
         matches!(self, FieldType::Array(_, _) | FieldType::Set(_, _))
     }
 
-    /// Returns true if the field type is a list type
+    // /// Returns true if the field type is a list type
     // TODO: Remove this?
     // pub fn is_list(&self) -> bool {
     //     matches!(self, FieldType::Array(_, _) | FieldType::Set(_, _))

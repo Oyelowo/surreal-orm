@@ -21,31 +21,33 @@ pub fn id_fn(record_id: impl Into<ThingLike>) -> crate::Function {
     }
 }
 
-/// Extracts and returns the table id from a SurrealDB Record ID
-/// Also aliased as `meta_id!`
-///
-/// # Arguments
-/// * `record_id` - The record id to extract the table name from. Can also be a field or a parameter
-/// representing the record id.
-///
-/// # Example
-/// ```rust
-/// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, functions::meta, statements::let_};
-/// use surrealdb::sql;
-///
-/// let record_id = sql::Thing::from(("person", "oyelowo"));
-/// let result = meta::id!(record_id);
-/// assert_eq!(result.to_raw().build(), format!("meta::id(person:oyelowo)"));
-///
-/// let id_field = Field::new("id_field");
-/// let result = meta::id!(id_field);
-/// assert_eq!(result.to_raw().build(), format!("meta::id(id_field)"));
-///
-/// let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
-/// let result = meta::id!(id_param);
-/// assert_eq!(result.to_raw().build(), format!("meta::id($id_param)"));
-/// ```
+/**
+Extracts and returns the table id from a SurrealDB Record ID
+Also aliased as `meta_id!`
+
+# Arguments
+* `record_id` - The record id to extract the table name from. Can also be a field or a parameter
+    representing the record id.
+
+# Example
+```rust
+# use surreal_query_builder as surreal_orm;
+use surreal_orm::{*, functions::meta, statements::let_};
+use surrealdb::sql;
+
+let record_id = sql::Thing::from(("person", "oyelowo"));
+let result = meta::id!(record_id);
+assert_eq!(result.to_raw().build(), format!("meta::id(person:oyelowo)"));
+
+let id_field = Field::new("id_field");
+let result = meta::id!(id_field);
+assert_eq!(result.to_raw().build(), format!("meta::id(id_field)"));
+
+let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
+let result = meta::id!(id_param);
+assert_eq!(result.to_raw().build(), format!("meta::id($id_param)"));
+```
+*/
 #[macro_export]
 macro_rules! meta_id {
     ($record_id: expr) => {
@@ -67,30 +69,32 @@ pub fn tb_fn(record_id: impl Into<ThingLike>) -> crate::Function {
     }
 }
 
-/// Extracts and returns the table name from a SurrelDB Record ID
-/// Also aliased as `meta_tb!`
-/// # Arguments
-/// * `record_id` - The record id to extract the table name from. Can also be a field or a parameter
-/// representing the record id.
-///
-/// # Example
-/// ```rust
-/// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, functions::meta, statements::let_};
-/// use surrealdb::sql;
-///
-/// let record_id = sql::Thing::from(("person", "oyelowo"));
-/// let result = meta::tb!(record_id);
-/// assert_eq!(result.to_raw().build(), format!("meta::tb(person:oyelowo)"));
-///
-/// let id_field = Field::new("id_field");
-/// let result = meta::tb!(id_field);
-/// assert_eq!(result.to_raw().build(), format!("meta::tb(id_field)"));
-///
-/// let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
-/// let result = meta::tb!(id_param);
-/// assert_eq!(result.to_raw().build(), format!("meta::tb($id_param)"));
-/// ```
+/**
+Extracts and returns the table name from a SurrelDB Record ID
+Also aliased as `meta_tb!`
+# Arguments
+* `record_id` - The record id to extract the table name from. Can also be a field or a parameter
+    representing the record id.
+
+# Example
+```rust
+# use surreal_query_builder as surreal_orm;
+use surreal_orm::{*, functions::meta, statements::let_};
+use surrealdb::sql;
+
+let record_id = sql::Thing::from(("person", "oyelowo"));
+let result = meta::tb!(record_id);
+assert_eq!(result.to_raw().build(), format!("meta::tb(person:oyelowo)"));
+
+let id_field = Field::new("id_field");
+let result = meta::tb!(id_field);
+assert_eq!(result.to_raw().build(), format!("meta::tb(id_field)"));
+
+let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
+let result = meta::tb!(id_param);
+assert_eq!(result.to_raw().build(), format!("meta::tb($id_param)"));
+```
+*/
 #[macro_export]
 macro_rules! meta_tb {
     ($record_id: expr) => {

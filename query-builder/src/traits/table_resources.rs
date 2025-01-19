@@ -11,39 +11,39 @@ pub trait TableResources
 where
     Self: Model,
 {
-    ///
+    /// Returns a list of fields definitions.
     fn events_definitions() -> Vec<Raw> {
         vec![]
     }
 
-    ///
+    /// Returns a list of fields' indexes definitions.
     fn indexes_definitions() -> Vec<Raw> {
         vec![]
     }
 
-    ///
+    /// Returns a list of fields definitions.
     fn fields_definitions() -> Vec<Raw> {
         Self::define_fields()
     }
 
-    ///
+    /// Returns a table definition.
     fn table_definition() -> Raw {
         Self::define_table()
     }
 }
 
-///
+/// A trait for field changes.
 #[derive(Debug, Clone)]
 pub struct FieldChangeMeta {
-    ///
+    /// The table where the field is located.
     pub table: Table,
-    ///
+    /// The old name of the field.
     pub old_name: Field,
-    ///
+    /// The new name of the field.
     pub new_name: Field,
 }
 
-///
+/// A trait for table changes.
 #[macro_export]
 macro_rules! create_table_resources {
     ($($struct_table: ident),*) => {

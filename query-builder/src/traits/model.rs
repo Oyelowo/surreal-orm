@@ -77,7 +77,7 @@ pub trait Model: Sized {
         Thing::from((Self::table().to_string(), id.into()))
     }
 
-    ///
+    /// Create a new surreal Thing/compound id from a string
     fn create_id<V: Into<sql::Id>>(id: V) -> SurrealId<Self, V> {
         SurrealId::new(id)
     }
@@ -276,13 +276,14 @@ pub trait Edge: Model + Serialize + SchemaGetter {
     type Out;
     #[doc(hidden)]
     type TableNameChecker;
-    /// The type of the schema
+    // The type of the schema
     // type Schema;
 
-    /// returns the schema of the edge for generating graph strings e.g
+    // returns the schema of the edge for generating graph strings e.g
     // fn schema() -> Self::Schema;
     // /// returns the key of the edge aka id field
     // fn get_id<T: From<Thing>>(self) -> T;
+
     /// returns the table name of the edge
     fn get_table() -> Table;
 }
@@ -300,13 +301,14 @@ pub trait Object: Serialize + SchemaGetter {
     // fn schema() -> Self::Schema;
 }
 
-///
+/// Trait for getting the schema of a node for generating graph strings
 pub trait SchemaGetter {
-    ///
+    /// The type of the schema
     type Schema;
-    ///
+    /// returns the schema of the node for generating graph strings e.g
+    ///  let UserSchema { id, age, name, email, writes__ } = User::schema();
     fn schema() -> Self::Schema;
-    ///
+    /// Same as schema but prefixed. Useful for traversing the graph for e.g aliases.
     fn schema_prefixed(prefix: impl Into<ValueLike>) -> Self::Schema;
 }
 

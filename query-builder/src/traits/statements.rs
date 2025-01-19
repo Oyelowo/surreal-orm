@@ -62,7 +62,7 @@ where
     Self: Parametric + Buildable + Sized + Send + Sync + Runnable,
     T: Serialize + DeserializeOwned + Model,
 {
-    /// Runs the statement against the database and returns the first result before the change.
+    // /// Runs the statement against the database and returns the first result before the change.
     // async fn return_first_before(self, db: Surreal<Db>) -> SurrealOrmResult<Option<T>> {
     //     let query = self.set_return_type(ReturnType::Before);
     //     query.return_first(db).await
@@ -134,7 +134,7 @@ where
         get_many::<P>(response)
     }
 
-    ///
+    #[doc(hidden)]
     fn validate_fields_to_fetch(linked_fields_to_fetch: &[Field]) -> SurrealOrmResult<Vec<String>> {
         let result = linked_fields_to_fetch
             .iter()
@@ -227,9 +227,9 @@ where
         self.load_links(T::get_linked_fields())
     }
 
-    /// Sets the return type to projections and fetches the all record links values.
-    /// For link_one, link_self, it returns null if the link is null or the reference
-    /// does not exist. For link_many, it returns filters out links that are null or that
+    // /// Sets the return type to projections and fetches the all record links values.
+    // /// For link_one, link_self, it returns null if the link is null or the reference
+    // /// does not exist. For link_many, it returns filters out links that are null or that
     // /// point to reference that does not yet exist
     // fn load_all_links_non_null(self) -> SurrealOrmResult<Self> {
     //     self.load_links_non_null(T::get_linked_fields())
@@ -241,8 +241,8 @@ where
         self.load_links(T::get_link_many_fields())
     }
 
-    /// Sets the return type to projections and fetches the all record links values
-    /// for link_many fields excluding the null record links.
+    // /// Sets the return type to projections and fetches the all record links values
+    // /// for link_many fields excluding the null record links.
     // fn load_link_manys_non_null(self) -> SurrealOrmResult<Self> {
     //     self.load_links_non_null(T::get_link_many_fields())
     // }
@@ -321,7 +321,7 @@ where
     /// Internal method to set the surrealdb return type of the statement.
     fn set_return_type(self, return_type: ReturnType) -> Self;
 
-    ///
+    /// Internal method to get the surrealdb return type of the statement.
     fn get_return_type(&self) -> ReturnType;
 }
 

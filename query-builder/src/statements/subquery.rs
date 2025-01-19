@@ -9,7 +9,7 @@ use surrealdb::sql;
 
 use crate::{
     Binding, BindingsList, Block, Buildable, Edge, Erroneous, ErrorList, Model, Node, Parametric,
-    Raw, SurrealOrmError, ToRaw, ValueLike,
+    Raw, SurrealOrmError, ToRaw,
 };
 
 use super::{
@@ -154,11 +154,12 @@ impl From<ReturnStatement> for Subquery {
     }
 }
 
-impl From<ValueLike> for Subquery {
-    fn from(statement: ValueLike) -> Self {
-        statement.into()
-    }
-}
+// Recursive issue
+// impl From<ValueLike> for Subquery {
+//     fn from(statement: ValueLike) -> Self {
+//         Subquery::from(statement)
+//     }
+// }
 
 impl From<Raw> for Subquery {
     fn from(statement: Raw) -> Self {

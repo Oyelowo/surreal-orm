@@ -13,7 +13,6 @@ use std::fmt::{self, Display};
 /// Statement syntax
 /// DEFINE MODEL ml::@name<@version>
 /// [ PERMISSIONS @permissions ]
-
 /// A statement for defining a ML model.
 #[derive(Clone, Debug)]
 pub struct DefineModelStatement {

@@ -286,9 +286,9 @@ pub fn int_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberLi
 ///
 /// # Arguments
 /// * `from` - The minimum value of the range. Can be a number, field or parameter reprsenting
-/// the number.
+///     the number.
 /// * `to` - The maximum value of the range. Can be a number, field or parameter reprsenting
-/// the number.
+///     the number.
 ///
 /// # Example
 /// ```rust
@@ -356,9 +356,9 @@ pub fn time_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberL
 ///
 /// # Arguments
 /// * `from` - The minimum value of the range. Can be a number, field or parameter reprsenting
-/// the number.
+///     the number.
 /// * `to` - The maximum value of the range. Can be a number, field or parameter reprsenting
-/// the number.
+///     the number.
 ///
 /// # Example
 /// ```rust
@@ -436,10 +436,10 @@ pub fn string_fn(
 ///
 /// # Arguments
 /// * `from` - The length of the string if one argument is provided. If two arguments are
-/// provided, then it is the minimum length of the string. Can be a number, field or parameter
-/// reprsenting the number.
+///     provided, then it is the minimum length of the string. Can be a number, field or parameter
+///     reprsenting the number.
 /// * `to` - The maximum length of the string. Can be a number, field or parameter reprsenting
-/// the number.
+///     the number.
 ///
 /// # Example
 /// ```rust
@@ -504,7 +504,7 @@ pub fn guid_fn(length: Option<impl Into<NumberLike>>) -> Function {
 /// # Arguments
 ///
 /// * `length` - The length of the guid. Can be a number, field or parameter reprsenting the
-/// number.
+///     number.
 ///
 /// # Example
 /// ```rust

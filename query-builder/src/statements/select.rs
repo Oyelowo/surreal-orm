@@ -1302,7 +1302,7 @@ impl SelectStatement {
         self
     }
 
-    ///
+    /// Groups all records in the query result into a single group.
     pub fn group_all(mut self) -> Self {
         self.0.group_all = true;
         self

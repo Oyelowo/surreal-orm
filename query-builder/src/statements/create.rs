@@ -152,7 +152,7 @@ where
     /// # Arguments
     ///
     /// * `settables` - an instance of `Setter` trait. This can be created using a single
-    /// `equal_to` helper method on a field or a list of `equal_to` methods for multiple fields
+    ///     `equal_to` helper method on a field or a list of `equal_to` methods for multiple fields
     ///
     /// # Examples
     ///
@@ -191,7 +191,6 @@ where
     ///                 ],
     ///         ).to_raw().build(), "CREATE user SET name='Oyelowo', age=192")
     /// ```
-
     pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> CreateStatement<T> {
         let settable: Vec<Setter> = settables.into();
 
