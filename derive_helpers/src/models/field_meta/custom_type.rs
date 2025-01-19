@@ -73,18 +73,19 @@ impl FromMeta for CustomType {
         // Type::from_meta(item).map(Self)
         let ty = match item {
             syn::Meta::Path(ref path) => {
-                let ty = Type::Path(syn::TypePath {
+                
+                Type::Path(syn::TypePath {
                     qself: None,
                     path: path.clone(),
-                });
-                ty
+                })
             }
             syn::Meta::NameValue(ref name_value) => {
-                let ty = match &name_value.value {
+                
+                match &name_value.value {
                     syn::Expr::Lit(lit_str) => match lit_str.lit {
                         syn::Lit::Str(ref lit_str) => {
-                            let ty = syn::parse_str::<Type>(&lit_str.value())?;
-                            ty
+                            
+                            syn::parse_str::<Type>(&lit_str.value())?
                         }
                         _ => {
                             return Err(darling::Error::custom(
@@ -93,19 +94,18 @@ impl FromMeta for CustomType {
                         }
                     },
                     syn::Expr::Path(ref path) => {
-                        let ty = Type::Path(syn::TypePath {
+                        
+                        Type::Path(syn::TypePath {
                             qself: None,
                             path: path.path.clone(),
-                        });
-                        ty
+                        })
                     }
                     _ => {
                         return Err(darling::Error::custom(
                             "Expected a valid Rust path or a stringified type",
                         ));
                     }
-                };
-                ty
+                }
             }
             _ => {
                 return Err(darling::Error::unsupported_shape(
@@ -262,11 +262,11 @@ impl CustomType {
                 Ok(CustomTypeTurboFished(ty))
             }
             _ => {
-                return Err(syn::Error::new(
+                Err(syn::Error::new(
                     self.to_token_stream().span(),
                     "Unsupported type for turbofishing",
                 )
-                .into());
+                .into())
             }
         }
     }
@@ -300,7 +300,7 @@ impl CustomType {
         &self,
         model_attributes: &ModelAttributes,
     ) -> ExtractorResult<CustomGenerics> {
-        let custom_type = self.replace_self_with_current_struct_concrete_type(&model_attributes)?;
+        let custom_type = self.replace_self_with_current_struct_concrete_type(model_attributes)?;
         Ok(
             GenericTypeExtractor::sync_field_type_to_current_struct_generics(
                 model_attributes,
@@ -734,7 +734,7 @@ impl CustomType {
 
                 if !potential_type_idents
                     .iter()
-                    .any(|type_ident| type_ident.to_string() == last_segment.ident.to_string())
+                    .any(|type_ident| last_segment.ident == type_ident.to_string())
                 {
                     return None;
                 }

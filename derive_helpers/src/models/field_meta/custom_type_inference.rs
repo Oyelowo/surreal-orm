@@ -24,7 +24,7 @@ impl<'a> FieldTypeInference<'a> {
     pub fn infer_type(&self) -> ExtractorResult<Option<DbFieldTypeAstMeta>> {
         let inferred = self
             .infer_type_by_priority()
-            .map(|res| Some(res))
+            .map(Some)
             .unwrap_or_else(|_| None);
 
         inferred.ok_or_else(|| {
@@ -43,9 +43,9 @@ impl<'a> FieldTypeInference<'a> {
         let field_name = self.db_field_name;
 
         // NOTE: The order of the inference approach is important. Type path should always be first
-        let priority1 = || self.based_on_type_path_token_structure(&ty, relation_type.clone());
-        let priority2 = || self.based_on_db_field_name(&ty, &field_name, &model_attrs);
-        let priority3 = || self.based_on_field_link_type(&ty, &relation_type);
+        let priority1 = || self.based_on_type_path_token_structure(ty, relation_type.clone());
+        let priority2 = || self.based_on_db_field_name(ty, field_name, model_attrs);
+        let priority3 = || self.based_on_field_link_type(ty, relation_type);
 
         let db_type = if let Ok(db_ty) = priority1() {
             Some(db_ty)
@@ -153,7 +153,7 @@ impl<'a> FieldTypeInference<'a> {
             let array_len_token = field_ty.get_array_const_length();
             let array_len_token_as_int = array_len_token
                 .as_ref()
-                .map(|expr| {
+                .and_then(|expr| {
                     if let Expr::Lit(lit) = expr {
                         if let syn::Lit::Int(int) = &lit.lit {
                             Some(int.base10_parse::<u64>().unwrap())
@@ -163,8 +163,7 @@ impl<'a> FieldTypeInference<'a> {
                     } else {
                         None
                     }
-                })
-                .flatten();
+                });
 
             let inner_item = inner_type
                 .map(|ct| self.based_on_type_path_token_structure(&ct, relation_type))
@@ -391,7 +390,8 @@ impl<'a> FieldTypeInference<'a> {
             RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
                 let ref_node = ref_node.turbo_fishize()?;
 
-                let db_field_type_ast_meta = DbFieldTypeAstMeta {
+                
+                DbFieldTypeAstMeta {
                             field_type_db_original: FieldType::Array(
                                 ::std::boxed::Box::new(FieldType::Record(vec![])),
                                 ::std::option::Option::None
@@ -403,8 +403,7 @@ impl<'a> FieldTypeInference<'a> {
                             static_assertion_token: quote!(
                                 #crate_name::validators::assert_type_eq_all!(#field_ty, #crate_name::LinkMany<#ref_node>);
                         ).into(),
-                        };
-                db_field_type_ast_meta
+                        }
             },
                 // TODO: Consider removing the concept of list altogether to 
                 // avoid confusion/ambiguity

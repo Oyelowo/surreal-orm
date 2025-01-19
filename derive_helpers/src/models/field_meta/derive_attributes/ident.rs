@@ -61,8 +61,7 @@ impl MyFieldReceiver {
         let field_ident_normalized = &self
             .rename
             .as_ref()
-            .map(|rename| rename.serialize.clone())
-            .flatten()
+            .and_then(|rename| rename.serialize.clone())
             .map_or_else(field_ident_cased, |renamed| renamed);
 
         let (field_ident_normalized, field_name_serialized) = if field_ident_normalized

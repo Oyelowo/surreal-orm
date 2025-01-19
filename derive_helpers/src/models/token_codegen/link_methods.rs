@@ -16,7 +16,7 @@ ListSimpleTraversalMethod
 
 use super::{Codegen, RelationType};
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn is_in_or_out_edge_node(&self) -> ExtractorResult<bool> {
         Ok(self
             .field_receiver()

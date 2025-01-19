@@ -13,7 +13,7 @@ use crate::models::*;
 use super::Codegen;
 create_tokenstream_wrapper!(=> StructPartialFieldType);
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_struct_partial_metadata(&mut self) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let model_attributes = self.table_derive_attributes();

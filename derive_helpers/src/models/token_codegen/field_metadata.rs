@@ -10,7 +10,7 @@ use crate::models::*;
 
 use super::Codegen;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_field_metadata_token(&mut self) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let field_receiver = self.field_receiver();

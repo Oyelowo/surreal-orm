@@ -42,7 +42,7 @@ pub struct TableNameAsString(String);
 
 impl ToTokens for TableNameAsString {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let table = format!("{}", self.0);
+        let table = self.0.to_string();
         let table = quote!(#table);
         table.to_tokens(tokens);
     }

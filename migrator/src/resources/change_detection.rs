@@ -35,7 +35,7 @@ pub(crate) struct FieldChangeDetectionMeta<'a, R: DbResources> {
     pub(crate) codebase_resources: &'a R,
 }
 
-impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeField {
+impl<R: DbResources> TryFrom<FieldChangeDetectionMeta<'_, R>> for DeltaTypeField {
     type Error = MigrationError;
 
     fn try_from(value: FieldChangeDetectionMeta<R>) -> MigrationResult<Self> {
@@ -90,8 +90,8 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
             }
             // No explicit rename attribute used on the field e.g old_name = "OldFieldName"
             (None, None) => {
-                let left_def = left_defs.get_definition(&field_name.build()).cloned();
-                let right_def = right_defs.get_definition(&field_name.build()).cloned();
+                let left_def = left_defs.get_definition(field_name.build()).cloned();
+                let right_def = right_defs.get_definition(field_name.build()).cloned();
 
                 match (left_def, right_def) {
                     (None, Some(r)) => DeltaTypeField::Create { right: r },

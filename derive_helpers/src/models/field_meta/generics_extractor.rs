@@ -76,7 +76,7 @@ impl CustomGenerics {
             .clone()
             .params
             .into_iter()
-            .filter(|param| filter_static(param))
+            .filter(filter_static)
             .collect();
 
         let generics_without_static_in_impl = Generics {
@@ -93,7 +93,7 @@ impl CustomGenerics {
     }
 
     pub fn to_basic_generics(&self) -> &Generics {
-        &self.into_inner_ref()
+        self.into_inner_ref()
     }
 
     pub fn strip_bounds_from_generics(original_generics: &Generics) -> StrippedBoundsGenerics {
@@ -227,7 +227,7 @@ impl StructGenerics {
     }
 
     pub fn to_basic_generics_ref(&self) -> &Generics {
-        &self.0.into_inner_ref()
+        self.0.into_inner_ref()
     }
 
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, WhereClause) {
@@ -248,7 +248,7 @@ impl FieldGenerics {
     }
 
     pub fn to_basic_generics_ref(&self) -> &Generics {
-        &self.0.into_inner_ref()
+        self.0.into_inner_ref()
     }
 
     pub fn to_basic_generics_ref_mut(&mut self) -> &mut Generics {

@@ -10,7 +10,7 @@ use crate::models::*;
 
 use super::Codegen;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_table_id_type_token(&mut self) -> ExtractorResult<()> {
         let field_receiver = self.field_receiver();
         let table_derive_attrs = self.table_derive_attributes();

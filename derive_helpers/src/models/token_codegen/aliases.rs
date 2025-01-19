@@ -8,7 +8,7 @@ use crate::models::*;
 
 use super::Codegen;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_relation_aliases_struct_fields_types_kv(&mut self) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = &self.table_derive_attributes();

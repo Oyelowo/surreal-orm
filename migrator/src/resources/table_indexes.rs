@@ -14,7 +14,7 @@ pub(crate) struct ComparisonIndexes<'a> {
     pub(crate) resources: &'a ComparisonsInit<'a>,
 }
 
-impl<'a> TableResourcesMeta<Indexes> for ComparisonIndexes<'a> {
+impl TableResourcesMeta<Indexes> for ComparisonIndexes<'_> {
     fn get_left(&self) -> Indexes {
         self.resources
             .left_resources

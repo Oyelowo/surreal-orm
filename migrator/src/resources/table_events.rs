@@ -14,7 +14,7 @@ pub struct ComparisonEvents<'a> {
     pub(crate) resources: &'a ComparisonsInit<'a>,
 }
 
-impl<'a> TableResourcesMeta<Events> for ComparisonEvents<'a> {
+impl TableResourcesMeta<Events> for ComparisonEvents<'_> {
     fn get_left(&self) -> Events {
         self.resources
             .left_resources

@@ -210,7 +210,7 @@ impl FromMeta for Relate {
                 } = v;
                 Self {
                     connection,
-                    edge_type: model.into(),
+                    edge_type: model,
                 }
             }
         }

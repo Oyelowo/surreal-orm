@@ -20,7 +20,7 @@ use crate::models::*;
 
 use super::Codegen;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_relation_connection_tokenstream(&mut self) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let table_derive_attributes = self.table_derive_attributes();
@@ -418,13 +418,13 @@ impl<'a> Deref for NodeEdgeMetadataLookupTable<'a> {
     }
 }
 
-impl<'a> DerefMut for NodeEdgeMetadataLookupTable<'a> {
+impl DerefMut for NodeEdgeMetadataLookupTable<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl<'a> NodeEdgeMetadataLookupTable<'a> {}
+impl NodeEdgeMetadataLookupTable<'_> {}
 
 create_tokenstream_wrapper!(=>ArrowTokenStream);
 
@@ -440,7 +440,7 @@ impl From<&EdgeDirection> for ArrowTokenStream {
     }
 }
 
-impl<'a> ToTokens for NodeEdgeMetadata<'a> {
+impl ToTokens for NodeEdgeMetadata<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let crate_name = get_crate_name(false);
         let VariablesModelMacro {
@@ -622,7 +622,7 @@ impl<'a> ToTokens for NodeEdgeMetadata<'a> {
     }
 }
 
-impl<'a> ToTokens for NodeEdgeMetadataLookupTable<'a> {
+impl ToTokens for NodeEdgeMetadataLookupTable<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let node_edge_token_streams = self
             .deref()

@@ -29,6 +29,12 @@ pub struct VariablesModelMacro {
     pub _____struct_marker_ident: syn::Ident,
 }
 
+impl Default for VariablesModelMacro {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VariablesModelMacro {
     pub fn new() -> Self {
         let __________connect_node_to_graph_traversal_string =
