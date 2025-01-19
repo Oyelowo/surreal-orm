@@ -39,7 +39,7 @@ macro_rules! object {
 /// stricter checking  - to ensure that all fields are provided and
 /// belong to the struct -  than using the basic struct to initialize values
 /// Compared to using a normal struct, this also allows using `parameter` or `field` as value.
-
+///
 /// Example
 /// ```rust, ignore
 ///     let updated = update::<Weapon>(id)

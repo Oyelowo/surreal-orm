@@ -106,8 +106,6 @@ impl MyFieldReceiver {
                 let casing = model_attributes.casing()?;
                 let field_name = &self.db_field_name(&casing)?;
 
-                
-
                 FieldTypeInference {
                     db_field_name: field_name,
                     relation_type: &self.to_relation_type(model_attributes),

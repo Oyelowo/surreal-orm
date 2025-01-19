@@ -435,9 +435,9 @@ pub fn point_fn(point1: impl Into<NumberLike>, point2: impl Into<NumberLike>) ->
 ///
 /// # Arguments
 /// * `point1` - The first point of the geometry point. Could also be a field or a parameter
-/// representing the value.
+///     representing the value.
 /// * `point2` - The second point of the geometry point. Could also be a field or a parameter
-/// representing the value.
+///     representing the value.
 ///
 /// # Example
 /// ```rust
@@ -489,9 +489,9 @@ pub fn thing_fn(table: impl Into<TableLike>, value: impl Into<ValueLike>) -> Fun
 ///
 /// # Arguments
 /// * `table` - The table to be converted to a record pointer definition. Could also be a field or a parameter
-/// representing the value.
+///     representing the value.
 /// * `value` - The value to be converted to a record pointer definition. Could also be a field or a parameter
-/// representing the value.
+///     representing the value.
 ///
 /// # Example
 /// ```rust

@@ -447,7 +447,7 @@ where
     ///
     /// # Arguments
     /// * `patch_op` - A patch operation to be applied to the record. Use the `patch`
-    /// helper function.
+    ///     helper function.
     ///
     /// # Example
     /// ```rust, ignore

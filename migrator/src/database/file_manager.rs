@@ -17,7 +17,6 @@ use crate::*;
 #[derive(Debug, Clone, Default)]
 struct FileManager {}
 
-///
 impl FileManager {}
 
 #[derive(Debug, Clone, Default, TypedBuilder)]

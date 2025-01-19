@@ -151,19 +151,17 @@ impl<'a> FieldTypeInference<'a> {
                     });
 
             let array_len_token = field_ty.get_array_const_length();
-            let array_len_token_as_int = array_len_token
-                .as_ref()
-                .and_then(|expr| {
-                    if let Expr::Lit(lit) = expr {
-                        if let syn::Lit::Int(int) = &lit.lit {
-                            Some(int.base10_parse::<u64>().unwrap())
-                        } else {
-                            None
-                        }
+            let array_len_token_as_int = array_len_token.as_ref().and_then(|expr| {
+                if let Expr::Lit(lit) = expr {
+                    if let syn::Lit::Int(int) = &lit.lit {
+                        Some(int.base10_parse::<u64>().unwrap())
                     } else {
                         None
                     }
-                });
+                } else {
+                    None
+                }
+            });
 
             let inner_item = inner_type
                 .map(|ct| self.based_on_type_path_token_structure(&ct, relation_type))

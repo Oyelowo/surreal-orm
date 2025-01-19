@@ -75,8 +75,8 @@
 //! * Complex Transaction
 //! * Query Chaining
 //! * All surrealdb Statements including:
-//! USE, LET, BEGIN, CANCEL, COMMIT, IF ELSE, SELECT, INSERT, CREATE, UPDATE, RELATE,
-//! DELETE, DEFINE, REMOVE, INFO, SLEEP
+//!     USE, LET, BEGIN, CANCEL, COMMIT, IF ELSE, SELECT, INSERT, CREATE, UPDATE, RELATE,
+//!     DELETE, DEFINE, REMOVE, INFO, SLEEP
 //! * Query execution
 //! * All Surreal Operators e.g CONTAINSALL, INTERSECTS, == etc
 //! * Array functions
@@ -115,9 +115,9 @@
 //! Licensed under either of
 //!
 //! * Apache License, Version 2.0,
-//! (./LICENSE-APACHE or <http://www.apache.org/licenses/LICENSE-2.0>)
+//!     (./LICENSE-APACHE or <http://www.apache.org/licenses/LICENSE-2.0>)
 //! * MIT license (./LICENSE-MIT or <http://opensource.org/licenses/MIT>)
-//! at your option.
+//!     at your option.
 //!
 //! ## References
 //!
@@ -226,7 +226,7 @@ pub use query_builder_macros::for_;
 // pub use serde;
 pub use surreal_query_builder::*;
 
-///
+/// The migrator module provides a way to run or embed migrations in your Rust binary.
 pub mod migrator {
     pub use migrator::*;
     pub use migrator_macros::embed_migrations;

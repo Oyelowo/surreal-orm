@@ -214,7 +214,6 @@ impl Codegen<'_> {
                     .map(|ty| ty.into_inner_ref())
                     .or(guessed_arrayish_item_type.as_ref());
 
-                
                 match inner_list_type {
                     Some(ref ty) => {
                         let generics_meta =

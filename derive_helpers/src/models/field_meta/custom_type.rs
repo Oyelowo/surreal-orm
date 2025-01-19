@@ -72,41 +72,29 @@ impl FromMeta for CustomType {
     fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
         // Type::from_meta(item).map(Self)
         let ty = match item {
-            syn::Meta::Path(ref path) => {
-                
-                Type::Path(syn::TypePath {
-                    qself: None,
-                    path: path.clone(),
-                })
-            }
-            syn::Meta::NameValue(ref name_value) => {
-                
-                match &name_value.value {
-                    syn::Expr::Lit(lit_str) => match lit_str.lit {
-                        syn::Lit::Str(ref lit_str) => {
-                            
-                            syn::parse_str::<Type>(&lit_str.value())?
-                        }
-                        _ => {
-                            return Err(darling::Error::custom(
-                                "Unable to parse stringified type. Expected a valid Rust path or a stringified type",
-                            ));
-                        }
-                    },
-                    syn::Expr::Path(ref path) => {
-                        
-                        Type::Path(syn::TypePath {
-                            qself: None,
-                            path: path.path.clone(),
-                        })
-                    }
+            syn::Meta::Path(ref path) => Type::Path(syn::TypePath {
+                qself: None,
+                path: path.clone(),
+            }),
+            syn::Meta::NameValue(ref name_value) => match &name_value.value {
+                syn::Expr::Lit(lit_str) => match lit_str.lit {
+                    syn::Lit::Str(ref lit_str) => syn::parse_str::<Type>(&lit_str.value())?,
                     _ => {
                         return Err(darling::Error::custom(
-                            "Expected a valid Rust path or a stringified type",
-                        ));
+                                "Unable to parse stringified type. Expected a valid Rust path or a stringified type",
+                            ));
                     }
+                },
+                syn::Expr::Path(ref path) => Type::Path(syn::TypePath {
+                    qself: None,
+                    path: path.path.clone(),
+                }),
+                _ => {
+                    return Err(darling::Error::custom(
+                        "Expected a valid Rust path or a stringified type",
+                    ));
                 }
-            }
+            },
             _ => {
                 return Err(darling::Error::unsupported_shape(
                     "Expected a path or a name-value pair",
@@ -261,13 +249,11 @@ impl CustomType {
                 });
                 Ok(CustomTypeTurboFished(ty))
             }
-            _ => {
-                Err(syn::Error::new(
-                    self.to_token_stream().span(),
-                    "Unsupported type for turbofishing",
-                )
-                .into())
-            }
+            _ => Err(syn::Error::new(
+                self.to_token_stream().span(),
+                "Unsupported type for turbofishing",
+            )
+            .into()),
         }
     }
 
