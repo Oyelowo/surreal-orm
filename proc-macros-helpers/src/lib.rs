@@ -20,7 +20,7 @@ pub fn get_crate_name(internal: bool) -> TokenStream {
     if internal {
         quote! { crate }
     } else {
-        let name = match crate_name("surreal-orm") {
+        let name = match crate_name("surreal_orm") {
             Ok(FoundCrate::Name(name)) => name,
             Ok(FoundCrate::Itself) | Err(_) => "surreal_orm".to_string(),
         };

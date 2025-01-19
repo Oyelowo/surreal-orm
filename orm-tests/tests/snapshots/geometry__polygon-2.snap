@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/geometry.rs
+source: surreal_orm-tests/tests/geometry.rs
 expression: res_string
 ---
 {"id":{"tb":"test_polygon","id":{"Number":32}},"homePolygon":{"exterior":[{"x":-111.0,"y":45.0},{"x":-111.0,"y":41.0},{"x":-104.0,"y":41.0},{"x":-104.0,"y":45.0},{"x":0.0,"y":0.0},{"x":4.0,"y":0.0},{"x":4.0,"y":1.0},{"x":1.0,"y":1.0},{"x":1.0,"y":4.0},{"x":0.0,"y":4.0},{"x":0.0,"y":0.0},{"x":-111.0,"y":45.0}],"interiors":[]}}

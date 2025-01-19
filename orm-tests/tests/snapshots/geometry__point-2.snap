@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/geometry.rs
+source: surreal_orm-tests/tests/geometry.rs
 expression: res_string
 ---
 {"id":{"tb":"test_point","id":{"Number":32}},"homePoint":{"x":40.02,"y":116.34}}

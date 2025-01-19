@@ -1,6 +1,6 @@
-# Helper Methods in `surreal-orm`
+# Helper Methods in `surreal_orm`
 
-The `surreal-orm` library offers a set of utility functions encapsulated in the
+The `surreal_orm` library offers a set of utility functions encapsulated in the
 `SurrealCrud` and `SurrealCrudNode` traits. These methods provide a high-level
 abstraction over raw database statements, simplifying CRUD operations.
 
@@ -349,4 +349,4 @@ async fn test_create() -> SurrealOrmResult<()> {
 ---
 
 This wraps up the explanations and demonstrations for all the helper methods in
-surreal-orm.
+surreal_orm.

@@ -9,7 +9,7 @@ documentation.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-surreal-orm = { workspace = true }
+surreal_orm = { workspace = true }
 surreal-models = { workspace = true }
 surrealdb = { workspace = true }
 tokio = { workspace = true }
@@ -18,4 +18,4 @@ tempfile = { workspace = true }
 insta = { workspace = true }
 pretty_env_logger = { workspace = true }
 
-# surreal-orm = { path = "../orm" }
+# surreal_orm = { path = "../orm" }

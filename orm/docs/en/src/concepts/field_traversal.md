@@ -1,6 +1,6 @@
 # Field Traversal
 
-The `surreal-orm` library equips developers with powerful field traversal
+The `surreal_orm` library equips developers with powerful field traversal
 capabilities, allowing for seamless querying and navigation through the
 `surrealdb` graph database. This chapter provides an in-depth exploration into
 the different traversal methods available and how to harness them effectively.
@@ -8,7 +8,7 @@ the different traversal methods available and how to harness them effectively.
 ## Basics of Field Traversal
 
 Field traversal is the mechanism used to navigate through a data structure,
-pinpointing specific fields or relationships. The design of the `surreal-orm`
+pinpointing specific fields or relationships. The design of the `surreal_orm`
 makes traversal not only intuitive but also direct, offering methods to navigate
 fields, relationships, and even to apply specific conditions.
 
@@ -179,5 +179,5 @@ title of the fifth semester course of that student's best friend.
 
 ## Conclusion
 
-Field traversal in `surreal-orm` equips developers with a versatile and powerful
+Field traversal in `surreal_orm` equips developers with a versatile and powerful
 toolset, enabling effective navigation and querying within

@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/test_query_strings.rs
+source: surreal_orm-tests/tests/test_query_strings.rs
 expression: relation.fine_tune_params()
 ---
 RELATE $_param_00000001->writes->$_param_00000002 CONTENT $_param_00000003 ;

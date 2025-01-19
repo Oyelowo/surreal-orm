@@ -2,13 +2,13 @@
 
 Casting is an indispensable tool in data management, allowing developers to
 convert values from one type to another. This chapter provides an in-depth look
-into the casting functionality provided by `surreal-orm`, illuminating its
+into the casting functionality provided by `surreal_orm`, illuminating its
 power, elegance, and strict adherence to the SurrealDB specifications.
 
 ## Table of Contents
 
 1. [Introduction to Casting](#introduction-to-casting)
-2. [The `Cast` Structure in `surreal-orm`](#the-cast-structure-in-surreal-orm)
+2. [The `Cast` Structure in `surreal_orm`](#the-cast-structure-in-surreal_orm)
 3. [Cast Functions](#cast-functions)
    - [Casting to Boolean](#casting-to-boolean)
    - [Casting to Integer](#casting-to-integer)
@@ -113,5 +113,5 @@ assert_eq!(result.build(), "<duration> 1h30m");
 
 Surreal Orm presents a powerful and user-friendly approach to casting, adhering
 closely to SurrealDB standards. Whether you're an experienced Rust developer or
-just starting, surreal-orm provides the tools for precise and effortless data
+just starting, surreal_orm provides the tools for precise and effortless data
 manipulation.

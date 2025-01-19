@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/test_query_strings.rs
+source: surreal_orm-tests/tests/test_query_strings.rs
 expression: "&query1.fine_tune_params()"
 ---
 SELECT age, lastName, content FROM book WHERE (content ~ $_param_00000001) AND (age >= $_param_00000002) OR (firstName = $_param_00000003) AND (lastName = $_param_00000004) ORDER BY lastName DESC, age DESC LIMIT $_param_00000005 START AT $_param_00000006 TIMEOUT 9s PARALLEL;

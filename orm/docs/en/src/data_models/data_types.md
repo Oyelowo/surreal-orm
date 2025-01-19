@@ -1,8 +1,8 @@
 # Data Types
 
-# Data Model in `surreal-orm`
+# Data Model in `surreal_orm`
 
-In the `surreal-orm`, developers are provided with a comprehensive data model
+In the `surreal_orm`, developers are provided with a comprehensive data model
 that mirrors the specifications laid out by the SurrealDB documentation. This
 ensures seamless integration with SurrealDB while also extending the
 capabilities to cater to more advanced use cases, such as supporting diverse
@@ -25,7 +25,7 @@ value types in one unified representation.
 
 ## Overview
 
-The data model in `surreal-orm` allows for a flexible representation of
+The data model in `surreal_orm` allows for a flexible representation of
 different data types. By utilizing structures such as `ValueType`, the ORM can
 represent a wide array of types from basic values, fields, parameters, to
 complex operations and statements.
@@ -42,7 +42,7 @@ it a easier, more intuitive and consistent to work with record ids in surrealdb.
 
 ### Strings
 
-In `surreal-orm`, strings are represented using the `StrandLike` structure:
+In `surreal_orm`, strings are represented using the `StrandLike` structure:
 
 ```rust
 pub struct StrandLike(..);
@@ -75,7 +75,7 @@ This allows for a clear representation of date and time values within the ORM.
 ### Objects
 
 Objects are complex data types that encapsulate key-value pairs. They are
-represented in `surreal-orm` using the `ObjectLike` structure:
+represented in `surreal_orm` using the `ObjectLike` structure:
 
 ```rust
 pub struct ObjectLike(..);
@@ -112,7 +112,7 @@ be inferred that such links could be represented using `SurrealId` types.
 
 ---
 
-This is a foundational overview of the data model in `surreal-orm`, with the aim
+This is a foundational overview of the data model in `surreal_orm`, with the aim
 of mirroring the SurrealDB specifications. The ORM extends the basic data types
 to provide a richer experience, supporting various operations and query
 constructs seamlessly.

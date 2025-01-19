@@ -1,5 +1,5 @@
 [package]
-name = "surreal-orm"
+name = "surreal_orm"
 version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }
