@@ -587,7 +587,6 @@ impl Default for Student {
 pub struct Writes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // pub id: SurrealSimpleId<Writes<In, Out>>,
-
     #[surreal_orm(link_many = In)]
     pub r#in: LinkOne<In>,
 

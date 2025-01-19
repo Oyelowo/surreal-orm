@@ -80,6 +80,3 @@ pub struct Organization<'a> {
     pub time: Time,
     pub age: u8,
 }
-
-
-

@@ -83,14 +83,20 @@ fn test_relate_field_has_serde_skip_serializing_but_not_attribute(
     let error_msg = || {
         node_token.contains("Missing required 'skip_serializing' or 'default' serde attribute(s) on `written_blogs`")
     };
-    let has_node_trait_valid =  || node_token.contains("impl surreal_orm :: Node for Student ");
+    let has_node_trait_valid = || node_token.contains("impl surreal_orm :: Node for Student ");
     match relate_field_attr_provided {
         SerdeSkipSerializingOnly => {
-            assert!(error_msg(), "should have default and skip_serializing attributes");
+            assert!(
+                error_msg(),
+                "should have default and skip_serializing attributes"
+            );
             assert_not!(has_node_trait_valid());
         }
         DefaultOnly => {
-            assert!(error_msg(), "should have default and skip_serializing attributes");
+            assert!(
+                error_msg(),
+                "should have default and skip_serializing attributes"
+            );
             assert_not!(has_node_trait_valid());
         }
         BothAttrs => {
@@ -98,7 +104,6 @@ fn test_relate_field_has_serde_skip_serializing_but_not_attribute(
             assert!(has_node_trait_valid());
         }
     }
-
 
     insta::assert_snapshot!(
         format!(
