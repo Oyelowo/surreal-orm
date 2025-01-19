@@ -287,6 +287,8 @@ impl ToTokens for EdgeToken {
 
                 #[allow(non_snake_case)]
                 mod #module_name_internal {
+                    #![allow(clippy::builtin_type_shadow)]
+
                     use #crate_name::Node;
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;

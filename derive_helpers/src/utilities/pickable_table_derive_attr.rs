@@ -93,7 +93,7 @@ impl ToTokens for TableDeriveAttributesPickable {
             }
 
             impl #struct_impl_generics #pickable_name for #struct_name_ident #struct_ty_generics #struct_where_clause {
-                #( 
+                #(
                     type #field_name_normalized_deserialized = #field_type ;
                 ) *
             }

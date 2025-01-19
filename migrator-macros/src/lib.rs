@@ -12,8 +12,8 @@ use proc_macro::TokenStream;
 /// It takes 2 arguments:
 /// 1. The path to the migrations directory
 /// 3. The migration mode
-/// The path to the migrations directory is optional. If not provided, it defaults to 'migrations'.
-/// The migration mode is optional. If not provided, it defaults to Mode::Strict.
+///     The path to the migrations directory is optional. If not provided, it defaults to 'migrations'.
+///     The migration mode is optional. If not provided, it defaults to Mode::Strict.
 ///
 /// # Example
 /// ```rust, ignore

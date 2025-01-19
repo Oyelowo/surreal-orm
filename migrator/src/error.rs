@@ -9,6 +9,7 @@ use thiserror::Error;
 
 use crate::MigrationFilename;
 
+#[allow(clippy::result_large_err)]
 #[derive(Error, Debug)]
 pub enum MigrationError {
     #[error("Checksum mismaatch in {migration_name}. Expected checksum: {expected_checksum}. Actual checksum: {actual_checksum}")]
@@ -111,9 +112,9 @@ pub enum MigrationError {
         It must have already been renamed previously or never existed before or wrongly spelt. \
          Also, make sure you are using the correct case for the field name. It should be one of these: {renamables}", )]
     InvalidOldFieldName {
-        new_name: Field,
+        new_name: Box<Field>,
         table: Table,
-        old_name: Field,
+        old_name: Box<Field>,
         renamables: String,
     },
 
@@ -121,7 +122,7 @@ pub enum MigrationError {
         It must have already been renamed previously or never existed before or wrongly spelt. \
          Also, make sure you are using the correct case for the field name. It should be one of these: {valid_fields}", )]
     FieldNameDoesNotExist {
-        field_expected: Field,
+        field_expected: Box<Field>,
         table: Table,
         valid_fields: String,
     },
@@ -135,8 +136,8 @@ pub enum MigrationError {
         This is likely not intentional. Use a different name for the new field. \
         You can rename only from one of {renamables}")]
     CannotRenameFromOldFieldInUSeInTable {
-        new_field: Field,
-        old_field: Field,
+        new_field: String,
+        old_field: String,
         table: Table,
         renamables: String,
     },

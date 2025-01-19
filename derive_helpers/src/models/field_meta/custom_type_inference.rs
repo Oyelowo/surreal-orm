@@ -388,7 +388,6 @@ impl<'a> FieldTypeInference<'a> {
             RelationType::LinkMany(ref_node) | RelationType::LinkManyInAndOutEdgeNodesInert(ref_node) => {
                 let ref_node = ref_node.turbo_fishize()?;
 
-                
                 DbFieldTypeAstMeta {
                             field_type_db_original: FieldType::Array(
                                 ::std::boxed::Box::new(FieldType::Record(vec![])),
