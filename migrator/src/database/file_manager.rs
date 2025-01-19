@@ -14,6 +14,7 @@ use typed_builder::TypedBuilder;
 
 use crate::*;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Default)]
 struct FileManager {}
 

@@ -537,10 +537,7 @@ impl CustomType {
 
     pub fn is_array_const(&self) -> bool {
         let ty = &self.into_inner_ref();
-        match ty {
-            Type::Array(_type_array) => true,
-            _ => false,
-        }
+        matches!(ty, Type::Array(_type_array))
     }
 
     pub fn is_array(&self) -> bool {

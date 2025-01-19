@@ -123,16 +123,16 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
 
         let old_field_def = left_defs.get_definition(old_name).ok_or_else(|| {
             MigrationError::InvalidOldFieldName {
-                new_name: old_name.to_owned(),
+                new_name: Box::new(old_name.to_owned()),
                 table: table.to_owned(),
-                old_name: old_name.to_owned(),
+                old_name: Box::new(old_name.to_owned()),
                 renamables: left_defs.get_names().join(", "),
             }
         })?;
 
         let new_field_def = right_defs.get_definition(new_name).ok_or_else(|| {
             MigrationError::FieldNameDoesNotExist {
-                field_expected: new_name.to_owned(),
+                field_expected: Box::new(new_name.to_owned()),
                 table: table.to_owned(),
                 valid_fields: right_defs.get_names().join(", "),
             }

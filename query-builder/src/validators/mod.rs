@@ -46,6 +46,7 @@ pub use assert_fields;
 /// Checks that two types are equal
 macro_rules! assert_type_eq_all {
     ($a:ty, $b:ty) => {
+        #[allow(clippy::diverging_sub_expression)]
         let _a: $a = todo!();
         #[allow(unreachable_code)]
         let _b: $b = _a;

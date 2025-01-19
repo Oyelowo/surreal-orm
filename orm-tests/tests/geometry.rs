@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
