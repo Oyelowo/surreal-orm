@@ -61,6 +61,7 @@ pub fn surreal_table_resources_derive(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(Pickable)]
 pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
+    #[allow(clippy::all)]
     let input = parse_macro_input!(input);
     let output = match TableDeriveAttributesPickable::from_derive_input(&input) {
         Ok(out) => out,
@@ -124,6 +125,7 @@ pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn pick(input: TokenStream) -> TokenStream {
+    #[allow(clippy::all)]
     let output = match syn::parse2::<PickedMeta>(input.into()) {
         Ok(out) => out,
         Err(err) => return err.to_compile_error().into(),
