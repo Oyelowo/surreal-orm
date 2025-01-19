@@ -178,6 +178,18 @@ impl Codegen<'_> {
         edge.into()
     }
 
+    pub fn add_direction_indication_to_ident_capitalize(
+        edge_table: &EdgeTableName,
+        edge_direction: &EdgeDirection,
+    ) -> EdgeWithDunderDirectionIndicator {
+        let edge_table = edge_table.to_string().to_case(Case::Title);
+        let edge = match edge_direction {
+            EdgeDirection::Out => format_ident!("{edge_table}__"),
+            EdgeDirection::In => format_ident!("__{edge_table}"),
+        };
+        edge.into()
+    }
+
     fn create_static_assertions(&self, relate: &Relate) -> ExtractorResult<StaticAssertionToken> {
         let crate_name = get_crate_name(false);
         let model_attributes = &self.table_derive_attributes();
@@ -493,7 +505,7 @@ impl ToTokens for NodeEdgeMetadata<'_> {
         let edge_name_as_struct_with_direction_ident =
             EdgeNameAsStructWithDirectionIdent(format_ident!(
                 "{}",
-                Codegen::add_direction_indication_to_ident(
+                Codegen::add_direction_indication_to_ident_capitalize(
                     // edge_name_as_struct_original_ident.deref(),
                     edge_table, direction,
                 )
