@@ -33,7 +33,7 @@ FieldSetterImplTokens);
 
 use super::Codegen;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_field_setter_impl(&mut self) -> ExtractorResult<()> {
         let field_receiver = self.field_receiver();
 
@@ -214,15 +214,15 @@ impl<'a> Codegen<'a> {
                     .map(|ty| ty.into_inner_ref())
                     .or(guessed_arrayish_item_type.as_ref());
 
-                let inferred_type = match inner_list_type {
+                
+                match inner_list_type {
                     Some(ref ty) => {
                         let generics_meta =
                             ty.get_generics_from_current_struct(model_attributes)?;
                         (Some(generics_meta), Some(quote!(#ty)))
                     }
                     None => (None, None),
-                };
-                inferred_type
+                }
             }
         };
 

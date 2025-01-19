@@ -10,7 +10,7 @@ use quote::{quote, ToTokens};
 use super::Codegen;
 use crate::models::*;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_field_definitions(&mut self) -> ExtractorResult<()> {
         self.validate_field_attributes()?;
 

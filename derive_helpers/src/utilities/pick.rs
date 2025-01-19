@@ -38,7 +38,7 @@ impl PickedMeta {
             match param {
                 syn::GenericParam::Type(type_param) => {
                     let ident = &type_param.ident;
-                    if ident.to_string() == "_" {
+                    if *ident == "_" {
                         quote! { ::std::marker::PhantomData<dyn ::std::any::Any> #separator }
                     } else {
                         quote! { #ident #separator }
@@ -69,7 +69,7 @@ impl PickedMeta {
         let filtered_generics = generics.params.iter().filter(|param| match param {
             syn::GenericParam::Type(type_param) => {
                 let ident = &type_param.ident;
-                ident.to_string() != "_"
+                *ident != "_"
             }
             _ => true,
         });
@@ -175,7 +175,7 @@ mod tests {
             PickedPerson, Person as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -214,7 +214,7 @@ mod tests {
             PickedPerson, Person as crate :: person::Pickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -253,7 +253,7 @@ mod tests {
             PickedPerson, Person<'a> as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -302,7 +302,7 @@ mod tests {
             PickedPerson, Person<'a, _> as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -351,7 +351,7 @@ mod tests {
             PickedPerson, Person<'a, _, 'b> as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -400,7 +400,7 @@ mod tests {
             PickedPerson, Person<'a, _, 'b, _> as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -449,7 +449,7 @@ mod tests {
             PickedPerson, Person<'a, 'b> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -499,7 +499,7 @@ mod tests {
             PickedPerson, Person<_, 'a, 'b> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -548,7 +548,7 @@ mod tests {
             PickedPerson, Person<'a, 'b, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -590,7 +590,7 @@ mod tests {
             PickedPerson, Person<'a, T> as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -638,7 +638,7 @@ mod tests {
         };
 
         // let picked_meta = PickedMeta::parse(input.into()).unwrap();
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -693,7 +693,7 @@ mod tests {
             PickedPerson, Person<T> as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -735,7 +735,7 @@ mod tests {
             PickedPerson, Person<T, _> as PersonPickable, [name]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -783,7 +783,7 @@ mod tests {
             PickedPerson, Person<T, U> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -832,7 +832,7 @@ mod tests {
             PickedPerson, Person<T, U, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -881,7 +881,7 @@ mod tests {
             PickedPerson, Person<_, T, U> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -930,7 +930,7 @@ mod tests {
             PickedPerson, Person<_, T, U, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -979,7 +979,7 @@ mod tests {
             PickedPerson, Person<_, T, _, U, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -1030,7 +1030,7 @@ mod tests {
             PickedPerson, Person<'a, _, T, _, U, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -1080,7 +1080,7 @@ mod tests {
             PickedPerson, Person<'a, _, T, _, U, _, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         assert_eq!(picked_meta.new_struct, format_ident!("PickedPerson"));
         assert_eq!(picked_meta.old_struct, format_ident!("Person"));
@@ -1129,7 +1129,7 @@ mod tests {
             PickedPerson, Person<_, _, _, U, _, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
@@ -1148,7 +1148,7 @@ mod tests {
             PickedPerson, Person<_, _, T, _, U, _, _> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
@@ -1167,7 +1167,7 @@ mod tests {
             PickedPerson, Person<_, _, _, _, _, _, T> as PersonPickable, [name, age]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
         let tokenstream = picked_meta.to_token_stream().to_string();
         let expected = quote! {
             pub struct PickedPerson<T> {
@@ -1211,7 +1211,7 @@ mod tests {
             ]
         };
 
-        let picked_meta = syn::parse2::<PickedMeta>(input.into()).expect("failed to parse");
+        let picked_meta = syn::parse2::<PickedMeta>(input).expect("failed to parse");
 
         let tokenstream = picked_meta.to_token_stream().to_string();
 

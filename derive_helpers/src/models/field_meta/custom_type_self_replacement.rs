@@ -45,10 +45,7 @@ impl VisitMut for ReplaceSelfVisitor {
             match &mut segment.arguments {
                 PathArguments::AngleBracketed(angle_bracketed) => {
                     for arg in &mut angle_bracketed.args {
-                        match arg {
-                            GenericArgument::Type(ty) => self.visit_type_mut(ty),
-                            _ => {}
-                        }
+                        if let GenericArgument::Type(ty) = arg { self.visit_type_mut(ty) }
                     }
                 }
                 PathArguments::Parenthesized(parenthesized) => {

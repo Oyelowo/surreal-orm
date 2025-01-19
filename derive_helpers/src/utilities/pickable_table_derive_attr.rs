@@ -38,8 +38,7 @@ impl TableDeriveAttributesPickable {
         let struct_level_casing = self
             .rename_all
             .as_ref()
-            .map(|case| case.serialize.clone())
-            .flatten()
+            .and_then(|case| case.serialize.clone())
             .map(|case| CaseString::from_str(case.as_str()));
 
         let casing = match struct_level_casing {

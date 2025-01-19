@@ -11,7 +11,7 @@ use crate::models::*;
 
 use super::Codegen;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_db_fields_for_links_and_loaders(&mut self) -> ExtractorResult<()> {
         let crate_name = get_crate_name(false);
         let table_derive_attrs = self.table_derive_attributes();

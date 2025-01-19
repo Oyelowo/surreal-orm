@@ -18,7 +18,7 @@ impl MyFieldReceiver {
     ) -> ExtractorResult<Option<FieldTypeDbToken>> {
         Ok(self
             .field_type_db_with_static_assertions(model_attributes)?
-            .map(|x| x.field_type_db_token.into()))
+            .map(|x| x.field_type_db_token))
     }
 
     pub fn field_type_db_original(
@@ -106,16 +106,15 @@ impl MyFieldReceiver {
                 let casing = model_attributes.casing()?;
                 let field_name = &self.db_field_name(&casing)?;
 
-                let inferred = FieldTypeInference {
+                
+
+                FieldTypeInference {
                     db_field_name: field_name,
                     relation_type: &self.to_relation_type(model_attributes),
                     field_ty: &field_ty.into_inner(),
                     model_attrs: model_attributes,
                 }
-                .infer_type()
-                .map(|ft_db| ft_db)?;
-
-                inferred
+                .infer_type()?
             }
         };
 
@@ -159,7 +158,7 @@ impl MyFieldReceiver {
             MyFieldReceiver {
                 link_many: Some(link_many),
                 ..
-            } if self.is_in_or_out_edge_node_field(&model_attributes) => {
+            } if self.is_in_or_out_edge_node_field(model_attributes) => {
                 RelationType::LinkManyInAndOutEdgeNodesInert(link_many.to_owned())
             }
             MyFieldReceiver {

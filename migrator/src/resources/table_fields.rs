@@ -15,7 +15,7 @@ pub(crate) struct ComparisonFields<'a, R: DbResources> {
     pub(crate) prompter: &'a dyn Prompter,
 }
 
-impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> {
+impl<R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'_, R> {
     fn get_left(&self) -> Fields {
         self.resources
             .left_resources

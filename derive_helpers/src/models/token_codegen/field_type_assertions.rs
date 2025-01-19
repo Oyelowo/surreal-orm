@@ -8,7 +8,7 @@
 use super::Codegen;
 use crate::models::*;
 
-impl<'a> Codegen<'a> {
+impl Codegen<'_> {
     pub fn create_field_type_static_assertion_token(&mut self) -> ExtractorResult<()> {
         let table_derive_attrs = self.table_derive_attributes();
         let field_receiver = self.field_receiver();
