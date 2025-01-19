@@ -92,9 +92,9 @@ impl MyFieldReceiver {
             CaseString::Pascal => ident.to_case(Case::Pascal),
             CaseString::Lower => ident.to_case(Case::Lower),
             CaseString::Upper => ident.to_case(Case::Upper),
-            CaseString::ScreamingSnake => ident.to_case(Case::ScreamingSnake),
+            CaseString::ScreamingSnake => ident.to_case(Case::UpperSnake),
             CaseString::Kebab => ident.to_case(Case::Kebab),
-            CaseString::ScreamingKebab => ident.to_case(Case::ScreamingSnake),
+            CaseString::ScreamingKebab => ident.to_case(Case::UpperSnake),
         };
         format_ident!("{ident}").into()
     }
