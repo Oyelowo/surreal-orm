@@ -22,18 +22,18 @@ pub type AlienVisitsPlanet = Visits<Alien, Planet<u64>>;
 // VisitsExplicit
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = visits_explicit)]
+#[orm(table = visits_explicit)]
 pub struct VisitsExplicit<In: Node, Out: Node> {
-    #[surreal_orm(ty = "record<visits_explicit>")]
+    #[orm(ty = "record<visits_explicit>")]
     pub id: SurrealSimpleId<Self>,
 
     #[serde(rename = "in")]
-    #[surreal_orm(link_one = "In", ty = "record<any>")]
+    #[orm(link_one = "In", ty = "record<any>")]
     pub in_: LinkOne<In>,
 
-    #[surreal_orm(link_one = "Out", ty = "record<any>")]
+    #[orm(link_one = "Out", ty = "record<any>")]
     pub out: LinkOne<Out>,
-    #[surreal_orm(ty = "duration")]
+    #[orm(ty = "duration")]
     pub time_visited: Duration,
 }
 
@@ -42,47 +42,47 @@ pub type AlienVisitsPlanetExplicit = VisitsExplicit<Alien, Planet<u64>>;
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = visits_with_explicit_attributes)]
+#[orm(table = visits_with_explicit_attributes)]
 pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
-    // #[surreal_orm(ty = "record<visits_with_explicit_attributes>")]
+    // #[orm(ty = "record<visits_with_explicit_attributes>")]
     pub id: SurrealSimpleId<Self>,
 
     #[serde(rename = "in")]
-    #[surreal_orm(link_one = In)]
+    #[orm(link_one = In)]
     pub in_: LinkOne<In>,
 
-    #[surreal_orm(link_one = Out)]
-    // #[surreal_orm(ty = "record")]
+    #[orm(link_one = Out)]
+    // #[orm(ty = "record")]
     pub out: LinkOne<Out>,
 
-    // #[surreal_orm(ty = "string")]
+    // #[orm(ty = "string")]
     name: String,
 
-    // #[surreal_orm(ty = "int")]
+    // #[orm(ty = "int")]
     age: u8,
 
-    // #[surreal_orm(ty = "datetime")]
+    // #[orm(ty = "datetime")]
     created: DateTime<Utc>,
 
-    // #[surreal_orm(ty = "duration")]
+    // #[orm(ty = "duration")]
     life_expectancy: Duration,
 
-    // #[surreal_orm(ty = "geometry<polygon>")]
+    // #[orm(ty = "geometry<polygon>")]
     territory_area: geo::Polygon,
 
-    // #[surreal_orm(ty = "geometry<point>")]
+    // #[orm(ty = "geometry<point>")]
     home: geo::Point,
 
-    // #[surreal_orm(ty = "array<string>")]
+    // #[orm(ty = "array<string>")]
     tags: Vec<String>,
 
-    // #[surreal_orm(link_one = "Weapon", ty = "record<weapon>")]
-    #[surreal_orm(link_one = Weapon)]
+    // #[orm(link_one = "Weapon", ty = "record<weapon>")]
+    #[orm(link_one = Weapon)]
     weapon: LinkOne<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
-    // #[surreal_orm(link_many = "SpaceShip", ty = "array<record<space_ship>>")]
-    #[surreal_orm(link_many = "SpaceShip")]
+    // #[orm(link_many = "SpaceShip", ty = "array<record<space_ship>>")]
+    #[orm(link_many = "SpaceShip")]
     space_ships: LinkMany<SpaceShip>,
 }
 
@@ -90,23 +90,23 @@ pub type AlienVisitsPlanetWithExplicitAttributes = VisitsWithExplicitAttributes<
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = visits)]
+#[orm(table = visits)]
 pub struct Visits<In: Node, Out>
 where
     Out: Node,
 {
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(link_one = In)]
+    #[orm(link_one = In)]
     pub r#in: LinkOne<In>,
 
-    #[surreal_orm(link_one = Out)]
+    #[orm(link_one = Out)]
     pub out: LinkOne<Out>,
     pub hair_color: Option<String>,
 
-    #[surreal_orm(ty = "duration")]
+    #[orm(ty = "duration")]
     pub time_visited: Duration,
 
-    #[surreal_orm(link_one = "Planet<u64>")]
+    #[orm(link_one = "Planet<u64>")]
     pub mana: LinkOne<Planet<u64>>,
     pub name: String,
     pub age: u8,
@@ -122,38 +122,38 @@ where
     pub territory_area: geo::Polygon,
     pub home: geo::Point,
 
-    #[surreal_orm(ty = "geometry<point>")]
+    #[orm(ty = "geometry<point>")]
     pub point_explicit: geo::Point,
 
-    #[surreal_orm(ty = "geometry<multipoint>")]
+    #[orm(ty = "geometry<multipoint>")]
     pub multi_point_explicit: geo::MultiPoint,
 
-    #[surreal_orm(ty = "geometry<LineString>")]
+    #[orm(ty = "geometry<LineString>")]
     pub line_string_explicit: geo::LineString,
 
-    #[surreal_orm(ty = "geometry<multiline>")]
+    #[orm(ty = "geometry<multiline>")]
     pub multi_line_string_explicit: geo::MultiLineString,
 
-    #[surreal_orm(ty = "geometry<polygon>")]
+    #[orm(ty = "geometry<polygon>")]
     pub polygon_explicit: geo::Polygon,
 
-    #[surreal_orm(ty = "geometry<multipolygon>")]
+    #[orm(ty = "geometry<multipolygon>")]
     pub multi_polygon_explicit: geo::MultiPolygon,
 
-    #[surreal_orm(ty = "geometry<feature>")]
+    #[orm(ty = "geometry<feature>")]
     pub geometry_collection_explicit: sql::Geometry,
 
     pub tags: Vec<String>,
-    #[surreal_orm(link_one = "Weapon")]
+    #[orm(link_one = "Weapon")]
     pub weapon: LinkOne<Weapon>,
     // Again, we dont have to provide the type attribute, it can auto detect
-    #[surreal_orm(link_many = "SpaceShip")]
+    #[orm(link_many = "SpaceShip")]
     pub space_ships: LinkMany<SpaceShip>,
     //
     // TODO:: Prevent doing this at compile time
     // This is a read only field. This wouldnt make sense. as we are using in node also as edge.
     // e.g visit->visit->plant
-    // #[surreal_orm(relate(model = "VistVisitsPlanet", connection = "->visits->planet"))]
+    // #[orm(relate(model = "VistVisitsPlanet", connection = "->visits->planet"))]
     // #[serde(skip_serializing, default)]
     // pub visit_to_planet: Relate<Planet<u64>>,
 }

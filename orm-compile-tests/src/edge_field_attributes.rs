@@ -35,17 +35,17 @@ mod check1 {
 
     #[derive(Edge, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = likes)]
+    #[orm(table = likes)]
     pub struct Likes<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Likes<In, Out>>,
 
-        #[surreal_orm(link_one = In)]
+        #[orm(link_one = In)]
         pub r#in: LinkOne<In>,
 
-        #[surreal_orm(link_one = Out)]
+        #[orm(link_one = Out)]
         pub out: LinkOne<Out>,
 
-        #[surreal_orm(define = "define_field_fn()")]
+        #[orm(define = "define_field_fn()")]
         pub likes_count: u64,
     }
 }
@@ -55,17 +55,17 @@ mod check2 {
 
     #[derive(Edge, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = likes)]
+    #[orm(table = likes)]
     pub struct Likes<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Likes<In, Out>>,
 
-        #[surreal_orm(link_one = In)]
+        #[orm(link_one = In)]
         pub r#in: LinkOne<In>,
 
-        #[surreal_orm(link_one = Out)]
+        #[orm(link_one = Out)]
         pub out: LinkOne<Out>,
 
-        #[surreal_orm(define = define_field_fn)]
+        #[orm(define = define_field_fn)]
         pub likes_count: u64,
     }
 }
@@ -75,17 +75,17 @@ mod check3 {
 
     #[derive(Edge, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = likes)]
+    #[orm(table = likes)]
     pub struct Likes<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Likes<In, Out>>,
 
-        #[surreal_orm(link_one = In)]
+        #[orm(link_one = In)]
         pub r#in: LinkOne<In>,
 
-        #[surreal_orm(link_one = Out)]
+        #[orm(link_one = Out)]
         pub out: LinkOne<Out>,
 
-        #[surreal_orm(value = "18", assert = assert_fn(), permissions = permissions_fn())]
+        #[orm(value = "18", assert = assert_fn(), permissions = permissions_fn())]
         pub likes_count: u64,
     }
 }
@@ -95,17 +95,17 @@ mod check4 {
 
     #[derive(Edge, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = likes)]
+    #[orm(table = likes)]
     pub struct Likes<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Likes<In, Out>>,
 
-        #[surreal_orm(link_one = In)]
+        #[orm(link_one = In)]
         pub r#in: LinkOne<In>,
 
-        #[surreal_orm(link_one = Out)]
+        #[orm(link_one = Out)]
         pub out: LinkOne<Out>,
 
-        #[surreal_orm(
+        #[orm(
             value = "18",
             assert= assert_fn,
             permissions= permissions_fn
@@ -122,17 +122,17 @@ mod check4 {
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         assert = assert_fn(),
 ///         permissions = permissions_fn(),
@@ -149,17 +149,17 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_1() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         define = define_field_fn()
 ///     )]
@@ -174,17 +174,17 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_2() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         assert = assert_fn(),
 ///         define = define_field_fn()
 ///     )]
@@ -199,17 +199,17 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_3() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         permissions = permissions_fn(),
 ///         define = define_field_fn()
 ///     )]
@@ -224,17 +224,17 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_4() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         assert = assert_fn(),
 ///         define = define_field_fn()
@@ -250,17 +250,17 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_5() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         assert = assert_fn(),
 ///         permissions = permissions_fn(),
 ///         define = define_field_fn()
@@ -276,17 +276,17 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_7() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         permissions = permissions_fn(),
 ///         define = define_field_fn()
@@ -304,17 +304,17 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_8() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         assert = assert_fn(),
 ///         permissions = permissions_fn(),
@@ -331,17 +331,17 @@ fn _no_other_attributes_when_define_fn_attr_is_used_in_edge_1() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         define_fn = define_field_fn
 ///     )]
@@ -357,17 +357,17 @@ fn _no_other_attributes_when_define_fn_attr_is_used_in_edge_2() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         assert = assert_fn(),
 ///         define_fn = define_field_fn
 ///     )]
@@ -383,17 +383,17 @@ fn _no_other_attributes_when_define_fn_attr_is_used_in_edge_3() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = "likes")]
+/// #[orm(table = "likes")]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         permissions = permissions_fn(),
 ///         define_fn = define_field_fn
 ///     )]
@@ -409,17 +409,17 @@ fn _no_other_attributes_when_define_fn_attr_is_used_in_edge_4() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = "likes")]
+/// #[orm(table = "likes")]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         assert = assert_fn,
 ///         define_fn = define_field_fn
@@ -436,18 +436,18 @@ fn _no_other_attributes_when_define_fn_attr_is_used_in_edge_5() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
 ///     #[serde(rename = "in")]
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub in_: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
 ///
-///     #[surreal_orm(
+///     #[orm(
 ///         assert = assert_fn(),
 ///         permissions = permissions_fn(),
 ///         define_fn = define_field_fn
@@ -464,17 +464,17 @@ fn _no_other_attributes_when_define_fn_attr_is_used_in_edge_7() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 
 ///     #[serde(rename = "in")]
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub in_: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
-///     #[surreal_orm(
+///     #[orm(
 ///         value = "18",
 ///         permissions = permissions_fn(),
 ///         define_fn = define_field_fn
@@ -500,16 +500,16 @@ fn _no_other_attributes_when_define_fn_attr_is_used_in_edge_8() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
-///     #[surreal_orm(define = define_field_fn(), define_fn = define_field_fn)]
+///     #[orm(define = define_field_fn(), define_fn = define_field_fn)]
 ///     pub likes_count: u64,
 /// }
 fn _define_and_define_fn_attrs_should_not_be_used_together_in_edge_1() {}
@@ -525,16 +525,16 @@ fn _define_and_define_fn_attrs_should_not_be_used_together_in_edge_1() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
-///     #[surreal_orm(value = value_fn())]
+///     #[orm(value = value_fn())]
 ///     pub likes_count: u64,
 /// }
 fn _value_and_value_fn_attrs_should_not_be_used_together_in_edge() {}
@@ -545,18 +545,18 @@ fn _value_and_value_fn_attrs_should_not_be_used_together_in_edge() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
 ///     #[serde(rename = "in", skip_serializing)]
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub in_: LinkOne<In>,
 ///
 ///     #[serde(skip_serializing)]
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
-///     #[surreal_orm(assert = assert_fn())]
+///     #[orm(assert = assert_fn())]
 ///     pub likes_count: u64,
 /// }
 fn _assert_and_assert_fn_attrs_should_not_be_used_together_in_edge() {}
@@ -567,16 +567,16 @@ fn _assert_and_assert_fn_attrs_should_not_be_used_together_in_edge() {}
 ///
 /// #[derive(Edge, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = likes)]
+/// #[orm(table = likes)]
 /// pub struct Likes<In: Node, Out: Node> {
 ///     pub id: SurrealSimpleId<Likes<In, Out>>,
 ///
-///     #[surreal_orm(link_one = In)]
+///     #[orm(link_one = In)]
 ///     pub r#in: LinkOne<In>,
 ///     
-///     #[surreal_orm(link_one = Out)]
+///     #[orm(link_one = Out)]
 ///     pub out: LinkOne<Out>,
-///     #[surreal_orm(permissions = permissions_fn())]
+///     #[orm(permissions = permissions_fn())]
 ///     pub likes_count: u64,
 /// }
 fn _permissions_and_permissions_fn_attrs_should_not_be_used_together_in_edge() {}

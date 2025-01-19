@@ -11,7 +11,7 @@ use quote::quote;
 use syn::Ident;
 
 #[derive(Debug, Clone, FromDeriveInput)]
-#[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct ObjectToken {
     pub(crate) ident: Ident,
     #[allow(dead_code)]

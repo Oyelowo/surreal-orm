@@ -19,7 +19,7 @@ use surreal_orm::{sql, Model, Node, SurrealId};
 // SpaceShip
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = space_ship)]
+#[orm(table = space_ship)]
 pub struct SpaceShip {
     pub id: SurrealId<Self, String>,
     pub name: String,
@@ -38,7 +38,7 @@ impl Default for SpaceShip {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = test_raw_id)]
+#[orm(table = test_raw_id)]
 pub struct TestRawId {
     pub id: SurrealId<Self, i32>,
     pub name: String,

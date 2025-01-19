@@ -95,7 +95,7 @@ fn test_node_table_name(
     };
     let input = quote!(
         #[derive(Node)]
-        #[surreal_orm(table = #table_name #relax_table)]
+        #[orm(table = #table_name #relax_table)]
         pub struct StudentTable {
             id: SurrealSimpleId<Self>,
         }
@@ -151,14 +151,14 @@ fn test_edge_table_name(
     };
     let input = quote!(
         #[derive(Edge)]
-        #[surreal_orm(table = #table_name #relax_table)]
+        #[orm(table = #table_name #relax_table)]
         pub struct BigWrites<In, Out> {
             id: SurrealSimpleId<Self>,
 
-            #[surreal_orm(link_one = In)]
+            #[orm(link_one = In)]
             r#in: LinkOne<In>,
 
-            #[surreal_orm(link_one = Out)]
+            #[orm(link_one = Out)]
             out: LinkOne<Out>,
         }
     );

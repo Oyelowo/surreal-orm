@@ -32,7 +32,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "user")]
+#[orm(table = "user")]
 pub struct User {
     pub id: SurrealSimpleId<Self>,
     pub account: String,
@@ -49,28 +49,28 @@ models. Here's a detailed example using a `Student` and a `Book`:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table = "student")]
+#[orm(table = "student")]
 pub struct Student {
     id: SurrealSimpleId<Self>,
     first_name: String,
     last_name: String,
     age: u8,
 
-    #[surreal_orm(link_self = "Student")]
+    #[orm(link_self = "Student")]
     best_friend: LinkSelf<Student>,
 
-    #[surreal_orm(link_one = "Book")]
+    #[orm(link_one = "Book")]
     fav_book: LinkOne<Book>,
 
-    #[surreal_orm(link_one = "Book")]
+    #[orm(link_one = "Book")]
     course: LinkOne<Book>,
 
-    #[surreal_orm(link_many = "Book")]
+    #[orm(link_many = "Book")]
     sem_courses: LinkMany<Book>,
 }
 
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table = "book")]
+#[orm(table = "book")]
 pub struct Book {
     id: SurrealSimpleId<Self>,
     content: String,
@@ -279,7 +279,7 @@ use surreal_orm::{*, statements::{select, insert}};
 
 #[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "weapon")]
+#[orm(table = "weapon")]
 pub struct Weapon {
     pub name: String,
     pub strength: i32,

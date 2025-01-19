@@ -30,10 +30,10 @@ pub use models::with_generics::*;
 
 // #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 // #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table = balance)]
+// #[orm(table = balance)]
 // pub struct Balance {
 //     pub id: SurrealId<Self, String>,
-//     #[surreal_orm(ty = "string")]
+//     #[orm(ty = "string")]
 //     pub amount: &'static str,
 //     // pub amount: Option<f64>,
 // }

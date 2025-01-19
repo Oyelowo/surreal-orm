@@ -58,7 +58,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "space_ship")]
+#[orm(table = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
     pub name: String,

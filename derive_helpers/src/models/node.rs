@@ -13,7 +13,7 @@ use proc_macros_helpers::get_crate_name;
 use quote::quote;
 
 #[derive(Clone, Debug, FromDeriveInput)]
-#[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct NodeToken(pub TableDeriveAttributes);
 
 impl NodeToken {
@@ -119,19 +119,19 @@ impl ToTokens for NodeToken {
 
         // #[derive(#crate::Model, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
-        // #[surreal_orm(table = student, drop, schemafull, permission, define="any_fnc")]
+        // #[orm(table = student, drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
         //     id: SurrealSimpleId<Self>,
         //     first_name: String,
         //
-        //     #[surreal_orm(link_one = Book)]
+        //     #[orm(link_one = Book)]
         //     course: LinkOne<Book>,
         //
-        //     #[surreal_orm(link_many = Book)]
+        //     #[orm(link_many = Book)]
         //     #[serde(rename = "lowo")]
         //     all_semester_courses: LinkMany<Book>,
         //
-        //     #[surreal_orm(relate(model = StudentWritesBlog, connection = "->writes->Blog"))]
+        //     #[orm(relate(model = StudentWritesBlog, connection = "->writes->Blog"))]
         //     #[serde(skip_serializing)]
         //     written_blogs: Relate<Blog>,
         // }

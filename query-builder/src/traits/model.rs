@@ -211,10 +211,10 @@ pub trait Node: Model + Serialize + SchemaGetter {
     /// #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     /// struct UserSchema {
     ///    ...,
-    ///    #[surreal_orm(relate(model = "StudentPublishedBook", connection = "->published->book"))]
+    ///    #[orm(relate(model = "StudentPublishedBook", connection = "->published->book"))]
     ///    published_books: Relate<Book>,
     ///    
-    ///    #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
+    ///    #[orm(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
     ///    wrriten_blogs: Relate<Blog>,
     /// }
     /// ```
@@ -258,10 +258,10 @@ pub trait Node: Model + Serialize + SchemaGetter {
     /// #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     /// struct UserSchema {
     ///    ...,
-    ///    #[surreal_orm(relate(model = "StudentPublishedBook", connection = "->published->book"))]
+    ///    #[orm(relate(model = "StudentPublishedBook", connection = "->published->book"))]
     ///    published_books: Relate<Book>,
     ///    
-    ///    #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
+    ///    #[orm(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
     ///    wrriten_blogs: Relate<Blog>,
     /// }
     /// ```

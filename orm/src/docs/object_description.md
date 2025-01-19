@@ -17,14 +17,14 @@ use surreal_orm::{SurrealSimpleId, Node};
 
 #[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "alien")]
+#[orm(table = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
 
-    #[surreal_orm(nest_object = "Rocket")]
+    #[orm(nest_object = "Rocket")]
     pub favorite_rocket: Rocket,
 
-    #[surreal_orm(nest_array = "Rocket")]
+    #[orm(nest_array = "Rocket")]
     pub strong_rockets: Vec<Rocket>,
 }
 

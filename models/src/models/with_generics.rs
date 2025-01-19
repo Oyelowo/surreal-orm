@@ -4,20 +4,20 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = planet_with_generics)]
+#[orm(table = planet_with_generics)]
 pub struct PlanetWithGenerics<'a, T: Serialize + Default + Clone + surreal_orm::validators::Int> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    #[surreal_orm(ty = "float")]
+    #[orm(ty = "float")]
     pub strength: Strength,
 
-    #[surreal_orm(ty = int)]
+    #[orm(ty = int)]
     pub something: T,
 
-    #[surreal_orm(nest_object = "RocketWithGenerics<'a, T>")]
+    #[orm(nest_object = "RocketWithGenerics<'a, T>")]
     pub rocket: RocketWithGenerics<'a, T>,
 
-    #[surreal_orm(ty = "option<array<float>>")]
+    #[orm(ty = "option<array<float>>")]
     pub score: Option<Vec<f64>>,
 }
 type Strength = f64;
@@ -26,20 +26,20 @@ type Strength = f64;
 // #[serde(rename_all = "camelCase")]
 pub struct RocketWithGenerics<'a, T: Serialize + Default + Clone + surreal_orm::validators::Int> {
     name: String,
-    #[surreal_orm(ty = "int")]
+    #[orm(ty = "int")]
     something: T,
 
-    #[surreal_orm(ty = "option<string>")]
+    #[orm(ty = "option<string>")]
     something2: Option<&'a str>,
 
     nana: &'static str,
     #[serde(rename = "lowo")]
     fav_number: Option<i32>,
-    #[surreal_orm(ty = "set<int>")]
+    #[orm(ty = "set<int>")]
     field_set: HashSet<i32>,
 
     // TODO: Do a compile check for the array size against the declared field type
-    #[surreal_orm(ty = "array<float, 2>")]
+    #[orm(ty = "array<float, 2>")]
     must_number: [Strength; 3],
 }
 

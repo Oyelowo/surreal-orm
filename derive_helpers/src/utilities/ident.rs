@@ -16,7 +16,7 @@ create_ident_wrapper!(DeserializedFieldName);
 
 #[allow(dead_code)]
 #[derive(Clone, Debug, FromField)]
-#[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct FieldAttribute {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.

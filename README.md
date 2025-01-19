@@ -57,7 +57,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "space_ship")]
+#[orm(table = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
@@ -304,7 +304,7 @@ db.use_ns("test").use_db("test").await.unwrap();
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "account")]
+#[orm(table = "account")]
 pub struct Account {
     pub id: SurrealId<Self, String>,
     pub balance: f64,
@@ -312,7 +312,7 @@ pub struct Account {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "balance")]
+#[orm(table = "balance")]
 pub struct Balance {
     pub id: SurrealId<Self, String>,
     pub amount: f64,
@@ -441,11 +441,11 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "animal", schemafull)]
+#[orm(table = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    // #[surreal_orm(old_name = "oldField")] // Comment this line out to carry out a renaming operation
+    // #[orm(old_name = "oldField")] // Comment this line out to carry out a renaming operation
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,
@@ -480,7 +480,7 @@ impl TableResources for Animal {
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "eats", schemafull)]
+#[orm(table = "eats", schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]

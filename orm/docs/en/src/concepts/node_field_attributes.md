@@ -35,7 +35,7 @@ Let's begin with a basic example. The `Student` struct below uses minimal
 annotations:
 
 ```rust
-#[surreal_orm(table = "student")]
+#[orm(table = "student")]
 pub struct Student {
     id: SurrealId<Student, String>,
     first_name: String,
@@ -57,7 +57,7 @@ For a more detailed configuration of a field, you can use granular attributes.
 The `Student` struct provides various usages:
 
 ```rust
-#[surreal_orm(
+#[orm(
     table = "student",
     permissions = "student_permissions()",
 )]
@@ -65,7 +65,7 @@ pub struct Student {
     id: SurrealId<Student, String>,
     first_name: String,
     last_name: String,
-    #[surreal_orm(
+    #[orm(
         type_ = "int",
         value = "18",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
@@ -92,13 +92,13 @@ You can externalize the logic for defining attributes by using external
 functions. This aids in reusability and cleaner code:
 
 ```rust
-#[surreal_orm(
+#[orm(
     table = "student_with_define_fn_attr",
     define_fn = "define_student_with_define_attr"
 )]
 pub struct StudentWithDefineFnAttr {
     // ... fields ...
-    #[surreal_orm(type_ = "int", define_fn = "age_define_external_fn_path")]
+    #[orm(type_ = "int", define_fn = "age_define_external_fn_path")]
     age_define_external_fn_path: u8,
 }
 ```
@@ -117,28 +117,28 @@ Fields can be defined in multiple ways using `surreal_orm`:
 ### Inline Definitions:
 
 ```rust
-#[surreal_orm(type_ = "int", value = "18")]
+#[orm(type_ = "int", value = "18")]
 age: u8,
 ```
 
 ### External Function Invoked:
 
 ```rust
-#[surreal_orm(type_ = "int", value = "get_age_default_value()")]
+#[orm(type_ = "int", value = "get_age_default_value()")]
 age_default_external_function_invoked_expr: u8,
 ```
 
 ### Using External Function Attributes:
 
 ```rust
-#[surreal_orm(type_ = "int", value_fn = "get_age_default_value")]
+#[orm(type_ = "int", value_fn = "get_age_default_value")]
 age_external_fn_attrs: u8,
 ```
 
 ### Mixing and Matching:
 
 ```rust
-#[surreal_orm(type_ = "int", value = "get_age_default_value()", assert_fn = "get_age_assertion")]
+#[orm(type_ = "int", value = "get_age_default_value()", assert_fn = "get_age_assertion")]
 age_mix_and_match_external_fn_inline_attrs: u8,
 ```
 
@@ -153,7 +153,7 @@ the database). Relationships can be `one-to-one`, `one-to-many`, or
 For instance:
 
 ```rust
-#[surreal_orm(link_one = "Book")]
+#[orm(link_one = "Book")]
 fav_book: LinkOne<Book>,
 ```
 
@@ -166,7 +166,7 @@ This indicates a one-to-one relationship between a student and a book.
 In `surreal_orm`, you can use inline expressions to add custom behavior:
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     value = "get_age_by_group_default_value(AgeGroup::Teen)",
     assert = "get_age_assertion()",
@@ -192,7 +192,7 @@ These two attributes are mutually exclusive. You can't define a default value
 using both a direct expression and a function at the same time.
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     value = "get_age_default_value()",
     value_fn = "get_age_default_value"
@@ -206,7 +206,7 @@ Similarly, you can't use both an inline assertion and an external function for
 the same purpose.
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     assert = "get_age_assertion()",
     assert_fn = "get_age_assertion"
@@ -220,7 +220,7 @@ Permissions should be defined either inline or through an external function, but
 not both.
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     permissions = "age_permissions()",
     permissions_fn = "age_permissions"
@@ -234,7 +234,7 @@ These attributes are also mutually exclusive. When specifying a custom
 definition, you should use either an inline expression or an external function.
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     define = "define_age()",
     define_fn = "define_age"
@@ -251,7 +251,7 @@ should be comprehensive and not require additional modifiers.
 For example, the following combinations are invalid:
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     value = "18",
     define = "define_age()"
@@ -260,7 +260,7 @@ age: u8,
 ```
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     assert = "cond(value().is_not(NONE)).and(value().gte(18))",
     define = "define_age()"
@@ -269,7 +269,7 @@ age: u8,
 ```
 
 ```rust
-#[surreal_orm(
+#[orm(
     type_ = "int",
     permissions = "for_permission([CrudType::Create, CrudType::Delete]).where_(StudentTest3::schema().firstName.is(\"Oyelowo\"))",
     define = "define_age()"
@@ -296,7 +296,7 @@ a comprehensive overview of the various annotations:
 ```rust
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(
+#[orm(
     table = "student_with_granular_attributes",
     drop,
     schemafull,
@@ -307,7 +307,7 @@ pub struct StudentWithGranularAttributes {
     id: SurrealId<StudentWithGranularAttributes, String>,
     first_name: String,
     last_name: String,
-    #[surreal_orm(
+    #[orm(
         type_ = "int",
         value = "18",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",

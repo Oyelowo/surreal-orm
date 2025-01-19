@@ -12,7 +12,7 @@ use surrealdb::sql;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = user)]
+#[orm(table = user)]
 pub struct User {
     pub id: SurrealId<Self, String>,
     pub name: String,
@@ -35,32 +35,32 @@ impl Default for User {
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = like)]
+#[orm(table = like)]
 pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     // #[serde(rename = "in")]
-    #[surreal_orm(link_one = In)]
+    #[orm(link_one = In)]
     pub r#in: LinkOne<In>,
 
-    #[surreal_orm(link_one = Out)]
+    #[orm(link_one = Out)]
     pub out: LinkOne<Out>,
 
-    #[surreal_orm(nest_object = Time)]
+    #[orm(nest_object = Time)]
     pub time: Time,
 }
 pub type CompanyLikeUser = Like<Company, User>;
 
 #[derive(surreal_orm::Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = company)]
+#[orm(table = company)]
 pub struct Company {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
 
-    #[surreal_orm(link_many = User)]
+    #[orm(link_many = User)]
     pub users: LinkMany<User>,
 
-    #[surreal_orm(relate(model = CompanyLikeUser, connection = "->like->user"))]
+    #[orm(relate(model = CompanyLikeUser, connection = "->like->user"))]
     #[serde(skip_serializing, default)]
     pub devs: Relate<User>,
 }
@@ -74,15 +74,15 @@ pub struct Time {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = organization)]
+#[orm(table = organization)]
 pub struct Organization {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
 
-    #[surreal_orm(link_many = User)]
+    #[orm(link_many = User)]
     pub users: LinkMany<User>,
 
-    #[surreal_orm(nest_object = Time)]
+    #[orm(nest_object = Time)]
     pub time: Time,
     pub age: u8,
 }

@@ -208,13 +208,13 @@ pub mod invalid_cases {
 
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(
+    #[orm(
         table = user_renaming_from_currently_used_field_name_disallowed,
         schemafull
     )]
     pub struct UserRenamingFromCurrentlyUsedFieldNameDisallowed {
         pub id: SurrealSimpleId<Self>,
-        #[surreal_orm(old_name = "firstName")]
+        #[orm(old_name = "firstName")]
         pub username: String,
         pub first_name: String,
         pub created_at: chrono::DateTime<Utc>,
@@ -227,13 +227,13 @@ pub mod invalid_cases {
 
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(
+    #[orm(
         table = user_renaming_with_same_old_field_name_disallowed,
         schemafull
     )]
     pub struct UserRenamingWithSameOldFieldNameDisallowed {
         pub id: SurrealSimpleId<Self>,
-        #[surreal_orm(old_name = "firstName")]
+        #[orm(old_name = "firstName")]
         pub first_name: String,
         pub another_stuff: String,
         pub created_at: chrono::DateTime<Utc>,
@@ -249,7 +249,7 @@ pub mod invalid_cases {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = user_credentials, schemafull)]
+#[orm(table = user_credentials, schemafull)]
 pub struct UserCredentials {
     pub id: SurrealId<Self, String>,
     pub email: String,
@@ -258,7 +258,7 @@ pub struct UserCredentials {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = new_stuff, schemafull)]
+#[orm(table = new_stuff, schemafull)]
 pub struct NewStuff {
     pub id: SurrealSimpleId<Self>,
     pub first_name: String,
@@ -268,7 +268,7 @@ pub struct NewStuff {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = planet, schemafull)]
+#[orm(table = planet, schemafull)]
 pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub first_name: String,
@@ -280,10 +280,10 @@ pub struct Planet {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = planet, schemafull, relax_table)]
+#[orm(table = planet, schemafull, relax_table)]
 pub struct PlanetV2 {
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(old_name = "firstName")]
+    // #[orm(old_name = "firstName")]
     pub new_name: String,
     pub population: u64,
     pub created_at: chrono::DateTime<Utc>,
@@ -293,7 +293,7 @@ pub struct PlanetV2 {
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = student, schemafull)]
+#[orm(table = student, schemafull)]
 pub struct Student {
     pub id: SurrealSimpleId<Self>,
     pub university: String,
@@ -306,7 +306,7 @@ pub mod snake_cases {
     use super::*;
 
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-    #[surreal_orm(table = animal_snake_case, schemafull)]
+    #[orm(table = animal_snake_case, schemafull)]
     pub struct AnimalSnakeCase {
         pub id: SurrealSimpleId<Self>,
         pub species: String,
@@ -318,22 +318,22 @@ pub mod snake_cases {
 
     // We are relaxing table name, so that this serves as second version of AnimalSnakeCase
     #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-    #[surreal_orm(table = animal_snake_case, schemafull, relax_table)]
+    #[orm(table = animal_snake_case, schemafull, relax_table)]
     pub struct AnimalSnakeCaseV2 {
         pub id: SurrealSimpleId<Self>,
         pub species: String,
-        #[surreal_orm(old_name = attributes)]
+        #[orm(old_name = attributes)]
         pub characteristics: Vec<String>,
         pub velocity: u64,
     }
 
     #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-    #[surreal_orm(table = eats_snake_case, schemafull)]
+    #[orm(table = eats_snake_case, schemafull)]
     pub struct EatsSnakeCase<In: Node, Out: Node> {
         pub id: SurrealSimpleId<Self>,
-        #[surreal_orm(link_many = "In")]
+        #[orm(link_many = "In")]
         pub r#in: LinkOne<In>,
-        #[surreal_orm(link_many = "Out")]
+        #[orm(link_many = "Out")]
         pub out: LinkOne<Out>,
         pub place: String,
         pub created_at: chrono::DateTime<Utc>,
@@ -344,7 +344,7 @@ pub mod snake_cases {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = animal, schemafull)]
+#[orm(table = animal, schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
@@ -391,11 +391,11 @@ impl TableResources for Animal {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = animal, schemafull, relax_table)]
+#[orm(table = animal, schemafull, relax_table)]
 pub struct AnimalV2 {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    #[surreal_orm(old_name = attributes)]
+    #[orm(old_name = attributes)]
     pub characteristics: Vec<String>,
     pub velocity: u64,
 }
@@ -434,12 +434,12 @@ impl TableResources for AnimalV2 {
 
 #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = eats, schemafull)]
+#[orm(table = eats, schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(link_one = In)]
+    #[orm(link_one = In)]
     pub r#in: LinkOne<In>,
-    #[surreal_orm(link_one = Out)]
+    #[orm(link_one = Out)]
     pub out: LinkOne<Out>,
     pub place: String,
     pub created_at: chrono::DateTime<Utc>,
@@ -448,13 +448,13 @@ pub struct Eats<In: Node, Out: Node> {
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
 
 #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
-#[surreal_orm(table = eats_v2, schemafull, relax_table)]
+#[orm(table = eats_v2, schemafull, relax_table)]
 pub struct EatsV2<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(link_one = In, ty = "record<any>")]
+    #[orm(link_one = In, ty = "record<any>")]
     pub in_: LinkOne<In>,
-    #[surreal_orm(link_one = Out, ty = "record<any>")]
+    #[orm(link_one = Out, ty = "record<any>")]
     pub out: LinkOne<Out>,
     pub location: String,
     pub created_at: chrono::DateTime<Utc>,
@@ -465,7 +465,7 @@ pub type AnimalEatsCropV2 = EatsV2<AnimalV2, Crop>;
 
 #[derive(Node, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "crop", schemafull)]
+#[orm(table = "crop", schemafull)]
 pub struct Crop {
     pub id: SurrealSimpleId<Self>,
     pub color: String,

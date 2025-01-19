@@ -10,7 +10,7 @@ use test_case::test_case;
 fn test_node_use_either_main_define_attr_or_individual_parts_but_not_both() {
     let input = quote!(
         #[derive(Node)]
-        #[surreal_orm(table = student, drop, schemafull, permissions = perm, define = define_student)]
+        #[orm(table = student, drop, schemafull, permissions = perm, define = define_student)]
         pub struct Student {
             id: SurrealSimpleId<Self>,
         }
@@ -56,7 +56,7 @@ fn test_node_use_either_main_define(def_strategy: DefinitionStrategy) {
 
     let input = quote!(
         #[derive(Node)]
-        #[surreal_orm(table = student, #defs)]
+        #[orm(table = student, #defs)]
         pub struct Student {
             id: SurrealSimpleId<Self>,
         }
@@ -101,14 +101,14 @@ fn test_edgeuse_either_main_define_attr_or_individual_parts_but_not_both(
     };
     let input = quote!(
         #[derive(Edge)]
-        #[surreal_orm(table = writes, #defs)]
+        #[orm(table = writes, #defs)]
         pub struct Writes<In, Out> {
             id: SurrealSimpleId<Self>,
 
-            #[surreal_orm(link_one = In)]
+            #[orm(link_one = In)]
             r#in: LinkOne<In>,
 
-            #[surreal_orm(link_one = Out)]
+            #[orm(link_one = Out)]
             out: LinkOne<Out>,
         }
     );

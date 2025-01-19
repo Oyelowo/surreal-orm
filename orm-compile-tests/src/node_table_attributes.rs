@@ -28,7 +28,7 @@ mod check1 {
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(
+    #[orm(
         table = student,
         flexible,
         drop,
@@ -47,7 +47,7 @@ mod check2 {
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = student, define = define_table_fn())]
+    #[orm(table = student, define = define_table_fn())]
     pub struct Student {
         id: SurrealSimpleId<Self>,
     }
@@ -58,7 +58,7 @@ mod check3 {
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = student, define = define_table_fn)]
+    #[orm(table = student, define = define_table_fn)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
     }
@@ -70,7 +70,7 @@ mod check3 {
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(table = "student_invalid_by_default")]
+/// #[orm(table = "student_invalid_by_default")]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 /// }
@@ -83,7 +83,7 @@ fn _no_table_should_be_snake_case_version_of_struct_name() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -104,7 +104,7 @@ fn _no_other_attributes_when_define_attr_is_used_1() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -124,7 +124,7 @@ fn _no_other_attributes_when_define_attr_is_used_2() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -143,7 +143,7 @@ fn _no_other_attributes_when_define_attr_is_used_3() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -161,7 +161,7 @@ fn _no_other_attributes_when_define_attr_is_used_4() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     define = define_table_fn()
@@ -180,7 +180,7 @@ fn _no_other_attributes_when_define_attr_is_used_5() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -201,7 +201,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_1() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -221,7 +221,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_2() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -240,7 +240,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_3() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     drop,
@@ -258,7 +258,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_4() {}
 ///
 /// #[derive(Node, Serialize, Deserialize)]
 /// #[serde(rename_all = "camelCase")] // this is the only attribute that should be allowed
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     flexible,
 ///     define = define_table_fn
@@ -277,7 +277,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_5() {}
 /// use surreal_compile_tests::*;
 ///
 /// #[derive(Node, Serialize, Deserialize)]
-/// #[surreal_orm(
+/// #[orm(
 ///     table = student,
 ///     define = define_table_fn(),
 /// )]
@@ -292,7 +292,7 @@ fn _define_and_define_fn_cannot_be_used_together_1() {}
 /// use surreal_compile_tests::*;
 ///
 /// #[derive(Node, Serialize, Deserialize)]
-/// #[surreal_orm(table = student, permissions = permissions_fn())]
+/// #[orm(table = student, permissions = permissions_fn())]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 /// }
@@ -304,7 +304,7 @@ fn _permissions_and_permissions_fn_cannot_be_used_together_2() {}
 /// use surreal_compile_tests::*;
 ///
 /// #[derive(Node, Serialize, Deserialize)]
-/// #[surreal_orm(table = student, as_ = as_fn())]
+/// #[orm(table = student, as_ = as_fn())]
 /// pub struct Student {
 ///     id: SurrealSimpleId<Self>,
 /// }
