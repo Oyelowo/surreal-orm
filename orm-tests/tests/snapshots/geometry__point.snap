@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/geometry.rs
+source: surreal_orm-tests/tests/geometry.rs
 expression: geom
 ---
 TestPoint {

@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/geometry.rs
+source: surreal_orm-tests/tests/geometry.rs
 expression: res_string
 ---
 {"id":{"tb":"test_linestring","id":{"Number":32}},"homeLinestring":[{"x":-122.33583,"y":47.60621},{"x":-122.33583,"y":47.60622},{"x":-122.33584,"y":47.60622},{"x":-122.33584,"y":47.60621},{"x":-122.33583,"y":47.60621}]}

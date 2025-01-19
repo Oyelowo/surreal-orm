@@ -78,7 +78,7 @@ assert_eq!(result.build(), "CREATE person SET name = 'Oyelowo', friends = [perso
 
 ---
 
-Utilizing futures in `surreal-orm` provides a dynamic layer to your data,
+Utilizing futures in `surreal_orm` provides a dynamic layer to your data,
 ensuring that you always receive the most up-to-date calculations and
 evaluations when querying your records. Whether you're calculating age, fetching
 related records, or even performing complex graph operations, futures have got

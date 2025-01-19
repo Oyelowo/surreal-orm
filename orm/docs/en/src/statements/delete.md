@@ -45,7 +45,7 @@ async fn create_test_data(db: Surreal<Db>) -> Vec<Weapon> {
 
 ## Delete by ID Using Helper Functions
 
-The `surreal-orm` library provides helper functions on model instances for
+The `surreal_orm` library provides helper functions on model instances for
 common operations. Here's how you can delete a record using the `delete_by_id`
 helper function:
 
@@ -114,7 +114,7 @@ async fn test_delete_one_by_id() -> SurrealOrmResult<()> {
 
 ## Delete Using Model Instance
 
-Rather than specifying an ID or condition, `surreal-orm` allows developers to
+Rather than specifying an ID or condition, `surreal_orm` allows developers to
 delete records directly using a model instance. This approach can be useful when
 the developer already has a reference to the model instance they want to delete:
 
@@ -222,7 +222,7 @@ async fn test_delete_many_query_by_condition() -> SurrealOrmResult<()> {
 
 ## Conclusion
 
-The delete operations in `surreal-orm` offer a flexible and comprehensive
+The delete operations in `surreal_orm` offer a flexible and comprehensive
 mechanism to remove records from the `surrealdb` database. Whether it's deleting
 a single record using its ID, removing multiple records based on conditions, or
 even utilizing model instances for deletions, the ORM provides an arsenal of

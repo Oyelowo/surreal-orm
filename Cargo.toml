@@ -31,7 +31,7 @@ documentation = "https://codebreather.com/oyelowo"
 [workspace.dependencies]
 surreal-derive = { path = "derive" }
 surreal-derive-helpers = { path = "derive_helpers" }
-surreal-orm = { path = "orm" }
+surreal_orm = { path = "orm" }
 surreal-query-builder = { path = "query-builder" }
 proc-macros-helpers = { path = "proc-macros-helpers" }
 query-builder-macros = { path = "query-builder-macros" }

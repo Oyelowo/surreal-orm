@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/test_query_strings.rs
+source: surreal_orm-tests/tests/test_query_strings.rs
 expression: "&cursive_relation.to_raw()"
 ---
 bestFriend.bestFriend->writes[WHERE timeWritten > 3422]->book[WHERE id = book:blaze].content

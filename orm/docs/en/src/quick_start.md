@@ -16,7 +16,7 @@ your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-surreal_orm = "https://github.com/Oyelowo/surreal-orm"
+surreal_orm = "https://github.com/Oyelowo/surreal_orm"
 ```
 
 After adding the dependency, you can import the necessary modules in your Rust

@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/query_insert.rs
+source: surreal_orm-tests/tests/query_insert.rs
 expression: "build.get_bindings()[0].get_raw_value()"
 ---
 20

@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/node_attributes.rs
+source: surreal_orm-tests/tests/node_attributes.rs
 expression: "StudentWithDefineFnAttr::define_table().to_raw().build()"
 ---
 DEFINE TABLE student_with_define_attr DROP SCHEMAFULL AS 

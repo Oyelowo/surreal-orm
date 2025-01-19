@@ -6,26 +6,26 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  */
 
-//! # surreal-orm is a hyper expressive and intuitive query builder and ORM for surrealdb implemented in Rust.
-//! If you know raw SurrealQl, you know surreal-orm.
+//! # surreal_orm is a hyper expressive and intuitive query builder and ORM for surrealdb implemented in Rust.
+//! If you know raw SurrealQl, you know surreal_orm.
 //!
 //! <div align="center">
 //! <!-- CI -->
-//! <img src="https://github.com/oyelowo/surreal-orm/workflows/CI/badge.svg" />
+//! <img src="https://github.com/oyelowo/surreal_orm/workflows/CI/badge.svg" />
 //! <!-- codecov -->
-//! <img src="https://codecov.io/gh/surreal-orm/surreal-orm/branch/master/graph/badge.svg" />
+//! <img src="https://codecov.io/gh/surreal_orm/surreal_orm/branch/master/graph/badge.svg" />
 //! <!-- Crates version -->
-//! <a href="https://crates.io/crates/surreal-orm">
-//! <img src="https://img.shields.io/crates/v/surreal-orm.svg?style=flat-square"
+//! <a href="https://crates.io/crates/surreal_orm">
+//! <img src="https://img.shields.io/crates/v/surreal_orm.svg?style=flat-square"
 //! alt="Crates.io version" />
 //! </a>
 //! <!-- Downloads -->
-//! <a href="https://crates.io/crates/surreal-orm">
-//! <img src="https://img.shields.io/crates/d/surreal-orm.svg?style=flat-square"
+//! <a href="https://crates.io/crates/surreal_orm">
+//! <img src="https://img.shields.io/crates/d/surreal_orm.svg?style=flat-square"
 //! alt="Download" />
 //! </a>
 //! <!-- docs.rs docs -->
-//! <a href="https://docs.rs/surreal-orm">
+//! <a href="https://docs.rs/surreal_orm">
 //! <img src="https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square"
 //! alt="docs.rs docs" />
 //! </a>
@@ -37,11 +37,11 @@
 //!
 //! ## Documentation
 //!
-//! * [Book](https://surreal-orm.github.io/surreal-orm/en/index.html)
-//! * [fr-placeholder](https://surreal-orm.github.io/surreal-orm/fr/index.html)
-//! * [Docs](https://docs.rs/surreal-orm)
-//! * [GitHub repository](https://github.com/oyelowo/surreal-orm)
-//! * [Cargo package](https://crates.io/crates/surreal-orm)
+//! * [Book](https://surreal_orm.github.io/surreal_orm/en/index.html)
+//! * [fr-placeholder](https://surreal_orm.github.io/surreal_orm/fr/index.html)
+//! * [Docs](https://docs.rs/surreal_orm)
+//! * [GitHub repository](https://github.com/oyelowo/surreal_orm)
+//! * [Cargo package](https://crates.io/crates/surreal_orm)
 //! * Minimum supported Rust version: 1.60.0 or later
 //!
 //! # Table of contents
@@ -62,7 +62,7 @@
 //!
 //! * Fully supports for surrealdb specifications
 //! * Compile-time Type safety
-//! * Intuitive, innovative and idiomatic API. If you know surrealql, you know surreal-orm
+//! * Intuitive, innovative and idiomatic API. If you know surrealql, you know surreal_orm
 //! * Rustfmt friendly (Procedural Macro)
 //! * Complex query of any nesting level
 //! * Automatic parameter binding and sql injection handling
@@ -103,7 +103,7 @@
 //! ## How to Install
 //!```cargo.toml
 //! [dependencies]
-//! surreal-orm = "1.0"!
+//! surreal_orm = "1.0"!
 //!```
 //!
 //! ## Integrations
@@ -125,7 +125,7 @@
 //!
 //! ## Examples
 //!
-//! All examples are in the [sub-repository](https://github.com/oyelowo/surreal-orm/examples), located in the examples directory.
+//! All examples are in the [sub-repository](https://github.com/oyelowo/surreal_orm/examples), located in the examples directory.
 //!
 //! **Run an example:**
 //!

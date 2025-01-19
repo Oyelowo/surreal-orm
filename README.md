@@ -1,8 +1,8 @@
-<!-- [Book](https://oyelowo.github.io/surreal-orm) | [doc.rs](https://docs.rs/surreal-orm/latest/surreal-rm/) | [Discord](https://discord.gg/xuA39Zpb) -->
-[Book](https://oyelowo.github.io/surreal-orm) | [Discord](https://discord.gg/xuA39Zpb)
+<!-- [Book](https://oyelowo.github.io/surreal_orm) | [doc.rs](https://docs.rs/surreal_orm/latest/surreal-rm/) | [Discord](https://discord.gg/xuA39Zpb) -->
+[Book](https://oyelowo.github.io/surreal_orm) | [Discord](https://discord.gg/xuA39Zpb)
 
 
-[![surreal-orm](https://github.com/Oyelowo/surreal-orm/actions/workflows/rust.yaml/badge.svg)](https://github.com/Oyelowo/surreal-orm/actions/workflows/rust.yaml)
+[![surreal_orm](https://github.com/Oyelowo/surreal_orm/actions/workflows/rust.yaml/badge.svg)](https://github.com/Oyelowo/surreal_orm/actions/workflows/rust.yaml)
 [![cleanup old images](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml/badge.svg)](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml)
 
 ## Introduction
@@ -19,7 +19,7 @@ your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-surreal_orm = "https://github.com/Oyelowo/surreal-orm"
+surreal_orm = "https://github.com/Oyelowo/surreal_orm"
 ```
 
 After adding the dependency, you can import the necessary modules in your Rust

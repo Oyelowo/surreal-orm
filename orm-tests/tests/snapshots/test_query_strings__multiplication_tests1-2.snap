@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/test_query_strings.rs
+source: surreal_orm-tests/tests/test_query_strings.rs
 expression: "&query.fine_tune_params()"
 ---
 SELECT *, content, age, lastName, firstName, course FROM student WHERE (age > age ~ firstName + $_param_00000001 - $_param_00000002 AND unoBook OR age) AND (bestFriend == $_param_00000003) OR (firstName = $_param_00000004) AND (age >= $_param_00000005) SPLIT lastName, firstName, firstName, semesterCourses, firstName, semesterCourses GROUP BY course, firstName, lastName, unoBook, lastName, unoBook, age, bestFriend, dayo ORDER BY firstName RAND() DESC, lastName COLLATE ASC, id NUMERIC DESC, id NUMERIC DESC, id NUMERIC DESC, firstName DESC, id NUMERIC DESC, firstName DESC LIMIT $_param_00000006 START AT $_param_00000007 FETCH firstName, lastName, age, unoBook, age, unoBook TIMEOUT 8s PARALLEL;

@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/query_create_v2.rs
+source: surreal_orm-tests/tests/query_create_v2.rs
 expression: build.to_raw().build().len()
 ---
 652
