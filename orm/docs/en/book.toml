@@ -1,6 +1,18 @@
 [book]
 authors = ["Oyelowo Oyelowo"]
+author = "Oyelowo Oyedayo"
+email = "oyelowo.oss@gmai.com"
 language = "en"
 multilingual = false
 src = "src"
 title = "Surreal ORM"
+description = "Powerful & expressive ORM/query-builder/static checker for raw queries/Fully Automated migration tooling , designed to offer an intuitive API, strict type-checking, novel features, & full specification support. It provides a fresh perspective in data management. Currently supports SurrealDB engine. RDMSs(PG, MYSQL etc) and others coming soon"
+
+[build]
+rustc-opts = ["--edition=2021"]
+
+[output.html]
+site-url = "/surreal_orm/"
+git-repository-url = "https://github.com/oyelowo/surream_orm"
+default-theme = "dark"
+preferred-dark-theme = "ayu"

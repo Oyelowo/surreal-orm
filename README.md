@@ -1,6 +1,6 @@
 <!-- [Book](https://oyelowo.github.io/surreal_orm) | [doc.rs](https://docs.rs/surreal_orm/latest/surreal-rm/) | [Discord](https://discord.gg/xuA39Zpb) -->
-[Book](https://oyelowo.github.io/surreal_orm) | [Discord](https://discord.gg/xuA39Zpb)
 
+[Book](https://oyelowo.github.io/surreal_orm) | [Discord](https://discord.gg/xuA39Zpb)
 
 [![surreal_orm](https://github.com/Oyelowo/surreal_orm/actions/workflows/rust.yaml/badge.svg)](https://github.com/Oyelowo/surreal_orm/actions/workflows/rust.yaml)
 [![cleanup old images](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml/badge.svg)](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml)
@@ -430,12 +430,13 @@ The `query!` macro offers several benefits, including:
 ---
 
 #### Migration: Fully Automated Database Schema Migrations
+
 Surreal ORM offers a robust command-line interface (CLI) for automatically diffing and managing database migrations in a SurrealDB environment. This tool supports a variety of tasks including initializing migrations, generating migration files, applying migrations up or down, resetting migrations, listing migrations, pruning unapplied migration files, and more, to efficiently manage your database schema.
 
 It supports both CLI-based and Embedded migrations. Embedded migrations incorporate migration file data into your binary at compile time, making it accessible at runtime.
 
-
 #### Usage
+
 The process involves gathering codebase resources and setting them up for initializing and generating new migrations.
 
 #### Step 1: Setting Up And Gathering Codebase Resources
@@ -542,11 +543,12 @@ async fn main() {
 }
 ```
 
-#### Step 2: Running the CLI and/or Embedding Migrations 
+#### Step 2: Running the CLI and/or Embedding Migrations
 
 The CLI tool offers a range of commands, each with specific options and flags:
 
 **Help**
+
 ```bash
 # Check information about all commands
 cargo run -- help
@@ -556,80 +558,87 @@ cargo run -- init --help
 ```
 
 1. **Initialize Migrations:**
+
    ```bash
    cargo run -- init --name "initial_migration" -r
    ```
-   Initializes the migrations directory with a reversible migration named "initial_migration". 
+
+   Initializes the migrations directory with a reversible migration named "initial_migration".
    Omit the -r flag for unidirectional migrations.
 
 2. **Generate Migrations:**
+
    ```bash
    cargo run -- gen --name "add_users_table"
    ```
+
    Generates a new migration file named "add_users_table".
    The migration type (reversible or non-reversible) is automatically detected based on the initial setup.
 
 3. **Apply Migrations Up:**
    Various strategies for applying migrations, including applying till latest, by number, or till a specified migration.
-   
+
    ```bash
    # Applies all pending till latest by default
    cargo run -- up
-   
+
    # Applies all pending till latest
    cargo run -- up -l
-   
+
    # Applies by the number specified
    cargo run -- up -n 5
    cargo run -- up --number 5
-   
+
    # Applies till specified migration
    cargo run -- up -t "20240107015727114_create_first.up.surql"
    cargo run -- up --till "20240107015727114_create_first.up.surql"
    ```
 
 4. **Rollback Migrations:**
-    Options to rollback migrations to a previous state, by number, till a specified migration, and an optional prune flag.
+   Options to rollback migrations to a previous state, by number, till a specified migration, and an optional prune flag.
 
    ```bash
    # Rollback migration to previous by default
    cargo run -- down
-   
+
    # Rollback all pending till previous
    cargo run -- down --previous
-   
+
    # Rollback by the number specified
    cargo run -- down -n 5
    cargo run -- down --number 5
-   
+
    # Rollback till specified migration
    cargo run -- down -t "20240107015727114_create_first.up.surql"
    cargo run -- down --till "20240107015727114_create_first.up.surql"
 
-   # In addition, you can use the --prune flag to delete local migration 
+   # In addition, you can use the --prune flag to delete local migration
    # files after rolling back. This can be useful in development for rapid changes.
    cargo run -- down -n 5 --prune
    ```
+
    Rolls back the last applied migration.
 
 5. **Reset Migrations:**
-    Resets and initializes a new reversible migration named "initial_migration". Omit -r for unidirectional migrations.
-   
+   Resets and initializes a new reversible migration named "initial_migration". Omit -r for unidirectional migrations.
+
    ```bash
    cargo run -- reset --name "initial_migration" -r
    ```
 
 6. **Prune Migrations:**
-    Removes unapplied migration files.
+   Removes unapplied migration files.
 
    ```bash
    # List pending migrations by default
    cargo run -- prune
    ```
+
    Prune all pending unapplied migrations.
 
 7. **List Migrations:**
-    Lists migrations based on their status (all, pending, applied).
+   Lists migrations based on their status (all, pending, applied).
+
    ```bash
    # List pending migrations by default
    cargo run -- ls
@@ -640,7 +649,7 @@ cargo run -- init --help
 
    # List pending migrations
    cargo run -- list --status pending
-   
+
    # List applied migrations
    cargo run -- list --status applied
    ```
@@ -650,18 +659,23 @@ cargo run -- init --help
 Detailed instructions for customizing migration processes, including specifying a custom migration directory, enabling verbose output, and configuring database connections.
 
 1. **Custom Migration Directory:**
+
    ```bash
    cargo run -- init --name "initial_migration" --dir "custom_migrations" -r
    ```
+
    Initializes migrations in a custom directory named "custom_migrations".
 
 2. **Verbose Output:**
+
    ```bash
    cargo run -- up -vvv
    ```
+
    Runs migrations with 3 levels verbose output.
 
 3. **Database Connection Configuration:**
+
    - URL: `ws://localhost:8000`
    - Database Name: `test`
    - Namespace: `test`
@@ -671,10 +685,11 @@ Detailed instructions for customizing migration processes, including specifying 
    ```bash
    cargo run -- up --url "ws://localhost:8000" --db "mydb" --ns "myns" --user "username" --pass "password"
    ```
+
    Connects to the specified SurrealDB instance with custom credentials and applies migrations.
 
    Other supported urls types include:
-    ```bash
+   `bash
     - ws://localhost:8000
     - wss://cloud.example.com
     - http://localhost:8000
@@ -686,11 +701,11 @@ Detailed instructions for customizing migration processes, including specifying 
     - indxdb://MyDatabase
     - tikv://localhost:2379
     - fdb://fdb.cluster
-    ```
-This configuration enables the CLI to connect to different database backends including WebSocket, HTTP(S), In-Memory, File-Backend, and more.
-
+    `
+   This configuration enables the CLI to connect to different database backends including WebSocket, HTTP(S), In-Memory, File-Backend, and more.
 
 ### Embedded Migrations
+
 Embedding migrations within the binary for runtime access.
 
 ```rust
@@ -724,6 +739,10 @@ MIGRATIONS_TWO_WAY
 This concludes the basic usage and features of the Surreal ORM library. You can
 explore more advanced features and methods in the API documentation and official book. If you have
 any further questions or need assistance, feel free to reach out at oyelowo.oss@gmail.com or discord.
+
+**© Oyelowo Oyedayo**
+
+**Email: oyelowo.oss@gmail.com**
 
 ## Development: Convention
 
