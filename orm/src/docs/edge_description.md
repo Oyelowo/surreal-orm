@@ -12,20 +12,20 @@ Here's a detailed example:
 ```rust, ignore
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "alien")]
+#[orm(table = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
 
     // This is a read-only field
-    #[surreal_orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
+    #[orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
     #[serde(skip_serializing, default)]
     pub planets_to_visit: Relate<Planet>,
 }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "planet")]
+#[orm(table = "planet")]
 pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub population: u64,
@@ -34,7 +34,7 @@ pub struct Planet {
 // Visits
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "visits")]
+#[orm(table = "visits")]
 pub struct Visits<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
@@ -54,7 +54,7 @@ This indirect relationship is defined by the `Relate` annotation on the
 `planets_to_visit` field in the `Alien` Node.
 
 The
-`#[surreal_orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]`
+`#[orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]`
 attribute on the `planets_to_visit` field in the `Alien` Node tells Surreal that
 this field represents the `Planet` Nodes that are connected to the `Alien` Node
 via the `AlienVisitsPlanet` Edge. The `connection = "->visits->planet"` part

@@ -35,25 +35,25 @@ use quote::quote;
 use surreal_derive_helpers::utilities::{PickedMeta, TableDeriveAttributesPickable};
 use syn::parse_macro_input;
 
-#[proc_macro_derive(Node, attributes(surreal_orm))]
+#[proc_macro_derive(Node, attributes(orm))]
 pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
     #[allow(clippy::all)]
     models::node::generate_fields_getter_trait(input)
 }
 
-#[proc_macro_derive(Edge, attributes(surreal_orm))]
+#[proc_macro_derive(Edge, attributes(orm))]
 pub fn surreal_edge_trait_derive(input: TokenStream) -> TokenStream {
     #[allow(clippy::all)]
     models::edge::generate_fields_getter_trait(input)
 }
 
-#[proc_macro_derive(Object, attributes(surreal_orm))]
+#[proc_macro_derive(Object, attributes(orm))]
 pub fn surreal_object_trait_derive(input: TokenStream) -> TokenStream {
     #[allow(clippy::all)]
     models::object::generate_fields_getter_trait(input)
 }
 
-#[proc_macro_derive(TableResources, attributes(surreal_orm))]
+#[proc_macro_derive(TableResources, attributes(orm))]
 pub fn surreal_table_resources_derive(input: TokenStream) -> TokenStream {
     #[allow(clippy::all)]
     migrations::table::generate_table_resources_trait(input)

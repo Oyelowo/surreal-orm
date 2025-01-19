@@ -7,19 +7,19 @@ use surreal_query_builder::assert_not;
 fn test_node_trait_derive() {
     let input = quote!(
         #[derive(Node)]
-        #[surreal_orm(table = "student", drop, schemafull, permissions = perm)]
+        #[orm(table = "student", drop, schemafull, permissions = perm)]
         pub struct Student {
             id: SurrealSimpleId<Self>,
             first_name: String,
 
-            #[surreal_orm(link_one = Book)]
+            #[orm(link_one = Book)]
             course: LinkOne<Book>,
 
-            #[surreal_orm(link_many = Book)]
+            #[orm(link_many = Book)]
             #[serde(rename = "lowo")]
             all_semester_courses: LinkMany<Book>,
 
-            #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
+            #[orm(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
             #[serde(skip_serializing, default)]
             written_blogs: Relate<Blog>,
         }
@@ -58,19 +58,19 @@ fn test_relate_field_has_serde_skip_serializing_but_not_attribute(
 
     let input = quote!(
         #[derive(Node, Serialize, Deserialize, Debug, Clone)]
-        #[surreal_orm(table = student)]
+        #[orm(table = student)]
         pub struct Student {
             id: SurrealSimpleId<Self>,
             first_name: String,
 
-            #[surreal_orm(link_one = Book)]
+            #[orm(link_one = Book)]
             course: LinkOne<Book>,
 
-            #[surreal_orm(link_many = Book)]
+            #[orm(link_many = Book)]
             #[serde(rename = "lowo")]
             all_semester_courses: LinkMany<Book>,
 
-            #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
+            #[orm(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
             #[serde(#serde_attr_for_relate)]
             written_blogs: Relate<Blog>,
         }
@@ -118,22 +118,22 @@ fn test_relate_field_has_serde_skip_serializing_but_not_attribute(
 fn test_edge_trait_derive() {
     let input = quote!(
         #[derive(Edge)]
-        #[surreal_orm(table = writes, drop, schemafull, permissions = perm)]
+        #[orm(table = writes, drop, schemafull, permissions = perm)]
         pub struct Writes<In, Out> {
             id: SurrealSimpleId<Self>,
 
             duration_of_write: Duration,
 
-            #[surreal_orm(link_one = In)]
+            #[orm(link_one = In)]
             r#in: LinkOne<In>,
 
-            #[surreal_orm(link_one = Out)]
+            #[orm(link_one = Out)]
             out: LinkOne<Out>,
 
-            #[surreal_orm(link_one = Book)]
+            #[orm(link_one = Book)]
             course: LinkOne<Book>,
 
-            #[surreal_orm(link_many = Book)]
+            #[orm(link_many = Book)]
             field_nother: LinkMany<Book>,
         }
     );

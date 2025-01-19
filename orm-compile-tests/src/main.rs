@@ -19,10 +19,10 @@ mod check1 {
 
     #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = student)]
+    #[orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(ty = int, define = define_field_fn())]
+        #[orm(ty = int, define = define_field_fn())]
         age: u8,
     }
 }
@@ -33,10 +33,10 @@ mod check2 {
 
     #[derive(Node, Serialize, Deserialize, Clone, Debug)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = student)]
+    #[orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(ty = "int", define = define_field_fn)]
+        #[orm(ty = "int", define = define_field_fn)]
         age: u8,
     }
 }
@@ -47,10 +47,10 @@ mod check3 {
 
     #[derive(Node, Serialize, Deserialize, Clone, Debug)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = student)]
+    #[orm(table = student)]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(
+        #[orm(
             ty = number,
             value = 18,
             assert = assert_fn,
@@ -58,7 +58,7 @@ mod check3 {
         )]
         age: u8,
 
-        #[surreal_orm(
+        #[orm(
             ty = string,
             value = "permissions_fn",
             assert = assert_fn(),

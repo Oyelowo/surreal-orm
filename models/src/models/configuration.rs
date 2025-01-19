@@ -14,7 +14,7 @@ use surreal_orm::Object;
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {
     length: u64,
-    #[surreal_orm(ty = "string")]
+    #[orm(ty = "string")]
     shape: Shape,
 }
 

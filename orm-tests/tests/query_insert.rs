@@ -1125,7 +1125,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealOrmResult<
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "strong_weapon")]
+#[orm(table = "strong_weapon")]
 pub struct StrongWeapon {
     pub id: SurrealSimpleId<Self>,
     pub name: String,

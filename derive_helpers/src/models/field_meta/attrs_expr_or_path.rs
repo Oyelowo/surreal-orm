@@ -55,7 +55,7 @@ impl FromMeta for ExprOrPath {
             // Lit::Str(str_lit) => {
             //     let value_str = str_lit.value();
             //     // just take the string directly as value the attribute is stringified i.e quoted
-            //     // e.g #[surreal_orm(value = "18")]
+            //     // e.g #[orm(value = "18")]
             //     Ok(ExprOrPath::Expr(syn::parse_str::<Expr>(&value_str)?))
             //
             //     // match syn::parse_str::<Path>(&value_str) {

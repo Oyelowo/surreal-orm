@@ -27,37 +27,37 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
 
     #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = "alien")]
+    #[orm(table = "alien")]
     pub struct Alien {
         pub id: SurrealSimpleId<Self>,
 
-        #[surreal_orm(link_self = "Alien")]
+        #[orm(link_self = "Alien")]
         pub ally: LinkSelf<Alien>,
 
-        #[surreal_orm(link_one = "Weapon")]
+        #[orm(link_one = "Weapon")]
         pub weapon: LinkOne<Weapon>,
 
         // Again, we dont have to provide the type attribute, it can auto detect
-        #[surreal_orm(link_many = "SpaceShip")]
+        #[orm(link_many = "SpaceShip")]
         pub space_ships: LinkMany<SpaceShip>,
 
         // This is a read only field
-        #[surreal_orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
+        #[orm(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
         #[serde(skip_serializing, default)]
         pub planets_to_visit: Relate<Planet>,
     }
 
     #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = "weapon")]
+    #[orm(table = "weapon")]
     pub struct Weapon {
         pub id: SurrealSimpleId<Self>,
         pub name: String,
         // pub strength: u64,
-        #[surreal_orm(type_ = "int")]
+        #[orm(type_ = "int")]
         pub strength: Strength,
         pub created: DateTime<Utc>,
-        #[surreal_orm(nest_object = "Rocket")]
+        #[orm(nest_object = "Rocket")]
         pub rocket: Rocket,
     }
     type Strength = u64;
@@ -65,7 +65,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
 
     #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
-    #[surreal_orm(table = "space_ship")]
+    #[orm(table = "space_ship")]
     pub struct SpaceShip {
         pub id: SurrealId<Self, String>,
         pub name: String,

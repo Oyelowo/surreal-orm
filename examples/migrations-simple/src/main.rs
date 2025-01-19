@@ -2,11 +2,11 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "animal", schemafull)]
+#[orm(table = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    // #[surreal_orm(old_name = "field_old_name")] // Comment this line out to carry out a renaming operation
+    // #[orm(old_name = "field_old_name")] // Comment this line out to carry out a renaming operation
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,
@@ -41,7 +41,7 @@ impl TableResources for Animal {
 
 #[derive(Edge, TableResources, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "eats", schemafull)]
+#[orm(table = "eats", schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]

@@ -19,19 +19,19 @@ use super::*;
 
 // #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 // #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table = "company")]
+// #[orm(table = "company")]
 // pub struct Company<'a, 'b: 'a, T, U: Clone + Default> {
 //     pub id: SurrealSimpleId<Self>,
 //     pub name: &'b T, // &'b T RawField
 //     pub moniker: &'a Somestuff<T, U>, // &'a Somestuff<T, U> RawFieldType
-//     #[surreal_orm(link_self = Self<...>)]
+//     #[orm(link_self = Self<...>)]
 //     pub branch: LinkSelf<Self<...>>, // user<'a, t>> rawfieldtype, linkrustfieldtype
-//     #[surreal_orm(link_many = user<'a, t>)]
+//     #[orm(link_many = user<'a, t>)]
 //     pub users: LinkMany<user<'a, t>>, // user<'a, t>> rawfieldtype, linkrustfieldtype
 //     // impl Company<'a, 'b, T, U> {
 //     //    pub fn users(&self) -> User<'a, T> { }
 //
-//     #[surreal_orm(relate(model = "CompanyLikeUser<'a, 'b, T, U>", connection = "->like->user"))]
+//     #[orm(relate(model = "CompanyLikeUser<'a, 'b, T, U>", connection = "->like->user"))]
 //     pub devs: RelatedUser<'a, T, U>>, // RawFieldType, EdgeFieldType, DestinationFieldType
 //     // pub devs: Relate<User<T>>,
 // }

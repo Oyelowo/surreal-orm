@@ -75,7 +75,7 @@ other than the snake case version, you need to add the attribute -
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table = "student_test")]
+#[orm(table = "student_test")]
 pub struct StudentTest {
     id: SurrealSimpleId<Self>,
 }
@@ -94,7 +94,7 @@ inline expression or an invoked external function.
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table = "student_test_4", as_ = "select(All).from(Student::table())", define = "define_student()")]
+#[orm(table = "student_test_4", as_ = "select(All).from(Student::table())", define = "define_student()")]
 pub struct StudentTest4 {
     id: SurrealSimpleId<Self>,
 }
@@ -107,7 +107,7 @@ define the table:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table = "student_test_7", define_fn = "define_student")]
+#[orm(table = "student_test_7", define_fn = "define_student")]
 pub struct StudentTest7 {
     id: SurrealSimpleId<Self>,
 }
@@ -122,7 +122,7 @@ passed in:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table = "student_test_5", permissions = "student_permissions()")]
+#[orm(table = "student_test_5", permissions = "student_permissions()")]
 pub struct StudentTest5 {
     id: SurrealSimpleId<Self>,
 }
@@ -147,7 +147,7 @@ and checks enforced by the ORM to avoid pitfalls:
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table = "student_test_6", define_fn = "define_student", define = "define_student()")]
+#[orm(table = "student_test_6", define_fn = "define_student", define = "define_student()")]
 pub struct StudentTest6 {
     id: SurrealSimpleId<Self>,
 }

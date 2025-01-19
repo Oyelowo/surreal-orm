@@ -20,7 +20,7 @@ use crate::*;
 // #[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 // #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table = "migration", schemafull)]
+// #[orm(table = "migration", schemafull)]
 pub struct Migration {
     // pub id: SurrealId<Self, String>,
     pub id: Thing,

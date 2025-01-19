@@ -12,7 +12,7 @@ use std::ops::Deref;
 use crate::models::*;
 
 // #[derive(Debug, FromDeriveInput)]
-// #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
+// #[darling(attributes(orm, serde), forward_attrs(allow, doc, cfg))]
 // pub struct FieldsGetterOpts {
 //     ident: syn::Ident,
 //     attrs: Vec<syn::Attribute>,
@@ -32,7 +32,7 @@ use crate::models::*;
 // }
 
 #[derive(Clone, Debug, FromDeriveInput)]
-#[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct EdgeToken(pub TableDeriveAttributes);
 
 impl Deref for EdgeToken {

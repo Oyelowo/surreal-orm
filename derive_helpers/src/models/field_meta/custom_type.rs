@@ -280,7 +280,7 @@ impl CustomType {
     // These are usually specified using the link_one, link_self
     // and link_many and relate attributes.
     // e.g
-    // #[surreal_orm(link_one = User<'a, T, u32>)]
+    // #[orm(link_one = User<'a, T, u32>)]
     // student: LinkOne<User<'a, T, u32>
     pub fn get_generics_from_current_struct(
         &self,

@@ -37,20 +37,20 @@ pub struct Person {
 #[allow(clippy::type_complexity)]
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "company")]
+#[orm(table = "company")]
 struct Company {
     id: SurrealId<Self, i32>,
     name: String,
     founded: chrono::DateTime<chrono::Utc>,
 
-    #[surreal_orm(nest_array = Person)]
+    #[orm(nest_array = Person)]
     founders: Vec<Person>,
 
-    // #[surreal_orm(nest_array = "Person", ty = "array<array<object>>")]
-    #[surreal_orm(nest_array = Person)]
+    // #[orm(nest_array = "Person", ty = "array<array<object>>")]
+    #[orm(nest_array = Person)]
     founders_multiple_nesting: Vec<Vec<Person>>,
 
-    #[surreal_orm(nest_array = Person)]
+    #[orm(nest_array = Person)]
     founders_10: Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
 
     tags: Vec<String>,
@@ -60,24 +60,24 @@ struct Company {
 #[allow(clippy::type_complexity)]
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = company_2_for_testing)]
+#[orm(table = company_2_for_testing)]
 struct Company2ForTesting {
     id: SurrealId<Self, i32>,
     name: String,
     founded: chrono::DateTime<chrono::Utc>,
 
-    #[surreal_orm(nest_array = "Person")]
+    #[orm(nest_array = "Person")]
     founder1: Person,
 
-    #[surreal_orm(nest_array = "Person")]
+    #[orm(nest_array = "Person")]
     // founders: Vec<Person>,
     founders: [Person; 3],
 
-    // #[surreal_orm(nest_array = "Person", ty = "array<array<object>>")]
-    #[surreal_orm(nest_array = "Person")]
+    // #[orm(nest_array = "Person", ty = "array<array<object>>")]
+    #[orm(nest_array = "Person")]
     founders_multiple_nesting: Vec<[Person; 28]>,
 
-    #[surreal_orm(nest_array = "Person")]
+    #[orm(nest_array = "Person")]
     founders_10: Vec<Vec<Vec<Vec<Option<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
 
     tags: Vec<String>,
@@ -86,12 +86,12 @@ struct Company2ForTesting {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "gen_z_company")]
+#[orm(table = "gen_z_company")]
 struct GenZCompany {
     id: SurrealSimpleId<Self>,
     name: String,
     founded: chrono::DateTime<chrono::Utc>,
-    #[surreal_orm(nest_array = "Person")]
+    #[orm(nest_array = "Person")]
     founders: Vec<Person>,
     tags: Vec<String>,
     home: geo::Point,
@@ -99,7 +99,7 @@ struct GenZCompany {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "test_point")]
+#[orm(table = "test_point")]
 struct TestPoint {
     id: SurrealId<Self, i32>,
     home_point: geo::Point,
@@ -107,7 +107,7 @@ struct TestPoint {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "test_linestring")]
+#[orm(table = "test_linestring")]
 struct TestLinestring {
     id: SurrealId<Self, i32>,
     home_linestring: geo::LineString,
@@ -115,7 +115,7 @@ struct TestLinestring {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "test_polygon")]
+#[orm(table = "test_polygon")]
 struct TestPolygon {
     id: SurrealId<Self, i32>,
     home_polygon: geo::Polygon,
@@ -123,7 +123,7 @@ struct TestPolygon {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "test_multilinestring")]
+#[orm(table = "test_multilinestring")]
 struct TestMultilinestring {
     id: SurrealId<Self, i32>,
     home_multilinestring: geo::MultiLineString,
@@ -131,7 +131,7 @@ struct TestMultilinestring {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "test_multipoint")]
+#[orm(table = "test_multipoint")]
 struct TestMultipoint {
     id: SurrealId<Self, i32>,
     home_multipoint: geo::MultiPoint,
@@ -139,7 +139,7 @@ struct TestMultipoint {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "test_multipolygon")]
+#[orm(table = "test_multipolygon")]
 struct TestMultipolygon {
     id: SurrealId<Self, i32>,
     home_multipolygon: geo::MultiPolygon,
@@ -147,7 +147,7 @@ struct TestMultipolygon {
 
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "test_geometrycollection")]
+#[orm(table = "test_geometrycollection")]
 pub struct TestGeometrycollection {
     id: SurrealId<Self, i32>,
     home_geometrycollection: Vec<GeometryCollection>,
@@ -172,7 +172,7 @@ impl From<GeometryCollection> for surrealdb::sql::Geometry {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = "book")]
+#[orm(table = "book")]
 pub struct Book {
     id: SurrealSimpleId<Self>,
     title: String,

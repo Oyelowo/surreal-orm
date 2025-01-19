@@ -200,7 +200,7 @@ impl Codegen<'_> {
             };
 
         // e.g for struct Student {
-        //                   #[surreal_orm(relate(mode="StudentWritesBook", connection="->writes->book"))]
+        //                   #[orm(relate(mode="StudentWritesBook", connection="->writes->book"))]
         //                   fav_books: Relate<Book>
         //              }
         let home_node_type =

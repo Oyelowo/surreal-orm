@@ -36,7 +36,7 @@ impl StructIdent {
 }
 
 #[derive(Clone, Debug, FromDeriveInput)]
-#[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
     pub(crate) ident: Ident,
     // pub(crate) attrs: Vec<syn::Attribute>,

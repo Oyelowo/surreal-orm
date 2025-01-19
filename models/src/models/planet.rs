@@ -12,23 +12,23 @@ use surreal_orm::{Node, SurrealSimpleId};
 // Planet
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = planet)]
+#[orm(table = planet)]
 pub struct Planet<T: Clone + Serialize + surreal_orm::validators::Int + Default> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     // area: Polygon,
-    // #[surreal_orm(ty = "any")]
-    // #[surreal_orm(ty = "array")]
-    // #[surreal_orm(ty = "array", item_type = "int")]
-    // #[surreal_orm(ty = "array", item_type = "int")]
-    // #[surreal_orm(ty = "int")]
+    // #[orm(ty = "any")]
+    // #[orm(ty = "array")]
+    // #[orm(ty = "array", item_type = "int")]
+    // #[orm(ty = "array", item_type = "int")]
+    // #[orm(ty = "int")]
     // pub population: Population,
     // pub population: PopArray,
     // pub population: Vec<Population>,
     pub population: u64,
     pub created: DateTime<Utc>,
     pub tags: Vec<u64>,
-    #[surreal_orm(ty = "int")]
+    #[orm(ty = "int")]
     pub data: T,
 }
 
@@ -79,13 +79,13 @@ mod tests {
 }
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table = planet_x)]
+#[orm(table = planet_x)]
 pub struct PlanetX<T: Clone + Serialize + surreal_orm::validators::Int + Default> {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     pub population: u64,
     pub created: DateTime<Utc>,
     pub tags: Vec<u64>,
-    #[surreal_orm(ty = int)]
+    #[orm(ty = int)]
     pub data: T,
 }
