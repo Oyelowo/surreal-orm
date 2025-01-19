@@ -801,8 +801,8 @@ impl CustomType {
         field_receiver: &MyFieldReceiver,
         model_attributes: &ModelAttributes,
     ) -> bool {
-        let is_db_field = model_attributes.casing().map_or(false, |casing| {
-            field_receiver.db_field_name(&casing).map_or(false, |dfn| {
+        let is_db_field = model_attributes.casing().is_ok_and(|casing| {
+            field_receiver.db_field_name(&casing).is_ok_and(|dfn| {
                 dfn.is_id() || dfn.is_in_or_out_edge_node(&model_attributes.to_data_type())
             })
         });
@@ -822,8 +822,8 @@ impl CustomType {
         field_receiver: &MyFieldReceiver,
         model_attributes: &ModelAttributes,
     ) -> bool {
-        let is_db_field = model_attributes.casing().map_or(false, |casing| {
-            field_receiver.db_field_name(&casing).map_or(false, |dfn| {
+        let is_db_field = model_attributes.casing().is_ok_and(|casing| {
+            field_receiver.db_field_name(&casing).is_ok_and(|dfn| {
                 dfn.is_id() || dfn.is_in_or_out_edge_node(&model_attributes.to_data_type())
             })
         });

@@ -198,7 +198,7 @@ impl MyFieldReceiver {
         let explicit_ty_is_list = matches!(field_type, FieldType::Array(_item_ty, _));
         explicit_ty_is_list
             || self.ty().is_array()
-            || self.field_type_db.as_ref().map_or(false, |t| t.is_array())
+            || self.field_type_db.as_ref().is_some_and(|t| t.is_array())
             || self.link_many.is_some()
     }
 
@@ -210,7 +210,7 @@ impl MyFieldReceiver {
         let explicit_ty_is_list = matches!(field_type, FieldType::Set(_item_ty, _));
         explicit_ty_is_list
             || self.ty().is_set()
-            || self.field_type_db.as_ref().map_or(false, |t| t.is_set())
+            || self.field_type_db.as_ref().is_some_and(|t| t.is_set())
     }
 
     // TODO: Remove this?
@@ -223,7 +223,7 @@ impl MyFieldReceiver {
     //         matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
     //     explicit_ty_is_list
     //         || self.ty().is_list()
-    //         || self.field_type_db.as_ref().map_or(false, |t| t.is_list())
+    //         || self.field_type_db.as_ref().is_some_and(|t| t.is_list())
     //         || self.link_many.is_some()
     // }
 

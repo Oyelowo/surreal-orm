@@ -13,6 +13,6 @@ rustc-opts = ["--edition=2021"]
 
 [output.html]
 site-url = "/surreal_orm/"
-git-repository-url = "https://github.com/oyelowo/surream_orm"
+git-repository-url = "https://github.com/oyelowo/surreal_orm"
 default-theme = "dark"
 preferred-dark-theme = "ayu"
