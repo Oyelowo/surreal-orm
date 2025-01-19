@@ -99,9 +99,12 @@ mod tests {
     #[test]
     fn test_function_without_args() {
         let f2 = function!((), {
-        return [1, 2, 3].map(v => v * 10);
-    });
-        assert_eq!(f2.build(), "function() { return [1, 2, 3].map(v => v * 10); }");
+            return [1, 2, 3].map(v => v * 10);
+        });
+        assert_eq!(
+            f2.build(),
+            "function() { return [1, 2, 3].map(v => v * 10); }"
+        );
         assert_eq!(
             f2.to_raw().build(),
             "function() { return [1, 2, 3].map(v => v * 10); }"
@@ -159,8 +162,8 @@ mod tests {
         let id = Param::new("id");
 
         let f2 = function!((name, id), {
-        return [1, 2, 3].map(v => v * 10);
-    });
+            return [1, 2, 3].map(v => v * 10);
+        });
         assert_eq!(
             f2.build(),
             "function($name, $id) { return [1, 2, 3].map(v => v * 10); }"

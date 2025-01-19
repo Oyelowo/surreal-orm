@@ -12,16 +12,16 @@ struct Person<'a, T: 'a, U: 'a> {
 pick!(NewPersonWithUnusedTypeGenericsSkipped, Person<'a,_,_> as PersonPickable, [name, age]);
 pick!(NewPerson, Person<'a,T,U> as PersonPickable, [name, age]);
 
-pick!{
-    #[derive(Serialize)] 
-    NewPersonWithAttributes, Person<'a,_,_> as PersonPickable, 
+pick! {
+    #[derive(Serialize)]
+    NewPersonWithAttributes, Person<'a,_,_> as PersonPickable,
     [
         #[serde(rename = "name2")]
-        name, 
+        name,
         age,
         // #[serde(borrow)]
         // some
-    ] 
+    ]
 }
 
 // #[pick(OldPerson, [age, num])]
@@ -31,7 +31,6 @@ pick!{
 //     #[override]
 //     age: u32,
 // }
-
 
 fn main() {
     let person = Person {

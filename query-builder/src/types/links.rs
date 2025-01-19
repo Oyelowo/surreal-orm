@@ -121,8 +121,8 @@ macro_rules! impl_from_model_for_ref_type {
     };
 }
 
-// The original derive default adds addition default bounds to the 
-// generic type which is not wanted here as we can generate a 
+// The original derive default adds addition default bounds to the
+// generic type which is not wanted here as we can generate a
 // default without needing to know the wrapped type default.
 // Out default is either null or empty vec
 // With this, user does not have to implement default for the wrapped type
@@ -364,7 +364,6 @@ implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 /// derived from the edge referencing the foreign table.
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Relate<V: Node>(Vec<Reference<V>>);
-
 
 implement_custom_default_for_link!(Relate<V>);
 implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);

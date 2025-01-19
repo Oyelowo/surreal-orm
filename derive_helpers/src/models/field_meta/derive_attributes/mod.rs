@@ -4,10 +4,10 @@
  * Copyright (c) 2024 Oyelowo Oyedayo
  */
 
+pub mod attributes;
 mod db_field_types;
 mod generics;
 mod ident;
-pub mod attributes;
 
 use darling::FromField;
 use proc_macro2::Ident;

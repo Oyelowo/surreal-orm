@@ -24,7 +24,9 @@ impl<'a> Codegen<'a> {
         let field_receiver = self.field_receiver();
         let model_attributes = self.table_derive_attributes();
         let relation_type = field_receiver.to_relation_type(model_attributes);
-        Ok(relation_type.is_relate_graph() || field_receiver.skip_serializing || field_receiver.skip) 
+        Ok(relation_type.is_relate_graph()
+            || field_receiver.skip_serializing
+            || field_receiver.skip)
     }
 
     pub fn field_defintion_db(&self) -> ExtractorResult<Vec<DefineFieldStatementToken>> {

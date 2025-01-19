@@ -570,7 +570,8 @@ mod tests {
             TableDeriveAttributesPickable::from_derive_input(&input).unwrap();
 
         let expected = quote!(
-            #[allow(non_camel_case_types, unused)]pub trait PersonPickable {
+            #[allow(non_camel_case_types, unused)]
+            pub trait PersonPickable {
                 type firstName;
                 type simple_rename;
                 type serialized_renmed_age;

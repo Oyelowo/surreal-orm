@@ -29,13 +29,11 @@ extern crate proc_macro;
 mod migrations;
 mod models;
 
-
 use darling::FromDeriveInput;
 use proc_macro::TokenStream;
-use surreal_derive_helpers::utilities::{PickedMeta, TableDeriveAttributesPickable};
 use quote::quote;
+use surreal_derive_helpers::utilities::{PickedMeta, TableDeriveAttributesPickable};
 use syn::parse_macro_input;
-
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
 pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
@@ -65,9 +63,7 @@ pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),
     };
     quote!(#output).into()
-    
 }
-
 
 /// ```rust
 /// #[derive(Pickable, Debug, Serialize)]
@@ -82,13 +78,13 @@ pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
 /// pick!(NewPerson, Person<'a,T,U> as PersonPickable, [name, age]);
 ///
 /// pick!{
-///     #[derive(Serialize)] 
-///     NewPersonWithAttributes, Person<'a,_,_> as PersonPickable, 
+///     #[derive(Serialize)]
+///     NewPersonWithAttributes, Person<'a,_,_> as PersonPickable,
 ///     [
 ///         #[serde(rename = "name2")]
-///         name, 
+///         name,
 ///         age,
-///     ] 
+///     ]
 /// }
 ///
 /// fn main() {
@@ -126,7 +122,7 @@ pub fn surreal_pickable_resources_derive(input: TokenStream) -> TokenStream {
 pub fn pick(input: TokenStream) -> TokenStream {
     let output = match syn::parse2::<PickedMeta>(input.into()) {
         Ok(out) => out,
-        Err(err) => return err.to_compile_error().into()
+        Err(err) => return err.to_compile_error().into(),
     };
 
     quote!(#output).into()

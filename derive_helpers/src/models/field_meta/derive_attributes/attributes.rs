@@ -10,7 +10,7 @@ impl MyFieldReceiver {
     pub fn validate_attributes(&self) -> ExtractorResult<()> {
         if self.relate.is_some() {
             let has_required_attributes = self.skip_serializing && self.default;
-            
+
             if !has_required_attributes {
                 let field_name = self.ident()?.to_string();
                 return Err(syn::Error::new(
