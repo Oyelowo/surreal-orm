@@ -1,0 +1,450 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Array functions - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="array-functions"><a class="header" href="#array-functions">Array Functions</a></h1>
+<p>Surreal ORM provides a set of array functions that allow you to manipulate and
+perform operations on arrays. These functions are designed to work with arrays
+of various types, including vectors, fields, and parameters. This documentation
+covers the usage and examples of the array functions available in Surreal ORM.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<!--toc:start-->
+<ul>
+<li><a href="#array-functions">Array Functions</a>
+<ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#append">Append</a></li>
+<li><a href="#combine">Combine</a></li>
+<li><a href="#concat">Concat</a></li>
+<li><a href="#union">Union</a></li>
+<li><a href="#difference">Difference</a></li>
+<li><a href="#intersect">Intersect</a></li>
+<li><a href="#complement">Complement</a></li>
+<li><a href="#distinct">Distinct</a></li>
+<li><a href="#flatten">Flatten</a></li>
+<li><a href="#group">Group</a></li>
+<li><a href="#insert">Insert</a></li>
+<li><a href="#len">Len</a></li>
+<li><a href="#pop">Pop</a></li>
+<li><a href="#prepend">Prepend</a></li>
+<li><a href="#push">Push</a></li>
+<li><a href="#remove">Remove</a></li>
+<li><a href="#reverse">Reverse</a></li>
+<li><a href="#sort">Sort</a></li>
+<li><a href="#asc-and-desc">Asc and Desc</a></li>
+</ul>
+<!--toc:end-->
+</li>
+</ul>
+<h2 id="append"><a class="header" href="#append">Append</a></h2>
+<p>The <code>append</code> function appends a value to the end of an array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::append!(vec![1, 2, 3, 4, 5], 6);
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>append</code> function to add values to an existing array.</p>
+<h2 id="combine"><a class="header" href="#combine">Combine</a></h2>
+<p>The <code>combine</code> function combines all values from two arrays together, returning
+an array of arrays.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::combine!(vec![1, 2, 3], vec![4, 5, 6]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>combine</code> function provides the same functionality as the <code>append</code> function
+but can work with two arrays instead of appending a single value.</p>
+<h2 id="concat"><a class="header" href="#concat">Concat</a></h2>
+<p>The <code>concat</code> function merges two arrays together, returning an array that may
+contain duplicate values.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::concat!(vec![1, 2, 3], vec![4, 5, 6]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>concat</code> function provides the same functionality as the <code>combine</code> function
+but does not remove duplicate values from the resulting array.</p>
+<h2 id="union"><a class="header" href="#union">Union</a></h2>
+<p>The <code>union</code> function combines two arrays together, removing duplicate values,
+and returning a single array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::union!(vec![1, 2, 3], vec![4, 5, 6]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>union</code> function provides the same functionality as the <code>concat</code> function
+but removes duplicate values from the resulting array.</p>
+<h2 id="difference"><a class="header" href="#difference">Difference</a></h2>
+<p>The <code>difference</code> function determines the difference between two arrays,
+returning a single array containing items that are not in both arrays.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::difference!(vec![1, 2, 3], vec![4, 5, 6]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>difference</code> function provides the same functionality</p>
+<p>as the previous functions but returns only the unique values that are present in
+one array but not in the other.</p>
+<h2 id="intersect"><a class="header" href="#intersect">Intersect</a></h2>
+<p>The <code>intersect</code> function calculates the values that intersect two arrays,
+returning a single array containing the values present in both arrays.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::intersect!(vec![1, 2, 3], vec![4, 5, 6]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>intersect</code> function provides the same functionality as the previous
+functions but returns only the values that are common between the two arrays.</p>
+<h2 id="complement"><a class="header" href="#complement">Complement</a></h2>
+<p>The <code>complement</code> function returns the complement of two arrays, returning a
+single array containing items that are not in the second array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::complement!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>complement</code> function provides the same functionality as the previous
+functions but returns only the values that are present in the first array but
+not in the second array.</p>
+<h2 id="distinct"><a class="header" href="#distinct">Distinct</a></h2>
+<p>The <code>distinct</code> function calculates the unique values in an array, returning a
+single array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::distinct!(vec![1, 2, 3]);
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>distinct</code> function to obtain unique values from an array.</p>
+<h2 id="flatten"><a class="header" href="#flatten">Flatten</a></h2>
+<p>The <code>flatten</code> function flattens an array of arrays, returning a new array with
+all sub-array elements concatenated into it.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::flatten!(array![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6]]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>flatten</code> function provides the same functionality as the previous functions
+but flattens an array of arrays.</p>
+<h2 id="group"><a class="header" href="#group">Group</a></h2>
+<p>The <code>group</code> function flattens and returns the unique items in an array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::group!(array![1, 2, 3, 4, array![3, 5, 6], vec![2, 4, 5, 6], 7, 8, 8, 9]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>group</code> function provides the same functionality as the previous functions
+but returns only the unique items in the array.</p>
+<h2 id="insert"><a class="header" href="#insert">Insert</a></h2>
+<p>The <code>insert</code> function inserts a value into an array at a specific position.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::insert!(vec![1, 2, 3, 4], 5, 2);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>insert</code> function allows you to insert a value into an array at a specified
+index.</p>
+<h2 id="len"><a class="header" href="#len">Len</a></h2>
+<p>The <code>len</code> function calculates the length of an array, returning a number. This
+function includes all items when counting the number of items in the array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::len!(vec![1, 2, 3]);
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>len</code> function to calculate the length of an array.</p>
+<h2 id="pop"><a class="header" href="#pop">Pop</a></h2>
+<p>The <code>pop</code> function removes a value from the end of an array and returns it.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::pop!(vec![1, 2, 3, 4]);
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>pop</code> function to remove the last value from an array.</p>
+<h2 id="prepend"><a class="header" href="#prepend">Prepend</a></h2>
+<p>The <code>prepend</code> function prepends a value to the end of an array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::prepend!(vec![1, 2, 3, 4], 5);
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>prepend</code> function to add a value to the beginning of an array.</p>
+<h2 id="push"><a class="header" href="#push">Push</a></h2>
+<p>The <code>push</code> function appends a value to the end of an array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::push!(vec![1, 2, 3, 4], 5);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>push</code> function provides the same functionality as the <code>prepend</code> function
+but appends the value to the end of the array instead of the beginning.</p>
+<h2 id="remove"><a class="header" href="#remove">Remove</a></h2>
+<p>The <code>remove</code> function removes an item from a specific position in an array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::remove!(vec![1, 2, 3, 4, 5], 2);
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>remove</code> function to delete an item from a specific position in
+an array.</p>
+<h2 id="reverse"><a class="header" href="#reverse">Reverse</a></h2>
+<p>The <code>reverse</code> function reverses the order of the elements in an array.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::reverse!(vec![1, 2, 3, 4, 5]);
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>reverse</code> function to reverse the order of elements in an array.</p>
+<h2 id="sort"><a class="header" href="#sort">Sort</a></h2>
+<p>The <code>sort</code> function sorts an array in ascending or descending order.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result = array::sort!(vec![3, 1, 2], "asc");
+<span class="boring">}</span></code></pre></pre>
+<p>You can use the <code>sort</code> function to sort an array in ascending or descending
+order.</p>
+<p>The <code>sort</code> function also provides the following ordering options:</p>
+<ul>
+<li><code>"asc"</code>: Sorts the array in ascending order.</li>
+<li><code>"desc"</code>: Sorts the array in descending order.</li>
+<li><code>false</code>: Does not sort the array.</li>
+</ul>
+<p>You can use the <code>sort</code> function with different ordering options to sort an array
+accordingly.</p>
+<h2 id="asc-and-desc"><a class="header" href="#asc-and-desc">Asc and Desc</a></h2>
+<p>The <code>asc</code> and <code>desc</code> functions are shorthand convenience functions for the
+<code>sort</code> function. They sort values in an array in ascending or descending order,
+respectively.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{functions::array, *};
+
+let result_asc = array::sort::asc!(vec![3, 1, 2]);
+let result_desc = array::sort::desc!(vec![3, 1, 2]);
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>asc</code> and <code>desc</code> functions provide the same functionality as the <code>sort</code>
+function but with a more concise syntax.</p>
+<p>These are the array functions available in Surreal ORM. Use them to perform
+various operations on arrays and manipulate array data effectively.</p>
+<p>That concludes the documentation for the array functions in Surreal ORM. Refer
+to this documentation whenever you need to use array functions in your code.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../functions/overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../functions/count.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../functions/overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../functions/count.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

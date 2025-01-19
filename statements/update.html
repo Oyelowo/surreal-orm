@@ -1,0 +1,581 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Update - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="update-statement"><a class="header" href="#update-statement">Update Statement</a></h1>
+<p>The <code>update</code> statement in Surreal ORM allows you to modify existing records in
+your database. It provides various operations to update fields and perform
+incremental changes to the data. This documentation provides an overview of the
+syntax and usage of the <code>update</code> statement, including the use of the <code>object!</code>
+and <code>object_partial!</code> macros for setting values.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#syntax">Syntax</a></li>
+<li><a href="#using-the-cond!-macro">Using the <code>cond!</code> Macro</a></li>
+<li><a href="#examples">Examples</a>
+<ul>
+<li><a href="#updating-a-single-object">Updating a Single Object</a>
+<ul>
+<li><a href="#using-the-update-content">Using the Update Content</a></li>
+<li><a href="#using-the-object-and-object_partial-macros-with-set-operation">Using the object! and object_partial! Macros with Set Operation</a></li>
+<li><a href="#using-the-set-operation">Using the Set Operation</a></li>
+<li><a href="#using-the-merge-operation">Using the Merge Operation</a></li>
+<li><a href="#using-the-replace-operation">Using the Replace Operation</a></li>
+<li><a href="#using-the-patch-operation">Using the Patch Operation</a>
+<ul>
+<li><a href="#using-the-patch-add-operation">Using the Patch Add Operation</a></li>
+<li><a href="#using-the-patch-replace-operation">Using the Patch Replace Operation</a></li>
+<li><a href="#using-the-patch-remove-operation">Using the Patch Remove Operation</a></li>
+<li><a href="#using-the-patch-change-operation">Using the Patch Change Operation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#updating-multiple-objects">Updating Multiple Objects</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="syntax"><a class="header" href="#syntax">Syntax</a></h2>
+<p>The basic syntax of the <code>update</code> statement is as follows:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>update::&lt;Type&gt;(id)
+    .content(content)
+    .merge(merge)
+    .replace(replace)
+    .set(settables)
+    .patch(patch_op)
+    .where_(condition)
+    .return_type(return_type)
+    .timeout(duration)
+    .parallel();
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>update</code> statement supports the following methods:</p>
+<ul>
+<li><code>.content(content)</code>: Sets the content of the update statement.</li>
+<li><code>.merge(merge)</code>: Performs a merge operation to update specific fields.</li>
+<li><code>.replace(replace)</code>: Replaces the entire object with a new one.</li>
+<li><code>.set(settables)</code>: Sets the values of the fields to be updated.</li>
+<li><code>.patch(patch_op)</code>: Applies patch operations to the record.</li>
+<li><code>.where_(condition)</code>: Adds a condition to the update statement.</li>
+<li><code>.return_type(return_type)</code>: Specifies the desired return type for the query.</li>
+<li><code>.timeout(duration)</code>: Sets the timeout duration for the query.</li>
+<li><code>.parallel()</code>: Executes the query in parallel.</li>
+</ul>
+<p>Note: Only one of the .content(), .merge(), .replace(), .set(), or .patch()
+methods can be used at a time.</p>
+<h2 id="using-the-cond-macro"><a class="header" href="#using-the-cond-macro">Using the <code>cond!</code> Macro</a></h2>
+<p>The <code>cond!</code> macro provides a concise way to define conditions for update
+operations. It enhances code readability while ensuring type safety.</p>
+<p>Example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let filter = cond!((strength &gt; 5) &amp;&amp; (strength &lt; 15));
+<span class="boring">}</span></code></pre></pre>
+<p>By using the <code>cond!</code> macro, you can define conditions efficiently and
+expressively for the <code>update</code> statement.</p>
+<p>For a more in-depth explanation and advanced usage of the <code>cond!</code> macro,
+<a href="#helper-macros">refer to the dedicated chapter on helper macros</a>.</p>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="updating-a-single-object"><a class="header" href="#updating-a-single-object">Updating a Single Object</a></h3>
+<h4 id="using-the-update-content"><a class="header" href="#using-the-update-content">Using the Update Content</a></h4>
+<p>The <code>update</code> statement also supports the <code>content</code> method, which allows you to
+specify the updated fields using a separate object. This provides a convenient
+way to define the fields to be updated.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let weapon_to_update = Weapon {
+    name: "Oyelowo".to_string(),
+    created: Utc::now(),
+    strength: 1000,
+    ..Default::default()
+};
+
+let updated_weapon = update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .content(weapon_to_update)
+    .get_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>content</code> method is used to specify the fields to be
+updated in the <code>created_weapon</code> object using the <code>weapon_to_update</code> object.</p>
+<h4 id="using-the-object-and-object_partial-macros-with-set-operation"><a class="header" href="#using-the-object-and-object_partial-macros-with-set-operation">Using the <code>object!</code> and <code>object_partial!</code> Macros with Set Operation</a></h4>
+<p>The <code>set</code> method of the <code>update</code> statement supports the <code>object!</code> and
+<code>object_partial!</code> macros, providing a type-safe and concise way to specify
+values when updating records. These macros offer several advantages:</p>
+<ol>
+<li><strong>Type-safety</strong>: Both macros ensure that all fields provided belong to the
+specified struct.</li>
+<li><strong>Parameters and Fields</strong>: They allow the use of <code>parameters</code> or <code>fields</code> as
+values, providing flexibility in constructing dynamic update statements.</li>
+<li><strong>Use within Transactions</strong>: Especially within the <code>block!</code> macro for
+transactions, these macros can be invaluable as they allow dynamic field and
+parameter manipulations based on transactional logic.</li>
+</ol>
+<p>Here's an example showcasing the usage of the <code>object_partial!</code> macro with the
+<code>set</code> method:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+assert_eq!(created_weapon.name, "Laser");
+assert_eq!(created_weapon.strength, 0);
+
+let ref id = created_weapon.clone().id;
+let weapon::Schema { strength, .. } = Weapon::schema();
+
+update::&lt;Weapon&gt;(id)
+    .set(object_partial!(Weapon { strength: 923u64 }))
+    .return_one(db.clone())
+    .await?;
+
+let selected: Option&lt;Weapon&gt; = select(All)
+    .from(Weapon::table())
+    .return_one(db.clone())
+    .await?;
+assert_eq!(selected.unwrap().strength, 923);
+<span class="boring">}</span></code></pre></pre>
+<p>In this example, the <code>object_partial!</code> macro is used with the <code>set</code> method to
+update the <code>strength</code> field of the <code>Weapon</code> object. This approach offers the
+advantages of type-safety and conciseness.</p>
+<p>Here's an example showcasing the usage of the <code>object!</code> macro with the <code>set</code>
+method:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let weapon::Schema { strength, name, .. } = Weapon::schema();
+
+update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .set(object!(Weapon {
+        strength: strength.increment_by(100u64),
+        name: "UpgradedWeapon".to_string()
+    }))
+    .return_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In this example, the <code>object!</code> macro is used with the <code>set</code> method to
+simultaneously set the <code>strength</code> field and rename the <code>Weapon</code>. The macro
+ensures that the fields provided belong to the <code>Weapon</code> struct, providing
+type-safety.</p>
+<p>The primary difference between <code>object!</code> and <code>object_partial!</code> is completeness:</p>
+<ul>
+<li>
+<p><strong><code>object!</code> Macro</strong>: This macro requires you to provide values for all fields
+of the struct. It's useful when you have values for all fields and want to
+ensure no fields are missed.</p>
+</li>
+<li>
+<p><strong><code>object_partial!</code> Macro</strong>: This allows for specifying only a subset of
+fields. It's especially useful when you only want to update specific fields
+without having to specify all of them.</p>
+</li>
+</ul>
+<p>In practice, you'll choose between them based on the update requirements. If
+you're updating all fields of a record and want to ensure none are missed,
+<code>object!</code> is preferable. If you're updating only certain fields,
+<code>object_partial!</code> offers a more concise approach.</p>
+<h4 id="using-the-set-operation"><a class="header" href="#using-the-set-operation">Using the Set Operation</a></h4>
+<p>The <code>update</code> statement also supports the <code>set</code> method, which allows you to
+perform 3 major kinds of updates including, overwriting a field with an
+<code>equal_to</code> method, <code>increment</code> and <code>decrement</code> method operations for numbers,
+<code>append</code> and <code>remove</code> methods for arrays. All the arguments to these methods are
+type-checked at compile- time to make sure they are valid for the respective
+fields</p>
+<ol>
+<li>Use set method for a single field</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let weapon_to_update = Weapon {
+    name: "Oyelowo".to_string(),
+    created: Utc::now(),
+    strength: 1000,
+    ..Default::default()
+};
+
+update::&lt;Weapon&gt;(weapon_to_update.id)
+    .set(strength.increment_by(5u64))
+    .run(db.clone())
+    .await?;
+
+// You can even pass the entire model instance as an argument
+update::&lt;Weapon&gt;(weapon_to_update)
+    .set(strength.increment_by(5u64))
+    .run(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<ol start="2">
+<li>Use set methods for updating multiple fields</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>update::&lt;Weapon&gt;(id)
+    .set([
+        strength.increment_by(5u64),
+        name.equal("Oyedayo"),
+    ])
+    .run(db.clone())
+    .await?;
+
+// In addition to array const `[T]`,you can also use a `vec!`.
+update::&lt;Weapon&gt;(id)
+    .set(vec![
+        strength.increment_by(5u64),
+        name.equal("Oyedayo"),
+    ])
+    .run(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>set</code> method is used to specify the fields to be
+updated in the <code>created_weapon</code> object using the <code>weapon_to_update</code> object.</p>
+<h4 id="using-the-merge-operation"><a class="header" href="#using-the-merge-operation">Using the Merge Operation</a></h4>
+<p>The <code>merge</code> operation allows you to update a single object by merging new values
+into the existing object. The new values overwrite the old ones, while fields
+not present in the new object are unaffected.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let weapon_to_update = Weapon {
+    name: "Oyelowo".to_string(),
+    created: Utc::now(),
+    strength: 1000,
+    ..Default::default()
+};
+
+let updated_weapon = update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .merge(weapon_to_update)
+    .get_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>merge</code> operation is used to update the
+<code>created_weapon</code> object with the fields from <code>weapon_to_update</code>. The result is
+stored in <code>updated_weapon</code>.</p>
+<h4 id="using-the-replace-operation"><a class="header" href="#using-the-replace-operation">Using the Replace Operation</a></h4>
+<p>The <code>replace</code> operation allows you to replace an existing object entirely with a
+new one. This operation removes all fields not present in the new object.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let weapon_to_replace = Weapon {
+    name: "Oyelowo".to_string(),
+    created: Utc::now(),
+    strength: 823,
+    ..Default::default()
+};
+
+let updated_weapon = update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .replace(weapon_to_replace)
+    .get_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>replace</code> operation replaces the <code>created_weapon</code>
+object with the fields from <code>weapon_to_replace</code>. The result is stored in
+<code>updated_weapon</code>.</p>
+<h4 id="using-the-patch-operation"><a class="header" href="#using-the-patch-operation">Using the Patch Operation</a></h4>
+<p>The <code>patch</code> operation allows you to perform detailed modifications on fields
+using methods such as <code>patch_change</code>, <code>patch_replace</code>, <code>patch_remove</code>, and
+<code>patch_add</code>. It enables incremental changes to string fields, replacing field
+values, removing fields, or adding new fields.</p>
+<h5 id="using-the-patch-add-operation"><a class="header" href="#using-the-patch-add-operation">Using the Patch Add Operation</a></h5>
+<p>The <code>patch_add</code> operation adds a new field to the object. It allows you to
+include additional fields during the update.</p>
+<ol>
+<li>Applying single patch</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let updated_weapon = update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .patch(nice.patch_add(true))
+    .get_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<ol start="2">
+<li>Applying multiple patches</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let ref _updated_weapon = update::&lt;WeaponOld&gt;(old_weapon.clone().id)
+    .patch([nice.patch_add(true), bunchOfOtherFields.patch_add(56)])
+    .return_one(db.clone())
+    .await;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>patch_add</code> operation adds the <code>nice</code> field with the
+value <code>true</code> to the <code>created_weapon</code> object.</p>
+<h5 id="using-the-patch-replace-operation"><a class="header" href="#using-the-patch-replace-operation">Using the Patch Replace Operation</a></h5>
+<p>The <code>patch_replace</code> operation replaces the value of a field with a new value. It
+allows you to update a field to a different value.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let updated_weapon = update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .patch(strength.patch_replace(34u64))
+    .get_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>patch_replace</code> operation replaces the value of the
+<code>strength</code> field in the <code>created_weapon</code> object with the specified value.</p>
+<h5 id="using-the-patch-remove-operation"><a class="header" href="#using-the-patch-remove-operation">Using the Patch Remove Operation</a></h5>
+<p>The <code>patch_remove</code> operation removes a field from the object entirely. This
+operation is destructive, and the field will no longer be available after the
+update. Make sure that the struct used here does not require that field to be
+present. You can create a copy of the existing struct but without the new field.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let updated_weapon = update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .patch(bunchOfOtherFields.patch_remove())
+    .get_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>patch_remove</code> operation removes the
+<code>bunchOfOtherFields</code> field from the <code>created_weapon</code> object.</p>
+<h5 id="using-the-patch-change-operation"><a class="header" href="#using-the-patch-change-operation">Using the Patch Change Operation</a></h5>
+<p>The <code>patch_change</code> operation modifies part of a string field using the diff
+format. It allows you to specify the changes to be applied to the field.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let updated_weapon = update::&lt;Weapon&gt;(created_weapon.clone().id)
+    .patch(name.patch_change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n"))
+    .get_one(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>patch_change</code> operation modifies the <code>name</code> field of
+the <code>created_weapon</code> object by changing "test" to "text".</p>
+<h3 id="updating-multiple-objects"><a class="header" href="#updating-multiple-objects">Updating Multiple Objects</a></h3>
+<p>To update multiple objects, you can use the <code>update</code> statement with a filter to
+select the objects to update.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let filter = cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
+
+let update_weapons_with_filter = update::&lt;Weapon&gt;(Weapon::table())
+    .content(Weapon {
+        name: "Oyelowo".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    })
+    .where_(filter)
+    .return_many(db.clone())
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+<p>In the above example, the <code>update</code> statement updates all <code>Weapon</code> objects that
+meet the specified filter condition with the new values.</p>
+<p>Please note that the above code snippets are for illustration purposes and may
+need to be adapted to your specific use case.</p>
+<p>You have now learned how to use the <code>update</code> statement to modify existing
+records in your SurrealDB database. Use the various operations and methods
+provided by the <code>update</code> statement to perform precise updates and incremental
+changes to your data.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../statements/create.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../statements/relate.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../statements/create.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../statements/relate.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

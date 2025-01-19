@@ -1,0 +1,537 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Select - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="surreal-orm-documentation"><a class="header" href="#surreal-orm-documentation">Surreal ORM Documentation</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#defining-data">Defining Your Data</a></li>
+<li><a href="#advanced-schema">Advanced Schema Definitions</a></li>
+<li><a href="#select-statements">Select Statements</a>
+<ul>
+<li><a href="#using-the-cond-macro">Using the cond! Macro</a></li>
+</ul>
+</li>
+<li><a href="#advanced-select-queries">Advanced Select Queries</a></li>
+<li><a href="#select-value-statements">Select Value Statements</a></li>
+<li><a href="#advanced-select-value-queries">Advanced Select Value Queries</a></li>
+<li><a href="#running-select-statements">Running Select Statements</a></li>
+<li><a href="#running-and-returning-from-a-select-statement">Running and Returning from a Select Statement</a></li>
+</ol>
+<p><a name="introduction"></a></p>
+<h2 id="1-introduction"><a class="header" href="#1-introduction">1. Introduction</a></h2>
+<p>This document focuses on defining models and using <code>select</code> and <code>select_value</code>
+statements for data retrieval.</p>
+<p><a name="defining-data"></a></p>
+<h2 id="2-defining-your-data"><a class="header" href="#2-defining-your-data">2. Defining Your Data</a></h2>
+<p>Start by defining a <code>User</code> struct representing a user in your application.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>extern crate surreal_orm;
+use surreal_orm::*;
+
+#[derive(Node, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+#[orm(table = "user")]
+pub struct User {
+    pub id: SurrealSimpleId&lt;Self&gt;,
+    pub account: String,
+    pub friend: String,
+}
+<span class="boring">}</span></code></pre></pre>
+<p><a name="advanced-schema"></a></p>
+<h2 id="3-advanced-schema-definitions"><a class="header" href="#3-advanced-schema-definitions">3. Advanced Schema Definitions</a></h2>
+<p>Surreal ORM supports more complex data types including links between different
+models. Here's a detailed example using a <code>Student</code> and a <code>Book</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Node, Serialize, Deserialize)]
+#[orm(table = "student")]
+pub struct Student {
+    id: SurrealSimpleId&lt;Self&gt;,
+    first_name: String,
+    last_name: String,
+    age: u8,
+
+    #[orm(link_self = "Student")]
+    best_friend: LinkSelf&lt;Student&gt;,
+
+    #[orm(link_one = "Book")]
+    fav_book: LinkOne&lt;Book&gt;,
+
+    #[orm(link_one = "Book")]
+    course: LinkOne&lt;Book&gt;,
+
+    #[orm(link_many = "Book")]
+    sem_courses: LinkMany&lt;Book&gt;,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[orm(table = "book")]
+pub struct Book {
+    id: SurrealSimpleId&lt;Self&gt;,
+    content: String,
+}
+<span class="boring">}</span></code></pre></pre>
+<p><a name="select-statements"></a></p>
+<h2 id="4-select-statements"><a class="header" href="#4-select-statements">4. Select Statements</a></h2>
+<p><code>select</code> allows you to construct a SELECT statement to fetch records.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, statements::{order, select}};
+
+let student::Schema {
+    id,
+    first_name,
+    last_name,
+    best_friend,
+    uno_book,
+    course,
+    sem_courses,
+    ref age,
+    ..
+} = &amp;Student::schema();
+
+let book::Schema { ref content, .. } = Book::schema();
+
+let mut statement = select(arr![age, last_name, content])
+    .from(Book::table())
+    .where_(
+        cond(content.like("lowo"))
+            .and(age.greater_than_or_equal(600))
+            .or(first_name.equal("Oyelowo"))
+            .and(last_name.equal("Oyedayo")),
+    )
+    .order_by(last_name.desc()
+    .limit(50)
+    .start(20)
+    .timeout(Duration::from_secs(9))
+    .parallel();
+
+let is_lowo = true;
+if is_lowo {
+    statement = statement.limit(55).order_by(age.desc());
+}
+<span class="boring">}</span></code></pre></pre>
+<p><a name="using-the-cond-macro"></a></p>
+<h3 id="using-the-cond-macro"><a class="header" href="#using-the-cond-macro">Using the cond! Macro</a></h3>
+<p>In Surreal ORM, while the <code>cond</code> function provides an elegant way to construct
+filters, there's also a macro alternative called <code>cond!</code>. This macro can offer
+more concise and readable representations, especially for complex conditions.</p>
+<p>The <code>cond!</code> macro provides a convenient syntax for constructing filters, similar
+to standard Rust conditional expressions. It can handle various operations like
+equalities, inequalities, and logical combinations.</p>
+<p>Here's a simple example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_query_builder as surreal_orm;
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let name = Field::new("name");
+</span><span class="boring">let title = Field::new("title");
+</span>
+let filter_simple = cond!(age &gt; 18);
+let filter_compound = cond!((age &gt; 18) AND (name ~ "%Oyelowo%") OR (title == "Professor"));
+let filter_mixed = cond!((age.or(4).or(545).or(232)) OR (title = "Professor") AND (age &lt; 100));
+<span class="boring">}</span></code></pre></pre>
+<p>This macro provides a more intuitive way of writing conditions, especially when
+compared to chaining methods. The full definition and capabilities of the
+<code>cond!</code> macro are documented within the Surreal ORM codebase.</p>
+<p><a name="advanced-select-queries"></a></p>
+<h2 id="5-advanced-select-queries"><a class="header" href="#5-advanced-select-queries">5. Advanced Select Queries</a></h2>
+<p>You can perform complex queries including nested select statements and
+conditional query generation. Here is an example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, statements::{order, select}};
+
+let student::Schema {
+    id,
+    firstName,
+    lastName,
+    bestFriend,
+    unoBook,
+    course,
+    semCoures,
+    ref age,
+    ..
+} = &amp;Student::schema();
+
+let book::Schema { ref content, .. } = Book::schema();
+let ref student_table = Student::get_table();
+let ref book_table = Book::get_table();
+let ref book_id = thing("book:1").unwrap();
+
+let mut query1 = select(arr![age, lastName, content])
+    .from(Book::get_table())
+    .where_(
+        cond(content.like("lowo"))
+            .and(age.greater_than_or_equal(600))
+            .or(firstName.equal("Oyelowo"))
+            .and(lastName.equal("Oyedayo")),
+    )
+    .order_by(lastName.desc())
+    .limit(50)
+    .start(20)
+    .timeout(Duration::from_secs(9))
+    .parallel();
+
+let statement = select(All)
+    .from(student_table)
+    // .from(&amp;[student_table, book_table])
+    // .from(book_id)
+    // .from(query1)
+    .where_(
+        cond(
+            (((age + 5) - 6) * 10).greater_then(5) // You can even use raw mathematical operators directly.
+        )
+        .and(bestFriend.exactly_equal("Oyelowo"))
+        .or(firstName.equal("Oyedayo"))
+        .and(age.greater_than_or_equal(150)),
+    )
+    .order_by(firstName.rand().desc())
+    // .order_by(lastName.collate().asc())
+    // .order_by(id.numeric().desc())
+    // .group_by(course)
+    // .group_by(firstName)
+    // .group_by(arr![lastName, unoBook])
+    .start(5)
+    .limit(400)
+    .fetch(firstName)
+    // .fetch(lastName)
+    // .fetch(arr![age, unoBook])
+    .split(lastName)
+    // .split(firstName)
+    // .split(arr![firstName, semCoures])
+    .timeout(Duration::from_secs(8))
+    .parallel();
+
+let is_oyelowo = true;
+if is_oyelowo {
+    query = query.group_by(arr![age, bestFriend, &amp;Field::new("dayo")]);
+}
+<span class="boring">}</span></code></pre></pre>
+<p><a name="select-value-statements"></a></p>
+<h2 id="6-select-value-statements"><a class="header" href="#6-select-value-statements">6. Select Value Statements</a></h2>
+<p><code>select_value</code> is similar to <code>select</code> but it only returns the first column from
+the result. Here is a basic usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let statement = select_value(account)
+    .from(user)
+    .where_(account.is("abc"));
+<span class="boring">}</span></code></pre></pre>
+<p><a name="advanced-select-value-queries"></a></p>
+<h2 id="7-advanced-select-value-queries"><a class="header" href="#7-advanced-select-value-queries">7. Advanced Select Value Queries</a></h2>
+<p>You can perform complex value queries as well. Here is an example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let statement = select_value(account)
+    .from(user)
+    .where_(
+        and(
+            account.is("abc"),
+            or(
+                friend.is("xyz"),
+                friend.is("lmn"),
+            ),
+        ),
+    );
+
+let statement = select_value(account)
+    .from(user)
+    .where_(
+        not(account.is("def")),
+    );
+<span class="boring">}</span></code></pre></pre>
+<p><a name="running-select-statements"></a></p>
+<h2 id="8-running-select-statements"><a class="header" href="#8-running-select-statements">8. Running Select Statements</a></h2>
+<p>Executing a select statement is straightforward. Here's an example that uses
+<code>return_many</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>extern crate surreal_orm;
+use surreal_orm::{*, statements::{select, insert}};
+
+#[derive(Node, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+#[orm(table = "weapon")]
+pub struct Weapon {
+    pub name: String,
+    pub strength: i32,
+    pub created: chrono::DateTime&lt;chrono::Utc&gt;,
+}
+
+let db = Surreal::new::&lt;Mem&gt;(()).await.unwrap();
+db.use_ns("test").use_db("test").await.unwrap();
+
+let generated_weapons = (1..=10)
+    .map(|i| Weapon {
+        name: format!("Weapon {}", i),
+        strength: i * 10,
+        created: chrono::Utc::now(),
+        ..Default::default()
+    })
+    .collect::&lt;Vec&lt;_&gt;&gt;();
+insert(generated_weapons.clone()).run(db.clone()).await?;
+
+let ref weapon = Weapon::table();
+let weapon::Schema { ref strength, .. } = &amp;Weapon::schema();
+
+let statement = select(All)
+    .from(weapon)
+    .where_(
+        strength.inside(
+            select_value(strength)
+                .from(weapon)
+                .order_by(strength.asc())
+                .limit(6),
+        ),
+    )
+    .order_by(strength.desc())
+    .start(2)
+    .limit(10);
+
+assert_eq!(
+    statement.to_raw().build(),
+    "SELECT * FROM weapon WHERE strength INSIDE \
+        (SELECT VALUE strength FROM weapon ORDER BY strength LIMIT 6) \
+        ORDER BY strength DESC LIMIT 10 START AT 2;"
+);
+let result = statement.return_many::&lt;Weapon&gt;(db.clone()).await?;
+
+assert_eq!(&amp;result[0].name, "Weapon 4");
+assert_eq!(&amp;result[1].name, "Weapon 3");
+assert_eq!(&amp;result[2].name, "Weapon 2");
+assert_eq!(&amp;result[3].name, "Weapon 1");
+
+assert_eq!(result.len(), 4);
+assert!(result[0].id.to_string().starts_with("weapon:"));
+Ok(())
+<span class="boring">}</span></code></pre></pre>
+<p>This example first inserts generated weapon data into the database. Then it
+constructs a <code>select</code> statement and retrieves the weapons whose <code>strength</code> is in
+the top 6, ordered by <code>strength</code> in descending order, and returns the results
+from the third entry. The <code>return_many</code> function is used to run the statement
+and get the result.</p>
+<p><a name="running-and-returning-from-a-select-statement"></a></p>
+<h2 id="9-running-and-returning-from-a-select-statement"><a class="header" href="#9-running-and-returning-from-a-select-statement">9. Running and Returning from a Select Statement</a></h2>
+<p>The Surreal ORM package provides the <code>ReturnableSelect</code> trait that defines
+several functions to run a select statement and return results in different
+ways. These functions include <code>return_none</code>, <code>return_first</code>, <code>return_one</code>,
+<code>return_one_unchecked</code>, and <code>return_many</code>.</p>
+<p>All these functions run the statement against the SurrealDB database and return
+results:</p>
+<ul>
+<li><code>return_none</code>: Returns no result.</li>
+<li><code>return_first</code>: Returns the first result.</li>
+<li><code>return_one</code>: Returns one result.</li>
+<li><code>return_one_unchecked</code>: Returns one result without checking if it's
+successful.</li>
+<li><code>return_many</code>: Returns many results.</li>
+<li><code>run</code>: Runs the query and provide more flexible deserialization just like
+surrealdb native drive e.g <code>.run(db).take::&lt;T&gt;(0)</code>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../statements/if_else.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../statements/insert.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../statements/if_else.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../statements/insert.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

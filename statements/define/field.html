@@ -1,0 +1,336 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Define Field - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="define-field-statement"><a class="header" href="#define-field-statement">Define Field Statement</a></h1>
+<p>The <code>define_field</code> statement is used to define a field in SurrealDB. It allows you to specify various options and permissions for the field. This documentation provides an overview of the syntax and usage of the <code>define_field</code> statement.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#syntax">Syntax</a></li>
+<li><a href="#examples">Examples</a>
+<ul>
+<li><a href="#define-field-with-full-configuration">Define Field with Full Configuration</a></li>
+<li><a href="#define-field-with-simple-configuration">Define Field with Simple Configuration</a></li>
+</ul>
+</li>
+<li><a href="#field-types">Field Types</a></li>
+<li><a href="#geometry-types">Geometry Types</a></li>
+<li><a href="#permission-types">Permission Types</a></li>
+</ul>
+<h2 id="syntax"><a class="header" href="#syntax">Syntax</a></h2>
+<p>The basic syntax of the <code>define_field</code> statement is as follows:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>define_field(field_name)
+    .on_table(table)
+    .type_(field_type)
+    .value(default_value)
+    .assert(assertion)
+    .permissions(permission_statements);
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li><code>field_name</code>: The name of the field to define.</li>
+<li><code>table</code>: The name of the table where the field belongs.</li>
+<li><code>field_type</code>: The type of the field.</li>
+<li><code>default_value</code> (optional): The default value for the field.</li>
+<li><code>assertion</code> (optional): An assertion condition for the field.</li>
+<li><code>permission_statements</code> (optional): The permissions for the field.</li>
+</ul>
+<p>The <code>define_field</code> statement supports the following methods:</p>
+<ul>
+<li><code>.on_table(table)</code>: Specifies the table where the field belongs.</li>
+<li><code>.type_(field_type)</code>: Specifies the type of the field.</li>
+<li><code>.value(default_value)</code>: Specifies the default value for the field.</li>
+<li><code>.assert(assertion)</code>: Specifies an assertion condition for the field.</li>
+<li><code>.permissions(permission_statements)</code>: Specifies the permissions for the field.</li>
+</ul>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="define-field-with-full-configuration"><a class="header" href="#define-field-with-full-configuration">Define Field with Full Configuration</a></h3>
+<p>To define a field with full configuration, including a default value, assertion condition, and permissions, you can use the following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let email = Field::new("email");
+let user_table = Table::from("user");
+let age = Field::new("age");
+let statement = define_field(email)
+    .on_table(user_table)
+    .type_(String)
+    .value("example@codebreather.com")
+    .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+    .permissions(for_permission(Permission::Select).where_(age.greater_than_or_equal(18))) // Single permission
+    .permissions(for_permission(&amp;[Permission::Create, Permission::Update]).where_(name.is("Oyedayo"))) // Multiple permissions
+    .permissions(&amp;[
+        for_permission(&amp;[Permission::Create, Permission::Delete]).where_(name.is("Oyedayo")),
+        for_permission(Permission::Update).where_(age.less_than_or_equal(130)),
+    ]);
+<span class="boring">}</span></code></pre></pre>
+<p>This will generate the following SQL statement:</p>
+<pre><code class="language-sql">DEFINE FIELD email ON TABLE user TYPE string VALUE 'example@codebreather.com' \
+    ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')
+PERMISSIONS
+    FOR select
+        WHERE age &gt;= 18
+    FOR create, update
+        WHERE name IS 'Oyedayo'
+    FOR create, delete
+        WHERE name IS 'Oyedayo'
+    FOR update
+        WHERE age &lt;= 130;
+</code></pre>
+<p>In the example above, the <code>define_field</code> statement defines a field named "email" on the "user" table. It specifies the field type as <code>String</code>, sets a default value of <code>'example@codebreather.com'</code>, and adds an</p>
+<p>assertion condition. It also sets different permissions for the field based on conditions.</p>
+<h3 id="define-field-with-simple-configuration"><a class="header" href="#define-field-with-simple-configuration">Define Field with Simple Configuration</a></h3>
+<p>To define a field with a simple configuration, you can use the following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use FieldType::*;
+
+let email = Field::new("email");
+let user_table = Table::from("user");
+let statement = define_field(email).on_table(user_table).type_(String);
+<span class="boring">}</span></code></pre></pre>
+<p>This will generate the following SQL statement:</p>
+<pre><code class="language-sql">DEFINE FIELD email ON TABLE user TYPE string;
+</code></pre>
+<p>In the example above, the <code>define_field</code> statement defines a field named "email" on the "user" table. It specifies the field type as <code>String</code> without setting a default value, assertion condition, or permissions.</p>
+<h2 id="field-types"><a class="header" href="#field-types">Field Types</a></h2>
+<p>The <code>define_field</code> statement supports various field types in SurrealDB. The available field types are:</p>
+<ul>
+<li><code>any</code>: Allows any data type supported by SurrealDB.</li>
+<li><code>array</code>: Represents a list.</li>
+<li><code>bool</code>: Represents true or false values.</li>
+<li><code>datetime</code>: Represents an ISO 8601 compliant date with time and time zone.</li>
+<li><code>decimal</code>: Represents any real number with arbitrary precision.</li>
+<li><code>duration</code>: Represents a length of time that can be added or subtracted from datetimes or other durations.</li>
+<li><code>float</code>: Represents a value stored in a 64-bit float.</li>
+<li><code>int</code>: Represents a value stored in a 64-bit integer.</li>
+<li><code>number</code>: Represents numbers without specifying the type, allowing SurrealDB to detect and store the number based on its minimal representation.</li>
+<li><code>object</code>: Represents formatted objects containing values of any supported type.</li>
+<li><code>string</code>: Represents a string value.</li>
+<li><code>record</code>: Represents a reference to another record in any table.</li>
+<li><code>geometry</code>: Represents a geometry type conforming to the GeoJSON format.</li>
+</ul>
+<h2 id="geometry-types"><a class="header" href="#geometry-types">Geometry Types</a></h2>
+<p>The <code>geometry</code> field type allows you to define geometric fields in SurrealDB. The available geometry types are:</p>
+<ul>
+<li><code>feature</code>: Represents any geometric type.</li>
+<li><code>point</code>: Represents a point.</li>
+<li><code>line</code>: Represents a line.</li>
+<li><code>polygon</code>: Represents a polygon.</li>
+<li><code>multipoint</code>: Represents a multipoint.</li>
+<li><code>multiline</code>: Represents a multiline.</li>
+<li><code>multipolygon</code>: Represents a multipolygon.</li>
+<li><code>collection</code>: Represents a collection of geometry types.</li>
+</ul>
+<h2 id="permission-types"><a class="header" href="#permission-types">Permission Types</a></h2>
+<p>The <code>define_field</code> statement allows you to define permissions for the field using permission types. The available permission types are:</p>
+<ul>
+<li><code>Create</code>: Allows creating new records with the field.</li>
+<li><code>Read</code>: Allows reading the field value from existing records.</li>
+<li><code>Update</code>: Allows updating the field value in existing records.</li>
+<li><code>Delete</code>: Allows deleting records that have the field.</li>
+</ul>
+<p>These permission types can be used in the <code>permissions</code> method to define the desired access control for the field.</p>
+<p>You have now learned how to define fields using the <code>define_field</code> statement, including different configuration options, field types, geometry types, and permission types. Use this statement to define fields in SurrealDB and specify their configurations and permissions.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../statements/define/function.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../statements/define/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../statements/define/function.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../statements/define/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

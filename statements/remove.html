@@ -1,0 +1,345 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Remove - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="remove-statement"><a class="header" href="#remove-statement">Remove Statement</a></h1>
+<p>The <code>REMOVE</code> statement in Surreal ORM is used to remove various elements from
+the database, such as databases, events, fields, indexes, logins, scopes,
+namespaces, tables, and tokens. This documentation covers the usage and examples
+of the <code>REMOVE</code> statement for each of these elements.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#remove-database">Remove Database</a></li>
+<li><a href="#remove-event">Remove Event</a></li>
+<li><a href="#remove-field">Remove Field</a></li>
+<li><a href="#remove-index">Remove Index</a></li>
+<li><a href="#remove-login">Remove Login</a></li>
+<li><a href="#remove-scope">Remove Scope</a></li>
+<li><a href="#remove-namespace">Remove Namespace</a></li>
+<li><a href="#remove-table">Remove Table</a></li>
+<li><a href="#remove-token">Remove Token</a></li>
+</ul>
+<h2 id="remove-database"><a class="header" href="#remove-database">Remove Database</a></h2>
+<p>The <code>REMOVE DATABASE</code> statement is used to remove a database from the SurrealDB.
+Here's an example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>assert_eq!(
+    remove_database("oyelowo").build(),
+    "REMOVE DATABASE oyelowo;"
+);
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL query for this code block would be <code>REMOVE DATABASE oyelowo;</code>.</p>
+<h2 id="remove-event"><a class="header" href="#remove-event">Remove Event</a></h2>
+<p>The <code>REMOVE EVENT</code> statement is used to remove an event from a table. Here's an
+example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let user = Table::new("user");
+let party = Event::new("party");
+
+let statement = remove_event(party).on_table(user);
+assert_eq!(statement.build(), "REMOVE EVENT party ON TABLE user;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL query for this code block would be
+<code>REMOVE EVENT party ON TABLE user;</code>.</p>
+<h2 id="remove-field"><a class="header" href="#remove-field">Remove Field</a></h2>
+<p>The <code>REMOVE FIELD</code> statement is used to remove a field from a table. Here's an
+example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let user = Table::new("user");
+let name = Field::new("name");
+
+let statement = remove_field(name).on_table(user);
+assert_eq!(statement.build(), "REMOVE FIELD name ON TABLE user;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL query for this code block would be
+<code>REMOVE FIELD name ON TABLE user;</code>.</p>
+<h2 id="remove-index"><a class="header" href="#remove-index">Remove Index</a></h2>
+<p>The <code>REMOVE INDEX</code> statement is used to remove an index from a table. Here's an
+example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let user = Table::new("user");
+let party = TableIndex::new("party");
+
+let statement = remove_index(party).on_table(user);
+assert_eq!(statement.build(), "REMOVE INDEX party ON TABLE user;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL query for this code block would be
+<code>REMOVE INDEX party ON TABLE user;</code>.</p>
+<h2 id="remove-login"><a class="header" href="#remove-login">Remove Login</a></h2>
+<p>The <code>REMOVE LOGIN</code> statement is used to remove a login from either a namespace
+or a database. Here are examples for removing a login on a namespace and a
+database:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let login = Login::new("login");
+
+// Remove login on a namespace
+let statement = remove_login(login).on_namespace();
+assert_eq!(statement.build(), "REMOVE LOGIN login ON NAMESPACE;");
+
+// Remove login on a database
+let statement = remove_login(login).on_database();
+assert_eq!(statement.build(), "REMOVE LOGIN login ON DATABASE;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL queries for these code blocks would be
+<code>REMOVE LOGIN login ON NAMESPACE;</code> and <code>REMOVE LOGIN login ON DATABASE;</code>
+respectively.</p>
+<h2 id="remove-scope"><a class="header" href="#remove-scope">Remove Scope</a></h2>
+<p>The <code>REMOVE SCOPE</code> statement is used to remove a scope from the SurrealDB.
+Here's an example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let scope = Scope::new("scope");
+let statement = remove_scope(scope);
+assert_eq!(statement.build(), "REMOVE SCOPE scope;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL query for this code block would be <code>REMOVE SCOPE scope;</code>.</p>
+<h2 id="remove-namespace"><a class="header" href="#remove-namespace">Remove Namespace</a></h2>
+<p>The <code>REMOVE NAMESPACE</code> statement is used to</p>
+<p>remove a namespace from the SurrealDB. Here's an example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let namespace = Namespace::new("namespace");
+let statement = remove_namespace(namespace);
+assert_eq!(statement.build(), "REMOVE NAMESPACE namespace;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL query for this code block would be
+<code>REMOVE NAMESPACE namespace;</code>.</p>
+<h2 id="remove-table"><a class="header" href="#remove-table">Remove Table</a></h2>
+<p>The <code>REMOVE TABLE</code> statement is used to remove a table from the SurrealDB.
+Here's an example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let table = Table::new("table");
+let statement = remove_table(table);
+assert_eq!(statement.build(), "REMOVE TABLE table;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL query for this code block would be <code>REMOVE TABLE table;</code>.</p>
+<h2 id="remove-token"><a class="header" href="#remove-token">Remove Token</a></h2>
+<p>The <code>REMOVE TOKEN</code> statement is used to remove a token from either a namespace
+or a database. Here are examples for removing a token on a namespace and a
+database:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let token = Token::new("token");
+
+// Remove token on a namespace
+let statement = remove_token(token).on_namespace();
+assert_eq!(statement.build(), "REMOVE TOKEN token ON NAMESPACE;");
+
+// Remove token on a database
+let statement = remove_token(token).on_database();
+assert_eq!(statement.build(), "REMOVE TOKEN token ON DATABASE;");
+<span class="boring">}</span></code></pre></pre>
+<p>The generated SQL queries for these code blocks would be
+<code>REMOVE TOKEN token ON NAMESPACE;</code> and <code>REMOVE TOKEN token ON DATABASE;</code>
+respectively.</p>
+<p>That concludes the documentation for the <code>REMOVE</code> statement in Surreal ORM. Use
+the examples and explanations provided to effectively remove various elements
+from the database.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../statements/define/param.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../statements/info.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../statements/define/param.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../statements/info.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

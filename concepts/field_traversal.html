@@ -1,0 +1,355 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Field Traversal - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="field-traversal"><a class="header" href="#field-traversal">Field Traversal</a></h1>
+<p>The <code>surreal_orm</code> library equips developers with powerful field traversal
+capabilities, allowing for seamless querying and navigation through the
+<code>surrealdb</code> graph database. This chapter provides an in-depth exploration into
+the different traversal methods available and how to harness them effectively.</p>
+<h2 id="basics-of-field-traversal"><a class="header" href="#basics-of-field-traversal">Basics of Field Traversal</a></h2>
+<p>Field traversal is the mechanism used to navigate through a data structure,
+pinpointing specific fields or relationships. The design of the <code>surreal_orm</code>
+makes traversal not only intuitive but also direct, offering methods to navigate
+fields, relationships, and even to apply specific conditions.</p>
+<p>To get started, let's set up our environment:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use pretty_assertions::assert_eq;
+use surreal_models::{student, Student};
+use surreal_orm::{index, this, where_, All, Buildable, Operatable, SchemaGetter, ToRaw, E};
+<span class="boring">}</span></code></pre></pre>
+<h2 id="root-object-the-starting-point"><a class="header" href="#root-object-the-starting-point">Root Object: The Starting Point</a></h2>
+<p>Every traversal starts with the root object. The <code>this()</code> function is your
+gateway, representing the current node or object you're working on.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn basic() {
+</span>let param_with_path = this();
+assert_eq!(param_with_path.to_raw().build(), "$this");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<p>In the code snippet above, the <code>this()</code> function signifies a reference to the
+root object or the primary context of the traversal. When executed, this will
+produce <code>"$this"</code>.</p>
+<h2 id="traversing-the-path"><a class="header" href="#traversing-the-path">Traversing the Path</a></h2>
+<p>Navigating relationships between nodes is where the real power of a graph
+database shines. The <code>with_path::&lt;T&gt;(index_or_clause)</code> method allows you to
+specify this path. Here <code>T</code> is the type of node you're targeting, while
+<code>index_or_clause</code> can either be an index or a clause, such as <code>WHERE age &gt; 18</code>
+or <code>E</code> (an alias for <code>Empty</code>).</p>
+<p>For instance, to get the <code>firstName</code> of a <code>Student</code> at index <code>2</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let param_with_path = this().with_path::&lt;Student&gt;([2]).firstName;
+<span class="boring">}</span></code></pre></pre>
+<p>This traversal, when executed, will output <code>"$this[2].firstName"</code>.</p>
+<h3 id="direct-field-access-within-an-object"><a class="header" href="#direct-field-access-within-an-object">Direct Field Access within an Object</a></h3>
+<p>Sometimes, all you want is to directly access a field within an object. Here's
+how you can achieve that:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn test_param_simple_clause() {
+</span>let param_with_path = this().with_path::&lt;Student&gt;(E).lastName;
+assert_eq!(param_with_path.to_raw().build(), "$this.lastName");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<p>In this example, the alias <code>E</code> (standing for <code>Empty</code>) is employed to directly
+traverse to the <code>lastName</code> field of the <code>Student</code> object.</p>
+<h3 id="direct-field-access-within-an-array"><a class="header" href="#direct-field-access-within-an-array">Direct Field Access within an Array</a></h3>
+<p>At other times, you might want to directly access a field within an array:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn test_param_with_path_simple() {
+</span>let param_with_path = this().with_path::&lt;Student&gt;([2]).firstName;
+assert_eq!(param_with_path.to_raw().build(), "$this[2].firstName");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<p>Here, the code fetches the <code>firstName</code> of the <code>Student</code> located at index <code>2</code>.</p>
+<h3 id="deep-relationship-traversal"><a class="header" href="#deep-relationship-traversal">Deep Relationship Traversal</a></h3>
+<p>The true essence of a graph database is revealed when traversing deep
+relationships. Consider this test:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn test_param_with_path() {
+</span>let param_with_path = this()
+    .with_path::&lt;Student&gt;([2])
+    .bestFriend()
+    .bestFriend()
+    .course()
+    .title;
+assert_eq!(param_with_path.to_raw().build(), "$this[2].bestFriend.bestFriend.course.title");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<p>This test showcases how to navigate through a <code>Student</code>'s best friend's best
+friend's course title.</p>
+<h3 id="index-function-for-indexing"><a class="header" href="#index-function-for-indexing">Index function for Indexing</a></h3>
+<p>An alternate to square bracket notation <code>[2]</code> is the <code>index</code> helper function
+e.g(<code>index(2)</code>):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn test_param_with_path_with_index_square_bracket_variation() {
+</span>let param_with_path = this()
+    .with_path::&lt;Student&gt;(index(2))
+    .bestFriend()
+    .bestFriend()
+    .course()
+    .title;
+assert_eq!(param_with_path.to_raw().build(), "$this[2].bestFriend.bestFriend.course.title");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<h3 id="traversal-with-conditional-clauses"><a class="header" href="#traversal-with-conditional-clauses">Traversal with Conditional Clauses</a></h3>
+<p>You can also traverse paths with conditions, allowing for more refined querying:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn test_param_with_path_with_clause() {
+</span>let student::Schema { age, .. } = Student::schema();
+let param_with_path = this()
+    .with_path::&lt;Student&gt;(where_(age.greater_than(18)))
+    .bestFriend()
+    .allSemesterCourses([5])
+    .title;
+assert_eq!(param_with_path.to_raw().build(), "$this[WHERE age &gt; 18].bestFriend.allSemesterCourses[5].title");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<p>This traversal fetches the title of the fifth semester course of the best
+friends of students older than 18.</p>
+<h3 id="using-the-all-wildcard"><a class="header" href="#using-the-all-wildcard">Using the All Wildcard</a></h3>
+<p>For scenarios where you want to traverse all items or elements of a certain
+relationship or field, the <code>All</code> wildcard is invaluable:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn test_param_with_path_with_all_wildcard() {
+</span>let param_with_path = this()
+    .with_path::&lt;Student&gt;(All)
+    .bestFriend()
+    .allSemesterCourses([5])
+    .title;
+assert_eq!(param_with_path.to_raw().build(), "$this[*].bestFriend.allSemesterCourses[5].title");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<p>In the traversal above, <code>All</code> is a wildcard that represents every instance of
+the <code>Student</code> type. The traversal then specifies the fifth course title of all
+students' best friends.</p>
+<h3 id="multiple-indexes-in-path"><a class="header" href="#multiple-indexes-in-path">Multiple Indexes in Path</a></h3>
+<p>There are scenarios where traversing multiple indexed fields or relationships
+becomes necessary:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">fn test_param_with_path_multiple_indexes() {
+</span>let param_with_path = this()
+    .with_path::&lt;Student&gt;([2])
+    .bestFriend()
+    .allSemesterCourses([5])
+    .title;
+assert_eq!(param_with_path.to_raw().build(), "$this[2].bestFriend.allSemesterCourses[5].title");
+<span class="boring">}
+</span><span class="boring">}</span></code></pre></pre>
+<p>Here, the traversal first targets the <code>Student</code> at index 2 and then fetches the
+title of the fifth semester course of that student's best friend.</p>
+<hr />
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Field traversal in <code>surreal_orm</code> equips developers with a versatile and powerful
+toolset, enabling effective navigation and querying within</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../concepts/links_and_relation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../concepts/loaders.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../concepts/links_and_relation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../concepts/loaders.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

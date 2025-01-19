@@ -1,0 +1,310 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Define Token - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="define-token-statement"><a class="header" href="#define-token-statement">Define Token Statement</a></h2>
+<p>The <code>define_token</code> statement is used to define a token in SurrealDB. Tokens are used for authentication and authorization purposes, allowing users or applications to access protected resources. This documentation provides an overview of the syntax and usage of the <code>define_token</code> statement.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#syntax">Syntax</a></li>
+<li><a href="#examples">Examples</a>
+<ul>
+<li><a href="#define-token-on-namespace">Define Token on Namespace</a></li>
+<li><a href="#define-token-on-database">Define Token on Database</a></li>
+<li><a href="#define-token-on-scope">Define Token on Scope</a></li>
+</ul>
+</li>
+<li><a href="#token-types">Token Types</a></li>
+</ul>
+<h2 id="syntax"><a class="header" href="#syntax">Syntax</a></h2>
+<p>The basic syntax of the <code>define_token</code> statement is as follows:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>define_token(token_name: Token)
+    .on_namespace()
+    .type_(token_type: TokenType)
+    .value(token_value: &amp;str)
+
+define_token(token_name: Token)
+    .on_database()
+    .type_(token_type: TokenType)
+    .value(token_value: &amp;str)
+
+define_token(token_name: Token)
+    .on_scope(scope_name: Scope)
+    .type_(token_type: TokenType)
+    .value(token_value: &amp;str)
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li><code>token_name</code>: The name of the token to define.</li>
+<li><code>token_type</code>: The type of the token, specified using the <code>TokenType</code> enum.</li>
+<li><code>token_value</code>: The value or secret associated with the token.</li>
+</ul>
+<p>The <code>define_token</code> statement supports the following options:</p>
+<ul>
+<li><code>on_namespace()</code>: Specifies that the token should be defined on the namespace level.</li>
+<li><code>on_database()</code>: Specifies that the token should be defined on the database level.</li>
+<li><code>on_scope(scope_name)</code>: Specifies that the token should be defined on a specific scope.</li>
+</ul>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="define-token-on-namespace"><a class="header" href="#define-token-on-namespace">Define Token on Namespace</a></h3>
+<p>To define a token on the namespace level, you can use the following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let statement = define_token("oyelowo_token")
+    .on_namespace()
+    .type_(TokenType::PS512)
+    .value("abrakradabra");
+<span class="boring">}</span></code></pre></pre>
+<p>In the example above, the <code>define_token</code> statement defines a token named "oyelowo_token" on the namespace level. The token type is set to <code>TokenType::PS512</code> and the value is set to "abrakradabra".</p>
+<p>This will generate the following SQL statement:</p>
+<pre><code class="language-sql">DEFINE TOKEN oyelowo_token ON NAMESPACE TYPE PS512 VALUE 'abrakradabra';
+</code></pre>
+<h3 id="define-token-on-database"><a class="header" href="#define-token-on-database">Define Token on Database</a></h3>
+<p>To define a token on the database level, you can use the following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let statement = define_token("oyelowo_token")
+    .on_database()
+    .type_(TokenType::HS512)
+    .value("anaksunamun");
+<span class="boring">}</span></code></pre></pre>
+<p>In the example above, the <code>define_token</code> statement defines a token named "oyelowo_token" on the database level. The token type is set to <code>TokenType::HS512</code> and the value is set to "anaksunamun".</p>
+<p>This will generate the following SQL statement:</p>
+<pre><code class="language-sql">DEFINE TOKEN oyelowo_token ON DATABASE TYPE HS512 VALUE 'anaksunamun';
+</code></pre>
+<h3 id="define-token-on-scope"><a class="header" href="#define-token-on-scope">Define Token on Scope</a></h3>
+<p>To define a token on a specific scope, you can use the following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let statement = define_token("oyelowo_token")
+    .on_scope("planet")
+    .type_(TokenType::EDDSA)
+    .value("abcde");
+<span class="boring">}</span></code></pre></pre>
+<p>In the example above, the <code>define_token</code> statement defines a token named "oyelowo_token" on the scope "planet". The token type is set to <code>TokenType::EDDSA</code> and the value is set to "abcde".</p>
+<p>This will generate the following SQL</p>
+<p>statement:</p>
+<pre><code class="language-sql">DEFINE TOKEN oyelowo_token ON SCOPE planet TYPE EDDSA VALUE 'abcde';
+</code></pre>
+<h2 id="token-types"><a class="header" href="#token-types">Token Types</a></h2>
+<p>The <code>TokenType</code> enum represents the available token types in SurrealDB. Each token type corresponds to a specific algorithm or cryptographic scheme used for token generation and validation. The following token types are available:</p>
+<ul>
+<li><code>EDDSA</code>: EdDSA (Edwards-curve Digital Signature Algorithm)</li>
+<li><code>ES256</code>: ECDSA using P-256 and SHA-256</li>
+<li><code>ES384</code>: ECDSA using P-384 and SHA-384</li>
+<li><code>ES512</code>: ECDSA using P-521 and SHA-512</li>
+<li><code>HS256</code>: HMAC using SHA-256</li>
+<li><code>HS384</code>: HMAC using SHA-384</li>
+<li><code>HS512</code>: HMAC using SHA-512</li>
+<li><code>PS256</code>: RSASSA-PSS using SHA-256 and MGF1 with SHA-256</li>
+<li><code>PS384</code>: RSASSA-PSS using SHA-384 and MGF1 with SHA-384</li>
+<li><code>PS512</code>: RSASSA-PSS using SHA-512 and MGF1 with SHA-512</li>
+<li><code>RS256</code>: RSASSA-PKCS1-v1_5 using SHA-256</li>
+<li><code>RS384</code>: RSASSA-PKCS1-v1_5 using SHA-384</li>
+<li><code>RS512</code>: RSASSA-PKCS1-v1_5 using SHA-512</li>
+</ul>
+<p>You can specify the desired token type when using the <code>define_token</code> statement by providing the corresponding <code>TokenType</code> enum variant.</p>
+<p>You have now learned how to define tokens using the <code>define_token</code> statement. Tokens are essential for authentication and authorization in SurrealDB, allowing you to secure your data and control access to resources.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../statements/define/login.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../statements/define/scope.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../statements/define/login.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../statements/define/scope.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

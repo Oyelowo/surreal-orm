@@ -1,0 +1,344 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Let - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="let-statement"><a class="header" href="#let-statement">Let Statement</a></h1>
+<p>The <code>let</code> statement in Surreal ORM allows you to bind variables within a code
+block. It simplifies complex queries and enables parameter handling.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#recommended-approach">Recommended Approach</a>
+<ul>
+<li><a href="#using-let-or-let-statement-within-block-macro">Using <code>let</code> or <code>LET</code> Statement/keyword within <code>block!</code> Macro</a></li>
+</ul>
+</li>
+<li><a href="#less-recommended-approach">Less Recommended Approach</a>
+<ul>
+<li><a href="#using-let-macro">Using <code>let_!</code> Macro</a></li>
+</ul>
+</li>
+<li><a href="#least-recommended-approach">Least Recommended Approach</a>
+<ul>
+<li><a href="#using-let-statements-with-let-function">Using <code>let</code> Statements with <code>let_</code> Function</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="recommended-approach"><a class="header" href="#recommended-approach">Recommended Approach</a></h2>
+<p>In the recommended approach, you can use the <code>let</code> statement within the <code>block!</code>
+macro. This approach provides a natural syntax that handles variable bindings
+and parameter references automatically.</p>
+<h3 id="using-let-or-let-statement-within-block-macro"><a class="header" href="#using-let-or-let-statement-within-block-macro">Using <code>let</code> or <code>LET</code> Statement within <code>block!</code> Macro</a></h3>
+<p>To define variables and bind them within a code block, you can use the <code>let</code>
+statement (or <code>LET</code> statement) within the <code>block!</code> macro. This approach offers
+simplicity and automation in handling variable bindings and parameter
+references. Let's take a look at an example:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let alien = Table::new("alien");
+let metrics = Table::new("metrics");
+let strength = Field::new("strength");
+
+let code_block = block! {
+    let strengths = select_value(strength).from(alien);
+    let total = math::sum!(strengths);
+    let count = count!(strengths);
+    let name = "Oyelowo";
+};
+
+// This is equivalent to the above. Note: This is not to be confused with actual Rust's native `let` keyword.
+
+let code_block = block! {
+    LET strengths = select_value(strength).from(alien);
+    LET total = math::sum!(strengths);
+    LET count = count!(strengths);
+    LET name = "Oyelowo";
+};
+<span class="boring">}</span></code></pre></pre>
+<p>In the code snippet above, the <code>let</code> (or <code>LET</code>) statements bind the variables
+<code>strengths</code>, <code>total</code>, <code>count</code>, and <code>name</code> within the code block. These variables
+are automatically handled by the ORM, simplifying the query construction
+process.</p>
+<p>The generated SQL query for this code block would look like:</p>
+<pre><code class="language-sql">LET $strengths = (SELECT VALUE strength FROM alien);
+
+LET $total = math::sum($strengths);
+
+LET $count = count($strengths);
+
+LET $name = 'Oyelowo';
+</code></pre>
+<p>The recommended approach using the <code>let</code> statement (or <code>LET</code> statement) within
+the <code>block!</code> macro is preferred because it provides a clean and concise syntax,
+handles variable bindings and parameter referencing automatically, and promotes
+code readability.</p>
+<h2 id="less-recommended-approach"><a class="header" href="#less-recommended-approach">Less Recommended Approach</a></h2>
+<p>The less recommended approach involves using the <code>let_!</code> macro to bind variables
+manually within a code block. Although it provides flexibility, it requires more
+manual handling of parameters and can be error-prone.</p>
+<p><a name="using-let-macro"></a></p>
+<h3 id="using-let_-macro"><a class="header" href="#using-let_-macro">Using <code>let_!</code> Macro</a></h3>
+<p>Here's an example of using the <code>let_!</code> macro to define variables within a code
+block:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let_!(strengths = select_value(strength).from(alien));
+let_!(total = math::sum!(strengths));
+let_!(count = count!(strengths));
+let_!(name = "Oyelowo");
+chain(strengths).chain(total).chain(count).chain(name)
+<span class="boring">}</span></code></pre></pre>
+<p>In the code snippet above, the <code>let_!</code>macro is used to bind
+variables<code>strengths</code>, <code>total</code>, <code>count</code>, and <code>name</code>within the code block. The
+variables are manually defined and then chained together using the<code>chain</code>
+function.</p>
+<p>The generated SQL query for this code block would look like:</p>
+<pre><code class="language-sql">LET $strengths = (SELECT VALUE strength FROM alien);
+
+LET $total = math::sum($strengths);
+
+LET $count = count($strengths);
+
+LET $name = 'Oyelowo';
+</code></pre>
+<p>The less recommended approach using the <code>let_!</code> macro requires explicit
+definition and chaining of variables, making the code more complex and
+error-prone compared to the recommended approach.</p>
+<h2 id="least-recommended-approach"><a class="header" href="#least-recommended-approach">Least Recommended Approach</a></h2>
+<p>The least recommended approach involves using the <code>let</code> statements with the
+<code>let_</code> function to bind variables manually within a code block. This approach
+requires even more manual handling of parameters and is prone to errors.</p>
+<p><a name="using-let-statements-with-let-function"></a></p>
+<h3 id="using-let-statements-with-let_-function"><a class="header" href="#using-let-statements-with-let_-function">Using <code>let</code> Statements with <code>let_</code> Function</a></h3>
+<p>Here's another example of using the <code>let</code> statements with the <code>let_</code> function to
+bind variables within a code block:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let strengths = let_("strengths").equal_to(select_value(strength).from(alien));
+let total = let_("total").equal_to(math::sum!(strengths));
+let count = let_("count").equal_to(count!(strengths));
+let name = let_("name").equal_to("Oyelowo");
+chain(strengths).chain(total).chain(count).chain(name);
+<span class="boring">}</span></code></pre></pre>
+<p>In this example, the <code>let_</code> function is used to define variables <code>strengths</code>,
+<code>total</code>, <code>count</code>, and <code>name</code> within the code block. The variables are manually
+defined and then chained together using the <code>chain</code> function.</p>
+<p>The generated SQL query for this code block would look like:</p>
+<pre><code class="language-sql">LET $strengths = (SELECT VALUE strength FROM alien);
+
+LET $total = math::sum($strengths);
+
+LET $count = count($strengths);
+
+LET $name = 'Oyelowo';
+</code></pre>
+<p>Similar to the previous approach, the use of <code>let</code> statements with the <code>let_</code>
+function in the least recommended approach requires explicit variable definition
+and chaining, making the code more complex and error-prone.</p>
+<p>It is generally recommended to use the recommended approach with the <code>let</code>
+statement (or <code>LET</code> statement) within the <code>block!</code> macro for better readability,
+automation of variable bindings, and parameter handling.</p>
+<p>That concludes the documentation for the <code>let</code> statement in Surreal ORM. Use the
+recommended approach to simplify complex queries and handle variable bindings
+effortlessly.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../statements/use.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../statements/begin.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../statements/use.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../statements/begin.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

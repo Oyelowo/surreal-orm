@@ -1,0 +1,295 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Fields and Model Schema - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="model-schema"><a class="header" href="#model-schema">Model Schema</a></h1>
+<p>This guide covers the <code>SchemaGetter</code> trait in SurrealDB, a Rust crate, and
+provides examples on how to use it.</p>
+<h3 id="the-schemagetter-trait"><a class="header" href="#the-schemagetter-trait">The SchemaGetter Trait</a></h3>
+<p>This trait is defined as follows:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait SchemaGetter {
+    type Schema;
+    fn schema() -&gt; Self::Schema;
+    fn schema_prefixed(prefix: impl Into&lt;ValueLike&gt;) -&gt; Self::Schema;
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This trait is used for defining schemas for different entities in your database.
+It contains two associated functions:</p>
+<ol>
+<li><code>schema()</code>: Returns a schema for an entity. This is used for defining the
+structure and constraints of the entity.</li>
+<li><code>schema_prefixed(prefix: impl Into&lt;ValueLike&gt;)</code>: This is similar to
+<code>schema()</code>, but it allows the schema to be prefixed with a custom value. This
+can be useful when working with entities that may share similar fields but
+have different schemas.</li>
+</ol>
+<p>The <code>SchemaGetter</code> trait's primary use is to allow types to be used as a
+'Schema' - a representation of the structure of the data you're storing or
+retrieving from the database. It's particularly useful in constructing complex
+queries with strong type safety.</p>
+<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
+<p>The examples below demonstrate the different methods you can utilize in
+SurrealDB, leveraging the SchemaGetter trait:</p>
+<h4 id="creating-and-retrieving-entities"><a class="header" href="#creating-and-retrieving-entities">Creating and Retrieving Entities:</a></h4>
+<p>This piece of code uses the <code>schema()</code> function of <code>SchemaGetter</code> to create and
+retrieve entities in the database:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let _simple_relation = Student::schema()
+    .writes__(Empty)
+    .book(Book::schema().id.equal(Thing::from(("book", "blaze"))))
+    .title;
+<span class="boring">}</span></code></pre></pre>
+<p>This creates a relation between the <code>Student</code> and <code>Book</code> entities. It uses the
+<code>writes__</code> method to create a relation indicating the <code>Student</code> writes a <code>Book</code>.
+The <code>book</code> call then specifies that the book's id equals a specific <code>Thing</code>
+entity.</p>
+<h4 id="pattern-selection"><a class="header" href="#pattern-selection">Pattern Selection:</a></h4>
+<p>SurrealDB also allows the pattern-like selection of entities:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let student_id = Student::create_id("oyelowo");
+let book_id = Book::create_id("2");
+let likes = StudentLiksBook::table();
+let writes = StudentWritesBook::table();
+let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
+
+let aliased_connection = Student::with(student_id)
+    .writes__(Empty)
+    .writes__(Empty)
+    .writes__(any_other_edges(&amp;[writes, likes]).where_(timeWritten.less_than_or_equal(50)))
+    .book(book_id)
+    .__as__(Student::aliases().writtenBooks);
+<span class="boring">}</span></code></pre></pre>
+<p>In this case, we are selecting all the books that a specific student wrote where
+the <code>timeWritten</code> is less than or equal to 50. This query is an example of how
+you can combine different methods and concepts provided by SurrealDB to form
+complex, yet understandable, queries.</p>
+<h4 id="modifying-and-updating-entities"><a class="header" href="#modifying-and-updating-entities">Modifying and Updating Entities:</a></h4>
+<p>The following example illustrates how to modify and update entities:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let ref id = created_weapon.clone().id;
+let weapon::Schema { strength, .. } = Weapon::schema();
+
+update::&lt;Weapon&gt;(id)
+    .set(strength.increment_by(5u64))
+    .run(db.clone())
+    .await?;
+
+let updated = update::&lt;Weapon&gt;(id)
+    .set(strength.decrement_by(2u64))
+    .return_one(db.clone())
+    .await?;
+
+let selected: Option&lt;Weapon&gt; = select(All)
+    .from(Weapon::table())
+    .return_one(db.clone())
+    .await?;
+assert_eq!(updated.unwrap().strength, 8);
+assert_eq!(selected.unwrap().strength, 8);
+<span class="boring">}</span></code></pre></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../concepts/record_ids.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../concepts/links_and_relation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../concepts/record_ids.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../concepts/links_and_relation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

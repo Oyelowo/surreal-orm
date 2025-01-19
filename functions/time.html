@@ -1,0 +1,919 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Time functions - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="time-functions"><a class="header" href="#time-functions">Time Functions</a></h1>
+<ul>
+<li><a href="#day-function">time::day()</a></li>
+<li><a href="#floor-function">time::floor()</a></li>
+<li><a href="#format-function">time::format()</a></li>
+<li><a href="#group-function">time::group()</a></li>
+<li><a href="#hour-function">time::hour()</a></li>
+<li><a href="#minute-function">time::minute()</a></li>
+<li><a href="#month-function">time::month()</a></li>
+<li><a href="#nano-function">time::nano()</a></li>
+<li><a href="#now-function">time::now()</a></li>
+<li><a href="#round-function">time::round()</a></li>
+<li><a href="#second-function">time::second()</a></li>
+<li><a href="#timezone-function">time::timezone()</a></li>
+<li><a href="#unix-function">time::unix()</a></li>
+<li><a href="#wday-function">time::wday()</a></li>
+<li><a href="#week-function">time::week()</a></li>
+<li><a href="#yday-function">time::yday()</a></li>
+<li><a href="#year-function">time::year()</a></li>
+</ul>
+<h2 id="timeday"><a class="header" href="#timeday">time::day() <a name="day-function"></a></a></h2>
+<p>The <code>time::day()</code> function extracts the day as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::day(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::day('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::day(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::day(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::day(param);
+assert_eq!(result.to_raw().build(), "time::day($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::day(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::day('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::day(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::day(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::day(param);
+assert_eq!(result.to_raw().build(), "time::day($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timefloor"><a class="header" href="#timefloor">time::floor() <a name="floor-function"></a></a></h2>
+<p>The <code>time::floor()</code> function rounds a datetime down by a specific duration.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let rebirth_date = Field::new("rebirth_date");
+let duration = Field::new("duration");
+let result = time::floor(rebirth_date, duration);
+
+assert_eq!(
+    result.to_raw().build(),
+    "time::floor(rebirth_date, duration)"
+);
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let rebirth_date = Field::new("rebirth_date");
+let duration = Field::new("duration");
+let result = time::floor(rebirth_date, duration);
+
+assert_eq!(
+    result.to_raw().
+
+build(),
+    "time::floor(rebirth_date, duration)"
+);
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timeformat"><a class="header" href="#timeformat">time::format() <a name="format-function"></a></a></h2>
+<p>The <code>time::format()</code> function outputs a datetime according to a specific format.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+let format_str = "'Year: 'yyyy-MM-dd";
+
+let result = time::format(dt, format_str);
+assert_eq!(
+    result.to_raw().build(),
+    "time::format('1970-01-01T00:01:01Z', 'Year: 'yyyy-MM-dd)"
+);
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+let format_str = "'Year: 'yyyy-MM-dd";
+
+let result = time::format(dt, format_str);
+assert_eq!(
+    result.to_raw().build(),
+    "time::format('1970-01-01T00:01:01Z', 'Year: 'yyyy-MM-dd)"
+);
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timegroup"><a class="header" href="#timegroup">time::group() <a name="group-function"></a></a></h2>
+<p>The <code>time::group()</code> function groups a datetime by a particular time interval.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+let interval = "month";
+
+let result = time::group(dt, interval);
+assert_eq!(
+    result.to_raw().build(),
+    "time::group('1970-01-01T00:01:01Z', 'month')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let interval_field = Field::new("interval");
+let result = time::group(rebirth_date, interval_field);
+assert_eq!(
+    result.to_raw().build(),
+    "time::group(rebirth_date, interval)"
+);
+
+let param = Param::new("rebirth_date");
+let result = time::group(param, interval);
+assert_eq!(
+    result.to_raw().build(),
+    "time::group($rebirth_date, 'month')"
+);
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+let interval = "month";
+
+let result = time::group(dt, interval);
+assert_eq!(
+    result.to_raw().build(),
+    "time::group('1970-01-01T00:01:01Z', 'month')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let interval_field = Field::new("interval");
+let result = time::group(rebirth_date, interval_field);
+assert_eq!(
+    result.to_raw().build(),
+    "time::group(rebirth_date, interval)"
+);
+
+let param = Param::new("rebirth_date");
+let result = time::group(param, interval);
+assert_eq!(
+    result.to_raw().build(),
+    "time::group($rebirth_date, 'month')"
+);
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timehour"><a class="header" href="#timehour">time::hour() <a name="hour-function"></a></a></h2>
+<p>The <code>time::hour()</code> function extracts the hour as a number</p>
+<p>from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::hour(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::hour('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::hour(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::hour(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::hour(param);
+assert_eq!(result.to_raw().build(), "time::hour($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::hour(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::hour('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::hour(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::hour(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::hour(param);
+assert_eq!(result.to_raw().build(), "time::hour($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timeminute"><a class="header" href="#timeminute">time::minute() <a name="minute-function"></a></a></h2>
+<p>The <code>time::minute()</code> function extracts the minutes as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::minute(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::minute('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::minute(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::minute(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::minute(param);
+assert_eq!(result.to_raw().build(), "time::minute($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::minute(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::minute('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::minute(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::minute(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::minute(param);
+assert_eq!(result.to_raw().build(), "time::minute($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timemonth"><a class="header" href="#timemonth">time::month() <a name="month-function"></a></a></h2>
+<p>The <code>time::month()</code> function extracts the month as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::month(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::month('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::month(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::month(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::month(param);
+assert_eq!(result.to_raw().build(), "time::month($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::month(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::month('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::month(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::month(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::month(param);
+assert_eq!(result.to_raw().build(), "time::month($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timenano"><a class="header" href="#timenano">time::nano() <a name="nano-function"></a></a></h2>
+<p>The <code>time::nano()</code> function returns the number of nanoseconds since the UNIX epoch.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::nano();
+assert_eq!(result.to_raw().build(), "time::nano()");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::nano();
+assert_eq!(result.to_raw().build(), "time::nano()");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timenow"><a class="header" href="#timenow">time::now() <a name="now-function"></a></a></h2>
+<p>The <code>time::now()</code> function returns the current datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::now();
+assert_eq!(result.to_raw().build(), "time::now()");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::now();
+assert_eq!(result.to_raw().build(), "time::now()");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timeround"><a class="header" href="#timeround">time::round() <a name="round-function"></a></a></h2>
+<p>The <code>time::round()</code> function rounds a datetime to the nearest multiple of a specific duration.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let rebirth_date = Field::new("rebirth_date");
+let duration = Field::new("duration");
+let result = time::round(rebirth_date, duration);
+
+assert_eq!(
+    result.to_raw().build(),
+    "time::round(rebirth_date, duration)"
+);
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let rebirth_date = Field::new("rebirth_date");
+let duration = Field::new("duration");
+let result = time::round(rebirth_date, duration);
+
+assert_eq!(
+    result.to_raw().build(),
+    "time::round(rebirth_date, duration)"
+);
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timesecond-a"><a class="header" href="#timesecond-a">time::second() <a name="second-function">&lt;/a</a></h2>
+<blockquote>
+</blockquote>
+<p>The <code>time::second()</code> function extracts the second as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::second(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::second('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::second(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::second(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::second(param);
+assert_eq!(result.to_raw().build(), "time::second($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::second(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::second('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::second(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::second(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::second(param);
+assert_eq!(result.to_raw().build(), "time::second($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timetimezone"><a class="header" href="#timetimezone">time::timezone() <a name="timezone-function"></a></a></h2>
+<p>The <code>time::timezone()</code> function returns the current local timezone offset in hours.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::timezone();
+assert_eq!(result.to_raw().build(), "time::timezone()");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::timezone();
+assert_eq!(result.to_raw().build(), "time::timezone()");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timeunix"><a class="header" href="#timeunix">time::unix() <a name="unix-function"></a></a></h2>
+<p>The <code>time::unix()</code> function returns the number of seconds since the UNIX epoch.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::unix();
+assert_eq!(result.to_raw().build(), "time::unix()");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let result = time::unix();
+assert_eq!(result.to_raw().build(), "time::unix()");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timewday"><a class="header" href="#timewday">time::wday() <a name="wday-function"></a></a></h2>
+<p>The <code>time::wday()</code> function extracts the week day as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::wday(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::wday('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::wday(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::wday(rebirth_date)");
+
+
+
+let param = Param::new("rebirth_date");
+let result = time::wday(param);
+assert_eq!(result.to_raw().build(), "time::wday($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::wday(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::wday('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::wday(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::wday(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::wday(param);
+assert_eq!(result.to_raw().build(), "time::wday($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timeweek"><a class="header" href="#timeweek">time::week() <a name="week-function"></a></a></h2>
+<p>The <code>time::week()</code> function extracts the week as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::week(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::week('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::week(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::week(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::week(param);
+assert_eq!(result.to_raw().build(), "time::week($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::week(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::week('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::week(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::week(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::week(param);
+assert_eq!(result.to_raw().build(), "time::week($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timeyday"><a class="header" href="#timeyday">time::yday() <a name="yday-function"></a></a></h2>
+<p>The <code>time::yday()</code> function extracts the yday as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::yday(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::yday('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::yday(rebirth_date);
+assert_eq!(result.to_raw().build(), "
+
+time::yday(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::yday(param);
+assert_eq!(result.to_raw().build(), "time::yday($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::yday(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::yday('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::yday(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::yday(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::yday(param);
+assert_eq!(result.to_raw().build(), "time::yday($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="timeyear"><a class="header" href="#timeyear">time::year() <a name="year-function"></a></a></h2>
+<p>The <code>time::year()</code> function extracts the year as a number from a datetime.</p>
+<p><strong>Usage:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::year(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::year('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::year(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::year(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::year(param);
+assert_eq!(result.to_raw().build(), "time::year($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use surreal_orm::{*, functions::time};
+
+let dt = chrono::DateTime::&lt;chrono::Utc&gt;::from_naive_utc_and_offset(
+    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    chrono::Utc,
+);
+
+let result = time::year(dt);
+assert_eq!(
+    result.to_raw().build(),
+    "time::year('1970-01-01T00:01:01Z')"
+);
+
+let rebirth_date = Field::new("rebirth_date");
+let result = time::year(rebirth_date);
+assert_eq!(result.to_raw().build(), "time::year(rebirth_date)");
+
+let param = Param::new("rebirth_date");
+let result = time::year(param);
+assert_eq!(result.to_raw().build(), "time::year($rebirth_date)");
+<span class="boring">}</span></code></pre></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../functions/string.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../functions/type.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../functions/string.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../functions/type.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

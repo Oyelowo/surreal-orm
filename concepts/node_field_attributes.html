@@ -1,0 +1,499 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Field Attributes - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-node-field-attributes"><a class="header" href="#chapter-node-field-attributes">Chapter: Node Field Attributes</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ol>
+<li><a href="#introduction">Introduction</a>
+<ul>
+<li><a href="#attributes-table">Attributes Table</a></li>
+</ul>
+</li>
+<li><a href="#basic-annotations">Basic Annotations</a></li>
+<li><a href="#granular-attributes">Granular Attributes</a></li>
+<li><a href="#defining-attributes-with-functions">Defining Attributes with Functions</a></li>
+<li><a href="#field-definitions">Field Definitions</a></li>
+<li><a href="#links-and-relationships">Links and Relationships</a></li>
+<li><a href="#customizing-behavior-with-inline-expressions">Customizing Behavior with Inline Expressions</a></li>
+<li><a href="#invalid-usages">Invalid Usages</a></li>
+<li><a href="#summary-and-conclusion">Summary and Conclusion</a></li>
+</ol>
+<hr />
+<h2 id="1-introduction"><a class="header" href="#1-introduction">1. Introduction <a name="introduction"></a></a></h2>
+<p>Field attributes in Surreal orm allow developers to fine-tune the behavior and
+characteristics of each field within a database node. As you've already seen in
+the table of attributes, each attribute serves a specific purpose. In this
+chapter, we'll delve deeper into each attribute, providing examples and
+clarifying common misconceptions.</p>
+<hr />
+<h3 id="attributes-table"><a class="header" href="#attributes-table">Attributes Table <a name="attributes-table"></a></a></h3>
+<h2 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Description</th><th>Type</th><th>Optional</th></tr></thead><tbody>
+<tr><td>rename</td><td>Renames the field.</td><td><code>string</code></td><td>Y</td></tr>
+<tr><td>link_one</td><td>Specifies a relationship to a singular record in another node table in the database.</td><td><code>model=NodeEdgeNode, connection -&gt;edge-&gt;node</code></td><td>Y</td></tr>
+<tr><td>link_self</td><td>Specifies a relationship to a singular record in the same node table in the database.</td><td><code>Node</code></td><td>Y</td></tr>
+<tr><td>link_many</td><td>Specifies a relationship to multiple records in another node table in the database.</td><td>`Vec&lt;S</td><td></td></tr>
+<tr><td>relate</td><td>Generates the relation helpers for the Current Node struct to an edge and destination node. The corresponding field name is merely used as an alias in code generation and is read only and not serializable. e.g <code>student:1-&gt;writes-&gt;book:2</code></td><td></td><td></td></tr>
+<tr><td>type</td><td>Specify the valid surrealdb field's type. One of any, array, bool, datetime, decimal, duration, float, int, number, object, string, record.</td><td>surrealdb field type</td><td>Y</td></tr>
+<tr><td>assert</td><td>Assert the field's value meets a certain criteria using the an filter using <code>value()</code> function as an operation (e.g <code>value().is_not(NONE)</code>) or in <code>cond</code> helper function for more complex filter assertion. e.g <code>cond(value().is_not(NONE)).and(value().like("@codebreather"))</code>.</td><td>inline code string</td><td>Y</td></tr>
+<tr><td>assert_fn</td><td>Provide a function to assert the field's value meets a certain criteria. This is similar to <code>assert</code> but is intended for an already created external function which is useful when reusing an assertion e.g <code>is_email</code>.</td><td>function name string</td><td>Y</td></tr>
+<tr><td>item_type</td><td>Only when for nested array. Specifies the type of the items of the array.</td><td><code>Option&lt;FieldTypeWrapper&gt;</code></td><td>Y</td></tr>
+<tr><td>item_assert</td><td>Only used for nested array. Asserts a condition on the content.</td><td><code>Option&lt;syn::LitStr&gt;</code></td><td>Y</td></tr>
+<tr><td>item_assert_fn</td><td>Only used for nested array. Specifies the function to assert a condition on the content.</td><td><code>Option&lt;syn::Path&gt;</code></td><td>Y</td></tr>
+<tr><td>define</td><td>Generates a <code>DEFINE FIELD</code> statement for the table. This overrides other specific definitions to prevent confusion and collision. You can also invoke an external function directly rather than inlining the function e.g <code>define = "define_age()"</code></td><td>inline code string</td><td>Y</td></tr>
+<tr><td>define_fn</td><td>Generates a <code>DEFINE FIELD</code> statement for the table. This overrides other specific definitions to prevent confusion and collision. Same as <code>define</code> attribute but expects the function name instead rather than invocation i.e <code>define_age</code> instead of <code>define_age()</code>. You can also invoke an external function directly rather than inlining the function e.g `define = "def</td><td></td><td></td></tr>
+<tr><td>skip_serializing</td><td>When true, this field will be omitted when serializing the struct.</td><td>bool</td><td>Y</td></tr>
+</tbody></table>
+</div>
+<h2 id="2-basic-annotations"><a class="header" href="#2-basic-annotations">2. Basic Annotations <a name="basic-annotations"></a></a></h2>
+<p>Let's begin with a basic example. The <code>Student</code> struct below uses minimal
+annotations:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(table = "student")]
+pub struct Student {
+    id: SurrealId&lt;Student, String&gt;,
+    first_name: String,
+    last_name: String,
+    age: u8,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Here:</p>
+<ul>
+<li><code>table</code> determines the name of the table in the database that corresponds
+to this struct.</li>
+</ul>
+<hr />
+<h2 id="3-granular-attributes"><a class="header" href="#3-granular-attributes">3. Granular Attributes <a name="granular-attributes"></a></a></h2>
+<p>For a more detailed configuration of a field, you can use granular attributes.
+The <code>Student</code> struct provides various usages:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    table = "student",
+    permissions = "student_permissions()",
+)]
+pub struct Student {
+    id: SurrealId&lt;Student, String&gt;,
+    first_name: String,
+    last_name: String,
+    #[orm(
+        type_ = "int",
+        value = "18",
+        assert = "cond(value().is_not(NONE)).and(value().gte(18))",
+        permissions = "age_permissions()"
+    )]
+    age_inline_expr: u8,
+    // ... other fields ...
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Here:</p>
+<ul>
+<li><code>type</code> specifies the data type of the field in the database.</li>
+<li><code>value</code> sets a default value for the field.</li>
+<li><code>assert</code> provides a condition that the field value must satisfy.</li>
+<li><code>permissions</code> specifies what operations can be performed on the field and
+under what conditions.</li>
+</ul>
+<hr />
+<h2 id="4-defining-attributes-with-functions"><a class="header" href="#4-defining-attributes-with-functions">4. Defining Attributes with Functions <a name="defining-attributes-with-functions"></a></a></h2>
+<p>You can externalize the logic for defining attributes by using external
+functions. This aids in reusability and cleaner code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    table = "student_with_define_fn_attr",
+    define_fn = "define_student_with_define_attr"
+)]
+pub struct StudentWithDefineFnAttr {
+    // ... fields ...
+    #[orm(type_ = "int", define_fn = "age_define_external_fn_path")]
+    age_define_external_fn_path: u8,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Here:</p>
+<ul>
+<li><code>define_fn</code> allows you to specify an external function that returns the
+definition of the table or field.</li>
+</ul>
+<hr />
+<h2 id="5-field-definitions"><a class="header" href="#5-field-definitions">5. Field Definitions <a name="field-definitions"></a></a></h2>
+<p>Fields can be defined in multiple ways using <code>surreal_orm</code>:</p>
+<h3 id="inline-definitions"><a class="header" href="#inline-definitions">Inline Definitions:</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(type_ = "int", value = "18")]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<h3 id="external-function-invoked"><a class="header" href="#external-function-invoked">External Function Invoked:</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(type_ = "int", value = "get_age_default_value()")]
+age_default_external_function_invoked_expr: u8,
+<span class="boring">}</span></code></pre></pre>
+<h3 id="using-external-function-attributes"><a class="header" href="#using-external-function-attributes">Using External Function Attributes:</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(type_ = "int", value_fn = "get_age_default_value")]
+age_external_fn_attrs: u8,
+<span class="boring">}</span></code></pre></pre>
+<h3 id="mixing-and-matching"><a class="header" href="#mixing-and-matching">Mixing and Matching:</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(type_ = "int", value = "get_age_default_value()", assert_fn = "get_age_assertion")]
+age_mix_and_match_external_fn_inline_attrs: u8,
+<span class="boring">}</span></code></pre></pre>
+<hr />
+<h2 id="6-links-and-relationships"><a class="header" href="#6-links-and-relationships">6. Links and Relationships <a name="links-and-relationships"></a></a></h2>
+<p>You can define relationships between different structs (representing tables in
+the database). Relationships can be <code>one-to-one</code>, <code>one-to-many</code>, or
+<code>many-to-many</code>.</p>
+<p>For instance:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(link_one = "Book")]
+fav_book: LinkOne&lt;Book&gt;,
+<span class="boring">}</span></code></pre></pre>
+<p>This indicates a one-to-one relationship between a student and a book.</p>
+<hr />
+<h2 id="7-customizing-behavior-with-inline-expressions"><a class="header" href="#7-customizing-behavior-with-inline-expressions">7. Customizing Behavior with Inline Expressions <a name="customizing-behavior-with-inline-expressions"></a></a></h2>
+<p>In <code>surreal_orm</code>, you can use inline expressions to add custom behavior:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    value = "get_age_by_group_default_value(AgeGroup::Teen)",
+    assert = "get_age_assertion()",
+)]
+age_teen_external_function_invoked_expr: u8,
+<span class="boring">}</span></code></pre></pre>
+<p>Here, the default value of <code>age_teen_external_function_invoked_expr</code> is
+determined by the <code>get_age_by_group_default_value</code> function with
+<code>AgeGroup::Teen</code> as a parameter.</p>
+<hr />
+<h2 id="8-invalid-usages"><a class="header" href="#8-invalid-usages">8. Invalid Usages <a name="invalid-usages"></a></a></h2>
+<p>When using <code>surreal_orm</code>, it's essential to be cautious about the attributes you
+combine. Certain combinations are considered invalid and will result in
+compilation errors.</p>
+<h3 id="1-mixing-value-and-value_fn"><a class="header" href="#1-mixing-value-and-value_fn">1. Mixing <code>value</code> and <code>value_fn</code>:</a></h3>
+<p>These two attributes are mutually exclusive. You can't define a default value
+using both a direct expression and a function at the same time.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    value = "get_age_default_value()",
+    value_fn = "get_age_default_value"
+)]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<h3 id="2-mixing-assert-and-assert_fn"><a class="header" href="#2-mixing-assert-and-assert_fn">2. Mixing <code>assert</code> and <code>assert_fn</code>:</a></h3>
+<p>Similarly, you can't use both an inline assertion and an external function for
+the same purpose.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    assert = "get_age_assertion()",
+    assert_fn = "get_age_assertion"
+)]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<h3 id="3-mixing-permissions-and-permissions_fn"><a class="header" href="#3-mixing-permissions-and-permissions_fn">3. Mixing <code>permissions</code> and <code>permissions_fn</code>:</a></h3>
+<p>Permissions should be defined either inline or through an external function, but
+not both.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    permissions = "age_permissions()",
+    permissions_fn = "age_permissions"
+)]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<h3 id="4-combining-define-and-define_fn"><a class="header" href="#4-combining-define-and-define_fn">4. Combining <code>define</code> and <code>define_fn</code>:</a></h3>
+<p>These attributes are also mutually exclusive. When specifying a custom
+definition, you should use either an inline expression or an external function.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    define = "define_age()",
+    define_fn = "define_age"
+)]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<h3 id="5-using-other-attributes-with-define-or-define_fn"><a class="header" href="#5-using-other-attributes-with-define-or-define_fn">5. Using other attributes with <code>define</code> or <code>define_fn</code>:</a></h3>
+<p>When you use either the <code>define</code> or <code>define_fn</code> attribute, you cannot use any
+other attributes (except for <code>type</code>). This is because the definition provided
+should be comprehensive and not require additional modifiers.</p>
+<p>For example, the following combinations are invalid:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    value = "18",
+    define = "define_age()"
+)]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    assert = "cond(value().is_not(NONE)).and(value().gte(18))",
+    define = "define_age()"
+)]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[orm(
+    type_ = "int",
+    permissions = "for_permission([CrudType::Create, CrudType::Delete]).where_(StudentTest3::schema().firstName.is(\"Oyelowo\"))",
+    define = "define_age()"
+)]
+age: u8,
+<span class="boring">}</span></code></pre></pre>
+<p>By being aware of these restrictions and avoiding the invalid combinations, you
+can ensure that your code remains consistent, clear, and free from compilation
+errors.</p>
+<hr />
+<h2 id="9-summary-and-conclusion"><a class="header" href="#9-summary-and-conclusion">9. Summary and Conclusion</a></h2>
+<p>With <code>surreal_orm</code>, you can easily map Rust structs to database tables,
+customize field properties, define relationships, and more. This provides a
+powerful way to interact with databases in a type-safe manner while keeping the
+codebase clean and maintainable.</p>
+<p>For a hands-on illustration, consider the following code snippet which provides
+a comprehensive overview of the various annotations:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[orm(
+    table = "student_with_granular_attributes",
+    drop,
+    schemafull,
+    as_ = "select(All).from(Student::table())",
+    permissions = "student_permissions()",
+)]
+pub struct StudentWithGranularAttributes {
+    id: SurrealId&lt;StudentWithGranularAttributes, String&gt;,
+    first_name: String,
+    last_name: String,
+    #[orm(
+        type_ = "int",
+        value = "18",
+        assert = "cond(value().is_not(NONE)).and(value().gte(18))",
+        permissions = "for_permission([CrudType::Create, CrudType::Delete]).where_(StudentWithGranularAttributes::schema().firstName.is(\"Oyelowo\"))"
+    )]
+    age_inline_expr: u8,
+    // ... other fields ...
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This chapter is a starting point to dive deeper into <code>surreal_orm</code>. With this
+foundation, you can explore more advanced features and best practices to make
+the most of this powerful ORM crate in Rust.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../concepts/node_struct_attributes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../concepts/edge.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../concepts/node_struct_attributes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../concepts/edge.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

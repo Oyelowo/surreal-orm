@@ -1,0 +1,680 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Operators - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="operators"><a class="header" href="#operators">Operators</a></h2>
+<h1 id="sql-query-builder-field-operators"><a class="header" href="#sql-query-builder-field-operators">SQL Query Builder: Field Operators</a></h1>
+<p>All these operators can also be chained together to create more complex conditions. For instance:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>age.outside(18, 65).and(age.not_equal(99));
+p1.outside(18, 65).and(p1.not_equal(99));
+<span class="boring">}</span></code></pre></pre>
+<p>The chaining of these operators is quite flexible and allows for the construction of complex query logic in a clear and concise manner.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#comparison-operators">Comparison Operators</a>
+<ul>
+<li><a href="#equal-eq"><code>equal</code>, <code>eq</code></a></li>
+<li><a href="#not_equal-neq"><code>not_equal</code>, <code>neq</code></a></li>
+<li><a href="#exactly_equal"><code>exactly_equal</code></a></li>
+<li><a href="#any_equal"><code>any_equal</code></a></li>
+<li><a href="#all_equal"><code>all_equal</code></a></li>
+</ul>
+</li>
+<li><a href="#string-operators">String Operators</a>
+<ul>
+<li><a href="#like"><code>like</code></a></li>
+<li><a href="#not_like"><code>not_like</code></a></li>
+<li><a href="#any_like"><code>any_like</code></a></li>
+<li><a href="#all_like"><code>all_like</code></a></li>
+</ul>
+</li>
+<li><a href="#relational-operators">Relational Operators</a>
+<ul>
+<li><a href="#less_than-lt"><code>less_than</code>, <code>lt</code></a></li>
+<li><a href="#less_than_or_equal-lte"><code>less_than_or_equal</code>, <code>lte</code></a></li>
+<li><a href="#greater_than-gt"><code>greater_than</code>, <code>gt</code></a></li>
+<li><a href="#greater_than_or_equal-gte"><code>greater_than_or_equal</code>, <code>gte</code></a></li>
+</ul>
+</li>
+<li><a href="#arithmetic-operators">Arithmetic Operators</a>
+<ul>
+<li><a href="#add-plus"><code>add</code>, <code>plus</code></a></li>
+<li><a href="#subtract-minus"><code>subtract</code>, <code>minus</code></a></li>
+<li><a href="#multiply-mul"><code>multiply</code>, <code>mul</code></a></li>
+<li><a href="#divide-div"><code>divide</code>, <code>div</code></a></li>
+<li><a href="#power-pow"><code>power</code>, <code>pow</code></a></li>
+</ul>
+</li>
+<li><a href="#logical-operators">Logical Operators</a>
+<ul>
+<li><a href="#truthy_and"><code>truthy_and</code></a></li>
+<li><a href="#truthy_or"><code>truthy_or</code></a></li>
+<li><a href="#and"><code>and</code></a></li>
+<li><a href="#or"><code>or</code></a></li>
+<li><a href="#is"><code>is</code></a></li>
+<li><a href="#is_not"><code>is_not</code></a></li>
+</ul>
+</li>
+<li><a href="#membership-operators">Membership Operators</a>
+<ul>
+<li><a href="#contains"><code>contains</code></a></li>
+<li><a href="#contains_not"><code>contains_not</code></a></li>
+<li><a href="#contains_all"><code>contains_all</code></a></li>
+<li><a href="#contains_any"><code>contains_any</code></a></li>
+<li><a href="#contains_none"><code>contains_none</code></a></li>
+<li><a href="#inside_in"><code>inside</code>, <code>in_</code></a></li>
+<li><a href="#not_inside"><code>not_inside</code></a></li>
+<li><a href="#all_inside"><code>all_inside</code></a></li>
+<li><a href="#any_inside"><code>any_inside</code></a></li>
+<li><a href="#none_inside"><code>none_inside</code></a></li>
+<li><a href="#outside"><code>outside</code></a></li>
+<li><a href="#intersects"><code>intersects</code></a></li>
+</ul>
+</li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>This document provides an overview of the different SQL query field operators available in our SQL Query Builder. For each operator, a brief description, usage, and examples are provided.</p>
+<h2 id="comparison-operators"><a class="header" href="#comparison-operators">Comparison Operators</a></h2>
+<h3 id="equal-eq"><a class="header" href="#equal-eq"><code>equal</code>, <code>eq</code></a></h3>
+<p>The <code>equal</code> operator checks if the given field is equal to the provided value. It returns true if the condition is met, and false otherwise.</p>
+<p>The <code>eq</code> operator is an alias for <code>equal</code>.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let field = Field::new("field");
+</span>field.equal(5);
+field.eq(9);
+
+## `not_equal`, `neq`
+
+The `not_equal` operator checks if the given field is not equal to the provided value. It returns true if the condition is met, and false otherwise.
+
+The `neq` operator is an alias for `not_equal`.
+
+Usage:
+
+```rust
+<span class="boring">use surreal_orm::*;
+</span><span class="boring">let ref price = Field::new("price");
+</span>price.not_equal(100);
+price.neq(100);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="exactly_equal"><a class="header" href="#exactly_equal"><code>exactly_equal</code></a></h3>
+<p>The <code>exactly_equal</code> operator checks if the given field is exactly equal to the provided value. It is generally used for fields that are binary or have specific precision requirements.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let name = Field::new("name");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>name.exactly_equal("Oyelowo");
+p1.exactly_equal(3.14);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="any_equal"><a class="header" href="#any_equal"><code>any_equal</code></a></h3>
+<p>The <code>any_equal</code> operator checks if any value in a list of values is equal to the given field.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let status = Field::new("status");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>status.any_equal(vec!["ACTIVE", "IN PROGRESS"]);
+p1.any_equal(vec!["APPLE", "BANANA"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="all_equal"><a class="header" href="#all_equal"><code>all_equal</code></a></h3>
+<p>The <code>all_equal</code> operator checks if all values in a list are equal to the given field. It's a niche operator and has limited use.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let id = Field::new("id");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>id.all_equal([1, 3, 5]);
+p1.all_equal([2, 2, 2]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="like"><a class="header" href="#like"><code>like</code></a></h3>
+<p>The <code>like</code> operator checks if the given field matches the provided pattern. <code>%</code> is used as a wildcard character.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let name = Field::new("name");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>name.like("Jo");
+p1.like("son");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="not_like"><a class="header" href="#not_like"><code>not_like</code></a></h3>
+<p>The <code>not_like</code> operator checks if the given field does not match the provided pattern. <code>%</code> is used as a wildcard character.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let name = Field::new("name");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>name.not_like("Jo%");
+p1.not_like("%son");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="any_like"><a class="header" href="#any_like"><code>any_like</code></a></h3>
+<p>The <code>any_like</code> operator checks if any value in a list of values matches the given field.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let status = Field::new("status");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>status.any_like(vec!["ACTIVE", "IN PROGRESS"]);
+p1.any_like(vec!["APPLE", "BANANA"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="all_like"><a class="header" href="#all_like"><code>all_like</code></a></h3>
+<p>The <code>all_like</code> operator checks if all values in a list match the given field. It's a niche operator and has limited use.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let id = Field::new("id");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>id.all_like(vec!["1", "2", "4"]);
+p1.all_like(vec!["2", "2", "2"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="less_than-lt"><a class="header" href="#less_than-lt"><code>less_than</code>, <code>lt</code></a></h3>
+<p>The <code>less_than</code> operator checks if the given field is less than the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>age.less_than(18);
+p1.lt(100);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="less_than_or_equal-lte"><a class="header" href="#less_than_or_equal-lte"><code>less_than_or_equal</code>, <code>lte</code></a></h3>
+<p>The <code>less_than_or_equal</code> operator checks if the given field is less than or equal to the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>age.less_than_or_equal(18);
+p1.lte(100);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="greater_than-gt"><a class="header" href="#greater_than-gt"><code>greater_than</code>, <code>gt</code></a></h3>
+<p>The <code>greater_than</code> operator checks if the given field is greater than the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>age.greater_than(18);
+p1.gt(100);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="greater_than_or_equal-gte"><a class="header" href="#greater_than_or_equal-gte"><code>greater_than_or_equal</code>, <code>gte</code></a></h3>
+<p>The <code>greater_than_or_equal</code> operator checks if the given field is greater than or equal to the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>age.greater_than_or_equal(18);
+p1.gte(100);
+<span class="boring">}</span></code></pre></pre>
+<h2 id="add-plus"><a class="header" href="#add-plus">add, plus, +</a></h2>
+<p>The <code>add</code> operator adds a value to the given field.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let salary = Field::new("salary");
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>salary.add(500);
+age + 500;
+p1.plus(200);
+<span class="boring">}</span></code></pre></pre>
+<h2 id="subtract-minus"><a class="header" href="#subtract-minus">subtract, minus, -</a></h2>
+<p>The <code>subtract</code> operator subtracts a value from the given field.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let salary = Field::new("salary");
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>salary.subtract(500);
+age - 500;
+p1.subtract(200);
+<span class="boring">}</span></code></pre></pre>
+<h2 id="multiply-mul"><a class="header" href="#multiply-mul">multiply, mul, *</a></h2>
+<p>The <code>multiply</code> operator multiplies the given field by the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let salary = Field::new("salary");
+</span><span class="boring">let quantity = Field::new("quantity");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>quantity.multiply(price);
+salary * 434;
+p1.multiply(10);
+<span class="boring">}</span></code></pre></pre>
+<p>This will generate the following SQL statement:</p>
+<pre><code class="language-sql">quantity * price
+p1 * 10
+</code></pre>
+<h2 id="divide-div"><a class="header" href="#divide-div">divide, div, /</a></h2>
+<p>The <code>divide</code> operator divides the given field by the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let salary = Field::new("salary");
+</span><span class="boring">let quantity = Field::new("quantity");
+</span><span class="boring">let count = Field::new("count");
+</span><span class="boring">let param = Param::new("param");
+</span>salary.divide(343);
+quantity / count;
+param.div(2);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="power-pow"><a class="header" href="#power-pow"><code>power</code>, <code>pow</code></a></h3>
+<p>The <code>power</code> operator raises the given field to the power of the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let length = Field::new("length");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>length.power(2);
+p1.power(3);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="trthy_and"><a class="header" href="#trthy_and"><code>trthy_and</code></a></h3>
+<p>The <code>truthy_and</code> operator performs a logical AND operation between the field and the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let is_active = Field::new("is_active");
+</span>is_active.truthy_and(true);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="truthy_or"><a class="header" href="#truthy_or"><code>truthy_or</code></a></h3>
+<p>The <code>truthy_or</code> operator performs a logical OR operation between the field and the provided value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let is_active = Field::new("is_active");
+</span>is_active.truthy_or(is_paid);
+<span class="boring">}</span></code></pre></pre>
+<p>This will generate the following SQL statement:</p>
+<pre><code class="language-sql">is_active OR is_paid
+p1 OR p2
+</code></pre>
+<h3 id="and"><a class="header" href="#and"><code>and</code></a></h3>
+<p>The <code>and</code> operator is used to combine multiple conditions in a WHERE clause to create more complex conditions. It returns true if all conditions are true.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let price = Field::new("price");
+</span>price.and(54).and(92);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="or"><a class="header" href="#or"><code>or</code></a></h3>
+<p>The <code>or</code> operator is used to combine multiple conditions in a WHERE clause to create more complex conditions. It returns true if at least one of the conditions is true.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let  = Field::new("price");
+</span>is_active.or(is_paid);
+p1.or(p2);
+<span class="boring">}</span></code></pre></pre>
+<p>This will generate the following SQL statement:</p>
+<h3 id="is"><a class="header" href="#is"><code>is</code></a></h3>
+<p>The <code>is</code> operator compares if a field is equal to a specific value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let age = Field::new("age");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>age.is(21);
+p1.is("John");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="is_not"><a class="header" href="#is_not"><code>is_not</code></a></h3>
+<p>The <code>is_not</code> operator compares if a field is not equal to a specific value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let age = Field::new("age");
+</span>age.is_not(21);
+p1.is_not("John");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="contains"><a class="header" href="#contains"><code>contains</code></a></h3>
+<p>The <code>contains</code> operator checks if a field contains a specific value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let names = Field::new("names");
+</span>names.contains("John");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="contains_not"><a class="header" href="#contains_not"><code>contains_not</code></a></h3>
+<p>The <code>contains_not</code> operator checks if a field does not contain a specific value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let names = Field::new("names");
+</span>names.contains_not("John");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="contains_all"><a class="header" href="#contains_all"><code>contains_all</code></a></h3>
+<p>The <code>contains_all</code> operator checks if a field contains all specified values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let tags = Field::new("tags");
+</span>tags.contains_all(vec!["novel", "adventure"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="contains_any"><a class="header" href="#contains_any"><code>contains_any</code></a></h3>
+<p>The <code>contains_any</code> operator checks if a field contains any of the specified values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let tags = Field::new("tags");
+</span>tags.contains_any(vec!["novel", "adventure"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="contains_none"><a class="header" href="#contains_none"><code>contains_none</code></a></h3>
+<p>The <code>contains_none</code> operator checks if a field does not contain any of the specified values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let tags = Field::new("tags");
+</span>tags.contains_none(vec!["novel", "adventure"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="inside-and-in_"><a class="header" href="#inside-and-in_"><code>inside</code> and <code>in_</code></a></h3>
+<p>The <code>inside</code> and <code>in_</code> operators check if a field's value is within a specified array of values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let scores = Field::new("scores");
+</span><span class="boring">let p1 = Field::new("p1");
+</span>scores.inside(vec![20, 30, 40]);
+p1.inside(vec![20, 30, 40]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="not_inside"><a class="header" href="#not_inside"><code>not_inside</code></a></h3>
+<p>The <code>not_inside</code> operator checks if a field's value is not within a specified array of values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let scores = Field::new("scores");
+</span>scores.not_inside(vec![20, 30, 40]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="all_inside"><a class="header" href="#all_inside"><code>all_inside</code></a></h3>
+<p>The <code>all_inside</code> operator checks if all values in a field are within a specified array of values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let tags = Field::new("tags");
+</span>tags.all_inside(["novel", "adventure", "mystery"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="any_inside"><a class="header" href="#any_inside"><code>any_inside</code></a></h3>
+<p>The <code>any_inside</code> operator checks if any value in a field is within a specified array of values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let tags = Field::new("tags");
+</span>tags.any_inside(vec!["novel", "adventure", "mystery"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="none_inside"><a class="header" href="#none_inside"><code>none_inside</code></a></h3>
+<p>The <code>none_inside</code> operator checks if none of the values in a field are within a specified array of values.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let tags = Field::new("tags");
+</span>tags.none_inside(["novel", "adventure", "mystery"]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="outside"><a class="header" href="#outside"><code>outside</code></a></h3>
+<p>The <code>outside</code> operator checks whether a geometry value is outside another geometry value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let point = Field::new("point");
+</span><span class="boring">let area = Param::new("area");
+</span>point.outside(area);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="intersects"><a class="header" href="#intersects"><code>intersects</code></a></h3>
+<p>The <code>intersects</code> operator checks whether a geometry value intersects annother geometry value.</p>
+<p>Usage:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use surreal_orm::*;
+</span><span class="boring">let area1 = Field::new("area1");
+</span><span class="boring">let area2 = Field::new("area2");
+</span>area1.intersects(area2);
+<span class="boring">}</span></code></pre></pre>
+<p>Also, note the distinction between <code>Field</code> and <code>Param</code> in the usage and examples.
+A <code>Field</code> represents a column in a database table, while a <code>Param</code> represents a parameter
+that could be used in the for value assignment. These are interchangeable in the context of these operators,
+meaning that you can apply the same operators whether you are comparing fields or parameters.</p>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>This document covers the complete list of SQL Query Builder field operators.
+Using these operators will help you build complex and robust SQL queries.
+Always ensure that you use the correct operator for your specific needs to prevent unexpected results or errors.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="statements/sleep.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="parameters.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="statements/sleep.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="parameters.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

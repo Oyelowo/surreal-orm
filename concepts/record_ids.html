@@ -1,0 +1,347 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Record Ids - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="record-ids"><a class="header" href="#record-ids">Record Ids</a></h1>
+<p>The <code>SurrealId</code> is a wrapper struct that extends the capabilities of
+<code>surrealdb::sql::Thing</code> and provides a more ergonomic interface. It's a static
+type representing the id of a model in the Surreal ORM and is a combination of
+the model's table name and the id, where the id can be anything that can be
+converted into a <code>surrealdb::sql::Id</code>.</p>
+<p>Let's explore how to utilize these ID types both implicitly (through
+auto-generation via the Default trait) and explicitly (by creating them
+manually).</p>
+<ol>
+<li><strong>SurrealSimpleId<Self>:</strong></li>
+</ol>
+<p>This ID type auto-generates a unique identifier when a new instance of the
+struct is created, thanks to the implementation of the Default trait. But you
+can also manually generate it using the <code>create_simple_id()</code> function directly
+on the struct.</p>
+<p>Example struct:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Node, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+#[orm(table = "alien")]
+pub struct Alien {
+    pub id: SurrealSimpleId&lt;Self&gt;,
+    // other fields
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Creating an instance of Alien with an auto-generated ID (implicit):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let alien = Alien {
+    // other fields
+    ..Default::default()
+};
+<span class="boring">}</span></code></pre></pre>
+<p>Creating an instance of Alien with a manually generated ID (explicit):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let alien = Alien {
+    id: Alien::create_simple_id(),
+    // other fields
+};
+<span class="boring">}</span></code></pre></pre>
+<ol start="2">
+<li><strong>SurrealUuid<Self>:</strong></li>
+</ol>
+<p><code>SurrealUuid&lt;Self&gt;</code> auto-generates a UUID when a new instance of the struct is
+created. You can also manually generate it using the <code>create_uuid()</code> function on
+the struct.</p>
+<p>Example struct:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Node, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+#[orm(table = "account")]
+pub struct Account {
+    pub id: SurrealUuid&lt;Self&gt;,
+    // other fields
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Creating an instance of Account with an auto-generated UUID (implicit):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let account = Account {
+    // other fields
+    ..Default::default()
+};
+<span class="boring">}</span></code></pre></pre>
+<p>Creating an instance of Account with a manually generated UUID (explicit):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let account = Account {
+    id: Account::create_uuid(),
+    // other fields
+};
+<span class="boring">}</span></code></pre></pre>
+<ol start="3">
+<li><strong>SurrealUlid<Self>:</strong></li>
+</ol>
+<p><code>SurrealUlid&lt;Self&gt;</code> auto-generates a ULID when a new instance of the struct is
+created. You can also manually generate it using the <code>create_ulid()</code> function on
+the struct.</p>
+<p>Example struct:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Node, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+#[orm(table = "spaceship")]
+pub struct SpaceShip {
+    pub id: SurrealUlid&lt;Self&gt;,
+    // other fields
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Creating an instance of SpaceShip with an auto-generated ULID (implicit):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let spaceship = SpaceShip {
+    // other fields
+    ..Default::default()
+};
+<span class="boring">}</span></code></pre></pre>
+<p>Creating an instance of SpaceShip with a manually generated ULID (explicit):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let spaceship = SpaceShip {
+    id: SpaceShip::create_ulid(),
+    // other fields
+};
+<span class="boring">}</span></code></pre></pre>
+<ol start="4">
+<li><strong>SurrealId&lt;Self, T&gt;:</strong></li>
+</ol>
+<p>This is the most flexible ID type, allowing for any arbitrary serializable type
+<code>T</code> as the ID. However, it doesn't implement the Default trait, which means you
+must manually create instances of this type using the <code>create_id()</code> function.</p>
+<p>Example struct:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[orm(table = "weapon")]
+pub struct Weapon {
+    pub id: SurrealId&lt;Self, String&gt;,
+    // other fields
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Creating an</p>
+<p>instance of Weapon with a manually created ID (explicit):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let weapon = Weapon {
+    id: Weapon::create_id("sword".into()),
+    // other fields
+};
+<span class="boring">}</span></code></pre></pre>
+<p>These ID types provide various options for users to meet the needs of different
+scenarios when working with entities in SurrealDB. Whether you want
+auto-generated identifiers or prefer to create them manually, there's an ID type
+to suit your requirements.</p>
+<p>The SurrealID types in SurrealDB are designed to be flexible and accommodating
+to various needs for entity identification and linking within the database.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../concepts/object_field_attributes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../concepts/fields_and_model_schema.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../concepts/object_field_attributes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../concepts/fields_and_model_schema.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

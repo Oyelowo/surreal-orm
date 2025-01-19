@@ -1,0 +1,368 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>For/Permissions - Surreal ORM</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Surreal ORM</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="for-statement-permissions"><a class="header" href="#for-statement-permissions">For Statement (Permissions)</a></h1>
+<p>The <code>for</code> statement is used to define permissions for a specific action or CRUD
+operation in SurrealDB. It allows you to specify the desired permissions and
+conditions for the action. This statement is commonly used when defining tables
+or fields in SurrealDB, but it may also be used for access control for other
+objects in the future. This documentation provides an overview of the syntax and
+usage of the <code>for</code> statement.</p>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h2>
+<ul>
+<li><a href="#syntax">Syntax</a></li>
+<li><a href="#permission-types">Permission Types</a></li>
+<li><a href="#using-the-cond!-macro">Using the <code>cond!</code> Macro</a></li>
+<li><a href="#examples">Examples</a>
+<ul>
+<li><a href="#define-permission-for-single-action">Define Permission for Single Action</a></li>
+<li><a href="#define-permissions-for-multiple-actions-individual">Define Permissions for Multiple Actions (Individual)</a></li>
+<li><a href="#define-permissions-for-multiple-actions-array">Define Permissions for Multiple Actions (Array)</a></li>
+<li><a href="#define-permissions-for-multiple-actions-mixed">Define Permissions for Multiple Actions (Mixed)</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="syntax"><a class="header" href="#syntax">Syntax</a></h2>
+<p>The basic syntax of the <code>for</code> statement is as follows:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>for_permission(permission_type)
+    .where_(condition);
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li><code>permission_type</code>: The type of permission or action for which you want to
+define permissions. It can be a single permission type or an array of
+permission types.</li>
+<li><code>condition</code>: The condition or criteria for the permission. It specifies the
+conditions under which the permission should be granted.</li>
+</ul>
+<p>The <code>for</code> statement supports the following methods:</p>
+<ul>
+<li><code>.where_(condition)</code>: Specifies the condition or criteria for the permission.</li>
+</ul>
+<h2 id="permission-types"><a class="header" href="#permission-types">Permission Types</a></h2>
+<p>SurrealDB uses permission types to define different actions or CRUD operations
+that can be performed on tables or fields. Here are the available permission
+types:</p>
+<ul>
+<li><code>Create</code>: Grants permission to create new records or objects.</li>
+<li><code>Read</code> (or <code>Select</code>): Grants permission to read or retrieve data from records
+or objects.</li>
+<li><code>Update</code>: Grants permission to modify or update existing records or objects.</li>
+<li><code>Delete</code>: Grants permission to delete records or objects.</li>
+</ul>
+<p>These permission types allow you to define fine-grained access control for
+different actions in your database.</p>
+<h2 id="using-the-cond-macro"><a class="header" href="#using-the-cond-macro">Using the <code>cond!</code> Macro</a></h2>
+<p>The <code>cond!</code> macro provides an alternative way to the <code>cond</code> function way to
+define conditions for the <code>for</code> statement when specifying the condition for the
+permissions. With the <code>cond!</code> macro, you can easily specify conditions that
+determine when permissions are granted.</p>
+<p>For instance:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let condition = cond!((field_name OR  "value") OR (age &gt; 18));
+<span class="boring">}</span></code></pre></pre>
+<p>The above code checks if the field named "field_name" equals the string "value".
+For more details on the <code>cond!</code> macro,
+<a href="#helper-macros">refer to the dedicated chapter on helper macros</a>.</p>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="define-permission-for-single-action"><a class="header" href="#define-permission-for-single-action">Define Permission for Single Action</a></h3>
+<p>To define permissions for a single action, you can use the following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use CrudType::*;
+let name = Field::new("name");
+
+let for_res = for_permission(Create).where_(name.like("Oyelowo"));
+println!("{}", for_res.to_raw().build());
+<span class="boring">}</span></code></pre></pre>
+<p>The above code will generate the following raw statement:</p>
+<pre><code>FOR create
+    WHERE name ~ 'Oyelowo'
+</code></pre>
+<p>In the example above, the <code>for</code> statement defines permissions for the <code>Create</code>
+action. It specifies the condition that the field "name" should be matched with
+the pattern "Oyelowo". This means that the permission to create records will be
+granted only when the field "name" matches the pattern.</p>
+<h3 id="define-permissions-for-multiple-actions-individual"><a class="header" href="#define-permissions-for-multiple-actions-individual">Define Permissions for Multiple Actions (Individual)</a></h3>
+<p>To define permissions for multiple actions individually, you can use the
+following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use CrudType::*;
+let name = Field::new("name");
+
+let for_res = for_permission(Select).where_(age.greater_than_or_equal(18))
+    .permissions(for_permission(Create).where_(name.is("Oyedayo")))
+    .permissions(for_permission(Update).where_(age.less_than_or_equal(130)));
+println!("{}", for_res.to_raw().build());
+<span class="boring">}</span></code></pre></pre>
+<p>The above code will generate the following raw statement:</p>
+<pre><code>FOR select
+    WHERE age &gt;= 18
+PERMISSIONS
+    FOR create
+        WHERE name IS 'Oyedayo'
+    FOR update
+
+
+ WHERE age &lt;= 130
+</code></pre>
+<p>In the example above, the <code>for</code> statement defines permissions for the <code>Select</code>
+action, as well as individual permissions for the <code>Create</code> and <code>Update</code> actions.
+It specifies different conditions for each action. This means that the
+permissions for these actions will be granted only when the specified conditions
+are met.</p>
+<h3 id="define-permissions-for-multiple-actions-array"><a class="header" href="#define-permissions-for-multiple-actions-array">Define Permissions for Multiple Actions (Array)</a></h3>
+<p>To define permissions for multiple actions using an array, you can use the
+following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use CrudType::*;
+let name = Field::new("name");
+
+let for_res = for_permission(&amp;[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
+println!("{}", for_res.to_raw().build());
+<span class="boring">}</span></code></pre></pre>
+<p>The above code will generate the following raw statement:</p>
+<pre><code>FOR create, delete, select, update
+    WHERE name IS 'Oyedayo'
+</code></pre>
+<p>In the example above, the <code>for</code> statement defines permissions for multiple
+actions (<code>Create</code>, <code>Delete</code>, <code>Select</code>, and <code>Update</code>) using an array. It
+specifies a common condition for all the actions. This means that the
+permissions for these actions will be granted only when the field "name" is
+equal to "Oyedayo".</p>
+<h3 id="define-permissions-for-multiple-actions-mixed"><a class="header" href="#define-permissions-for-multiple-actions-mixed">Define Permissions for Multiple Actions (Mixed)</a></h3>
+<p>To define permissions for multiple actions using a mix of individual permissions
+and an array, you can use the following code:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use CrudType::*;
+let name = Field::new("name");
+
+let for_res = for_permission(&amp;[Create, Delete]).where_(name.is("Oyedayo"))
+    .permissions(for_permission(Update).where_(age.less_than_or_equal(130)));
+println!("{}", for_res.to_raw().build());
+<span class="boring">}</span></code></pre></pre>
+<p>The above code will generate the following raw statement:</p>
+<pre><code>FOR create, delete
+    WHERE name IS 'Oyedayo'
+PERMISSIONS
+    FOR update
+        WHERE age &lt;= 130
+</code></pre>
+<p>In the example above, the <code>for</code> statement defines individual permissions for the
+<code>Create</code> and <code>Delete</code> actions, and an array of permissions for the <code>Update</code>
+action. It specifies different conditions for each action. This means that the
+permissions for these actions will be granted only when the specified conditions
+are met.</p>
+<p>You have now learned how to define permissions using the <code>for</code> statement in
+SurrealDB. Use this statement to specify the desired access control for
+different actions or CRUD operations in your database. While it is commonly used
+when defining tables or fields, it may also be utilized for access control for
+other objects in the future.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../statements/delete.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../statements/define.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../statements/delete.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../statements/define.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
