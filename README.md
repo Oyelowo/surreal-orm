@@ -1,3 +1,7 @@
+<!-- [Book](https://oyelowo.github.io/surreal-orm) | [doc.rs](https://docs.rs/surreal-orm/latest/surreal-rm/) | [Discord](https://discord.gg/xuA39Zpb) -->
+[Book](https://oyelowo.github.io/surreal-orm) | [Discord](https://discord.gg/xuA39Zpb)
+
+
 [![surreal-orm](https://github.com/Oyelowo/surreal-orm/actions/workflows/rust.yaml/badge.svg)](https://github.com/Oyelowo/surreal-orm/actions/workflows/rust.yaml)
 [![cleanup old images](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml/badge.svg)](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml)
 
@@ -15,7 +19,7 @@ your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-surreal_orm = "0.1"
+surreal_orm = "https://github.com/Oyelowo/surreal-orm"
 ```
 
 After adding the dependency, you can import the necessary modules in your Rust
@@ -57,7 +61,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[orm(table = "space_ship")]
+#[orm(table = space_ship)]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
@@ -312,7 +316,7 @@ pub struct Account {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[orm(table = "balance")]
+#[orm(table = balance)]
 pub struct Balance {
     pub id: SurrealId<Self, String>,
     pub amount: f64,
@@ -484,8 +488,8 @@ impl TableResources for Animal {
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    pub in_: In,
-    pub out: Out,
+    pub in_: LinkOne<In>,
+    pub out: LinkOne<Out>,
     pub place: String,
     pub created_at: chrono::DateTime<Utc>,
 }

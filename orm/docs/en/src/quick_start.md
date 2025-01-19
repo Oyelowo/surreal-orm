@@ -16,7 +16,7 @@ your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-surreal_orm = "0.1"
+surreal_orm = "https://github.com/Oyelowo/surreal-orm"
 ```
 
 After adding the dependency, you can import the necessary modules in your Rust
@@ -58,7 +58,7 @@ use surreal_orm::*;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[orm(table = "space_ship")]
+#[orm(table = space_ship)]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
