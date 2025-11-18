@@ -1,0 +1,17 @@
+[project]
+name = "surreal_orm"
+version = "0.1.0"
+description = "Python port (work-in-progress) of the surreal_orm Rust crate"
+readme = "README.md"
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest]
+addopts = "-q"
+
+[project.optional-dependencies]
+dev = ["pytest"]
