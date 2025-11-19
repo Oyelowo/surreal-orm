@@ -1,13 +1,13 @@
-from surreal_orm.query_builder import len, first, last, field
+from surreal_orm.query_builder import array_len, first, last, field
 
 
 def test_array_len_first_last():
-    res = len([1, 2, 3])
+    res = array_len([1, 2, 3])
     assert res.fine_tune_params() == "array::len($_param_00000001)"
     assert res.to_raw().build() == "array::len([1, 2, 3])"
 
     f = field("own_goals")
-    r2 = len(f)
+    r2 = array_len(f)
     assert r2.fine_tune_params() == "array::len(own_goals)"
     assert r2.to_raw().build() == "array::len(own_goals)"
 
